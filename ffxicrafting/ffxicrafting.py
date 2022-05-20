@@ -1,4 +1,3 @@
-from tkinter import E
 from item import Item
 from recipe import Recipe
 from auction_listing import AuctionListing
