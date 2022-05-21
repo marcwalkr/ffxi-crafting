@@ -40,7 +40,7 @@ class Recipe:
                 raise ValueError("Failed to calculate recipe cost: an " +
                                  "ingredient was not found in the items table")
 
-            vendor_price = item[5]
+            vendor_price = item[2]
             if vendor_price is not None:
                 prices.append(vendor_price)
 
