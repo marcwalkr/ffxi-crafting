@@ -25,8 +25,9 @@ class Product:
 
         products = cls.filter_threshold(products, profit_threshold,
                                         freq_threshold)
+        profit_sorted = sorted(products, key=lambda x: x.profit, reverse=True)
 
-        return products
+        return profit_sorted
 
     @classmethod
     def get_crafted_products(cls, recipe):
