@@ -224,7 +224,7 @@ if __name__ == "__main__":
                         "2. Add a recipe\n" +
                         "3. Remove an item\n" +
                         "4. Remove a recipe\n" +
-                        "5. Remove auction listings for an item\n" +
+                        "5. Remove auction listings\n" +
                         "6. Update a vendor price\n" +
                         "7. Update AH data and recipe costs\n" +
                         "8. Print item table\n" +
