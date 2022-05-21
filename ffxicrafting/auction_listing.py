@@ -46,6 +46,16 @@ class AuctionListing:
         return sorted
 
     @classmethod
+    def get_listings(cls, name):
+        listings = []
+        listing_tuples = cls.db.get_auction_listings(name)
+        for listing_tuple in listing_tuples:
+            listing = cls(*listing_tuple)
+            listings.append(listing)
+
+        return listings
+
+    @classmethod
     def remove_listings(cls, name):
         cls.db.remove_auction_listings(name)
 

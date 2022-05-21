@@ -152,50 +152,59 @@ def get_table(column_names, rows):
     return table
 
 
-def print_item_table():
-    all_items = Item.get_all_items()
+def print_item():
+    item_name = input("Enter the item name: ")
+    item = Item.get_item(item_name)
 
-    rows = []
-    for item in all_items:
-        row = [item.name, item.stack_quantity, item.vendor_price]
-        rows.append(row)
-
-    table = get_table(["Name", "Stack Quantity", "Vendor Price"], rows)
-
-    print(table)
-
-
-def print_recipe_table():
-    all_recipes = Recipe.get_all_recipes()
-
-    rows = []
-    for recipe in all_recipes:
-        row = [recipe.name, recipe.synth_yield, recipe.synth_cost,
-               recipe.crystal]
-        row += recipe.ingredients
-        rows.append(row)
-
-    table = get_table(["Name", "Synth Yield", "Synth Cost", "Crystal",
-                       "Ingredient 1", "Ingredient 2", "Ingredient 3",
-                       "Ingredient 4", "Ingredient 5", "Ingredient 6",
-                       "Ingredient 7", "Ingredient 8"], rows)
-
-    print(table)
+    if item is None:
+        print(Fore.RED + "Item \"{}\" does not exist in the database"
+              .format(item_name))
+    else:
+        rows = [[item.name, item.stack_quantity, item.vendor_price]]
+        table = get_table(["Name", "Stack Quantity", "Vendor Price"], rows)
+        print(table)
 
 
-def print_auction_listing_table():
-    all_listings = AuctionListing.get_all_listings()
+def print_recipes():
+    recipe_name = input("Enter the item name: ")
+    recipes = Recipe.get_recipes(recipe_name)
 
-    rows = []
-    for listing in all_listings:
-        row = [listing.name, listing.quantity,
-               listing.price, listing.sell_freq]
-        rows.append(row)
+    if len(recipes) == 0:
+        print(Fore.RED + "Recipe for \"{}\" does not exist in the database"
+              .format(recipe_name))
+    else:
+        rows = []
+        for recipe in recipes:
+            row = [recipe.name, recipe.synth_yield, recipe.synth_cost,
+                   recipe.crystal]
+            row += recipe.ingredients
+            rows.append(row)
 
-    table = get_table(["Item Name", "Quantity", "Price", "Sell Frequency"],
-                      rows)
+        table = get_table(["Name", "Synth Yield", "Synth Cost", "Crystal",
+                           "Ingredient 1", "Ingredient 2", "Ingredient 3",
+                           "Ingredient 4", "Ingredient 5", "Ingredient 6",
+                           "Ingredient 7", "Ingredient 8"], rows)
+        print(table)
 
-    print(table)
+
+def print_auction_listings():
+    item_name = input("Enter the item name: ")
+    listings = AuctionListing.get_listings(item_name)
+
+    if len(listings) == 0:
+        print(Fore.RED + "Listings for \"{}\" do not exist in the database".
+              format(item_name))
+    else:
+        rows = []
+        for listing in listings:
+            row = [listing.name, listing.quantity, listing.price,
+                   listing.sell_freq]
+            rows.append(row)
+
+        table = get_table(["Item Name", "Quantity", "Price", "Sell Frequency"],
+                          rows)
+
+        print(table)
 
 
 def print_product_table():
@@ -227,10 +236,10 @@ if __name__ == "__main__":
                         "5. Remove auction listings\n" +
                         "6. Update a vendor price\n" +
                         "7. Update AH data and recipe costs\n" +
-                        "8. Print item table\n" +
-                        "9. Print recipe table\n" +
-                        "10. Print auction listing table\n" +
-                        "11. Print product table\n" +
+                        "8. Print an item\n" +
+                        "9. Print recipes for an item\n" +
+                        "10. Print an item's auction listings\n" +
+                        "11. Print products\n" +
                         "Q. Quit\n")
 
         if command == "1":
@@ -248,11 +257,11 @@ if __name__ == "__main__":
         elif command == "7":
             update_ah_data_and_recipe_costs()
         elif command == "8":
-            print_item_table()
+            print_item()
         elif command == "9":
-            print_recipe_table()
+            print_recipes()
         elif command == "10":
-            print_auction_listing_table()
+            print_auction_listings()
         elif command == "11":
             print_product_table()
         elif command == "q" or command == "Q":
