@@ -214,9 +214,10 @@ def print_product_table():
     freq_treshold = int(freq_treshold)
 
     products = Product.get_products(profit_threshold, freq_treshold)
+    profit_sorted = sorted(products, key=lambda x: x.profit, reverse=True)
 
     rows = []
-    for product in products:
+    for product in profit_sorted:
         row = [product.name, product.quantity, product.cost,
                product.sell_price, product.profit, product.sell_freq]
         rows.append(row)
