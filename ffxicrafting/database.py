@@ -205,6 +205,10 @@ class Database:
         self.cur.execute("DELETE FROM auction_listings")
         self.commit()
 
+    def auction_listing_is_in_database(self, name):
+        listings = self.get_auction_listings(name)
+        return len(listings) > 0
+
     def commit(self):
         self.connection.commit()
 

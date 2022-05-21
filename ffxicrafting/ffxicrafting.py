@@ -48,8 +48,12 @@ def add_item():
 
 def remove_item():
     item_name = input("Enter the item name: ")
-    Item.remove_item(item_name)
-    print(Fore.GREEN + "Removed item \"{}\"".format(item_name))
+    if not Item.is_in_database(item_name):
+        print(Fore.RED + "Item \"{}\" does not exist in the database"
+              .format(item_name))
+    else:
+        Item.remove_item(item_name)
+        print(Fore.GREEN + "Removed item \"{}\"".format(item_name))
 
 
 def add_recipe():
@@ -100,14 +104,22 @@ def remove_recipe():
     ingredients = ingredients.split(", ")
     expanded_ingredients = expand_ingredients(ingredients)
 
-    Recipe.remove_recipe(recipe_name, crystal, expanded_ingredients)
-    print(Fore.GREEN + "Removed recipe for \"{}\"".format(recipe_name))
+    if not Recipe.is_in_database(recipe_name, crystal, expand_ingredients):
+        print(Fore.RED + "Recipe for \"{}\" does not exist in the database"
+              .format(recipe_name))
+    else:
+        Recipe.remove_recipe(recipe_name, crystal, expanded_ingredients)
+        print(Fore.GREEN + "Removed recipe for \"{}\"".format(recipe_name))
 
 
 def remove_auction_listings():
     listing_name = input("Enter the item name: ")
-    AuctionListing.remove_listings(listing_name)
-    print(Fore.GREEN + "Removed auction listings for \"{}\"".format(listing_name))
+    if not AuctionListing.is_in_database(listing_name):
+        print(Fore.RED + "Listings for \"{}\" do not exist in the database"
+              .format(listing_name))
+    else:
+        AuctionListing.remove_listings(listing_name)
+        print(Fore.GREEN + "Removed auction listings for \"{}\"".format(listing_name))
 
 
 def update_ah_data_and_recipe_costs():
@@ -118,10 +130,14 @@ def update_ah_data_and_recipe_costs():
 
 def update_vendor_price():
     item_name = input("Enter the item name: ")
-    price = input("Enter the new price: ")
-    price = int(price)
-    Item.update_vendor_price(item_name, price)
-    print(Fore.GREEN + "Updated vendor price for \"{}\"".format(item_name))
+    if not Item.is_in_database(item_name):
+        print(Fore.RED + "Item \"{}\" does not exist in the database"
+              .format(item_name))
+    else:
+        price = input("Enter the new price: ")
+        price = int(price)
+        Item.update_vendor_price(item_name, price)
+        print(Fore.GREEN + "Updated vendor price for \"{}\"".format(item_name))
 
 
 def get_table(column_names, rows):
