@@ -50,6 +50,10 @@ class AuctionListing:
         cls.db.remove_auction_listings(name)
 
     @classmethod
+    def is_in_database(cls, name):
+        return cls.db.auction_listing_is_in_database(name)
+
+    @classmethod
     def scrape_listings(cls, item_name, stack_quantity):
         scraper = AuctionScraper(item_name)
         scraper.scrape()
