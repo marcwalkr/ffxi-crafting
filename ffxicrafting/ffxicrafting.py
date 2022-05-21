@@ -212,12 +212,12 @@ def print_product_table():
 
     rows = []
     for product in products:
-        row = [product.name, product.quantity, product.crafted,
-               product.cost, product.sell_price, product.profit, product.sell_freq]
+        row = [product.name, product.quantity, product.cost,
+               product.sell_price, product.profit, product.sell_freq]
         rows.append(row)
 
-    table = get_table(["Name", "Quantity", "Crafted", "Cost", "Sell Price",
-                       "Profit", "Sell Frequency"], rows)
+    table = get_table(["Name", "Quantity", "Cost", "Sell Price", "Profit",
+                       "Sell Frequency"], rows)
 
     print(table)
 
