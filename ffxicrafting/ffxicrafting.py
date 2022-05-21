@@ -5,7 +5,6 @@ from product import Product
 from prettytable import PrettyTable
 import re
 from colorama import Fore, init
-from database import Database
 
 # Auto reset style with colorama
 init(autoreset=True)
@@ -224,8 +223,6 @@ def print_product_table():
 
 
 if __name__ == "__main__":
-    db = Database()
-    db.recreate_recipes_table()
     while True:
         command = input("1. Add an item\n" +
                         "2. Add a recipe\n" +
