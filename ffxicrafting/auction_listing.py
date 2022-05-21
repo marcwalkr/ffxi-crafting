@@ -27,9 +27,7 @@ class AuctionListing:
 
         all_items = cls.db.get_all_items()
         for item in all_items:
-            item_name = item[0]
-            stack_quantity = item[2]
-
+            item_name, stack_quantity = item[0:2]
             listings = cls.scrape_listings(item_name, stack_quantity)
 
             for listing in listings:

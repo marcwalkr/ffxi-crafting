@@ -15,30 +15,19 @@ def add_item():
 
     stackable = input("Is it stackable? (y/n): ")
     if stackable == "y":
-        stackable = True
         stack_quantity = input("Enter the stack quantity: ")
         stack_quantity = int(stack_quantity)
     else:
-        stackable = False
         stack_quantity = None
-
-    craftable = input("Is it craftable? (y/n) ")
-    if craftable == "y":
-        craftable = True
-    else:
-        craftable = False
 
     vendor_purchasable = input("Is it purchasable from a vendor? (y/n) ")
     if vendor_purchasable == "y":
-        vendor_location = input("Enter the vendor location: ")
         vendor_price = input("Enter the vendor price: ")
         vendor_price = int(vendor_price)
     else:
-        vendor_location = None
         vendor_price = None
 
-    item = Item(item_name, stackable, stack_quantity, craftable,
-                vendor_location, vendor_price)
+    item = Item(item_name, stack_quantity, vendor_price)
 
     if Item.is_in_database(item_name):
         print(Fore.RED + "Item \"{}\" is already in the database"
@@ -135,13 +124,6 @@ def update_vendor_price():
     print(Fore.GREEN + "Updated vendor price for \"{}\"".format(item_name))
 
 
-def update_vendor_location():
-    item_name = input("Enter the item name: ")
-    location = input("Enter the new location: ")
-    Item.update_vendor_location(item_name, location)
-    print(Fore.GREEN + "Updated vendor location for \"{}\"".format(item_name))
-
-
 def get_table(column_names, rows):
     table = PrettyTable(column_names)
 
@@ -159,12 +141,10 @@ def print_item_table():
 
     rows = []
     for item in all_items:
-        row = [item.name, bool(item.stackable), item.stack_quantity,
-               bool(item.craftable), item.vendor_location, item.vendor_price]
+        row = [item.name, item.stack_quantity, item.vendor_price]
         rows.append(row)
 
-    table = get_table(["Name", "Stackable", "Stack Quantity", "Craftable",
-                       "Vendor Location", "Vendor Price"], rows)
+    table = get_table(["Name", "Stack Quantity", "Vendor Price"], rows)
 
     print(table)
 
@@ -229,13 +209,12 @@ if __name__ == "__main__":
                         "3. Remove an item\n" +
                         "4. Remove a recipe\n" +
                         "5. Remove auction listings for an item\n" +
-                        "6. Update a vendor location\n" +
-                        "7. Update a vendor price\n" +
-                        "8. Update AH data and recipe costs\n" +
-                        "9. Print item table\n" +
-                        "10. Print recipe table\n" +
-                        "11. Print auction listing table\n" +
-                        "12. Print product table\n" +
+                        "6. Update a vendor price\n" +
+                        "7. Update AH data and recipe costs\n" +
+                        "8. Print item table\n" +
+                        "9. Print recipe table\n" +
+                        "10. Print auction listing table\n" +
+                        "11. Print product table\n" +
                         "Q. Quit\n")
 
         if command == "1":
@@ -249,18 +228,16 @@ if __name__ == "__main__":
         elif command == "5":
             remove_auction_listings()
         elif command == "6":
-            update_vendor_location()
-        elif command == "7":
             update_vendor_price()
-        elif command == "8":
+        elif command == "7":
             update_ah_data_and_recipe_costs()
-        elif command == "9":
+        elif command == "8":
             print_item_table()
-        elif command == "10":
+        elif command == "9":
             print_recipe_table()
-        elif command == "11":
+        elif command == "10":
             print_auction_listing_table()
-        elif command == "12":
+        elif command == "11":
             print_product_table()
         elif command == "q" or command == "Q":
             break

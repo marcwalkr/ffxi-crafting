@@ -19,10 +19,7 @@ class Database:
     def create_tables(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS items (
                             name text PRIMARY KEY NOT NULL,
-                            stackable integer NOT NULL,
                             stack_quantity integer,
-                            craftable integer NOT NULL,
-                            vendor_location text,
                             vendor_price integer
                             )""")
 
@@ -61,14 +58,10 @@ class Database:
                             )""")
 
     def add_item(self, item):
-        self.cur.execute("""INSERT INTO items VALUES (:name, :stackable,
-                            :stack_quantity, :craftable, :vendor_location,
-                            :vendor_price)""",
+        self.cur.execute("""INSERT INTO items VALUES (:name, :stack_quantity,
+                         :vendor_price)""",
                          {"name": item.name,
-                          "stackable": item.stackable,
                           "stack_quantity": item.stack_quantity,
-                          "craftable": item.craftable,
-                          "vendor_location": item.vendor_location,
                           "vendor_price": item.vendor_price
                           })
         self.commit()
@@ -93,12 +86,6 @@ class Database:
         self.cur.execute("""UPDATE items
                             SET vendor_price=?
                             WHERE name=?""", (vendor_price, name,))
-        self.commit()
-
-    def update_item_vendor_location(self, name, vendor_location):
-        self.cur.execute("""UPDATE items
-                            SET vendor_location=?
-                            WHERE name=?""", (vendor_location, name,))
         self.commit()
 
     def item_is_in_database(self, name):
@@ -226,18 +213,14 @@ class Database:
 
         self.cur.execute("""CREATE TABLE items_temp (
                             name text PRIMARY KEY NOT NULL,
-                            stackable integer NOT NULL,
                             stack_quantity integer,
-                            craftable integer NOT NULL,
-                            vendor_location text,
                             vendor_price integer
                             )""")
 
-        self.cur.execute("""INSERT INTO items_temp (name, stackable,
-                         stack_quantity, craftable, vendor_location,
+        self.cur.execute("""INSERT INTO items_temp (name, stack_quantity,
                          vendor_price)
-                         SELECT name, stackable, stack_quantity, craftable,
-                         vendor_location, vendor_price FROM items""")
+                         SELECT name, stack_quantity, vendor_price
+                         FROM items""")
         self.commit()
 
         self.cur.execute("DROP TABLE items")
