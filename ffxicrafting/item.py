@@ -26,6 +26,15 @@ class Item:
         return sorted
 
     @classmethod
+    def get_item(cls, name):
+        item_tuple = cls.db.get_item(name)
+        if item_tuple is not None:
+            item = cls(*item_tuple)
+            return item
+        else:
+            return None
+
+    @classmethod
     def remove_item(cls, item_name):
         cls.db.remove_item(item_name)
 
