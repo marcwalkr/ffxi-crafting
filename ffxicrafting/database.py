@@ -34,7 +34,12 @@ class Database:
                             ingredient6 text,
                             ingredient7 text,
                             ingredient8 text,
-                            synth_yield integer NOT NULL,
+                            nq_yield integer NOT NULL,
+                            hq1_yield integer NOT NULL,
+                            hq2_yield integer NOT NULL,
+                            hq3_yield integer NOT NULL,
+                            craft text NOT NULL,
+                            skill_cap integer NOT NULL,
                             synth_cost real NOT NULL,
                             FOREIGN KEY (name) REFERENCES items (name),
                             FOREIGN KEY (crystal) REFERENCES items (name),
@@ -95,8 +100,9 @@ class Database:
         self.cur.execute("""INSERT INTO recipes VALUES (:name, :crystal,
                                 :ingredient1, :ingredient2, :ingredient3,
                                 :ingredient4, :ingredient5, :ingredient6,
-                                :ingredient7, :ingredient8, :synth_yield,
-                                :synth_cost)""",
+                                :ingredient7, :ingredient8, :nq_yield,
+                                :hq1_yield, :hq2_yield, :hq3_yield, :craft,
+                                :skill_cap, :synth_cost)""",
                          {"name": recipe.name,
                           "crystal": recipe.crystal,
                           "ingredient1": ingredient1,
@@ -107,7 +113,12 @@ class Database:
                           "ingredient6": ingredient6,
                           "ingredient7": ingredient7,
                           "ingredient8": ingredient8,
-                          "synth_yield": recipe.synth_yield,
+                          "nq_yield": recipe.nq_yield,
+                          "hq1_yield": recipe.hq1_yield,
+                          "hq2_yield": recipe.hq2_yield,
+                          "hq3_yield": recipe.hq3_yield,
+                          "craft": recipe.craft,
+                          "skill_cap": recipe.skill_cap,
                           "synth_cost": recipe.synth_cost
                           })
         self.commit()
@@ -228,7 +239,7 @@ class Database:
     def recreate_recipes_table(self):
         self.connection.execute("PRAGMA foreign_keys = 0")
 
-        self.cur.execute("""CREATE TABLE recipes_temp (
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS recipes_temp (
                             name text NOT NULL,
                             crystal text NOT NULL,
                             ingredient1 text NOT NULL,
@@ -239,7 +250,12 @@ class Database:
                             ingredient6 text,
                             ingredient7 text,
                             ingredient8 text,
-                            synth_yield integer NOT NULL,
+                            nq_yield integer NOT NULL,
+                            hq1_yield integer NOT NULL,
+                            hq2_yield integer NOT NULL,
+                            hq3_yield integer NOT NULL,
+                            craft text NOT NULL,
+                            skill_cap integer NOT NULL,
                             synth_cost real NOT NULL,
                             FOREIGN KEY (name) REFERENCES items (name),
                             FOREIGN KEY (crystal) REFERENCES items (name),
@@ -255,15 +271,17 @@ class Database:
 
         all_recipes = self.get_all_recipes()
         for recipe in all_recipes:
-            name, crystal, ingredient1, ingredient2, ingredient3, \
-                ingredient4, ingredient5, ingredient6, ingredient7, \
-                ingredient8, synth_yield, synth_cost = recipe
+            name, crystal = recipe[0:2]
+            ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
+                ingredient6, ingredient7, ingredient8 = recipe[2:10]
+            nq_yield, hq1_yield, hq2_yield, hq3_yield, craft, skill_cap, \
+                synth_cost = recipe[10:]
 
             self.cur.execute("""INSERT INTO recipes_temp VALUES (:name,
                              :crystal, :ingredient1, :ingredient2,
                              :ingredient3, :ingredient4, :ingredient5,
                              :ingredient6, :ingredient7, :ingredient8,
-                             :synth_yield, :synth_cost)""",
+                             :nq_yield, :synth_cost)""",
                              {
                                  "name": name,
                                  "crystal": crystal,
@@ -275,7 +293,12 @@ class Database:
                                  "ingredient6": ingredient6,
                                  "ingredient7": ingredient7,
                                  "ingredient8": ingredient8,
-                                 "synth_yield": synth_yield,
+                                 "nq_yield": nq_yield,
+                                 "hq1_yield": hq1_yield,
+                                 "hq2_yield": hq2_yield,
+                                 "hq3_yield": hq3_yield,
+                                 "craft": craft,
+                                 "skill_cap": skill_cap,
                                  "synth_cost": synth_cost
                              })
             self.commit()

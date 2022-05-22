@@ -5,7 +5,8 @@ from helpers import add_nones, remove_nones, sort_alphabetically
 class Recipe:
     db = Database()
 
-    def __init__(self, name, crystal, ingredients, synth_yield) -> None:
+    def __init__(self, name, crystal, ingredients, nq_yield, hq1_yield,
+                 hq2_yield, hq3_yield, craft, skill_cap) -> None:
         self.name = name
         self.crystal = crystal
 
@@ -13,7 +14,13 @@ class Recipe:
         empty_slots = 8 - len(ingredients)
         self.ingredients = add_nones(ingredients, empty_slots)
 
-        self.synth_yield = synth_yield
+        self.nq_yield = nq_yield
+        self.hq1_yield = hq1_yield
+        self.hq2_yield = hq2_yield
+        self.hq3_yield = hq3_yield
+        self.craft = craft
+        self.skill_cap = skill_cap
+
         self.synth_cost = self.calculate_synth_cost()
 
     def add_to_database(self):
@@ -47,7 +54,7 @@ class Recipe:
             # Get all recipes for this ingredient and append the single cost
             recipes = self.get_recipes(ingredient)
             for recipe in recipes:
-                single_cost = recipe.synth_cost / recipe.synth_yield
+                single_cost = recipe.synth_cost / recipe.nq_yield
                 prices.append(single_cost)
 
             cheapest = min(prices)
@@ -97,6 +104,8 @@ class Recipe:
     def from_tuple(cls, recipe_tuple):
         name, crystal = recipe_tuple[0:2]
         ingredients = list(recipe_tuple[2:10])
-        synth_yield = recipe_tuple[10]
-        recipe = cls(name, crystal, ingredients, synth_yield)
+        nq_yield, hq1_yield, hq2_yield, hq3_yield, craft, \
+            skill_cap = recipe_tuple[10:16]
+        recipe = cls(name, crystal, ingredients, nq_yield, hq1_yield,
+                     hq2_yield, hq3_yield, craft, skill_cap)
         return recipe

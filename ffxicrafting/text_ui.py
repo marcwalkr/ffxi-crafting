@@ -49,13 +49,6 @@ class TextUI:
         return input("Enter the recipe name: ")
 
     @staticmethod
-    def prompt_synth_yield():
-        synth_yield = input("Enter the synth yield: ")
-        synth_yield = int(synth_yield)
-
-        return synth_yield
-
-    @staticmethod
     def prompt_crystal():
         return input("Enter the crystal: ")
 
@@ -65,16 +58,40 @@ class TextUI:
                             "commas: ")
         return ingredients.split(", ")
 
+    @staticmethod
+    def prompt_yields():
+        nq_yield = input("Enter the NQ yield: ")
+        hq1_yield = input("Enter the HQ1 yield: ")
+        hq2_yield = input("Enter the HQ2 yield: ")
+        hq3_yield = input("Enter the HQ3 yield: ")
+
+        nq_yield = int(nq_yield)
+        hq1_yield = int(hq1_yield)
+        hq2_yield = int(hq2_yield)
+        hq3_yield = int(hq3_yield)
+
+        return nq_yield, hq1_yield, hq2_yield, hq3_yield
+
+    @staticmethod
+    def prompt_craft():
+        return input("Enter the craft: ")
+
+    @staticmethod
+    def prompt_skill_cap():
+        return input("Enter the skill cap: ")
+
     @classmethod
     def prompt_recipe(cls):
         recipe_name = cls.prompt_recipe_name()
-        synth_yield = cls.prompt_synth_yield()
         crystal = cls.prompt_crystal()
         ingredients = cls.prompt_ingredients()
-
         expanded_ingredients = expand_list(ingredients)
+        nq_yield, hq1_yield, hq2_yield, hq3_yield = cls.prompt_yields()
+        craft = cls.prompt_craft()
+        skill_cap = cls.prompt_skill_cap()
 
-        return recipe_name, synth_yield, crystal, expanded_ingredients
+        return recipe_name, crystal, expanded_ingredients, nq_yield, \
+            hq1_yield, hq2_yield, hq3_yield, craft, skill_cap
 
     @classmethod
     def prompt_recipe_short(cls):
