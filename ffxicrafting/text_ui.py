@@ -225,15 +225,18 @@ class TextUI:
     def print_recipes(cls, recipes):
         rows = []
         for recipe in recipes:
-            row = [recipe.name, recipe.synth_yield, recipe.synth_cost,
-                   recipe.crystal]
+            row = [recipe.name, recipe.crystal]
             row += recipe.ingredients
+            row += [recipe.nq_yield, recipe.hq1_yield, recipe.hq2_yield,
+                    recipe.hq3_yield, recipe.craft, recipe.skill_cap, recipe.synth_cost]
             rows.append(row)
 
-        table = cls.get_table(["Name", "Synth Yield", "Synth Cost", "Crystal",
-                               "Ingredient 1", "Ingredient 2", "Ingredient 3",
-                              "Ingredient 4", "Ingredient 5", "Ingredient 6",
-                               "Ingredient 7", "Ingredient 8"], rows)
+        table = cls.get_table(["Name", "Crystal", "Ingredient 1",
+                               "Ingredient 2", "Ingredient 3", "Ingredient 4",
+                               "Ingredient 5", "Ingredient 6", "Ingredient 7",
+                               "Ingredient 8", "NQ Yield", "HQ1 Yield",
+                               "HQ2 Yield", "HQ3 Yield", "Craft", "Skill Cap",
+                               "Synth Cost"], rows)
         print(table)
 
     @ classmethod
