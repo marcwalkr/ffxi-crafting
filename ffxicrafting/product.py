@@ -38,7 +38,8 @@ class Product:
 
         for listing in auction_listings:
             name, quantity, sell_price, sell_freq = listing
-            synth_yield, synth_cost = recipe[10:]
+            synth_yield = recipe[10]
+            synth_cost = recipe[16]
             product_cost = (synth_cost / synth_yield) * quantity
 
             product = cls(name, quantity, product_cost, sell_price, sell_freq)

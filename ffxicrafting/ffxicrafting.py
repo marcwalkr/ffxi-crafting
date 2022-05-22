@@ -41,10 +41,12 @@ def remove_item():
 
 
 def add_recipe():
-    recipe_name, synth_yield, crystal, ingredients = TextUI.prompt_recipe()
+    recipe_name, crystal, ingredients, nq_yield, hq1_yield, hq2_yield, \
+        hq3_yield, craft, skill_cap = TextUI.prompt_recipe()
 
     try:
-        recipe = Recipe(recipe_name, crystal, ingredients, synth_yield)
+        recipe = Recipe(recipe_name, crystal, ingredients, nq_yield,
+                        hq1_yield, hq2_yield, hq3_yield, craft, skill_cap)
 
         if Recipe.is_in_database(recipe_name, crystal, ingredients):
             TextUI.print_error_recipe_exists(recipe_name)
