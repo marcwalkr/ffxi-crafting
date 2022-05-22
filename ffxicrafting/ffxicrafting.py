@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from item import Item
 from recipe import Recipe
 from auction_listing import AuctionListing
@@ -32,8 +33,11 @@ def remove_item():
     if not Item.is_in_database(item_name):
         TextUI.print_error_item_not_exists(item_name)
     else:
-        Item.remove_item(item_name)
-        TextUI.print_remove_item_success(item_name)
+        try:
+            Item.remove_item(item_name)
+            TextUI.print_remove_item_success(item_name)
+        except IntegrityError:
+            TextUI.print_error_item_integrity(item_name)
 
 
 def add_recipe():
@@ -49,6 +53,8 @@ def add_recipe():
         recipe.add_to_database()
 
         TextUI.print_add_recipe_success(recipe_name)
+    except IntegrityError:
+        TextUI.print_error_recipe_integrity(recipe_name)
     except ValueError as e:
         TextUI.print_error(str(e))
 
