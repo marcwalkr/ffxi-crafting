@@ -75,12 +75,8 @@ class Database:
         return self.cur.fetchall()
 
     def remove_item(self, name):
-        try:
-            self.cur.execute("DELETE FROM items WHERE name=?", (name,))
-            self.commit()
-        except sqlite3.IntegrityError:
-            print(Fore.RED + "Failed to remove item: a recipe or auction " +
-                  "listing references it")
+        self.cur.execute("DELETE FROM items WHERE name=?", (name,))
+        self.commit()
 
     def update_item_vendor_price(self, name, vendor_price):
         self.cur.execute("""UPDATE items
@@ -96,29 +92,25 @@ class Database:
         ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
             ingredient6, ingredient7, ingredient8 = recipe.ingredients
 
-        try:
-            self.cur.execute("""INSERT INTO recipes VALUES (:name, :crystal,
+        self.cur.execute("""INSERT INTO recipes VALUES (:name, :crystal,
                                 :ingredient1, :ingredient2, :ingredient3,
                                 :ingredient4, :ingredient5, :ingredient6,
                                 :ingredient7, :ingredient8, :synth_yield,
                                 :synth_cost)""",
-                             {"name": recipe.name,
-                              "crystal": recipe.crystal,
-                              "ingredient1": ingredient1,
-                              "ingredient2": ingredient2,
-                              "ingredient3": ingredient3,
-                              "ingredient4": ingredient4,
-                              "ingredient5": ingredient5,
-                              "ingredient6": ingredient6,
-                              "ingredient7": ingredient7,
-                              "ingredient8": ingredient8,
-                              "synth_yield": recipe.synth_yield,
-                              "synth_cost": recipe.synth_cost
-                              })
-            self.commit()
-        except sqlite3.IntegrityError:
-            raise ValueError(Fore.RED + "Failed to add recipe: a necessary " +
-                             "item was not found or the recipe already exists")
+                         {"name": recipe.name,
+                          "crystal": recipe.crystal,
+                          "ingredient1": ingredient1,
+                          "ingredient2": ingredient2,
+                          "ingredient3": ingredient3,
+                          "ingredient4": ingredient4,
+                          "ingredient5": ingredient5,
+                          "ingredient6": ingredient6,
+                          "ingredient7": ingredient7,
+                          "ingredient8": ingredient8,
+                          "synth_yield": recipe.synth_yield,
+                          "synth_cost": recipe.synth_cost
+                          })
+        self.commit()
 
     def get_recipes(self, name):
         self.cur.execute("SELECT * FROM recipes WHERE name=?", (name,))

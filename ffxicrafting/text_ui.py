@@ -143,40 +143,50 @@ class TextUI:
               .format(listing_name))
 
     @staticmethod
+    def print_error_item_integrity(item_name):
+        print(Fore.RED + "Failed to remove \"{}\":".format(item_name) +
+              " a recipe or auction listing references it")
+
+    @ staticmethod
+    def print_error_recipe_integrity(item_name):
+        print(Fore.RED + "Failed to add recipe for \"{}\":".format(item_name) +
+              " a necessary item was not found or the recipe already exists")
+
+    @ staticmethod
     def print_add_item_success(item_name):
         print(Fore.GREEN + "Item \"{}\" added successfully".format(item_name))
 
-    @staticmethod
+    @ staticmethod
     def print_add_recipe_success(recipe_name):
         print(Fore.GREEN + "Recipe for \"{}\" added successfully"
               .format(recipe_name))
 
-    @staticmethod
+    @ staticmethod
     def print_remove_listings_success(item_name):
         print(Fore.GREEN + "Removed auction listings for \"{}\""
               .format(item_name))
 
-    @staticmethod
+    @ staticmethod
     def print_remove_item_success(item_name):
         print(Fore.GREEN + "Removed item \"{}\"".format(item_name))
 
-    @staticmethod
+    @ staticmethod
     def print_remove_recipe_success(recipe_name):
         print(Fore.GREEN + "Removed recipe for \"{}\"".format(recipe_name))
 
-    @staticmethod
+    @ staticmethod
     def print_update_data_success():
         print(Fore.GREEN + "Successfully updated AH data and recipe costs")
 
-    @staticmethod
+    @ staticmethod
     def print_update_price_success(item_name):
         print(Fore.GREEN + "Updated vendor price for \"{}\"".format(item_name))
 
-    @staticmethod
+    @ staticmethod
     def print_error(error_text):
         print(Fore.RED + error_text)
 
-    @staticmethod
+    @ staticmethod
     def get_table(column_names, rows):
         table = PrettyTable(column_names)
 
@@ -188,13 +198,13 @@ class TextUI:
 
         return table
 
-    @classmethod
+    @ classmethod
     def print_item(cls, item):
         rows = [[item.name, item.stack_quantity, item.vendor_price]]
         table = cls.get_table(["Name", "Stack Quantity", "Vendor Price"], rows)
         print(table)
 
-    @classmethod
+    @ classmethod
     def print_recipes(cls, recipes):
         rows = []
         for recipe in recipes:
@@ -205,11 +215,11 @@ class TextUI:
 
         table = cls.get_table(["Name", "Synth Yield", "Synth Cost", "Crystal",
                                "Ingredient 1", "Ingredient 2", "Ingredient 3",
-                               "Ingredient 4", "Ingredient 5", "Ingredient 6",
+                              "Ingredient 4", "Ingredient 5", "Ingredient 6",
                                "Ingredient 7", "Ingredient 8"], rows)
         print(table)
 
-    @classmethod
+    @ classmethod
     def print_auction_listings(cls, listings):
         rows = []
         for listing in listings:
@@ -221,7 +231,7 @@ class TextUI:
                                "Sell Frequency"], rows)
         print(table)
 
-    @classmethod
+    @ classmethod
     def print_products(cls, products):
         rows = []
         for product in products:
