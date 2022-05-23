@@ -1,5 +1,4 @@
 import sqlite3
-from helpers import remove_nones, same_elements, add_nones
 
 
 class Database:
@@ -17,7 +16,7 @@ class Database:
         self.create_vendors_table()
         self.create_vendor_items_table()
         self.create_auction_listings_table()
-        self.create_synthesis_recipes_table()
+        self.create_recipes_table()
         self.create_synthesis_results_table()
 
     def create_items_table(self):
@@ -29,7 +28,7 @@ class Database:
     def create_vendors_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS vendors (
                             npc_name text PRIMARY KEY,
-                            location text NOT NULL,
+                            area text NOT NULL,
                             coordinates text NOT NULL,
                             type text NOT NULL
                             )""")
@@ -49,13 +48,13 @@ class Database:
                             item_name text,
                             is_stack integer,
                             price integer NOT NULL,
-                            sell_freq real NOT NULL,
+                            sell_frequency real NOT NULL,
                             PRIMARY KEY (item_name, is_stack),
                             FOREIGN KEY (item_name) REFERENCES items (name)
                             )""")
 
-    def create_synthesis_recipes_table(self):
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS synthesis_recipes (
+    def create_recipes_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS recipes (
                             id INTEGER PRIMARY KEY,
                             name text NOT NULL,
                             crystal text NOT NULL,
@@ -95,36 +94,48 @@ class Database:
                             FOREIGN KEY (recipe_id) REFERENCES synthesis_recipes (id)
                             )""")
 
-    # def add_item(self, item):
-    #     self.cur.execute("""INSERT INTO items VALUES (:name, :stack_quantity,
-    #                      :vendor_price)""",
-    #                      {"name": item.name,
-    #                       "stack_quantity": item.stack_quantity,
-    #                       "vendor_price": item.vendor_price
-    #                       })
-    #     self.commit()
+    def add_item(self, item):
+        self.cur.execute("""INSERT INTO items VALUES (:name,
+                         :stack_quantity)""",
+                         {"name": item.name,
+                          "stack_quantity": item.stack_quantity
+                          })
+        self.commit()
 
-    # def get_item(self, name):
-    #     self.cur.execute("SELECT * FROM items WHERE name=?", (name,))
-    #     return self.cur.fetchone()
+    def get_item(self, name):
+        self.cur.execute("SELECT * FROM items WHERE name=?", (name,))
+        return self.cur.fetchone()
+
+    def remove_item(self, name):
+        self.cur.execute("DELETE FROM items WHERE name=?", (name,))
+        self.commit()
+
+    def item_is_in_database(self, name):
+        item = self.get_item(name)
+        return item is not None
+
+    def add_auction_listing(self, auction_listing):
+        self.cur.execute("""INSERT INTO auction_listings VALUES (:item_name,
+                         :is_stack, :price, :sell_frequency)""",
+                         {"item_name": auction_listing.item_name,
+                          "is_stack": auction_listing.is_stack,
+                          "price": auction_listing.price,
+                          "sell_frequency": auction_listing.sell_frequency
+                          })
+        self.commit()
+
+    def commit(self):
+        self.connection.commit()
 
     # def get_all_items(self):
     #     self.cur.execute("SELECT * FROM items")
     #     return self.cur.fetchall()
-
-    # def remove_item(self, name):
-    #     self.cur.execute("DELETE FROM items WHERE name=?", (name,))
-    #     self.commit()
 
     # def update_item_vendor_price(self, name, vendor_price):
     #     self.cur.execute("""UPDATE items
     #                         SET vendor_price=?
     #                         WHERE name=?""", (vendor_price, name,))
     #     self.commit()
-
-    # def item_is_in_database(self, name):
-    #     item = self.get_item(name)
-    #     return item is not None
 
     # def add_recipe(self, recipe):
     #     ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
@@ -202,16 +213,6 @@ class Database:
 
     #     return False
 
-    # def add_auction_listing(self, auction_listing):
-    #     self.cur.execute("""INSERT INTO auction_listings VALUES (:name,
-    #                      :quantity, :price, :sell_freq)""",
-    #                      {"name": auction_listing.name,
-    #                       "quantity": auction_listing.quantity,
-    #                       "price": auction_listing.price,
-    #                       "sell_freq": auction_listing.sell_freq
-    #                       })
-    #     self.commit()
-
     # def get_auction_listings(self, name):
     #     self.cur.execute("""SELECT * FROM auction_listings
     #                      WHERE name=?""", (name,))
@@ -244,6 +245,3 @@ class Database:
     # def auction_listing_is_in_database(self, name):
     #     listings = self.get_auction_listings(name)
     #     return len(listings) > 0
-
-    def commit(self):
-        self.connection.commit()

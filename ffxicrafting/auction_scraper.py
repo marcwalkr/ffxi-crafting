@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import date, datetime
 import time
+from text_ui import TextUI
 
 
 class AuctionScraper:
@@ -18,7 +19,7 @@ class AuctionScraper:
     def scrape(self):
         self.item_id = self.get_item_id()
         if self.item_id is None:
-            raise ValueError("Error: could not find item on AH")
+            raise ValueError  # could not find item
 
         self.quantities, self.prices, self.dates = self.get_ah_data()
         self.empty_price_history = len(self.quantities) == 0
@@ -30,17 +31,17 @@ class AuctionScraper:
 
         if len(item_tags) > 1:
             for i, tag in enumerate(item_tags):
-                print(str(i) + ". " + tag.get_text())
-            idx = input("Enter the correct index for the item \"" +
-                        self.item_name + "\": ")
-            idx = int(idx)
-            item_tag = item_tags[idx]
+                TextUI.print_item_index(str(i), tag.get_text())
+
+            index = TextUI.prompt_correct_index(self.item_name)
+            item_tag = item_tags[index]
         elif len(item_tags) == 1:
             item_tag = item_tags[0]
         else:
             return None
 
-        print("Scraping item: " + item_tag.get_text())
+        TextUI.print_scraping_item(item_tag.get_text())
+
         item_url = item_tag["href"]
         item_id = item_url.split("&")[-1][3:]
 
