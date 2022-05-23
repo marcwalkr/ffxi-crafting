@@ -1,9 +1,5 @@
 import sqlite3
-from colorama import Fore, init
 from helpers import remove_nones, same_elements, add_nones
-
-# Auto reset style with colorama
-init(autoreset=True)
 
 
 class Database:
@@ -17,13 +13,50 @@ class Database:
         self.connection.close()
 
     def create_tables(self):
+        self.create_items_table()
+        self.create_vendors_table()
+        self.create_vendor_items_table()
+        self.create_auction_listings_table()
+        self.create_synthesis_recipes_table()
+        self.create_synthesis_results_table()
+
+    def create_items_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS items (
-                            name text PRIMARY KEY NOT NULL,
-                            stack_quantity integer,
-                            vendor_price integer
+                            name text PRIMARY KEY,
+                            stack_quantity integer
                             )""")
 
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS recipes (
+    def create_vendors_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS vendors (
+                            npc_name text PRIMARY KEY,
+                            location text NOT NULL,
+                            coordinates text NOT NULL,
+                            type text NOT NULL
+                            )""")
+
+    def create_vendor_items_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS vendor_items (
+                            item_name text,
+                            vendor_name text,
+                            price integer NOT NULL,
+                            PRIMARY KEY (item_name, vendor_name),
+                            FOREIGN KEY (item_name) REFERENCES items (name),
+                            FOREIGN KEY (vendor_name) REFERENCES vendors (npc_name)
+                            )""")
+
+    def create_auction_listings_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS auction_listings (
+                            item_name text,
+                            is_stack integer,
+                            price integer NOT NULL,
+                            sell_freq real NOT NULL,
+                            PRIMARY KEY (item_name, is_stack),
+                            FOREIGN KEY (item_name) REFERENCES items (name)
+                            )""")
+
+    def create_synthesis_recipes_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS synthesis_recipes (
+                            id INTEGER PRIMARY KEY,
                             name text NOT NULL,
                             crystal text NOT NULL,
                             ingredient1 text NOT NULL,
@@ -34,13 +67,8 @@ class Database:
                             ingredient6 text,
                             ingredient7 text,
                             ingredient8 text,
-                            nq_yield integer NOT NULL,
-                            hq1_yield integer NOT NULL,
-                            hq2_yield integer NOT NULL,
-                            hq3_yield integer NOT NULL,
                             craft text NOT NULL,
                             skill_cap integer NOT NULL,
-                            synth_cost real NOT NULL,
                             FOREIGN KEY (name) REFERENCES items (name),
                             FOREIGN KEY (crystal) REFERENCES items (name),
                             FOREIGN KEY (ingredient1) REFERENCES items (name),
@@ -50,16 +78,21 @@ class Database:
                             FOREIGN KEY (ingredient5) REFERENCES items (name),
                             FOREIGN KEY (ingredient6) REFERENCES items (name),
                             FOREIGN KEY (ingredient7) REFERENCES items (name),
-                            FOREIGN KEY (ingredient8) REFERENCES items (name)
+                            FOREIGN KEY (ingredient8) REFERENCES items (name),
+                            UNIQUE (crystal, ingredient1, ingredient2,
+                                    ingredient3, ingredient4, ingredient5,
+                                    ingredient6, ingredient7, ingredient8)
                             )""")
 
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS auction_listings (
-                            name text NOT NULL,
+    def create_synthesis_results_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS synthesis_results (
+                            item_name text NOT NULL,
+                            recipe_id integer NOT NULL,
                             quantity integer NOT NULL,
-                            price integer NOT NULL,
-                            sell_freq real NOT NULL,
-                            PRIMARY KEY (name, quantity),
-                            FOREIGN KEY (name) REFERENCES items (name)
+                            quality_level text NOT NULL,
+                            PRIMARY KEY (recipe_id, quality_level),
+                            FOREIGN KEY (item_name) REFERENCES items (name),
+                            FOREIGN KEY (recipe_id) REFERENCES synthesis_recipes (id)
                             )""")
 
     def add_item(self, item):
@@ -214,127 +247,3 @@ class Database:
 
     def commit(self):
         self.connection.commit()
-
-    def recreate_items_table(self):
-        self.connection.execute("PRAGMA foreign_keys = 0")
-
-        self.cur.execute("""CREATE TABLE items_temp (
-                            name text PRIMARY KEY NOT NULL,
-                            stack_quantity integer,
-                            vendor_price integer
-                            )""")
-
-        self.cur.execute("""INSERT INTO items_temp (name, stack_quantity,
-                         vendor_price)
-                         SELECT name, stack_quantity, vendor_price
-                         FROM items""")
-        self.commit()
-
-        self.cur.execute("DROP TABLE items")
-
-        self.cur.execute("ALTER TABLE items_temp RENAME TO items")
-
-        self.connection.execute("PRAGMA foreign_keys = 1")
-
-    def recreate_recipes_table(self):
-        self.connection.execute("PRAGMA foreign_keys = 0")
-
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS recipes_temp (
-                            name text NOT NULL,
-                            crystal text NOT NULL,
-                            ingredient1 text NOT NULL,
-                            ingredient2 text,
-                            ingredient3 text,
-                            ingredient4 text,
-                            ingredient5 text,
-                            ingredient6 text,
-                            ingredient7 text,
-                            ingredient8 text,
-                            nq_yield integer NOT NULL,
-                            hq1_yield integer NOT NULL,
-                            hq2_yield integer NOT NULL,
-                            hq3_yield integer NOT NULL,
-                            craft text NOT NULL,
-                            skill_cap integer NOT NULL,
-                            synth_cost real NOT NULL,
-                            FOREIGN KEY (name) REFERENCES items (name),
-                            FOREIGN KEY (crystal) REFERENCES items (name),
-                            FOREIGN KEY (ingredient1) REFERENCES items (name),
-                            FOREIGN KEY (ingredient2) REFERENCES items (name),
-                            FOREIGN KEY (ingredient3) REFERENCES items (name),
-                            FOREIGN KEY (ingredient4) REFERENCES items (name),
-                            FOREIGN KEY (ingredient5) REFERENCES items (name),
-                            FOREIGN KEY (ingredient6) REFERENCES items (name),
-                            FOREIGN KEY (ingredient7) REFERENCES items (name),
-                            FOREIGN KEY (ingredient8) REFERENCES items (name)
-                            )""")
-
-        all_recipes = self.get_all_recipes()
-        for recipe in all_recipes:
-            name, crystal = recipe[0:2]
-            ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
-                ingredient6, ingredient7, ingredient8 = recipe[2:10]
-            nq_yield, hq1_yield, hq2_yield, hq3_yield, craft, skill_cap, \
-                synth_cost = recipe[10:]
-
-            self.cur.execute("""INSERT INTO recipes_temp VALUES (:name,
-                             :crystal, :ingredient1, :ingredient2,
-                             :ingredient3, :ingredient4, :ingredient5,
-                             :ingredient6, :ingredient7, :ingredient8,
-                             :nq_yield, :synth_cost)""",
-                             {
-                                 "name": name,
-                                 "crystal": crystal,
-                                 "ingredient1": ingredient1,
-                                 "ingredient2": ingredient2,
-                                 "ingredient3": ingredient3,
-                                 "ingredient4": ingredient4,
-                                 "ingredient5": ingredient5,
-                                 "ingredient6": ingredient6,
-                                 "ingredient7": ingredient7,
-                                 "ingredient8": ingredient8,
-                                 "nq_yield": nq_yield,
-                                 "hq1_yield": hq1_yield,
-                                 "hq2_yield": hq2_yield,
-                                 "hq3_yield": hq3_yield,
-                                 "craft": craft,
-                                 "skill_cap": skill_cap,
-                                 "synth_cost": synth_cost
-                             })
-            self.commit()
-
-        self.cur.execute("DROP TABLE recipes")
-
-        self.cur.execute("ALTER TABLE recipes_temp RENAME TO recipes")
-
-        self.connection.execute("PRAGMA foreign_keys = 1")
-
-    def recreate_auction_listings_table(self):
-        self.connection.execute("PRAGMA foreign_keys = 0")
-
-        self.cur.execute("""CREATE TABLE auction_listings_temp (
-                            name text NOT NULL,
-                            quantity integer NOT NULL,
-                            price integer NOT NULL,
-                            sell_freq real NOT NULL,
-                            PRIMARY KEY (name, quantity),
-                            FOREIGN KEY (name) REFERENCES items (name)
-                            )""")
-
-        self.cur.execute("""INSERT INTO auction_listings_temp (name, quantity,
-                         price, sell_freq)
-                         SELECT name, quantity, price, sell_freq
-                         FROM auction_listings""")
-        self.commit()
-
-        self.cur.execute("DROP TABLE auction_listings")
-
-        self.cur.execute("""ALTER TABLE auction_listings_temp
-                         RENAME TO auction_listings""")
-
-        self.connection.execute("PRAGMA foreign_keys = 1")
-
-    def recreate_all_tables(self):
-        self.recreate_items_table()
-        self.recreate_recipes_table()
-        self.recreate_auction_listings_table()
