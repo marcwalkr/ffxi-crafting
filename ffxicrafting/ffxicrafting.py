@@ -96,36 +96,6 @@ def update_vendor_price():
         TextUI.print_update_price_success(item_name)
 
 
-def print_item():
-    item_name = TextUI.prompt_item_name()
-    item = Item.get_item(item_name)
-
-    if item is None:
-        TextUI.print_error_item_not_exists(item_name)
-    else:
-        TextUI.print_item(item)
-
-
-def print_recipes():
-    recipe_name = TextUI.prompt_item_name()
-    recipes = Recipe.get_recipes(recipe_name)
-
-    if len(recipes) == 0:
-        TextUI.print_error_recipe_not_exists(recipe_name)
-    else:
-        TextUI.print_recipes(recipes)
-
-
-def print_auction_listings():
-    item_name = TextUI.prompt_item_name()
-    listings = AuctionListing.get_listings(item_name)
-
-    if len(listings) == 0:
-        TextUI.print_error_listing_not_exists(item_name)
-    else:
-        TextUI.print_auction_listings(listings)
-
-
 def print_products():
     profit_threshold, freq_treshold = TextUI.prompt_product()
     products = Product.get_products(profit_threshold, freq_treshold)
@@ -151,12 +121,6 @@ if __name__ == "__main__":
         elif command == "7":
             update_ah_data_and_recipe_costs()
         elif command == "8":
-            print_item()
-        elif command == "9":
-            print_recipes()
-        elif command == "10":
-            print_auction_listings()
-        elif command == "11":
             print_products()
         elif command == "q" or command == "Q":
             break

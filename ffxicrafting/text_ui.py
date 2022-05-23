@@ -127,10 +127,7 @@ class TextUI:
                         "5. Remove auction listings\n" +
                         "6. Update a vendor price\n" +
                         "7. Update AH data and recipe costs\n" +
-                        "8. Print an item\n" +
-                        "9. Print recipes for an item\n" +
-                        "10. Print an item's auction listings\n" +
-                        "11. Print products\n" +
+                        "8. Print products\n" +
                         "Q. Quit\n")
         return command
 
@@ -214,42 +211,6 @@ class TextUI:
             table.add_row(row)
 
         return table
-
-    @ classmethod
-    def print_item(cls, item):
-        rows = [[item.name, item.stack_quantity, item.vendor_price]]
-        table = cls.get_table(["Name", "Stack Quantity", "Vendor Price"], rows)
-        print(table)
-
-    @ classmethod
-    def print_recipes(cls, recipes):
-        rows = []
-        for recipe in recipes:
-            row = [recipe.name, recipe.crystal]
-            row += recipe.ingredients
-            row += [recipe.nq_yield, recipe.hq1_yield, recipe.hq2_yield,
-                    recipe.hq3_yield, recipe.craft, recipe.skill_cap, recipe.synth_cost]
-            rows.append(row)
-
-        table = cls.get_table(["Name", "Crystal", "Ingredient 1",
-                               "Ingredient 2", "Ingredient 3", "Ingredient 4",
-                               "Ingredient 5", "Ingredient 6", "Ingredient 7",
-                               "Ingredient 8", "NQ Yield", "HQ1 Yield",
-                               "HQ2 Yield", "HQ3 Yield", "Craft", "Skill Cap",
-                               "Synth Cost"], rows)
-        print(table)
-
-    @ classmethod
-    def print_auction_listings(cls, listings):
-        rows = []
-        for listing in listings:
-            row = [listing.name, listing.quantity, listing.price,
-                   listing.sell_freq]
-            rows.append(row)
-
-        table = cls.get_table(["Item Name", "Quantity", "Price",
-                               "Sell Frequency"], rows)
-        print(table)
 
     @ classmethod
     def print_products(cls, products):
