@@ -56,7 +56,6 @@ class Database:
     def create_recipes_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS recipes (
                             id INTEGER PRIMARY KEY,
-                            name text NOT NULL,
                             crystal text NOT NULL,
                             ingredient1 text NOT NULL,
                             ingredient2 text,
@@ -68,7 +67,6 @@ class Database:
                             ingredient8 text,
                             craft text NOT NULL,
                             skill_cap integer NOT NULL,
-                            FOREIGN KEY (name) REFERENCES items (name),
                             FOREIGN KEY (crystal) REFERENCES items (name),
                             FOREIGN KEY (ingredient1) REFERENCES items (name),
                             FOREIGN KEY (ingredient2) REFERENCES items (name),
