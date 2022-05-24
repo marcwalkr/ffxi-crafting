@@ -24,18 +24,6 @@ class TextUI:
 
         return stack_quantity
 
-    @classmethod
-    def prompt_item(cls):
-        item_name = cls.prompt_item_name()
-        stack_quantity = cls.prompt_stack_quantity()
-
-        return item_name, stack_quantity
-
-    @staticmethod
-    def prompt_vendor_purchasable():
-        vendor_purchasable = input("Is it purchasable from a vendor? (y/n): ")
-        return vendor_purchasable == "y"
-
     @staticmethod
     def prompt_vendor_name():
         return input("Enter the NPC name: ")
@@ -92,11 +80,6 @@ class TextUI:
     @staticmethod
     def print_scraping_item(item_name):
         print(Fore.CYAN + "Scraping item: {}".format(item_name))
-
-    # @staticmethod
-    # def print_error_item_in_db(item_name):
-    #     print(Fore.RED + "Item \"{}\" is already in the database"
-    #           .format(item_name))
 
     @staticmethod
     def print_error_item_not_in_db(item_name):

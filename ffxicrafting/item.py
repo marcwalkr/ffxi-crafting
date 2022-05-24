@@ -17,7 +17,8 @@ class Item:
 
     @classmethod
     def prompt_add_item(cls):
-        item_name, stack_quantity = TextUI.prompt_item()
+        item_name = TextUI.prompt_item_name()
+        stack_quantity = TextUI.prompt_stack_quantity()
 
         try:
             # Scrape and verify the item exists on AH before everything else
