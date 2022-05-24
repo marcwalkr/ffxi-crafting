@@ -31,8 +31,12 @@ class TextUI:
 
         return item_name, stack_quantity
 
-    @staticmethod
-    def prompt_correct_index(item_name):
+    @classmethod
+    def prompt_correct_index(cls, item_name, item_tags):
+        for i, tag in enumerate(item_tags):
+            full_item_name = tag.get_text()
+            cls.print_item_index(str(i), full_item_name)
+
         index = input(Fore.YELLOW + "Enter the correct index for the item " +
                       Fore.YELLOW + "\"{}\": ".format(item_name))
         return int(index)

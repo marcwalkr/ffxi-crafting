@@ -9,43 +9,62 @@ class AuctionScraper:
     def __init__(self, item_name) -> None:
         self.item_name = item_name
 
-        self.item_id = None
-        self.quantities = None
-        self.prices = None
-        self.dates = None
-        self.empty_price_history = None
-        self.num_days = None
+        self.item_id, self.full_item_name = self.scrape_search()
+        self.quantities, self.prices, self.dates = self.scrape_listing()
+        self.is_empty_history = len(self.quantities) == 0
 
-    def scrape(self):
-        self.item_id = self.get_item_id()
-        if self.item_id is None:
-            raise ValueError  # could not find item
-
-        self.quantities, self.prices, self.dates = self.get_ah_data()
-        self.empty_price_history = len(self.quantities) == 0
-        self.num_days = self.get_num_days()
-
-    def get_item_id(self):
+    def scrape_search(self):
         search_html = self.get_search_html()
         item_tags = search_html.find_all("a", {"class": "character"})
 
         if len(item_tags) > 1:
-            for i, tag in enumerate(item_tags):
-                TextUI.print_item_index(str(i), tag.get_text())
-
-            index = TextUI.prompt_correct_index(self.item_name)
-            item_tag = item_tags[index]
+            index = TextUI.prompt_correct_index(self.item_name, item_tags)
+            correct_tag = item_tags[index]
         elif len(item_tags) == 1:
-            item_tag = item_tags[0]
+            correct_tag = item_tags[0]
         else:
-            return None
+            raise ValueError  # item not found
 
-        TextUI.print_scraping_item(item_tag.get_text())
+        full_item_name = correct_tag.get_text()
+        TextUI.print_scraping_item(full_item_name)
 
-        item_url = item_tag["href"]
+        item_url = correct_tag["href"]
         item_id = item_url.split("&")[-1][3:]
 
-        return item_id
+        return item_id, full_item_name
+
+    def scrape_listing(self):
+        seller_buyer_quantity_tags = self.get_listing_html().find_all(
+            "td", {"style": "width: 10px;"})
+        price_date_tags = self.get_listing_html().find_all(
+            "td", {"style": "width: 10px; text-align: right"})
+
+        quantities = []
+        for tag in seller_buyer_quantity_tags:
+            tag_text = tag.get_text()
+            if tag_text == "Seller":
+                break
+            elif tag_text != "Single" and tag_text != "Stack":
+                continue
+            else:
+                quantities.append(tag_text)
+
+        dates = []
+        prices = []
+        for tag in price_date_tags:
+            tag_text = tag.get_text()
+            if tag_text == "Date":
+                continue
+            elif "/" in tag_text:
+                dates.append(tag_text)
+            else:
+                prices.append(tag_text)
+
+        # Remove elements from the end of prices to match the length of dates
+        # The last few prices are from bazaars
+        prices = prices[:len(dates)]
+
+        return quantities, prices, dates
 
     def get_url_formatted_name(self):
         # Replace spaces with +
@@ -77,43 +96,9 @@ class AuctionScraper:
 
         return html
 
-    def get_ah_data(self):
-        listing_html = self.get_listing_html()
-
-        seller_buyer_quantity_tags = listing_html.find_all(
-            "td", {"style": "width: 10px;"})
-        price_date_tags = listing_html.find_all(
-            "td", {"style": "width: 10px; text-align: right"})
-
-        quantities = []
-        for tag in seller_buyer_quantity_tags:
-            tag_text = tag.get_text()
-            if tag_text == "Seller":
-                break
-            elif tag_text != "Single" and tag_text != "Stack":
-                continue
-            else:
-                quantities.append(tag_text)
-
-        dates = []
-        prices = []
-        for tag in price_date_tags:
-            tag_text = tag.get_text()
-            if tag_text == "Date":
-                continue
-            elif "/" in tag_text:
-                dates.append(tag_text)
-            else:
-                prices.append(tag_text)
-
-        # Remove elements from the end of prices to match the length of dates
-        # The last few prices are from bazaars
-        prices = prices[:len(dates)]
-
-        return [quantities, prices, dates]
-
-    def get_single_price(self):
-        if self.empty_price_history:
+    @property
+    def single_price(self):
+        if self.is_empty_history:
             return None
 
         try:
@@ -123,8 +108,9 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    def get_stack_price(self):
-        if self.empty_price_history:
+    @property
+    def stack_price(self):
+        if self.is_empty_history:
             return None
 
         try:
@@ -134,11 +120,12 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    def get_num_days(self):
+    @property
+    def num_days(self):
         """Gets the number of days from the first in history until today,
         inclusive, for calculating sell frequency
         """
-        if self.empty_price_history:
+        if self.is_empty_history:
             return 0
 
         first_date_str = self.dates[-1]
@@ -150,8 +137,9 @@ class AuctionScraper:
 
         return delta.days + 1
 
-    def get_single_freq(self):
-        if self.empty_price_history:
+    @property
+    def single_freq(self):
+        if self.is_empty_history:
             return None
 
         try:
@@ -161,8 +149,9 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    def get_stack_freq(self):
-        if self.empty_price_history:
+    @property
+    def stack_freq(self):
+        if self.is_empty_history:
             return None
 
         try:

@@ -2,6 +2,7 @@ from sqlite3 import IntegrityError
 from item import Item
 from recipe import Recipe
 from auction_listing import AuctionListing
+from auction_scraper import AuctionScraper
 from product import Product
 from text_ui import TextUI
 
@@ -9,17 +10,27 @@ from text_ui import TextUI
 def add_item():
     item_name, stack_quantity = TextUI.prompt_item()
 
-    item = Item(item_name, stack_quantity)
     try:
         # Scrape and verify the item exists on AH before adding the item
-        listings = AuctionListing.scrape_listings(item_name)
+        scraper = AuctionScraper(item_name)
 
+        # Create the item and add to db
+        item = Item(item_name, scraper.full_item_name, stack_quantity)
         item.to_database()
 
-        for listing in listings:
-            listing.to_database()
+        # Create auction listings for single and stack, add to db
+        if scraper.single_price is not None:
+            single_listing = AuctionListing(item_name, False,
+                                            scraper.single_price, scraper.single_freq)
+            single_listing.to_database()
+
+        if scraper.stack_price is not None:
+            stack_listing = AuctionListing(item_name, True, scraper.stack_price,
+                                           scraper.stack_freq)
+            stack_listing.to_database()
 
         TextUI.print_add_item_success(item_name)
+
     except IntegrityError:
         TextUI.print_error_item_in_db(item_name)
     except ValueError:

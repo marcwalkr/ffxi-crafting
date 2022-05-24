@@ -22,6 +22,7 @@ class Database:
     def create_items_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS items (
                             name text PRIMARY KEY,
+                            full_name text NOT NULL,
                             stack_quantity integer
                             )""")
 
@@ -93,9 +94,10 @@ class Database:
                             )""")
 
     def add_item(self, item):
-        self.cur.execute("""INSERT INTO items VALUES (:name,
+        self.cur.execute("""INSERT INTO items VALUES (:name, :full_name,
                          :stack_quantity)""",
                          {"name": item.name,
+                          "full_name": item.full_name,
                           "stack_quantity": item.stack_quantity
                           })
         self.commit()

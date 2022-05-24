@@ -4,8 +4,9 @@ from database import Database
 class Item:
     db = Database()
 
-    def __init__(self, name, stack_quantity) -> None:
+    def __init__(self, name, full_name, stack_quantity) -> None:
         self.name = name
+        self.full_name = name
         self.stack_quantity = stack_quantity
 
     def to_database(self):

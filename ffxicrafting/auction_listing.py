@@ -1,5 +1,4 @@
 from database import Database
-from auction_scraper import AuctionScraper
 
 
 class AuctionListing:
@@ -13,31 +12,6 @@ class AuctionListing:
 
     def to_database(self):
         self.db.add_auction_listing(self)
-
-    @classmethod
-    def scrape_listings(cls, item_name):
-        scraper = AuctionScraper(item_name)
-        scraper.scrape()
-
-        single_price = scraper.get_single_price()
-        single_freq = scraper.get_single_freq()
-
-        stack_price = scraper.get_stack_price()
-        stack_freq = scraper.get_stack_freq()
-
-        listings = []
-
-        if single_price is not None:
-            single_listing = AuctionListing(item_name, False, single_price,
-                                            single_freq)
-            listings.append(single_listing)
-
-        if stack_price is not None:
-            stack_listing = AuctionListing(item_name, True, stack_price,
-                                           stack_freq)
-            listings.append(stack_listing)
-
-        return listings
 
     # @classmethod
     # def update_ah_data(cls):
