@@ -1,4 +1,5 @@
 from database import Database
+from text_ui import TextUI
 
 
 class Vendor:
@@ -12,6 +13,21 @@ class Vendor:
 
     def to_database(self):
         self.db.add_vendor(self)
+
+    @classmethod
+    def prompt_add_vendor(cls):
+        npc_name, area, coordinates, vendor_type = TextUI.prompt_vendor()
+        vendor = cls(npc_name, area, coordinates, vendor_type)
+        vendor.to_database()
+
+    @classmethod
+    def prompt_remove_vendor(cls):
+        npc_name = TextUI.prompt_vendor_name()
+
+        if cls.is_in_database(npc_name):
+            cls.remove_vendor(npc_name)
+        else:
+            TextUI.print_error_vendor_not_in_db(npc_name)
 
     @classmethod
     def get_vendor(cls, npc_name):

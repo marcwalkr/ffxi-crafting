@@ -13,6 +13,18 @@ class AuctionListing:
     def to_database(self):
         self.db.add_auction_listing(self)
 
+    @classmethod
+    def add_scraped(cls, item_name, scraper):
+        if scraper.single_price is not None:
+            single_listing = cls(item_name, False, scraper.single_price,
+                                 scraper.single_freq)
+            single_listing.to_database()
+
+        if scraper.stack_price is not None:
+            stack_listing = cls(item_name, True, scraper.stack_price,
+                                scraper.stack_freq)
+            stack_listing.to_database()
+
     # @classmethod
     # def update_ah_data(cls):
     #     """Clears and repopulates the auction listing table, refreshing all data"""

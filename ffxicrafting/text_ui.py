@@ -34,10 +34,7 @@ class TextUI:
     @staticmethod
     def prompt_vendor_purchasable():
         vendor_purchasable = input("Is it purchasable from a vendor? (y/n): ")
-        if vendor_purchasable == "y":
-            return True
-        else:
-            return False
+        return vendor_purchasable == "y"
 
     @staticmethod
     def prompt_vendor_name():
@@ -116,32 +113,37 @@ class TextUI:
         print(Fore.RED + "Item \"{}\" sold by vendor \"{}\""
               .format(item_name, npc_name) + " does not exist in the database")
 
-    @ staticmethod
+    @staticmethod
+    def print_error_not_on_ah(item_name):
+        print(Fore.RED + "Item \"{}\" was not found on the AH"
+              .format(item_name))
+
+    @staticmethod
     def print_error(error_text):
         print(Fore.RED + error_text)
 
-    @ staticmethod
+    @staticmethod
     def print_add_item_success(item_name):
         print(Fore.GREEN + "Item \"{}\" added successfully".format(item_name))
 
-    @ staticmethod
+    @staticmethod
     def print_remove_item_success(item_name):
         print(Fore.GREEN + "Removed item \"{}\"".format(item_name))
 
-    @ staticmethod
+    @staticmethod
     def print_add_vendor_success(npc_name):
         print(Fore.GREEN + "Vendor \"{}\" added successfully".format(npc_name))
 
-    @ staticmethod
+    @staticmethod
     def print_remove_vendor_success(npc_name):
         print(Fore.GREEN + "Removed vendor \"{}\"".format(npc_name))
 
-    @ staticmethod
+    @staticmethod
     def print_add_vendor_item_success(item_name, vendor_name):
         print(Fore.GREEN + "Item \"{}\" sold by \"{}\" added successfully"
               .format(item_name, vendor_name))
 
-    @ staticmethod
+    @staticmethod
     def print_remove_vendor_item_success(item_name, vendor_name):
         print(Fore.GREEN + "Removed item \"{}\" sold by \"{}\""
               .format(item_name, vendor_name))
