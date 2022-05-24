@@ -23,7 +23,8 @@ class AuctionScraper:
         elif len(item_tags) == 1:
             correct_tag = item_tags[0]
         else:
-            raise ValueError  # item not found
+            raise ValueError("Item \"{}\" was not found on the AH"
+                             .format(self.item_name))
 
         full_item_name = correct_tag.get_text()
         TextUI.print_scraping_item(full_item_name)

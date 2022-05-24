@@ -114,6 +114,51 @@ class Database:
         item = self.get_item(name)
         return item is not None
 
+    def add_vendor(self, vendor):
+        self.cur.execute("""INSERT INTO vendors VALUES (:npc_name, :area,
+                         :coordinates, :type)""",
+                         {"npc_name": vendor.npc_name,
+                          "area": vendor.area,
+                          "coordinates": vendor.coordinates,
+                          "type": vendor.vendor_type
+                          })
+        self.commit()
+
+    def get_vendor(self, npc_name):
+        self.cur.execute("SELECT * FROM vendors WHERE npc_name=?", (npc_name,))
+        return self.cur.fetchone()
+
+    def remove_vendor(self, npc_name):
+        self.cur.execute("DELETE FROM vendors WHERE npc_name=?", (npc_name,))
+        self.commit()
+
+    def vendor_is_in_database(self, npc_name):
+        vendor = self.get_vendor(npc_name)
+        return vendor is not None
+
+    def add_vendor_item(self, vendor_item):
+        self.cur.execute("""INSERT INTO vendor_items VALUES (:item_name,
+                         :vendor_name, :price)""",
+                         {"item_name": vendor_item.item_name,
+                          "vendor_name": vendor_item.vendor_name,
+                          "price": vendor_item.price
+                          })
+        self.commit()
+
+    def get_vendor_item(self, item_name, vendor_name):
+        self.cur.execute("""SELECT * FROM vendor_items WHERE item_name=? and
+                         vendor_name=?""", (item_name, vendor_name))
+        return self.cur.fetchone()
+
+    def remove_vendor_item(self, item_name, vendor_name):
+        self.cur.execute("""DELETE FROM vendor_items WHERE item_name=? and
+                         vendor_name=?""", (item_name, vendor_name))
+        self.commit()
+
+    def vendor_item_is_in_database(self, item_name, npc_name):
+        vendor_item = self.get_vendor_item(item_name, npc_name)
+        return vendor_item is not None
+
     def add_auction_listing(self, auction_listing):
         self.cur.execute("""INSERT INTO auction_listings VALUES (:item_name,
                          :is_stack, :price, :sell_frequency)""",

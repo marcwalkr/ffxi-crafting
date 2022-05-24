@@ -31,6 +31,42 @@ class TextUI:
 
         return item_name, stack_quantity
 
+    @staticmethod
+    def prompt_vendor_purchasable():
+        vendor_purchasable = input("Is it purchasable from a vendor? (y/n): ")
+        if vendor_purchasable == "y":
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def prompt_vendor_name():
+        return input("Enter the NPC name: ")
+
+    @staticmethod
+    def prompt_vendor_area():
+        area = input("Enter the area name abbreviation: ")
+        coordinates = input("Enter the coordinates: ")
+
+        return area, coordinates
+
+    @staticmethod
+    def prompt_vendor_type():
+        return input("Enter the vendor type (Standard, Guild, Regional): ")
+
+    @staticmethod
+    def prompt_vendor_price():
+        price = input("Enter the price: ")
+        return int(price)
+
+    @classmethod
+    def prompt_vendor(cls):
+        npc_name = cls.prompt_vendor_name()
+        area, coordinates = cls.prompt_vendor_area()
+        vendor_type = cls.prompt_vendor_type()
+
+        return npc_name, area, coordinates, vendor_type
+
     @classmethod
     def prompt_correct_index(cls, item_name, item_tags):
         for i, tag in enumerate(item_tags):
@@ -44,7 +80,11 @@ class TextUI:
     @staticmethod
     def prompt_command():
         command = input("1. Add an item\n" +
-                        "2. Remove an item\n" +
+                        "2. Add a vendor\n" +
+                        "3. Add a vendor item\n" +
+                        "4. Remove an item\n" +
+                        "5. Remove a vendor\n" +
+                        "6. Remove a vendor item\n" +
                         "Q. Quit\n")
         return command
 
@@ -56,15 +96,10 @@ class TextUI:
     def print_scraping_item(item_name):
         print(Fore.CYAN + "Scraping item: {}".format(item_name))
 
-    @staticmethod
-    def print_error_item_in_db(item_name):
-        print(Fore.RED + "Item \"{}\" is already in the database"
-              .format(item_name))
-
-    @staticmethod
-    def print_error_item_not_on_ah(item_name):
-        print(Fore.RED + "Item \"{}\" was not found on the AH"
-              .format(item_name))
+    # @staticmethod
+    # def print_error_item_in_db(item_name):
+    #     print(Fore.RED + "Item \"{}\" is already in the database"
+    #           .format(item_name))
 
     @staticmethod
     def print_error_item_not_in_db(item_name):
@@ -72,9 +107,18 @@ class TextUI:
               .format(item_name))
 
     @staticmethod
-    def print_error_item_integrity(item_name):
-        print(Fore.RED + "Failed to remove \"{}\":".format(item_name) +
-              " it is being referenced by another table")
+    def print_error_vendor_not_in_db(npc_name):
+        print(Fore.RED + "Vendor \"{}\" does not exist in the database"
+              .format(npc_name))
+
+    @staticmethod
+    def print_error_vendor_item_not_in_db(item_name, npc_name):
+        print(Fore.RED + "Item \"{}\" sold by vendor \"{}\""
+              .format(item_name, npc_name) + " does not exist in the database")
+
+    @ staticmethod
+    def print_error(error_text):
+        print(Fore.RED + error_text)
 
     @ staticmethod
     def print_add_item_success(item_name):
@@ -83,6 +127,24 @@ class TextUI:
     @ staticmethod
     def print_remove_item_success(item_name):
         print(Fore.GREEN + "Removed item \"{}\"".format(item_name))
+
+    @ staticmethod
+    def print_add_vendor_success(npc_name):
+        print(Fore.GREEN + "Vendor \"{}\" added successfully".format(npc_name))
+
+    @ staticmethod
+    def print_remove_vendor_success(npc_name):
+        print(Fore.GREEN + "Removed vendor \"{}\"".format(npc_name))
+
+    @ staticmethod
+    def print_add_vendor_item_success(item_name, vendor_name):
+        print(Fore.GREEN + "Item \"{}\" sold by \"{}\" added successfully"
+              .format(item_name, vendor_name))
+
+    @ staticmethod
+    def print_remove_vendor_item_success(item_name, vendor_name):
+        print(Fore.GREEN + "Removed item \"{}\" sold by \"{}\""
+              .format(item_name, vendor_name))
 
     # @staticmethod
     # def prompt_vendor_price():
@@ -210,10 +272,6 @@ class TextUI:
     # @ staticmethod
     # def print_update_price_success(item_name):
     #     print(Fore.GREEN + "Updated vendor price for \"{}\"".format(item_name))
-
-    # @ staticmethod
-    # def print_error(error_text):
-    #     print(Fore.RED + error_text)
 
     # @ staticmethod
     # def get_table(column_names, rows):
