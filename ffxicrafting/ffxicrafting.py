@@ -1,6 +1,4 @@
-from item import Item
-from vendor import Vendor
-from vendor_item import VendorItem
+from command import Command
 
 # def add_recipe():
 #     recipe_name, crystal, ingredients, nq_yield, hq1_yield, hq2_yield, \
@@ -61,19 +59,19 @@ from vendor_item import VendorItem
 
 if __name__ == "__main__":
     while True:
-        command = TextUI.prompt_command()
+        command = Command.prompt_command()
 
         if command == "1":
-            Item.prompt_add_item()
+            Command.add_item()
         elif command == "2":
-            Vendor.prompt_add_vendor()
+            Command.add_vendor()
         elif command == "3":
-            VendorItem.prompt_add_vendor_item()
+            Command.add_vendor_item()
         elif command == "4":
-            Item.prompt_remove_item()
+            Command.remove_item()
         elif command == "5":
-            Vendor.prompt_remove_vendor()
+            Command.remove_vendor()
         elif command == "6":
-            VendorItem.prompt_remove_vendor_item()
+            Command.remove_vendor_item()
         elif command == "q" or command == "Q":
             break
