@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import date, datetime
 import time
-from text_ui import TextUI
+from logger import Logger
 
 
 class AuctionScraper:
@@ -18,7 +18,7 @@ class AuctionScraper:
         item_tags = search_html.find_all("a", {"class": "character"})
 
         if len(item_tags) > 1:
-            index = TextUI.prompt_correct_index(self.item_name, item_tags)
+            index = self.prompt_correct_index(item_tags)
             correct_tag = item_tags[index]
         elif len(item_tags) == 1:
             correct_tag = item_tags[0]
@@ -27,7 +27,7 @@ class AuctionScraper:
                              .format(self.item_name))
 
         full_item_name = correct_tag.get_text()
-        TextUI.print_scraping_item(full_item_name)
+        Logger.print_cyan("Scraping item: {}".format(full_item_name))
 
         item_url = correct_tag["href"]
         item_id = item_url.split("&")[-1][3:]
@@ -161,3 +161,14 @@ class AuctionScraper:
             return freq
         except ValueError:
             return None
+
+    def prompt_correct_index(self, item_tags):
+        for i, tag in enumerate(item_tags):
+            full_item_name = tag.get_text()
+            Logger.print_yello("{}. {}".format(str(i), full_item_name))
+
+        prompt = Logger.print_yello("Enter the correct index for the item " +
+                                    "\"{}\"".format(self.item_name))
+        index = input(prompt)
+
+        return int(index)

@@ -1,5 +1,5 @@
 from sqlite3 import connect, IntegrityError
-from text_ui import TextUI
+from logger import Logger
 
 
 class Database:
@@ -102,9 +102,10 @@ class Database:
                               "full_name": item.full_name,
                               "stack_quantity": item.stack_quantity
                               })
-            TextUI.print_add_item_success(item.name)
+            Logger.print_green("Item \"{}\" added successfully"
+                               .format(item.name))
         except IntegrityError as e:
-            TextUI.print_error(str(e))
+            Logger.print_red(str(e))
 
         self.commit()
 
@@ -115,9 +116,9 @@ class Database:
     def remove_item(self, name):
         try:
             self.cur.execute("DELETE FROM items WHERE name=?", (name,))
-            TextUI.print_remove_item_success(name)
+            Logger.print_green("Removed item \"{}\"".format(name))
         except IntegrityError as e:
-            TextUI.print_error(str(e))
+            Logger.print_red(str(e))
 
         self.commit()
 
@@ -134,9 +135,10 @@ class Database:
                               "coordinates": vendor.coordinates,
                               "type": vendor.vendor_type
                               })
-            TextUI.print_add_vendor_success(vendor.npc_name)
+            Logger.print_green("Vendor \"{}\" added successfully"
+                               .format(vendor.npc_name))
         except IntegrityError as e:
-            TextUI.print_error(str(e))
+            Logger.print_red(str(e))
 
         self.commit()
 
@@ -148,9 +150,9 @@ class Database:
         try:
             self.cur.execute("DELETE FROM vendors WHERE npc_name=?",
                              (npc_name,))
-            TextUI.print_remove_vendor_success(npc_name)
+            Logger.print_green("Removed vendor \"{}\"".format(npc_name))
         except IntegrityError as e:
-            TextUI.print_error(str(e))
+            Logger.print_red(str(e))
 
         self.commit()
 
@@ -166,10 +168,11 @@ class Database:
                               "vendor_name": vendor_item.vendor_name,
                               "price": vendor_item.price
                               })
-            TextUI.print_add_vendor_item_success(vendor_item.item_name,
-                                                 vendor_item.vendor_name)
+            Logger.print_green("Item \"{}\" sold by \"{}\" added successfully"
+                               .format(vendor_item.item_name,
+                                       vendor_item.vendor_name))
         except IntegrityError as e:
-            TextUI.print_error(str(e))
+            Logger.print_red(str(e))
 
         self.commit()
 
@@ -181,7 +184,8 @@ class Database:
     def remove_vendor_item(self, item_name, vendor_name):
         self.cur.execute("""DELETE FROM vendor_items WHERE item_name=? and
                          vendor_name=?""", (item_name, vendor_name))
-        TextUI.print_remove_vendor_item_success(item_name, vendor_name)
+        Logger.print_green("Removed item \"{}\" sold by \"{}\""
+                           .format(item_name, vendor_name))
         self.commit()
 
     def vendor_item_is_in_database(self, item_name, npc_name):

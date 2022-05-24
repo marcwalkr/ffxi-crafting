@@ -1,7 +1,6 @@
 from item import Item
 from vendor import Vendor
 from vendor_item import VendorItem
-from text_ui import TextUI
 
 # def add_recipe():
 #     recipe_name, crystal, ingredients, nq_yield, hq1_yield, hq2_yield, \
