@@ -27,9 +27,7 @@ class Command:
         item_name = cls.prompt_item_name()
 
         # Check if the item already exists
-        item = ItemController.get_item(item_name)
-
-        if item is not None:
+        if ItemController.is_in_database(item_name):
             Logger.print_red("The item \"{}\" is already in the database"
                              .format(item_name))
             return
@@ -55,8 +53,7 @@ class Command:
         npc_name = cls.prompt_vendor_name()
 
         # Check if the vendor already exists
-        vendor = VendorController.get_vendor(npc_name)
-        if vendor is not None:
+        if VendorController.is_in_database(npc_name):
             Logger.print_red("The vendor \"{}\" is already in the database"
                              .format(npc_name))
             return
@@ -73,9 +70,7 @@ class Command:
         vendor_name = cls.prompt_vendor_name()
 
         # Check if the vendor item already exists
-        vendor_item = VendorItemController.get_vendor_item(item_name,
-                                                           vendor_name)
-        if vendor_item is not None:
+        if VendorItemController.is_in_database(item_name, vendor_name):
             Logger.print_red("The item \"{}\"".format(item_name) +
                              " sold by vendor \"{}\"".format(vendor_name) +
                              " is already in the database")
@@ -91,8 +86,7 @@ class Command:
         item_name = cls.prompt_item_name()
 
         # Verify that the item exists
-        item = ItemController.get_item(item_name)
-        if item is not None:
+        if ItemController.is_in_database(item_name):
             ItemController.remove_item(item_name)
         else:
             Logger.print_red("Item \"{}\" does not exist in the database"
@@ -103,8 +97,7 @@ class Command:
         npc_name = cls.prompt_vendor_name()
 
         # Verify that the vendor exists
-        vendor = VendorController.get_vendor(npc_name)
-        if vendor is not None:
+        if VendorController.is_in_database(npc_name):
             VendorController.remove_vendor(npc_name)
         else:
             Logger.print_red("Vendor \"{}\" does not exist in the database"
@@ -116,9 +109,7 @@ class Command:
         vendor_name = cls.prompt_vendor_name()
 
         # Verify that the vendor item exists
-        vendor_item = VendorItemController.get_vendor_item(
-            item_name, vendor_name)
-        if vendor_item is not None:
+        if VendorItemController.is_in_database(item_name, vendor_name):
             VendorItemController.remove_vendor_item(item_name, vendor_name)
         else:
             Logger.print_red("Item \"{}\" sold by vendor \"{}\""

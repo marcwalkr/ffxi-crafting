@@ -24,3 +24,8 @@ class VendorItemController:
     @classmethod
     def remove_vendor_item(cls, item_name, vendor_name):
         cls.db.remove_vendor_item(item_name, vendor_name)
+
+    @classmethod
+    def is_in_database(cls, item_name, vendor_name):
+        vendor_item = cls.get_vendor_item(item_name, vendor_name)
+        return vendor_item is not None

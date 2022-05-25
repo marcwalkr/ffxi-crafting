@@ -34,3 +34,8 @@ class ItemController:
     @classmethod
     def remove_item(cls, item_name):
         cls.db.remove_item(item_name)
+
+    @classmethod
+    def is_in_database(cls, item_name):
+        item = cls.get_item(item_name)
+        return item is not None
