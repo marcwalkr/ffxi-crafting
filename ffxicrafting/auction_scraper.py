@@ -9,8 +9,6 @@ class AuctionScraper:
     def __init__(self, item_name) -> None:
         self.item_name = item_name
 
-        # todo: look for item_id in DB searching by item_name
-
         self.item_id = self.scrape_search()
 
         if self.item_id is not None:
@@ -20,8 +18,8 @@ class AuctionScraper:
             self.single_price = self.get_single_price()
             self.stack_price = self.get_stack_price()
 
-            self.single_freq = self.get_single_freq()
-            self.stack_freq = self.get_stack_freq()
+            self.single_frequency = self.get_single_frequency()
+            self.stack_frequency = self.get_stack_frequency()
 
     def scrape_search(self):
         search_html = self.get_search_html()
@@ -145,7 +143,7 @@ class AuctionScraper:
 
         return delta.days + 1
 
-    def get_single_freq(self):
+    def get_single_frequency(self):
         if self.is_empty_history:
             return None
 
@@ -156,7 +154,7 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    def get_stack_freq(self):
+    def get_stack_frequency(self):
         if self.is_empty_history:
             return None
 

@@ -1,5 +1,4 @@
-from auction_data_controller import AuctionDataController
-from auction_listing_controller import AuctionListingController
+from auction_item_controller import AuctionItemController
 from vendor_item_controller import VendorItemController
 from vendor_controller import VendorController
 from item_controller import ItemController
@@ -18,7 +17,7 @@ class Command:
                         "4. Remove an item\n" +
                         "5. Remove a vendor\n" +
                         "6. Remove a vendor item\n" +
-                        "7. Remove auction listings\n" +
+                        "7. Remove an auction item\n" +
                         "Q. Quit\n")
         return command
 
@@ -35,9 +34,10 @@ class Command:
         stack_quantity = cls.prompt_stack_quantity()
 
         # Scrape and verify the item exists on AH
-        auction_data = AuctionDataController.get_auction_data(item_name)
+        auction_item_controller = AuctionItemController(item_name)
+        item_found = auction_item_controller.scrape_auction_item()
 
-        if auction_data is None:
+        if not item_found:
             Logger.print_red("The item \"{}\" was not found on the AH"
                              .format(item_name))
             return
@@ -45,8 +45,8 @@ class Command:
         # Add the item to the database
         ItemController.add_item(item_name, stack_quantity)
 
-        # Add the auction listings to the database (single and stack)
-        AuctionListingController.add_auction_listings(auction_data)
+        # Add the auction item to the database
+        auction_item_controller.add_auction_item()
 
     @classmethod
     def add_vendor(cls):
@@ -117,12 +117,12 @@ class Command:
                              " does not exist in the database")
 
     @classmethod
-    def remove_auction_listings(cls):
+    def remove_auction_item(cls):
         item_name = cls.prompt_item_name()
 
         # Verify that a listing exists
-        if AuctionListingController.is_in_database(item_name):
-            AuctionListingController.remove_auction_listings(item_name)
+        if AuctionItemController.is_in_database(item_name):
+            AuctionItemController.remove_auction_item(item_name)
         else:
             Logger.print_red("Auction listings for item " +
                              "\"{}\" do not exist in the database"

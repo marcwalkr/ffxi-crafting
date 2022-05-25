@@ -16,7 +16,7 @@ class Database:
         self.create_items_table()
         self.create_vendors_table()
         self.create_vendor_items_table()
-        self.create_auction_listings_table()
+        self.create_auction_items_table()
         self.create_recipes_table()
         self.create_synthesis_results_table()
 
@@ -44,14 +44,14 @@ class Database:
                             FOREIGN KEY (vendor_name) REFERENCES vendors (npc_name)
                             )""")
 
-    def create_auction_listings_table(self):
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS auction_listings (
-                            item_id integer,
+    def create_auction_items_table(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS auction_items (
+                            item_id integer PRIMARY KEY,
                             item_name text,
-                            is_stack integer,
-                            price integer NOT NULL,
-                            sell_frequency real NOT NULL,
-                            PRIMARY KEY (item_id, is_stack),
+                            single_price integer,
+                            stack_price integer,
+                            single_frequency real,
+                            stack_frequency real,
                             FOREIGN KEY (item_name) REFERENCES items (name)
                             )""")
 
@@ -175,37 +175,33 @@ class Database:
         Logger.print_green("Item \"{}\" sold by \"{}\" removed successfully"
                            .format(item_name, vendor_name))
 
-    def get_auction_listings(self, item_name):
-        self.cur.execute("""SELECT * FROM auction_listings
+    def get_auction_item(self, item_name):
+        self.cur.execute("""SELECT * FROM auction_items
                          WHERE item_name=?""", (item_name,))
-        return self.cur.fetchall()
+        return self.cur.fetchone()
 
-    def add_auction_listing(self, auction_listing):
-        self.cur.execute("""INSERT INTO auction_listings VALUES (:item_id,
-                         :item_name, :is_stack, :price, :sell_frequency)""",
-                         {"item_id": auction_listing.item_id,
-                          "item_name": auction_listing.item_name,
-                          "is_stack": auction_listing.is_stack,
-                          "price": auction_listing.price,
-                          "sell_frequency": auction_listing.sell_frequency
+    def add_auction_item(self, auction_item):
+        self.cur.execute("""INSERT INTO auction_items VALUES (:item_id,
+                         :item_name, :single_price, :stack_price,
+                         :single_frequency, :stack_frequency)""",
+                         {"item_id": auction_item.item_id,
+                          "item_name": auction_item.item_name,
+                          "single_price": auction_item.single_price,
+                          "stack_price": auction_item.stack_price,
+                          "single_frequency": auction_item.single_frequency,
+                          "stack_frequency": auction_item.stack_frequency
                           })
 
-        if auction_listing.is_stack:
-            listing_type = "stack"
-        else:
-            listing_type = "single"
-
         self.commit()
-        Logger.print_green("Auction listing for " +
-                           "\"{}\"".format(auction_listing.item_name) +
-                           " added successfully ({})".format(listing_type))
+        Logger.print_green("Auction item \"{}\" added successfully"
+                           .format(auction_item.item_name))
 
-    def remove_auction_listings(self, item_name):
-        self.cur.execute("DELETE FROM auction_listings WHERE item_name=?",
+    def remove_auction_item(self, item_name):
+        self.cur.execute("DELETE FROM auction_items WHERE item_name=?",
                          (item_name,))
         self.commit()
-        Logger.print_green("Auction listings for item " +
-                           "\"{}\" removed successfully".format(item_name))
+        Logger.print_green("Auction item \"{}\" removed successfully"
+                           .format(item_name))
 
     def commit(self):
         self.connection.commit()
