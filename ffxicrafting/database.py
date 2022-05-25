@@ -303,27 +303,3 @@ class Database:
     #             return True
 
     #     return False
-
-    # def get_all_auction_listings(self):
-    #     self.cur.execute("SELECT * FROM auction_listings")
-    #     return self.cur.fetchall()
-
-    # def update_auction_listing_price(self, name, new_price):
-    #     self.cur.execute("""UPDATE auction_listings
-    #                         SET price=?
-    #                         WHERE name=?""", (new_price, name,))
-    #     self.commit()
-
-    # def update_auction_listing_sell_freq(self, name, new_freq):
-    #     self.cur.execute("""UPDATE auction_listings
-    #                         SET sell_freq=?
-    #                         WHERE name=?""", (new_freq, name,))
-    #     self.commit()
-
-    # def delete_all_auction_listings(self):
-    #     self.cur.execute("DELETE FROM auction_listings")
-    #     self.commit()
-
-    # def auction_listing_is_in_database(self, name):
-    #     listings = self.get_auction_listings(name)
-    #     return len(listings) > 0

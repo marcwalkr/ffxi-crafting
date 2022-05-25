@@ -14,11 +14,14 @@ class Command:
         command = input("1. Add an item\n" +
                         "2. Add a vendor\n" +
                         "3. Add a vendor item\n" +
-                        "4. Remove an item\n" +
-                        "5. Remove a vendor\n" +
-                        "6. Remove a vendor item\n" +
-                        "7. Remove an auction item\n" +
-                        "8. Update auction prices and frequencies\n" +
+                        "4. Add a recipe\n" +
+                        "5. Remove an item\n" +
+                        "6. Remove a vendor\n" +
+                        "7. Remove a vendor item\n" +
+                        "8. Remove an auction item\n" +
+                        "9. Remove a recipe\n" +
+                        "10. Update a vendor price\n" +
+                        "11. Update auction prices and frequencies\n" +
                         "Q. Quit\n")
         return command
 

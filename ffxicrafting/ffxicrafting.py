@@ -68,14 +68,20 @@ if __name__ == "__main__":
         elif command == "3":
             Command.add_vendor_item()
         elif command == "4":
-            Command.remove_item()
+            pass
         elif command == "5":
-            Command.remove_vendor()
+            Command.remove_item()
         elif command == "6":
-            Command.remove_vendor_item()
+            Command.remove_vendor()
         elif command == "7":
-            Command.remove_auction_item()
+            Command.remove_vendor_item()
         elif command == "8":
+            Command.remove_auction_item()
+        elif command == "9":
+            pass
+        elif command == "10":
+            pass
+        elif command == "11":
             Command.update_auction_items()
         elif command == "q" or command == "Q":
             break

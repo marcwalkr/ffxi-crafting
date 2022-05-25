@@ -91,8 +91,8 @@ class AuctionScraper:
     def get_search_html(self):
         url_formatted_name = self.get_url_formatted_name()
 
-        url = "https://www.wingsxi.com/wings/index.php?page=itemsearch&name=" + \
-            url_formatted_name + "&worldid=100"
+        url = ("https://www.wingsxi.com/wings/index.php?page=itemsearch&name="
+               "{}&worldid=100").format(url_formatted_name)
 
         result = requests.get(url)
         html = BeautifulSoup(result.text, "html.parser")
@@ -103,8 +103,8 @@ class AuctionScraper:
         return html
 
     def get_listing_html(self):
-        url = "https://www.wingsxi.com/wings/index.php?page=item&worldid=100&id=" + \
-            self.item_id
+        url = ("https://www.wingsxi.com/wings/index.php?page=item&worldid=100"
+               "&id={}").format(self.item_id)
 
         result = requests.get(url)
         html = BeautifulSoup(result.text, "html.parser")
@@ -169,8 +169,8 @@ class AuctionScraper:
             full_item_name = tag.get_text()
             Logger.print_yello("{}. {}".format(str(i), full_item_name))
 
-        prompt_str = Logger.get_yellow(
-            "Enter the correct index for the item \"{}\": ".format(self.item_name))
+        prompt_str = Logger.get_yellow(("Enter the correct index for the item"
+                                        " \"{}\": ").format(self.item_name))
 
         correct_index = input(prompt_str)
 
