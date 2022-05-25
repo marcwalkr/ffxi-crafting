@@ -18,6 +18,7 @@ class Command:
                         "4. Remove an item\n" +
                         "5. Remove a vendor\n" +
                         "6. Remove a vendor item\n" +
+                        "7. Remove auction listings\n" +
                         "Q. Quit\n")
         return command
 
@@ -123,6 +124,18 @@ class Command:
             Logger.print_red("Item \"{}\" sold by vendor \"{}\""
                              .format(item_name, vendor_name) +
                              " does not exist in the database")
+
+    @classmethod
+    def remove_auction_listings(cls):
+        item_name = cls.prompt_item_name()
+
+        # Verify that a listing exists
+        if AuctionListingController.is_in_database(item_name):
+            AuctionListingController.remove_auction_listings(item_name)
+        else:
+            Logger.print_red("Auction listings for item " +
+                             "\"{}\" do not exist in the database"
+                             .format(item_name))
 
     @staticmethod
     def prompt_item_name():

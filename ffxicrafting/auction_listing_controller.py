@@ -10,7 +10,6 @@ class AuctionListingController:
 
     @classmethod
     def add_auction_listings(cls, auction_data):
-
         if auction_data.single_price is not None:
             single_listing = AuctionListing(auction_data.item_id,
                                             auction_data.item_name, False,
@@ -24,3 +23,22 @@ class AuctionListingController:
                                            auction_data.stack_price,
                                            auction_data.stack_frequency)
             cls.db.add_auction_listing(stack_listing)
+
+    @classmethod
+    def get_auction_listings(cls, item_name):
+        listings = []
+        listing_tuples = cls.db.get_auction_listings(item_name)
+        for listing_tuple in listing_tuples:
+            listing = AuctionListing(*listing_tuple)
+            listings.append(listing)
+
+        return listings
+
+    @classmethod
+    def remove_auction_listings(cls, item_name):
+        cls.db.remove_auction_listings(item_name)
+
+    @classmethod
+    def is_in_database(cls, item_name):
+        listings = cls.get_auction_listings(item_name)
+        return len(listings) > 0

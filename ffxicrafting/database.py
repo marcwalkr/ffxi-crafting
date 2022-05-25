@@ -94,6 +94,10 @@ class Database:
                             FOREIGN KEY (recipe_id) REFERENCES synthesis_recipes (id)
                             )""")
 
+    def get_item(self, name):
+        self.cur.execute("SELECT * FROM items WHERE name=?", (name,))
+        return self.cur.fetchone()
+
     def add_item(self, item):
         self.cur.execute("""INSERT INTO items VALUES (:name,
                          :stack_quantity)""",
@@ -103,10 +107,6 @@ class Database:
         self.commit()
         Logger.print_green("Item \"{}\" added successfully".format(item.name))
 
-    def get_item(self, name):
-        self.cur.execute("SELECT * FROM items WHERE name=?", (name,))
-        return self.cur.fetchone()
-
     def remove_item(self, name):
         try:
             self.cur.execute("DELETE FROM items WHERE name=?", (name,))
@@ -115,6 +115,10 @@ class Database:
             Logger.print_red(str(e))
 
         self.commit()
+
+    def get_vendor(self, npc_name):
+        self.cur.execute("SELECT * FROM vendors WHERE npc_name=?", (npc_name,))
+        return self.cur.fetchone()
 
     def add_vendor(self, vendor):
         self.cur.execute("""INSERT INTO vendors VALUES (:npc_name, :area,
@@ -128,10 +132,6 @@ class Database:
         Logger.print_green("Vendor \"{}\" added successfully"
                            .format(vendor.npc_name))
 
-    def get_vendor(self, npc_name):
-        self.cur.execute("SELECT * FROM vendors WHERE npc_name=?", (npc_name,))
-        return self.cur.fetchone()
-
     def remove_vendor(self, npc_name):
         try:
             self.cur.execute("DELETE FROM vendors WHERE npc_name=?",
@@ -142,6 +142,11 @@ class Database:
             Logger.print_red(str(e))
 
         self.commit()
+
+    def get_vendor_item(self, item_name, vendor_name):
+        self.cur.execute("""SELECT * FROM vendor_items WHERE item_name=? and
+                         vendor_name=?""", (item_name, vendor_name,))
+        return self.cur.fetchone()
 
     def add_vendor_item(self, vendor_item):
         try:
@@ -159,21 +164,17 @@ class Database:
 
         self.commit()
 
-    def get_vendor_item(self, item_name, vendor_name):
-        self.cur.execute("""SELECT * FROM vendor_items WHERE item_name=? and
-                         vendor_name=?""", (item_name, vendor_name))
-        return self.cur.fetchone()
-
     def remove_vendor_item(self, item_name, vendor_name):
         self.cur.execute("""DELETE FROM vendor_items WHERE item_name=? and
-                         vendor_name=?""", (item_name, vendor_name))
+                         vendor_name=?""", (item_name, vendor_name,))
+        self.commit()
         Logger.print_green("Item \"{}\" sold by \"{}\" removed successfully"
                            .format(item_name, vendor_name))
-        self.commit()
 
-    def vendor_item_is_in_database(self, item_name, npc_name):
-        vendor_item = self.get_vendor_item(item_name, npc_name)
-        return vendor_item is not None
+    def get_auction_listings(self, item_name):
+        self.cur.execute("""SELECT * FROM auction_listings
+                         WHERE item_name=?""", (item_name,))
+        return self.cur.fetchall()
 
     def add_auction_listing(self, auction_listing):
         self.cur.execute("""INSERT INTO auction_listings VALUES (:item_id,
@@ -184,7 +185,23 @@ class Database:
                           "price": auction_listing.price,
                           "sell_frequency": auction_listing.sell_frequency
                           })
+
+        if auction_listing.is_stack:
+            listing_type = "stack"
+        else:
+            listing_type = "single"
+
         self.commit()
+        Logger.print_green("Auction listing for " +
+                           "\"{}\"".format(auction_listing.item_name) +
+                           " added successfully ({})".format(listing_type))
+
+    def remove_auction_listings(self, item_name):
+        self.cur.execute("DELETE FROM auction_listings WHERE item_name=?",
+                         (item_name,))
+        self.commit()
+        Logger.print_green("Auction listings for item " +
+                           "\"{}\" removed successfully".format(item_name))
 
     def commit(self):
         self.connection.commit()
@@ -275,18 +292,9 @@ class Database:
 
     #     return False
 
-    # def get_auction_listings(self, name):
-    #     self.cur.execute("""SELECT * FROM auction_listings
-    #                      WHERE name=?""", (name,))
-    #     return self.cur.fetchall()
-
     # def get_all_auction_listings(self):
     #     self.cur.execute("SELECT * FROM auction_listings")
     #     return self.cur.fetchall()
-
-    # def remove_auction_listings(self, name):
-    #     self.cur.execute("DELETE FROM auction_listings WHERE name=?", (name,))
-    #     self.commit()
 
     # def update_auction_listing_price(self, name, new_price):
     #     self.cur.execute("""UPDATE auction_listings

@@ -30,21 +30,3 @@ class AuctionListing:
     #     sorted = sort_alphabetically(all_listings)
 
     #     return sorted
-
-    # @classmethod
-    # def get_listings(cls, name):
-    #     listings = []
-    #     listing_tuples = cls.db.get_auction_listings(name)
-    #     for listing_tuple in listing_tuples:
-    #         listing = cls(*listing_tuple)
-    #         listings.append(listing)
-
-    #     return listings
-
-    # @classmethod
-    # def remove_listings(cls, name):
-    #     cls.db.remove_auction_listings(name)
-
-    # @classmethod
-    # def is_in_database(cls, name):
-    #     return cls.db.auction_listing_is_in_database(name)
