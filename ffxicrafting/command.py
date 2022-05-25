@@ -1,8 +1,8 @@
-from item import Item
-from vendor import Vendor
-from vendor_item import VendorItem
-from auction_scraper import AuctionScraper
-from auction_listing import AuctionListing
+from auction_data_controller import AuctionDataController
+from auction_listing_controller import AuctionListingController
+from vendor_item_controller import VendorItemController
+from vendor_controller import VendorController
+from item_controller import ItemController
 from logger import Logger
 
 
@@ -24,43 +24,75 @@ class Command:
     @classmethod
     def add_item(cls):
         item_name = cls.prompt_item_name()
+
+        # Check if the item already exists
+        item = ItemController.get_item(item_name)
+
+        if item is not None:
+            Logger.print_red("The item \"{}\" is already in the database"
+                             .format(item_name))
+            return
+
         stack_quantity = cls.prompt_stack_quantity()
 
-        try:
-            # Scrape and verify the item exists on AH before everything else
-            scraper = AuctionScraper(item_name)
+        # Scrape and verify the item exists on AH
+        auction_data = AuctionDataController.get_auction_data(item_name)
 
-            # Create the item and add to database
-            item = Item(item_name, scraper.full_item_name, stack_quantity)
-            item.to_database()
+        if auction_data is None:
+            Logger.print_red("The item \"{}\" was not found on the AH"
+                             .format(item_name))
+            return
 
-            # Create auction listings for single and stack, add to database
-            AuctionListing.add_scraped(item_name, scraper)
+        # Add the item to the database
+        ItemController.add_item(item_name, stack_quantity)
 
-        except ValueError as e:
-            Logger.print_red(str(e))
+        # Add the auction listings to the database (single and stack)
+        AuctionListingController.add_auction_listings(auction_data)
 
     @classmethod
     def add_vendor(cls):
-        npc_name, area, coordinates, vendor_type = cls.prompt_vendor()
-        vendor = Vendor(npc_name, area, coordinates, vendor_type)
-        vendor.to_database()
+        npc_name = cls.prompt_vendor_name()
+
+        # Check if the vendor already exists
+        vendor = VendorController.get_vendor(npc_name)
+        if vendor is not None:
+            Logger.print_red("The vendor \"{}\" is already in the database"
+                             .format(npc_name))
+            return
+
+        area, coordinates = cls.prompt_vendor_area()
+        vendor_type = cls.prompt_vendor_type()
+
+        # Add the vendor to the database
+        VendorController.add_vendor(npc_name, area, coordinates, vendor_type)
 
     @classmethod
     def add_vendor_item(cls):
         item_name = cls.prompt_item_name()
         vendor_name = cls.prompt_vendor_name()
+
+        # Check if the vendor item already exists
+        vendor_item = VendorItemController.get_vendor_item(item_name,
+                                                           vendor_name)
+        if vendor_item is not None:
+            Logger.print_red("The item \"{}\"".format(item_name) +
+                             " sold by vendor \"{}\"".format(vendor_name) +
+                             " is already in the database")
+            return
+
         price = cls.prompt_vendor_price()
 
-        vendor_item = VendorItem(item_name, vendor_name, price)
-        vendor_item.to_database()
+        # Add the vendor item to the database
+        VendorItemController.add_vendor_item(item_name, vendor_name, price)
 
     @classmethod
     def remove_item(cls):
         item_name = cls.prompt_item_name()
 
-        if Item.is_in_database(item_name):
-            Item.remove_item(item_name)
+        # Verify that the item exists
+        item = ItemController.get_item(item_name)
+        if item is not None:
+            ItemController.remove_item(item_name)
         else:
             Logger.print_red("Item \"{}\" does not exist in the database"
                              .format(item_name))
@@ -69,8 +101,10 @@ class Command:
     def remove_vendor(cls):
         npc_name = cls.prompt_vendor_name()
 
-        if Vendor.is_in_database(npc_name):
-            Vendor.remove_vendor(npc_name)
+        # Verify that the vendor exists
+        vendor = VendorController.get_vendor(npc_name)
+        if vendor is not None:
+            VendorController.remove_vendor(npc_name)
         else:
             Logger.print_red("Vendor \"{}\" does not exist in the database"
                              .format(npc_name))
@@ -80,8 +114,11 @@ class Command:
         item_name = cls.prompt_item_name()
         vendor_name = cls.prompt_vendor_name()
 
-        if VendorItem.is_in_database(item_name, vendor_name):
-            VendorItem.remove_vendor_item(item_name, vendor_name)
+        # Verify that the vendor item exists
+        vendor_item = VendorItemController.get_vendor_item(
+            item_name, vendor_name)
+        if vendor_item is not None:
+            VendorItemController.remove_vendor_item(item_name, vendor_name)
         else:
             Logger.print_red("Item \"{}\" sold by vendor \"{}\""
                              .format(item_name, vendor_name) +
@@ -121,11 +158,3 @@ class Command:
     def prompt_vendor_price():
         price = input("Enter the price: ")
         return int(price)
-
-    @classmethod
-    def prompt_vendor(cls):
-        npc_name = cls.prompt_vendor_name()
-        area, coordinates = cls.prompt_vendor_area()
-        vendor_type = cls.prompt_vendor_type()
-
-        return npc_name, area, coordinates, vendor_type

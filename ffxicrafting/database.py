@@ -23,7 +23,6 @@ class Database:
     def create_items_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS items (
                             name text PRIMARY KEY,
-                            full_name text NOT NULL,
                             stack_quantity integer
                             )""")
 
@@ -47,11 +46,12 @@ class Database:
 
     def create_auction_listings_table(self):
         self.cur.execute("""CREATE TABLE IF NOT EXISTS auction_listings (
+                            item_id integer,
                             item_name text,
                             is_stack integer,
                             price integer NOT NULL,
                             sell_frequency real NOT NULL,
-                            PRIMARY KEY (item_name, is_stack),
+                            PRIMARY KEY (item_id, is_stack),
                             FOREIGN KEY (item_name) REFERENCES items (name)
                             )""")
 
@@ -95,19 +95,13 @@ class Database:
                             )""")
 
     def add_item(self, item):
-        try:
-            self.cur.execute("""INSERT INTO items VALUES (:name, :full_name,
-                            :stack_quantity)""",
-                             {"name": item.name,
-                              "full_name": item.full_name,
-                              "stack_quantity": item.stack_quantity
-                              })
-            Logger.print_green("Item \"{}\" added successfully"
-                               .format(item.name))
-        except IntegrityError as e:
-            Logger.print_red(str(e))
-
+        self.cur.execute("""INSERT INTO items VALUES (:name,
+                         :stack_quantity)""",
+                         {"name": item.name,
+                          "stack_quantity": item.stack_quantity
+                          })
         self.commit()
+        Logger.print_green("Item \"{}\" added successfully".format(item.name))
 
     def get_item(self, name):
         self.cur.execute("SELECT * FROM items WHERE name=?", (name,))
@@ -116,31 +110,23 @@ class Database:
     def remove_item(self, name):
         try:
             self.cur.execute("DELETE FROM items WHERE name=?", (name,))
-            Logger.print_green("Removed item \"{}\"".format(name))
+            Logger.print_green("Item \"{}\" removed successfully".format(name))
         except IntegrityError as e:
             Logger.print_red(str(e))
 
         self.commit()
-
-    def item_is_in_database(self, name):
-        item = self.get_item(name)
-        return item is not None
 
     def add_vendor(self, vendor):
-        try:
-            self.cur.execute("""INSERT INTO vendors VALUES (:npc_name, :area,
+        self.cur.execute("""INSERT INTO vendors VALUES (:npc_name, :area,
                             :coordinates, :type)""",
-                             {"npc_name": vendor.npc_name,
-                              "area": vendor.area,
-                              "coordinates": vendor.coordinates,
-                              "type": vendor.vendor_type
-                              })
-            Logger.print_green("Vendor \"{}\" added successfully"
-                               .format(vendor.npc_name))
-        except IntegrityError as e:
-            Logger.print_red(str(e))
-
+                         {"npc_name": vendor.npc_name,
+                          "area": vendor.area,
+                          "coordinates": vendor.coordinates,
+                          "type": vendor.vendor_type
+                          })
         self.commit()
+        Logger.print_green("Vendor \"{}\" added successfully"
+                           .format(vendor.npc_name))
 
     def get_vendor(self, npc_name):
         self.cur.execute("SELECT * FROM vendors WHERE npc_name=?", (npc_name,))
@@ -150,20 +136,17 @@ class Database:
         try:
             self.cur.execute("DELETE FROM vendors WHERE npc_name=?",
                              (npc_name,))
-            Logger.print_green("Removed vendor \"{}\"".format(npc_name))
+            Logger.print_green("Vendor \"{}\" removed successfully"
+                               .format(npc_name))
         except IntegrityError as e:
             Logger.print_red(str(e))
 
         self.commit()
 
-    def vendor_is_in_database(self, npc_name):
-        vendor = self.get_vendor(npc_name)
-        return vendor is not None
-
     def add_vendor_item(self, vendor_item):
         try:
             self.cur.execute("""INSERT INTO vendor_items VALUES (:item_name,
-                            :vendor_name, :price)""",
+                                :vendor_name, :price)""",
                              {"item_name": vendor_item.item_name,
                               "vendor_name": vendor_item.vendor_name,
                               "price": vendor_item.price
@@ -184,7 +167,7 @@ class Database:
     def remove_vendor_item(self, item_name, vendor_name):
         self.cur.execute("""DELETE FROM vendor_items WHERE item_name=? and
                          vendor_name=?""", (item_name, vendor_name))
-        Logger.print_green("Removed item \"{}\" sold by \"{}\""
+        Logger.print_green("Item \"{}\" sold by \"{}\" removed successfully"
                            .format(item_name, vendor_name))
         self.commit()
 
@@ -193,9 +176,10 @@ class Database:
         return vendor_item is not None
 
     def add_auction_listing(self, auction_listing):
-        self.cur.execute("""INSERT INTO auction_listings VALUES (:item_name,
-                         :is_stack, :price, :sell_frequency)""",
-                         {"item_name": auction_listing.item_name,
+        self.cur.execute("""INSERT INTO auction_listings VALUES (:item_id,
+                         :item_name, :is_stack, :price, :sell_frequency)""",
+                         {"item_id": auction_listing.item_id,
+                          "item_name": auction_listing.item_name,
                           "is_stack": auction_listing.is_stack,
                           "price": auction_listing.price,
                           "sell_frequency": auction_listing.sell_frequency

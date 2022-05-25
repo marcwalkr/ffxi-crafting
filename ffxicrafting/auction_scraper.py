@@ -9,9 +9,19 @@ class AuctionScraper:
     def __init__(self, item_name) -> None:
         self.item_name = item_name
 
-        self.item_id, self.full_item_name = self.scrape_search()
-        self.quantities, self.prices, self.dates = self.scrape_listing()
-        self.is_empty_history = len(self.quantities) == 0
+        # todo: look for item_id in DB searching by item_name
+
+        self.item_id = self.scrape_search()
+
+        if self.item_id is not None:
+            self.quantities, self.prices, self.dates = self.scrape_listing()
+            self.is_empty_history = len(self.quantities) == 0
+
+            self.single_price = self.get_single_price()
+            self.stack_price = self.get_stack_price()
+
+            self.single_freq = self.get_single_freq()
+            self.stack_freq = self.get_stack_freq()
 
     def scrape_search(self):
         search_html = self.get_search_html()
@@ -23,8 +33,8 @@ class AuctionScraper:
         elif len(item_tags) == 1:
             correct_tag = item_tags[0]
         else:
-            raise ValueError("Item \"{}\" was not found on the AH"
-                             .format(self.item_name))
+            # Item not found
+            return None
 
         full_item_name = correct_tag.get_text()
         Logger.print_cyan("Scraping item: {}".format(full_item_name))
@@ -32,7 +42,7 @@ class AuctionScraper:
         item_url = correct_tag["href"]
         item_id = item_url.split("&")[-1][3:]
 
-        return item_id, full_item_name
+        return item_id
 
     def scrape_listing(self):
         seller_buyer_quantity_tags = self.get_listing_html().find_all(
@@ -97,8 +107,7 @@ class AuctionScraper:
 
         return html
 
-    @property
-    def single_price(self):
+    def get_single_price(self):
         if self.is_empty_history:
             return None
 
@@ -109,8 +118,7 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    @property
-    def stack_price(self):
+    def get_stack_price(self):
         if self.is_empty_history:
             return None
 
@@ -121,8 +129,7 @@ class AuctionScraper:
         except ValueError:
             return None
 
-    @property
-    def num_days(self):
+    def get_num_days(self):
         """Gets the number of days from the first in history until today,
         inclusive, for calculating sell frequency
         """
@@ -138,26 +145,24 @@ class AuctionScraper:
 
         return delta.days + 1
 
-    @property
-    def single_freq(self):
+    def get_single_freq(self):
         if self.is_empty_history:
             return None
 
         try:
             single_count = self.quantities.count("Single")
-            freq = single_count / self.num_days
+            freq = single_count / self.get_num_days()
             return freq
         except ValueError:
             return None
 
-    @property
-    def stack_freq(self):
+    def get_stack_freq(self):
         if self.is_empty_history:
             return None
 
         try:
             stack_count = self.quantities.count("Stack")
-            freq = stack_count / self.num_days
+            freq = stack_count / self.get_num_days()
             return freq
         except ValueError:
             return None
