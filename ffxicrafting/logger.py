@@ -13,6 +13,10 @@ class Logger:
         print(Fore.YELLOW + text)
 
     @staticmethod
+    def get_yellow(text):
+        return Fore.YELLOW + text
+
+    @staticmethod
     def print_cyan(text):
         print(Fore.CYAN + text)
 

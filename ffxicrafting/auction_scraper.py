@@ -6,10 +6,13 @@ from logger import Logger
 
 
 class AuctionScraper:
-    def __init__(self, item_name) -> None:
+    def __init__(self, item_name, item_id=None) -> None:
         self.item_name = item_name
 
-        self.item_id = self.scrape_search()
+        if item_id is None:
+            self.item_id = self.scrape_search()
+        else:
+            self.item_id = str(item_id)
 
         if self.item_id is not None:
             self.quantities, self.prices, self.dates = self.scrape_listing()
@@ -170,8 +173,9 @@ class AuctionScraper:
             full_item_name = tag.get_text()
             Logger.print_yello("{}. {}".format(str(i), full_item_name))
 
-        prompt = Logger.print_yello("Enter the correct index for the item " +
-                                    "\"{}\"".format(self.item_name))
-        index = input(prompt)
+        prompt_str = Logger.get_yellow("Enter the correct index for the " +
+                                       "item \"{}\": ".format(self.item_name))
 
-        return int(index)
+        correct_index = input(prompt_str)
+
+        return int(correct_index)

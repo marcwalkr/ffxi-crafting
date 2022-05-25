@@ -105,12 +105,12 @@ class Database:
                           "stack_quantity": item.stack_quantity
                           })
         self.commit()
-        Logger.print_green("Item \"{}\" added successfully".format(item.name))
+        Logger.print_green("Added item \"{}\"".format(item.name))
 
     def remove_item(self, name):
         try:
             self.cur.execute("DELETE FROM items WHERE name=?", (name,))
-            Logger.print_green("Item \"{}\" removed successfully".format(name))
+            Logger.print_green("Removed item \"{}\"".format(name))
         except IntegrityError as e:
             Logger.print_red(str(e))
 
@@ -129,15 +129,13 @@ class Database:
                           "type": vendor.vendor_type
                           })
         self.commit()
-        Logger.print_green("Vendor \"{}\" added successfully"
-                           .format(vendor.npc_name))
+        Logger.print_green("Added vendor \"{}\"".format(vendor.npc_name))
 
     def remove_vendor(self, npc_name):
         try:
             self.cur.execute("DELETE FROM vendors WHERE npc_name=?",
                              (npc_name,))
-            Logger.print_green("Vendor \"{}\" removed successfully"
-                               .format(npc_name))
+            Logger.print_green("Removed vendor \"{}\"".format(npc_name))
         except IntegrityError as e:
             Logger.print_red(str(e))
 
@@ -160,9 +158,8 @@ class Database:
                               "vendor_name": vendor_name,
                               "price": price
                               })
-            Logger.print_green("Vendor item \"{}\"".format(item_name) +
-                               " sold by \"{}\"".format(vendor_name) +
-                               " added successfully")
+            Logger.print_green("Added vendor item \"{}\"".format(item_name) +
+                               " sold by \"{}\"".format(vendor_name))
         except IntegrityError as e:
             Logger.print_red(str(e))
 
@@ -172,13 +169,17 @@ class Database:
         self.cur.execute("""DELETE FROM vendor_items WHERE item_name=? and
                          vendor_name=?""", (item_name, vendor_name,))
         self.commit()
-        Logger.print_green("Item \"{}\" sold by \"{}\" removed successfully"
+        Logger.print_green("Removed vendor item \"{}\" sold by \"{}\""
                            .format(item_name, vendor_name))
 
     def get_auction_item(self, item_name):
         self.cur.execute("""SELECT * FROM auction_items
                          WHERE item_name=?""", (item_name,))
         return self.cur.fetchone()
+
+    def get_all_auction_items(self):
+        self.cur.execute("SELECT * FROM auction_items")
+        return self.cur.fetchall()
 
     def add_auction_item(self, auction_item):
         self.cur.execute("""INSERT INTO auction_items VALUES (:item_id,
@@ -193,15 +194,26 @@ class Database:
                           })
 
         self.commit()
-        Logger.print_green("Auction item \"{}\" added successfully"
+        Logger.print_green("Added auction item \"{}\""
                            .format(auction_item.item_name))
 
     def remove_auction_item(self, item_name):
         self.cur.execute("DELETE FROM auction_items WHERE item_name=?",
                          (item_name,))
         self.commit()
-        Logger.print_green("Auction item \"{}\" removed successfully"
-                           .format(item_name))
+        Logger.print_green("Removed auction item \"{}\"".format(item_name))
+
+    def update_auction_item(self, auction_item):
+        self.cur.execute("""UPDATE auction_items SET single_price=?,
+                         stack_price=?, single_frequency=?, stack_frequency=?
+                         WHERE item_id=?""", (auction_item.single_price,
+                                              auction_item.stack_price,
+                                              auction_item.single_frequency,
+                                              auction_item.stack_frequency,
+                                              auction_item.item_id,))
+        self.commit()
+        Logger.print_green("Updated prices and frequencies for \"{}\""
+                           .format(auction_item.item_name))
 
     def commit(self):
         self.connection.commit()

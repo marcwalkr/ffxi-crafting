@@ -75,5 +75,7 @@ if __name__ == "__main__":
             Command.remove_vendor_item()
         elif command == "7":
             Command.remove_auction_item()
+        elif command == "8":
+            Command.update_auction_items()
         elif command == "q" or command == "Q":
             break

@@ -18,6 +18,7 @@ class Command:
                         "5. Remove a vendor\n" +
                         "6. Remove a vendor item\n" +
                         "7. Remove an auction item\n" +
+                        "8. Update auction prices and frequencies\n" +
                         "Q. Quit\n")
         return command
 
@@ -27,7 +28,7 @@ class Command:
 
         # Check if the item already exists
         if ItemController.is_in_database(item_name):
-            Logger.print_red("The item \"{}\" is already in the database"
+            Logger.print_red("Item \"{}\" is already in the database"
                              .format(item_name))
             return
 
@@ -35,10 +36,10 @@ class Command:
 
         # Scrape and verify the item exists on AH
         auction_item_controller = AuctionItemController(item_name)
-        item_found = auction_item_controller.scrape_auction_item()
+        item_found = auction_item_controller.scrape_self()
 
         if not item_found:
-            Logger.print_red("The item \"{}\" was not found on the AH"
+            Logger.print_red("Item \"{}\" was not found on the AH"
                              .format(item_name))
             return
 
@@ -46,7 +47,7 @@ class Command:
         ItemController.add_item(item_name, stack_quantity)
 
         # Add the auction item to the database
-        auction_item_controller.add_auction_item()
+        auction_item_controller.add_self()
 
     @classmethod
     def add_vendor(cls):
@@ -54,7 +55,7 @@ class Command:
 
         # Check if the vendor already exists
         if VendorController.is_in_database(npc_name):
-            Logger.print_red("The vendor \"{}\" is already in the database"
+            Logger.print_red("Vendor \"{}\" is already in the database"
                              .format(npc_name))
             return
 
@@ -124,9 +125,12 @@ class Command:
         if AuctionItemController.is_in_database(item_name):
             AuctionItemController.remove_auction_item(item_name)
         else:
-            Logger.print_red("Auction listings for item " +
-                             "\"{}\" do not exist in the database"
-                             .format(item_name))
+            Logger.print_red("Auction item \"{}\"".format(item_name) +
+                             " does not exist in the database")
+
+    @classmethod
+    def update_auction_items(cls):
+        AuctionItemController.update_auction_items()
 
     @staticmethod
     def prompt_item_name():
