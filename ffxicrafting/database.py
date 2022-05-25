@@ -149,16 +149,20 @@ class Database:
         return self.cur.fetchone()
 
     def add_vendor_item(self, vendor_item):
+        item_name = vendor_item.item_name
+        vendor_name = vendor_item.vendor_name
+        price = vendor_item.price
+
         try:
             self.cur.execute("""INSERT INTO vendor_items VALUES (:item_name,
                                 :vendor_name, :price)""",
-                             {"item_name": vendor_item.item_name,
-                              "vendor_name": vendor_item.vendor_name,
-                              "price": vendor_item.price
+                             {"item_name": item_name,
+                              "vendor_name": vendor_name,
+                              "price": price
                               })
-            Logger.print_green("Item \"{}\" sold by \"{}\" added successfully"
-                               .format(vendor_item.item_name,
-                                       vendor_item.vendor_name))
+            Logger.print_green("Vendor item \"{}\"".format(item_name) +
+                               " sold by \"{}\"".format(vendor_name) +
+                               " added successfully")
         except IntegrityError as e:
             Logger.print_red(str(e))
 

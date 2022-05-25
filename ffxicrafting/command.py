@@ -71,8 +71,8 @@ class Command:
 
         # Check if the vendor item already exists
         if VendorItemController.is_in_database(item_name, vendor_name):
-            Logger.print_red("The item \"{}\"".format(item_name) +
-                             " sold by vendor \"{}\"".format(vendor_name) +
+            Logger.print_red("Vendor item \"{}\"".format(item_name) +
+                             " sold by \"{}\"".format(vendor_name) +
                              " is already in the database")
             return
 
