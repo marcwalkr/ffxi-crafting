@@ -1,8 +1,9 @@
-from auction_item_controller import AuctionItemController
-from vendor_item_controller import VendorItemController
+from auction_controller import AuctionController
 from vendor_controller import VendorController
 from item_controller import ItemController
+from synth_controller import SynthController
 from logger import Logger
+from helpers import expand_list
 
 
 class Command:
@@ -30,7 +31,7 @@ class Command:
         item_name = cls.prompt_item_name()
 
         # Check if the item already exists
-        if ItemController.is_in_database(item_name):
+        if ItemController.exists(item_name):
             Logger.print_red("Item \"{}\" is already in the database"
                              .format(item_name))
             return
@@ -38,7 +39,7 @@ class Command:
         stack_quantity = cls.prompt_stack_quantity()
 
         # Scrape and verify the item exists on AH
-        auction_item_controller = AuctionItemController(item_name)
+        auction_item_controller = AuctionController(item_name)
         item_found = auction_item_controller.scrape_self()
 
         if not item_found:
@@ -57,7 +58,7 @@ class Command:
         npc_name = cls.prompt_vendor_name()
 
         # Check if the vendor already exists
-        if VendorController.is_in_database(npc_name):
+        if VendorController.vendor_exists(npc_name):
             Logger.print_red("Vendor \"{}\" is already in the database"
                              .format(npc_name))
             return
@@ -74,7 +75,7 @@ class Command:
         vendor_name = cls.prompt_vendor_name()
 
         # Check if the vendor item already exists
-        if VendorItemController.is_in_database(item_name, vendor_name):
+        if VendorController.vendor_item_exists(item_name, vendor_name):
             Logger.print_red("Vendor item \"{}\"".format(item_name) +
                              " sold by \"{}\"".format(vendor_name) +
                              " is already in the database")
@@ -83,14 +84,41 @@ class Command:
         price = cls.prompt_vendor_price()
 
         # Add the vendor item to the database
-        VendorItemController.add_vendor_item(item_name, vendor_name, price)
+        VendorController.add_vendor_item(item_name, vendor_name, price)
+
+    @classmethod
+    def add_recipe(cls):
+        crystal = cls.prompt_crystal()
+        ingredients = cls.prompt_ingredients()
+        craft = cls.prompt_craft()
+        skill_cap = cls.prompt_skill_cap()
+
+        # Check if the recipe already exists
+        if SynthController.recipe_exists(crystal, ingredients):
+            Logger.print_red("Recipe is already in the database")
+            return
+
+        SynthController.add_recipe(crystal, ingredients, craft, skill_cap)
+
+        # Get the id that was generated when the recipe was added
+        recipe_id = SynthController.get_recipe_id(crystal, ingredients)
+
+        # Get the items and quantities of all of the quality levels
+        nq_item, hq1_item, hq2_item, hq3_item, nq_quantity, hq1_quantity, \
+            hq2_quantity, hq3_quantity = cls.prompt_quality_levels()
+
+        # Add synthesis results
+        SynthController.add_result(nq_item, recipe_id, nq_quantity, "NQ")
+        SynthController.add_result(hq1_item, recipe_id, hq1_quantity, "HQ1")
+        SynthController.add_result(hq2_item, recipe_id, hq2_quantity, "HQ2")
+        SynthController.add_result(hq3_item, recipe_id, hq3_quantity, "HQ3")
 
     @classmethod
     def remove_item(cls):
         item_name = cls.prompt_item_name()
 
         # Verify that the item exists
-        if ItemController.is_in_database(item_name):
+        if ItemController.exists(item_name):
             ItemController.remove_item(item_name)
         else:
             Logger.print_red("Item \"{}\" does not exist in the database"
@@ -113,8 +141,8 @@ class Command:
         vendor_name = cls.prompt_vendor_name()
 
         # Verify that the vendor item exists
-        if VendorItemController.is_in_database(item_name, vendor_name):
-            VendorItemController.remove_vendor_item(item_name, vendor_name)
+        if VendorController.is_in_database(item_name, vendor_name):
+            VendorController.remove_vendor_item(item_name, vendor_name)
         else:
             Logger.print_red("Item \"{}\" sold by vendor \"{}\""
                              .format(item_name, vendor_name) +
@@ -125,15 +153,26 @@ class Command:
         item_name = cls.prompt_item_name()
 
         # Verify that a listing exists
-        if AuctionItemController.is_in_database(item_name):
-            AuctionItemController.remove_auction_item(item_name)
+        if AuctionController.exists(item_name):
+            AuctionController.remove_auction_item(item_name)
         else:
             Logger.print_red("Auction item \"{}\"".format(item_name) +
                              " does not exist in the database")
 
     @classmethod
+    def remove_recipe(cls):
+        crystal = cls.prompt_crystal()
+        ingredients = cls.prompt_ingredients()
+
+        # Verify that the recipe exists
+        if SynthController.recipe_exists(crystal, ingredients):
+            SynthController.remove_recipe(crystal, ingredients)
+        else:
+            Logger.print_red("Recipe does not exist in the database")
+
+    @classmethod
     def update_auction_items(cls):
-        AuctionItemController.update_auction_items()
+        AuctionController.update_auction_items()
 
     @staticmethod
     def prompt_item_name():
@@ -169,3 +208,54 @@ class Command:
     def prompt_vendor_price():
         price = input("Enter the price: ")
         return int(price)
+
+    @staticmethod
+    def prompt_crystal():
+        return input("Enter the crystal: ")
+
+    @staticmethod
+    def prompt_ingredients():
+        ingredients = input(("Enter the list of ingredients separated by "
+                             "commas: "))
+        ingredients = ingredients.split(", ")
+        ingredients = expand_list(ingredients)
+
+        return ingredients
+
+    @staticmethod
+    def prompt_craft():
+        return input("Enter the craft: ")
+
+    @staticmethod
+    def prompt_skill_cap():
+        skill_cap = input("Enter the skill cap: ")
+
+        return int(skill_cap)
+
+    @staticmethod
+    def prompt_quality_levels():
+        nq_item = input("Enter the NQ item: ")
+
+        different_items = input("Does HQ produce different items? (y/n): ")
+
+        if different_items == "y":
+            hq1_item = input("Enter the HQ1 item: ")
+            hq2_item = input("Enter the HQ2 item: ")
+            hq3_item = input("Enter the HQ3 item: ")
+        else:
+            hq1_item = nq_item
+            hq2_item = nq_item
+            hq3_item = nq_item
+
+        nq_quantity = input("Enter the NQ quantity: ")
+        hq1_quantity = input("Enter the HQ1 quantity: ")
+        hq2_quantity = input("Enter the HQ2 quantity: ")
+        hq3_quantity = input("Enter the HQ3 quantity: ")
+
+        nq_quantity = int(nq_quantity)
+        hq1_quantity = int(hq1_quantity)
+        hq2_quantity = int(hq2_quantity)
+        hq3_quantity = int(hq3_quantity)
+
+        return nq_item, hq1_item, hq2_item, hq3_item, nq_quantity, \
+            hq1_quantity, hq2_quantity, hq3_quantity

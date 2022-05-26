@@ -1,5 +1,6 @@
 from sqlite3 import connect, IntegrityError
 from logger import Logger
+from helpers import add_nones
 
 
 class Database:
@@ -77,10 +78,7 @@ class Database:
                             FOREIGN KEY (ingredient5) REFERENCES items (name),
                             FOREIGN KEY (ingredient6) REFERENCES items (name),
                             FOREIGN KEY (ingredient7) REFERENCES items (name),
-                            FOREIGN KEY (ingredient8) REFERENCES items (name),
-                            UNIQUE (crystal, ingredient1, ingredient2,
-                                    ingredient3, ingredient4, ingredient5,
-                                    ingredient6, ingredient7, ingredient8)
+                            FOREIGN KEY (ingredient8) REFERENCES items (name)
                             )""")
 
     def create_synthesis_results_table(self):
@@ -91,7 +89,7 @@ class Database:
                             quality_level text NOT NULL,
                             PRIMARY KEY (recipe_id, quality_level),
                             FOREIGN KEY (item_name) REFERENCES items (name),
-                            FOREIGN KEY (recipe_id) REFERENCES synthesis_recipes (id)
+                            FOREIGN KEY (recipe_id) REFERENCES recipes (id)
                             )""")
 
     def get_item(self, name):
@@ -215,6 +213,77 @@ class Database:
         Logger.print_green("Updated prices and frequencies for \"{}\""
                            .format(auction_item.item_name))
 
+    def get_recipe(self, crystal, ingredients):
+        where_recipe = self.get_where_recipe(ingredients)
+
+        self.cur.execute("SELECT * FROM recipes " + where_recipe,
+                         (crystal, *ingredients))
+        return self.cur.fetchone()
+
+    def add_recipe(self, recipe):
+        self.cur.execute("""INSERT INTO recipes VALUES (:id, :crystal,
+                         :ingredient1, :ingredient2, :ingredient3,
+                         :ingredient4, :ingredient5, :ingredient6,
+                         :ingredient7, :ingredient8, :craft, :skill_cap)""",
+                         {"id": None,
+                          "crystal": recipe.crystal,
+                          "ingredient1": recipe.ingredients[0],
+                          "ingredient2": recipe.ingredients[1],
+                          "ingredient3": recipe.ingredients[2],
+                          "ingredient4": recipe.ingredients[3],
+                          "ingredient5": recipe.ingredients[4],
+                          "ingredient6": recipe.ingredients[5],
+                          "ingredient7": recipe.ingredients[6],
+                          "ingredient8": recipe.ingredients[7],
+                          "craft": recipe.craft,
+                          "skill_cap": recipe.skill_cap
+                          })
+        self.commit()
+        Logger.print_green("Added recipe")
+
+    def remove_recipe(self, crystal, ingredients):
+        # Get the recipe id
+        recipe_id = self.get_recipe(crystal, ingredients)[0]
+
+        # Delete the synthesis results
+        self.cur.execute("DELETE FROM synthesis_results WHERE recipe_id=?",
+                         (recipe_id,))
+
+        where_recipe = self.get_where_recipe(ingredients)
+
+        self.cur.execute("DELETE FROM recipes " + where_recipe,
+                         (crystal, *ingredients))
+        self.commit()
+        Logger.print_green("Removed recipe")
+
+    @staticmethod
+    def get_where_recipe(ingredients):
+        empty_slots = 8 - len(ingredients)
+        full_ingredients = add_nones(ingredients, empty_slots)
+
+        query_string = "WHERE crystal=? "
+
+        for i, ingredient in enumerate(full_ingredients, start=1):
+            if ingredient is None:
+                append_str = " and ingredient{} IS NULL".format(str(i))
+                query_string += append_str
+            else:
+                append_str = " and ingredient{}=?".format(str(i))
+                query_string += append_str
+
+        return query_string
+
+    def add_synthesis_result(self, synthesis_result):
+        self.cur.execute("""INSERT INTO synthesis_results VALUES (:item_name,
+                         :recipe_id, :quantity, :quality_level)""",
+                         {"item_name": synthesis_result.item_name,
+                          "recipe_id": synthesis_result.recipe_id,
+                          "quantity": synthesis_result.quantity,
+                          "quality_level": synthesis_result.quality_level
+                          })
+        self.commit()
+        Logger.print_green("Added synthesis results")
+
     def commit(self):
         self.connection.commit()
 
@@ -228,78 +297,12 @@ class Database:
     #                         WHERE name=?""", (vendor_price, name,))
     #     self.commit()
 
-    # def add_recipe(self, recipe):
-    #     ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
-    #         ingredient6, ingredient7, ingredient8 = recipe.ingredients
-
-    #     self.cur.execute("""INSERT INTO recipes VALUES (:name, :crystal,
-    #                             :ingredient1, :ingredient2, :ingredient3,
-    #                             :ingredient4, :ingredient5, :ingredient6,
-    #                             :ingredient7, :ingredient8, :nq_yield,
-    #                             :hq1_yield, :hq2_yield, :hq3_yield, :craft,
-    #                             :skill_cap, :synth_cost)""",
-    #                      {"name": recipe.name,
-    #                       "crystal": recipe.crystal,
-    #                       "ingredient1": ingredient1,
-    #                       "ingredient2": ingredient2,
-    #                       "ingredient3": ingredient3,
-    #                       "ingredient4": ingredient4,
-    #                       "ingredient5": ingredient5,
-    #                       "ingredient6": ingredient6,
-    #                       "ingredient7": ingredient7,
-    #                       "ingredient8": ingredient8,
-    #                       "nq_yield": recipe.nq_yield,
-    #                       "hq1_yield": recipe.hq1_yield,
-    #                       "hq2_yield": recipe.hq2_yield,
-    #                       "hq3_yield": recipe.hq3_yield,
-    #                       "craft": recipe.craft,
-    #                       "skill_cap": recipe.skill_cap,
-    #                       "synth_cost": recipe.synth_cost
-    #                       })
-    #     self.commit()
-
-    # def get_recipes(self, name):
-    #     self.cur.execute("SELECT * FROM recipes WHERE name=?", (name,))
-    #     return self.cur.fetchall()
-
     # def get_all_recipes(self):
     #     self.cur.execute("SELECT * FROM recipes")
     #     return self.cur.fetchall()
-
-    # def remove_recipe(self, name, crystal, ingredients):
-    #     empty_slots = 8 - len(ingredients)
-    #     full_ingredients = add_nones(ingredients, empty_slots)
-
-    #     query_string = "DELETE FROM recipes WHERE name=? and crystal=? "
-
-    #     for i, ingredient in enumerate(full_ingredients, start=1):
-    #         if ingredient is None:
-    #             append_str = " and ingredient{} IS NULL".format(str(i))
-    #             query_string += append_str
-    #         else:
-    #             append_str = " and ingredient{}=?".format(str(i))
-    #             query_string += append_str
-
-    #     self.cur.execute(query_string, (name, crystal, *ingredients))
-    #     self.commit()
 
     # def update_recipe_synth_cost(self, name, new_cost):
     #     self.cur.execute("""UPDATE recipes
     #                         SET synth_cost=?
     #                         WHERE name=?""", (new_cost, name,))
     #     self.commit()
-
-    # def recipe_is_in_database(self, name, crystal, ingredients):
-    #     recipe_tuples = self.get_recipes(name)
-    #     for recipe_tuple in recipe_tuples:
-    #         tuple_name, tuple_crystal = recipe_tuple[0:2]
-    #         tuple_ingredients = recipe_tuple[2:10]
-    #         tuple_ingredients = remove_nones(tuple_ingredients)
-
-    #         same_recipe = tuple_name == name and tuple_crystal == crystal and \
-    #             same_elements(tuple_ingredients, ingredients)
-
-    #         if same_recipe:
-    #             return True
-
-    #     return False

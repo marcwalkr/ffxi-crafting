@@ -5,8 +5,7 @@ from helpers import add_nones
 class Recipe:
     db = Database()
 
-    def __init__(self, name, crystal, ingredients, craft, skill_cap) -> None:
-        self.name = name
+    def __init__(self, crystal, ingredients, craft, skill_cap) -> None:
         self.crystal = crystal
 
         # Add Nones to represent empty ingredient slots for database
@@ -15,9 +14,6 @@ class Recipe:
 
         self.craft = craft
         self.skill_cap = skill_cap
-
-    # def to_database(self):
-    #     self.db.add_recipe(self)
 
     # def calculate_synth_cost(self):
     #     cost = 0

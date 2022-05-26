@@ -68,7 +68,7 @@ if __name__ == "__main__":
         elif command == "3":
             Command.add_vendor_item()
         elif command == "4":
-            pass
+            Command.add_recipe()
         elif command == "5":
             Command.remove_item()
         elif command == "6":
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         elif command == "8":
             Command.remove_auction_item()
         elif command == "9":
-            pass
+            Command.remove_recipe()
         elif command == "10":
             pass
         elif command == "11":

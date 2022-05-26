@@ -3,7 +3,7 @@ from auction_item import AuctionItem
 from database import Database
 
 
-class AuctionItemController:
+class AuctionController:
     db = Database()
 
     def __init__(self, item_name) -> None:
@@ -61,7 +61,7 @@ class AuctionItemController:
         cls.db.remove_auction_item(item_name)
 
     @classmethod
-    def is_in_database(cls, item_name):
+    def exists(cls, item_name):
         auction_item = cls.get_auction_item(item_name)
         return auction_item is not None
 
