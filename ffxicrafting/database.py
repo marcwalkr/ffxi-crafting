@@ -131,8 +131,13 @@ class Database:
 
     def remove_vendor(self, npc_name):
         try:
+            # Remove vendor items from that vendor
+            self.cur.execute("DELETE FROM vendor_items WHERE vendor_name=?",
+                             (npc_name,))
+
             self.cur.execute("DELETE FROM vendors WHERE npc_name=?",
                              (npc_name,))
+
             Logger.print_green("Removed vendor \"{}\"".format(npc_name))
         except IntegrityError as e:
             Logger.print_red(str(e))
