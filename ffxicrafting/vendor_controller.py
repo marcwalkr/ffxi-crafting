@@ -59,5 +59,9 @@ class VendorController:
         cls.db.remove_vendor_item(item_name, vendor_name)
 
     @classmethod
+    def update_vendor_price(cls, item_name, vendor_name, price):
+        cls.db.update_vendor_price(item_name, vendor_name, price)
+
+    @classmethod
     def vendor_item_exists(cls, item_name, vendor_name):
         return cls.get_vendor_item(item_name, vendor_name) is not None

@@ -23,7 +23,7 @@ if __name__ == "__main__":
         elif command == "9":
             Command.remove_recipe()
         elif command == "10":
-            pass
+            Command.update_vendor_price()
         elif command == "11":
             Command.update_auction_items()
         elif command == "12":

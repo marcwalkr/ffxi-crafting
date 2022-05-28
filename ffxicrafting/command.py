@@ -174,6 +174,14 @@ class Command:
             Logger.print_red("Recipe does not exist in the database")
 
     @classmethod
+    def update_vendor_price(cls):
+        item_name = cls.prompt_item_name()
+        vendor_name = cls.prompt_vendor_name()
+        price = cls.prompt_vendor_price()
+
+        VendorController.update_vendor_price(item_name, vendor_name, price)
+
+    @classmethod
     def update_auction_items(cls):
         AuctionController.update_auction_items()
 

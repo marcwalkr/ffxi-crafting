@@ -180,6 +180,13 @@ class Database:
         Logger.print_green("Removed vendor item \"{}\" sold by \"{}\""
                            .format(item_name, vendor_name))
 
+    def update_vendor_price(self, item_name, vendor_name, price):
+        self.cur.execute("""UPDATE vendor_items SET price=? WHERE item_name=?
+                         and vendor_name=?""",
+                         (price, item_name, vendor_name,))
+        self.commit()
+        Logger.print_green("Updated vendor item price")
+
     def get_auction_item(self, item_name):
         self.cur.execute("""SELECT * FROM auction_items
                          WHERE item_name=?""", (item_name,))
