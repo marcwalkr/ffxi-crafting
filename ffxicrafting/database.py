@@ -149,6 +149,11 @@ class Database:
                          vendor_name=?""", (item_name, vendor_name,))
         return self.cur.fetchone()
 
+    def get_vendor_items_by_item(self, item_name):
+        self.cur.execute("SELECT * FROM vendor_items WHERE item_name=?",
+                         (item_name,))
+        return self.cur.fetchall()
+
     def add_vendor_item(self, vendor_item):
         item_name = vendor_item.item_name
         vendor_name = vendor_item.vendor_name
@@ -225,6 +230,14 @@ class Database:
                          (crystal, *ingredients))
         return self.cur.fetchone()
 
+    def get_recipe_by_id(self, recipe_id):
+        self.cur.execute("SELECT * FROM recipes WHERE id=?", (recipe_id,))
+        return self.cur.fetchone()
+
+    def get_all_recipes(self):
+        self.cur.execute("SELECT * FROM recipes")
+        return self.cur.fetchall()
+
     def add_recipe(self, recipe):
         self.cur.execute("""INSERT INTO recipes VALUES (:id, :crystal,
                          :ingredient1, :ingredient2, :ingredient3,
@@ -278,6 +291,15 @@ class Database:
 
         return query_string
 
+    def get_synthesis_results(self, item_name):
+        self.cur.execute("SELECT * from synthesis_results WHERE item_name=?",
+                         (item_name,))
+        return self.cur.fetchall()
+
+    def get_all_synthesis_results(self):
+        self.cur.execute("SELECT * from synthesis_results")
+        return self.cur.fetchall()
+
     def add_synthesis_result(self, synthesis_result):
         self.cur.execute("""INSERT INTO synthesis_results VALUES (:item_name,
                          :recipe_id, :quantity, :quality_level)""",
@@ -287,7 +309,8 @@ class Database:
                           "quality_level": synthesis_result.quality_level
                           })
         self.commit()
-        Logger.print_green("Added synthesis results")
+        Logger.print_green("Added {} synthesis result"
+                           .format(synthesis_result.quality_level))
 
     def commit(self):
         self.connection.commit()
@@ -301,10 +324,6 @@ class Database:
     #                         SET vendor_price=?
     #                         WHERE name=?""", (vendor_price, name,))
     #     self.commit()
-
-    # def get_all_recipes(self):
-    #     self.cur.execute("SELECT * FROM recipes")
-    #     return self.cur.fetchall()
 
     # def update_recipe_synth_cost(self, name, new_cost):
     #     self.cur.execute("""UPDATE recipes

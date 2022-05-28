@@ -39,6 +39,17 @@ class VendorController:
             return None
 
     @classmethod
+    def get_vendor_items(cls, item_name):
+        vendor_items = []
+
+        vendor_item_tuples = cls.db.get_vendor_items_by_item(item_name)
+        for vendor_item_tuple in vendor_item_tuples:
+            vendor_item = VendorItem(*vendor_item_tuple)
+            vendor_items.append(vendor_item)
+
+        return vendor_items
+
+    @classmethod
     def add_vendor_item(cls, item_name, vendor_name, price):
         vendor_item = VendorItem(item_name, vendor_name, price)
         cls.db.add_vendor_item(vendor_item)

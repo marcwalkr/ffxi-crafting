@@ -1,9 +1,12 @@
 from auction_controller import AuctionController
 from vendor_controller import VendorController
 from item_controller import ItemController
-from synth_controller import SynthController
+from recipe_controller import RecipeController
+from result_controller import ResultController
+from product import Product
 from logger import Logger
 from helpers import expand_list
+from prettytable import PrettyTable
 
 
 class Command:
@@ -23,6 +26,7 @@ class Command:
                         "9. Remove a recipe\n" +
                         "10. Update a vendor price\n" +
                         "11. Update auction prices and frequencies\n" +
+                        "12. Print products\n" +
                         "Q. Quit\n")
         return command
 
@@ -94,24 +98,24 @@ class Command:
         skill_cap = cls.prompt_skill_cap()
 
         # Check if the recipe already exists
-        if SynthController.recipe_exists(crystal, ingredients):
+        if RecipeController.recipe_exists(crystal, ingredients):
             Logger.print_red("Recipe is already in the database")
             return
 
-        SynthController.add_recipe(crystal, ingredients, craft, skill_cap)
+        RecipeController.add_recipe(crystal, ingredients, craft, skill_cap)
 
         # Get the id that was generated when the recipe was added
-        recipe_id = SynthController.get_recipe_id(crystal, ingredients)
+        recipe_id = RecipeController.get_recipe_id(crystal, ingredients)
 
         # Get the items and quantities of all of the quality levels
         nq_item, hq1_item, hq2_item, hq3_item, nq_quantity, hq1_quantity, \
             hq2_quantity, hq3_quantity = cls.prompt_quality_levels()
 
         # Add synthesis results
-        SynthController.add_result(nq_item, recipe_id, nq_quantity, "NQ")
-        SynthController.add_result(hq1_item, recipe_id, hq1_quantity, "HQ1")
-        SynthController.add_result(hq2_item, recipe_id, hq2_quantity, "HQ2")
-        SynthController.add_result(hq3_item, recipe_id, hq3_quantity, "HQ3")
+        ResultController.add_result(nq_item, recipe_id, nq_quantity, "NQ")
+        ResultController.add_result(hq1_item, recipe_id, hq1_quantity, "HQ1")
+        ResultController.add_result(hq2_item, recipe_id, hq2_quantity, "HQ2")
+        ResultController.add_result(hq3_item, recipe_id, hq3_quantity, "HQ3")
 
     @classmethod
     def remove_item(cls):
@@ -165,14 +169,30 @@ class Command:
         ingredients = cls.prompt_ingredients()
 
         # Verify that the recipe exists
-        if SynthController.recipe_exists(crystal, ingredients):
-            SynthController.remove_recipe(crystal, ingredients)
+        if RecipeController.recipe_exists(crystal, ingredients):
+            RecipeController.remove_recipe(crystal, ingredients)
         else:
             Logger.print_red("Recipe does not exist in the database")
 
     @classmethod
     def update_auction_items(cls):
         AuctionController.update_auction_items()
+
+    @classmethod
+    def print_products(cls):
+        profit_threshold, freq_threshold = cls.prompt_thresholds()
+
+        products = Product.get_products(profit_threshold, freq_threshold)
+
+        rows = []
+        for product in products:
+            row = [product.item_name, product.quantity, product.cost,
+                   product.sell_price, product.profit, product.sell_frequency]
+            rows.append(row)
+
+        table = cls.get_table(["Name", "Quantity", "Cost", "Sell Price",
+                               "Profit", "Sell Frequency"], rows)
+        print(table)
 
     @staticmethod
     def prompt_item_name():
@@ -259,3 +279,25 @@ class Command:
 
         return nq_item, hq1_item, hq2_item, hq3_item, nq_quantity, \
             hq1_quantity, hq2_quantity, hq3_quantity
+
+    @staticmethod
+    def prompt_thresholds():
+        profit_threshold = input("Enter the profit threshold: ")
+        freq_threshold = input("Enter the frequency threshold: ")
+
+        profit_threshold = int(profit_threshold)
+        freq_threshold = int(freq_threshold)
+
+        return profit_threshold, freq_threshold
+
+    @staticmethod
+    def get_table(column_names, rows):
+        table = PrettyTable(column_names)
+
+        for name in column_names:
+            table.align[name] = "l"
+
+        for row in rows:
+            table.add_row(row)
+
+        return table
