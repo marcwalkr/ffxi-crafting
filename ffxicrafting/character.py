@@ -1,9 +1,6 @@
-class Recipe:
-    def __init__(self, crystal, ingredients, alchemy, bonecraft, clothcraft,
-                 cooking, goldsmithing, leathercraft, smithing,
-                 woodworking) -> None:
-        self.crystal = crystal
-        self.ingredients = ingredients
+class Character:
+    def __init__(self, alchemy, bonecraft, clothcraft, cooking, goldsmithing,
+                 leathercraft, smithing, woodworking) -> None:
         self.alchemy = alchemy
         self.bonecraft = bonecraft
         self.clothcraft = clothcraft

@@ -2,86 +2,55 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import date, datetime
 import time
+from logger import Logger
 
 
 class AuctionScraper:
-    def __init__(self, item_name) -> None:
+    def __init__(self, item_name, item_id=None) -> None:
         self.item_name = item_name
 
-        self.item_id = None
-        self.quantities = None
-        self.prices = None
-        self.dates = None
-        self.empty_price_history = None
-        self.num_days = None
+        if item_id is None:
+            self.item_id = self.scrape_search()
+        else:
+            self.item_id = str(item_id)
 
-    def scrape(self):
-        self.item_id = self.get_item_id()
-        if self.item_id is None:
-            raise ValueError("Error: could not find item on AH")
+        if self.item_id is not None:
+            self.quantities, self.prices, self.dates = self.scrape_listing()
 
-        self.quantities, self.prices, self.dates = self.get_ah_data()
-        self.empty_price_history = len(self.quantities) == 0
-        self.num_days = self.get_num_days()
+            self.single_price = self.get_single_price()
+            self.stack_price = self.get_stack_price()
 
-    def get_item_id(self):
+            self.single_frequency = self.get_single_frequency()
+            self.stack_frequency = self.get_stack_frequency()
+
+    def scrape_search(self):
         search_html = self.get_search_html()
+
         item_tags = search_html.find_all("a", {"class": "character"})
 
         if len(item_tags) > 1:
-            for i, tag in enumerate(item_tags):
-                print(str(i) + ". " + tag.get_text())
-            idx = input("Enter the correct index for the item \"" +
-                        self.item_name + "\": ")
-            idx = int(idx)
-            item_tag = item_tags[idx]
+            index = self.prompt_correct_index(item_tags)
+            correct_tag = item_tags[index]
         elif len(item_tags) == 1:
-            item_tag = item_tags[0]
+            correct_tag = item_tags[0]
         else:
+            # Item not found
             return None
 
-        print("Scraping item: " + item_tag.get_text())
-        item_url = item_tag["href"]
+        item_url = correct_tag["href"]
         item_id = item_url.split("&")[-1][3:]
 
         return item_id
 
-    def get_url_formatted_name(self):
-        # Replace spaces with +
-        formatted_name = self.item_name.replace(" ", "+")
-        # Remove single quotes, search fails on items with apostrophes
-        formatted_name = formatted_name.replace("'", "")
-
-        return formatted_name
-
-    def get_search_html(self):
-        url = "https://www.wingsxi.com/wings/index.php?page=itemsearch&name=" + \
-            self.get_url_formatted_name() + "&worldid=100"
-        result = requests.get(url)
-        html = BeautifulSoup(result.text, "html.parser")
-
-        # Wait 3 seconds so it's not scraping to fast
-        time.sleep(3)
-
-        return html
-
-    def get_listing_html(self):
-        url = "https://www.wingsxi.com/wings/index.php?page=item&worldid=100&id=" + \
-            self.item_id
-        result = requests.get(url)
-        html = BeautifulSoup(result.text, "html.parser")
-
-        # Wait 3 seconds so it's not scraping to fast
-        time.sleep(3)
-
-        return html
-
-    def get_ah_data(self):
+    def scrape_listing(self):
         listing_html = self.get_listing_html()
+
+        full_item_name = listing_html.find("h2").get_text()
+        Logger.print_cyan("Scraping item: {}".format(full_item_name))
 
         seller_buyer_quantity_tags = listing_html.find_all(
             "td", {"style": "width: 10px;"})
-        price_date_tags = listing_html.find_all(
+        price_date_tags = self.get_listing_html().find_all(
             "td", {"style": "width: 10px; text-align: right"})
 
         quantities = []
@@ -109,12 +78,43 @@ class AuctionScraper:
         # The last few prices are from bazaars
         prices = prices[:len(dates)]
 
-        return [quantities, prices, dates]
+        return quantities, prices, dates
+
+    def get_url_formatted_name(self):
+        # Replace spaces with +
+        formatted_name = self.item_name.replace(" ", "+")
+        # Remove single quotes, search fails on items with apostrophes
+        formatted_name = formatted_name.replace("'", "")
+
+        return formatted_name
+
+    def get_search_html(self):
+        url_formatted_name = self.get_url_formatted_name()
+
+        url = ("https://www.wingsxi.com/wings/index.php?page=itemsearch&name="
+               "{}&worldid=100").format(url_formatted_name)
+
+        result = requests.get(url)
+        html = BeautifulSoup(result.text, "html.parser")
+
+        # Wait 3 seconds so it's not scraping to fast
+        time.sleep(3)
+
+        return html
+
+    def get_listing_html(self):
+        url = ("https://www.wingsxi.com/wings/index.php?page=item&worldid=100"
+               "&id={}").format(self.item_id)
+
+        result = requests.get(url)
+        html = BeautifulSoup(result.text, "html.parser")
+
+        # Wait 3 seconds so it's not scraping to fast
+        time.sleep(3)
+
+        return html
 
     def get_single_price(self):
-        if self.empty_price_history:
-            return None
-
         try:
             single_index = self.quantities.index("Single")
             single_price = self.prices[single_index]
@@ -123,9 +123,6 @@ class AuctionScraper:
             return None
 
     def get_stack_price(self):
-        if self.empty_price_history:
-            return None
-
         try:
             stack_index = self.quantities.index("Stack")
             stack_price = self.prices[stack_index]
@@ -137,36 +134,44 @@ class AuctionScraper:
         """Gets the number of days from the first in history until today,
         inclusive, for calculating sell frequency
         """
-        if self.empty_price_history:
+        try:
+            first_date_str = self.dates[-1]
+            year, month, day = first_date_str.split("/")
+            first_date = date(int(year), int(month), int(day))
+
+            # Dates are in UTC on website
+            today_utc = datetime.utcnow().date()
+            delta = today_utc - first_date
+
+            return delta.days + 1
+
+        except IndexError:
             return 0
 
-        first_date_str = self.dates[-1]
-        year, month, day = first_date_str.split("/")
-        first_date = date(int(year), int(month), int(day))
-        # Dates are in UTC on website
-        today_utc = datetime.utcnow().date()
-        delta = today_utc - first_date
-
-        return delta.days + 1
-
-    def get_single_freq(self):
-        if self.empty_price_history:
-            return None
-
+    def get_single_frequency(self):
         try:
             single_count = self.quantities.count("Single")
-            freq = single_count / self.num_days
+            freq = single_count / self.get_num_days()
             return freq
-        except ValueError:
+        except (ValueError, ZeroDivisionError):
             return None
 
-    def get_stack_freq(self):
-        if self.empty_price_history:
-            return None
-
+    def get_stack_frequency(self):
         try:
             stack_count = self.quantities.count("Stack")
-            freq = stack_count / self.num_days
+            freq = stack_count / self.get_num_days()
             return freq
-        except ValueError:
+        except (ValueError, ZeroDivisionError):
             return None
+
+    def prompt_correct_index(self, item_tags):
+        for i, tag in enumerate(item_tags):
+            full_item_name = tag.get_text()
+            Logger.print_yello("{}. {}".format(str(i), full_item_name))
+
+        prompt_str = Logger.get_yellow(("Enter the correct index for the item"
+                                        " \"{}\": ").format(self.item_name))
+
+        correct_index = input(prompt_str)
+
+        return int(correct_index)

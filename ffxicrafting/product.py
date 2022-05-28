@@ -1,27 +1,56 @@
-from database import Database
+from synth_controller import SynthController
+from auction_controller import AuctionController
+from item_controller import ItemController
+from vendor_controller import VendorController
 
 
 class Product:
-    db = Database()
-
-    def __init__(self, name, quantity, cost, sell_price,
-                 sell_freq) -> None:
-        self.name = name
+    def __init__(self, item_name, quantity, sell_price, sell_frequency,
+                 cost) -> None:
+        self.item_name = item_name
         self.quantity = quantity
-        self.cost = cost
         self.sell_price = sell_price
-        self.sell_freq = sell_freq
+        self.sell_frequency = sell_frequency
+        self.cost = cost
         self.profit = sell_price - cost
 
     @classmethod
     def get_products(cls, profit_threshold, freq_threshold):
-        all_recipes = cls.db.get_all_recipes()
+        # Get all synthesis results
+        synth_results = SynthController.get_all_results()
 
         products = []
 
-        for recipe in all_recipes:
-            crafted_products = cls.get_crafted_products(recipe)
-            products += crafted_products
+        for result in synth_results:
+            # For now, skip HQ qualities
+            # TODO: calculate cost and profit factoring in HQ and craft skill
+            if result.quality_level != "NQ":
+                continue
+
+            # Get the recipe for the result by recipe id
+            recipe = SynthController.get_recipe_by_id(result.recipe_id)
+            # Calculate the cost of one synth
+            synth_cost = cls.calculate_synth_cost(recipe)
+            # The cost to craft one of the item
+            single_cost = synth_cost / result.quantity
+            # Get the auction data for the item
+            auction_item = AuctionController.get_auction_item(result.item_name)
+            # Get the item for the stack quantity
+            item = ItemController.get_item(result.item_name)
+            # The cost to craft a stack of the item
+            stack_cost = single_cost * item.stack_quantity
+
+            if auction_item.single_price is not None:
+                single_product = cls(item.name, 1, auction_item.single_price,
+                                     auction_item.single_frequency,
+                                     single_cost)
+                products.append(single_product)
+
+            if auction_item.stack_price is not None:
+                stack_product = cls(item.name, item.stack_quantity,
+                                    auction_item.stack_price,
+                                    auction_item.stack_frequency, stack_cost)
+                products.append(stack_product)
 
         products = cls.filter_threshold(products, profit_threshold,
                                         freq_threshold)
@@ -30,29 +59,61 @@ class Product:
         return profit_sorted
 
     @classmethod
-    def get_crafted_products(cls, recipe):
-        products = []
+    def calculate_synth_cost(cls, recipe):
+        cost = 0
 
-        recipe_name = recipe[0]
-        auction_listings = cls.db.get_auction_listings(recipe_name)
+        for ingredient in [recipe.crystal] + recipe.ingredients:
+            # Look for every method of obtaining the single ingredient
+            # (auction, vendor, craft)
+            prices = []
 
-        for listing in auction_listings:
-            name, quantity, sell_price, sell_freq = listing
-            synth_yield = recipe[10]
-            synth_cost = recipe[16]
-            product_cost = (synth_cost / synth_yield) * quantity
+            # Get the auction item for the ingredient
+            auction_item = AuctionController.get_auction_item(ingredient)
 
-            product = cls(name, quantity, product_cost, sell_price, sell_freq)
-            products.append(product)
+            # Get the item for the stack quantity
+            item = ItemController.get_item(ingredient)
 
-        return products
+            # Append both prices for one
+            # single_price and (stack_price / stack_quantity)
+            if auction_item.single_price is not None:
+                prices.append(auction_item.single_price)
+
+            if auction_item.stack_price is not None:
+                single_from_stack = auction_item.stack_price / item.stack_quantity
+                prices.append(single_from_stack)
+
+            # Get all vendor items for the ingredient
+            vendor_items = VendorController.get_vendor_items(ingredient)
+            if len(vendor_items) > 0:
+                # Append all of the prices
+                for vendor_item in vendor_items:
+                    prices.append(vendor_item.price)
+
+            # Find the cost to craft the single ingredient
+            synth_results = SynthController.get_results(ingredient)
+            for result in synth_results:
+                # For now, skip HQ qualities
+                # TODO: calculate the cost factoring in HQ and craft skill
+                if result.quality_level != "NQ":
+                    continue
+
+                result_recipe = cls.get_recipe_by_id(result.recipe_id)
+                result_synth_cost = result_recipe.calculate_synth_cost()
+                ingredient_cost = result_synth_cost / result.quantity
+                prices.append(ingredient_cost)
+
+            # Add the min price (cheapest way to obtain the item) to the cost
+            cheapest = min(prices)
+            cost += cheapest
+
+        return cost
 
     @staticmethod
     def filter_threshold(products, profit_threshold, freq_threshold):
         filtered = []
         for product in products:
             profitable = product.profit >= profit_threshold
-            fast_selling = product.sell_freq >= freq_threshold
+            fast_selling = product.sell_frequency >= freq_threshold
 
             if profitable and fast_selling:
                 filtered.append(product)
