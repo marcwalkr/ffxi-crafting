@@ -1,8 +1,7 @@
 from auction_controller import AuctionController
 from vendor_controller import VendorController
 from item_controller import ItemController
-from recipe_controller import RecipeController
-from result_controller import ResultController
+from synth_controller import SynthController
 from product import Product
 from logger import Logger
 from helpers import expand_list
@@ -98,24 +97,24 @@ class Command:
         skill_cap = cls.prompt_skill_cap()
 
         # Check if the recipe already exists
-        if RecipeController.recipe_exists(crystal, ingredients):
+        if SynthController.recipe_exists(crystal, ingredients):
             Logger.print_red("Recipe is already in the database")
             return
 
-        RecipeController.add_recipe(crystal, ingredients, craft, skill_cap)
+        SynthController.add_recipe(crystal, ingredients, craft, skill_cap)
 
         # Get the id that was generated when the recipe was added
-        recipe_id = RecipeController.get_recipe_id(crystal, ingredients)
+        recipe_id = SynthController.get_recipe_id(crystal, ingredients)
 
         # Get the items and quantities of all of the quality levels
         nq_item, hq1_item, hq2_item, hq3_item, nq_quantity, hq1_quantity, \
             hq2_quantity, hq3_quantity = cls.prompt_quality_levels()
 
         # Add synthesis results
-        ResultController.add_result(nq_item, recipe_id, nq_quantity, "NQ")
-        ResultController.add_result(hq1_item, recipe_id, hq1_quantity, "HQ1")
-        ResultController.add_result(hq2_item, recipe_id, hq2_quantity, "HQ2")
-        ResultController.add_result(hq3_item, recipe_id, hq3_quantity, "HQ3")
+        SynthController.add_result(nq_item, recipe_id, nq_quantity, "NQ")
+        SynthController.add_result(hq1_item, recipe_id, hq1_quantity, "HQ1")
+        SynthController.add_result(hq2_item, recipe_id, hq2_quantity, "HQ2")
+        SynthController.add_result(hq3_item, recipe_id, hq3_quantity, "HQ3")
 
     @classmethod
     def remove_item(cls):
@@ -169,8 +168,8 @@ class Command:
         ingredients = cls.prompt_ingredients()
 
         # Verify that the recipe exists
-        if RecipeController.recipe_exists(crystal, ingredients):
-            RecipeController.remove_recipe(crystal, ingredients)
+        if SynthController.recipe_exists(crystal, ingredients):
+            SynthController.remove_recipe(crystal, ingredients)
         else:
             Logger.print_red("Recipe does not exist in the database")
 
