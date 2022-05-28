@@ -68,8 +68,14 @@ class Database:
                             ingredient6 text,
                             ingredient7 text,
                             ingredient8 text,
-                            craft text NOT NULL,
-                            skill_cap integer NOT NULL,
+                            alchemy integer NOT NULL,
+                            bonecraft integer NOT NULL,
+                            clothcraft integer NOT NULL,
+                            cooking integer NOT NULL,
+                            goldsmithing integer NOT NULL,
+                            leathercraft integer NOT NULL,
+                            smithing integer NOT NULL,
+                            woodworking integer NOT NULL,
                             FOREIGN KEY (crystal) REFERENCES items (name),
                             FOREIGN KEY (ingredient1) REFERENCES items (name),
                             FOREIGN KEY (ingredient2) REFERENCES items (name),
@@ -249,7 +255,9 @@ class Database:
         self.cur.execute("""INSERT INTO recipes VALUES (:id, :crystal,
                          :ingredient1, :ingredient2, :ingredient3,
                          :ingredient4, :ingredient5, :ingredient6,
-                         :ingredient7, :ingredient8, :craft, :skill_cap)""",
+                         :ingredient7, :ingredient8, :alchemy, :bonecraft,
+                         :clothcraft, :cooking, :goldsmithing, :leathercraft,
+                         :smithing, :woodworking)""",
                          {"id": None,
                           "crystal": recipe.crystal,
                           "ingredient1": recipe.ingredients[0],
@@ -260,8 +268,14 @@ class Database:
                           "ingredient6": recipe.ingredients[5],
                           "ingredient7": recipe.ingredients[6],
                           "ingredient8": recipe.ingredients[7],
-                          "craft": recipe.craft,
-                          "skill_cap": recipe.skill_cap
+                          "alchemy": recipe.alchemy,
+                          "bonecraft": recipe.bonecraft,
+                          "clothcraft": recipe.clothcraft,
+                          "cooking": recipe.cooking,
+                          "goldsmithing": recipe.goldsmithing,
+                          "leathercraft": recipe.leathercraft,
+                          "smithing": recipe.smithing,
+                          "woodworking": recipe.woodworking,
                           })
         self.commit()
         Logger.print_green("Added recipe")
@@ -321,19 +335,3 @@ class Database:
 
     def commit(self):
         self.connection.commit()
-
-    # def get_all_items(self):
-    #     self.cur.execute("SELECT * FROM items")
-    #     return self.cur.fetchall()
-
-    # def update_item_vendor_price(self, name, vendor_price):
-    #     self.cur.execute("""UPDATE items
-    #                         SET vendor_price=?
-    #                         WHERE name=?""", (vendor_price, name,))
-    #     self.commit()
-
-    # def update_recipe_synth_cost(self, name, new_cost):
-    #     self.cur.execute("""UPDATE recipes
-    #                         SET synth_cost=?
-    #                         WHERE name=?""", (new_cost, name,))
-    #     self.commit()

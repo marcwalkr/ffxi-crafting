@@ -93,15 +93,17 @@ class Command:
     def add_recipe(cls):
         crystal = cls.prompt_crystal()
         ingredients = cls.prompt_ingredients()
-        craft = cls.prompt_craft()
-        skill_cap = cls.prompt_skill_cap()
+        alchemy, bonecraft, clothcraft, cooking, goldsmithing, leathercraft, \
+            smithing, woodworking = cls.prompt_craft_skills()
 
         # Check if the recipe already exists
         if SynthController.recipe_exists(crystal, ingredients):
             Logger.print_red("Recipe is already in the database")
             return
 
-        SynthController.add_recipe(crystal, ingredients, craft, skill_cap)
+        SynthController.add_recipe(crystal, ingredients, alchemy, bonecraft,
+                                   clothcraft, cooking, goldsmithing,
+                                   leathercraft, smithing, woodworking)
 
         # Get the id that was generated when the recipe was added
         recipe_id = SynthController.get_recipe_id(crystal, ingredients)
@@ -250,14 +252,18 @@ class Command:
         return ingredients
 
     @staticmethod
-    def prompt_craft():
-        return input("Enter the craft: ")
+    def prompt_craft_skills():
+        alchemy = input("Enter the alchemy skill: ")
+        bonecraft = input("Enter the bonecraft skill: ")
+        clothcraft = input("Enter the clothcraft skill: ")
+        cooking = input("Enter the cooking skill: ")
+        goldsmithing = input("Enter the goldsmithing skill: ")
+        leathercraft = input("Enter the leathercraft skill: ")
+        smithing = input("Enter the smithing skill: ")
+        woodworking = input("Enter the woodworking skill: ")
 
-    @staticmethod
-    def prompt_skill_cap():
-        skill_cap = input("Enter the skill cap: ")
-
-        return int(skill_cap)
+        return alchemy, bonecraft, clothcraft, cooking, goldsmithing, \
+            leathercraft, smithing, woodworking
 
     @staticmethod
     def prompt_quality_levels():

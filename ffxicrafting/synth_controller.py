@@ -36,12 +36,15 @@ class SynthController:
         return recipes
 
     @classmethod
-    def add_recipe(cls, crystal, ingredients, craft, skill_cap):
+    def add_recipe(cls, crystal, ingredients, alchemy, bonecraft, clothcraft,
+                   cooking, goldsmithing, leathercraft, smithing, woodworking):
         # Add Nones to represent empty ingredient slots
         empty_slots = 8 - len(ingredients)
         full_ingredients = add_nones(ingredients, empty_slots)
 
-        recipe = Recipe(crystal, full_ingredients, craft, skill_cap)
+        recipe = Recipe(crystal, full_ingredients, alchemy, bonecraft,
+                        clothcraft, cooking, goldsmithing, leathercraft,
+                        smithing, woodworking)
         cls.db.add_recipe(recipe)
 
     @classmethod
@@ -57,8 +60,11 @@ class SynthController:
         crystal = recipe_tuple[1]
         ingredients = list(recipe_tuple[2:10])
         ingredients = remove_nones(ingredients)
-        craft, skill_cap = recipe_tuple[10:]
-        return Recipe(crystal, ingredients, craft, skill_cap)
+        alchemy, bonecraft, clothcraft, cooking, goldsmithing, leathercraft, \
+            smithing, woodworking = recipe_tuple[10:]
+        return Recipe(crystal, ingredients, alchemy, bonecraft, clothcraft,
+                      cooking, goldsmithing, leathercraft, smithing,
+                      woodworking)
 
     @classmethod
     def get_results(cls, item_name):
