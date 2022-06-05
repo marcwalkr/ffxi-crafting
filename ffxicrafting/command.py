@@ -193,14 +193,18 @@ class Command:
 
         products = Product.get_products(profit_threshold, freq_threshold)
 
+        # Sort by value (profit * sell frequency)
+        sorted_products = sorted(products, key=lambda x: x.value, reverse=True)
+
         rows = []
-        for product in products:
+        for product in sorted_products:
             row = [product.item_name, product.quantity, product.cost,
-                   product.sell_price, product.profit, product.sell_frequency]
+                   product.sell_price, product.profit, product.sell_frequency,
+                   product.value]
             rows.append(row)
 
         table = cls.get_table(["Name", "Quantity", "Cost", "Sell Price",
-                               "Profit", "Sell Frequency"], rows)
+                               "Profit", "Sell Frequency", "Value"], rows)
         print(table)
 
     @staticmethod

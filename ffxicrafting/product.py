@@ -13,6 +13,7 @@ class Product:
         self.sell_frequency = sell_frequency
         self.cost = cost
         self.profit = sell_price - cost
+        self.value = self.profit * sell_frequency
 
     @classmethod
     def get_products(cls, profit_threshold, freq_threshold):
@@ -54,9 +55,8 @@ class Product:
 
         products = cls.filter_threshold(products, profit_threshold,
                                         freq_threshold)
-        profit_sorted = sorted(products, key=lambda x: x.profit, reverse=True)
 
-        return profit_sorted
+        return products
 
     @classmethod
     def calculate_synth_cost(cls, recipe):
