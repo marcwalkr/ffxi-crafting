@@ -322,16 +322,20 @@ class Database:
         return self.cur.fetchall()
 
     def add_synthesis_result(self, synthesis_result):
-        self.cur.execute("""INSERT INTO synthesis_results VALUES (:item_name,
-                         :recipe_id, :quantity, :quality_level)""",
-                         {"item_name": synthesis_result.item_name,
-                          "recipe_id": synthesis_result.recipe_id,
-                          "quantity": synthesis_result.quantity,
-                          "quality_level": synthesis_result.quality_level
-                          })
+        try:
+            self.cur.execute("""INSERT INTO synthesis_results VALUES (:item_name,
+                            :recipe_id, :quantity, :quality_level)""",
+                             {"item_name": synthesis_result.item_name,
+                              "recipe_id": synthesis_result.recipe_id,
+                              "quantity": synthesis_result.quantity,
+                              "quality_level": synthesis_result.quality_level
+                              })
+            Logger.print_green("Added {} synthesis result"
+                               .format(synthesis_result.quality_level))
+        except IntegrityError as e:
+            Logger.print_red(str(e))
+
         self.commit()
-        Logger.print_green("Added {} synthesis result"
-                           .format(synthesis_result.quality_level))
 
     def commit(self):
         self.connection.commit()
