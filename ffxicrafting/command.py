@@ -198,13 +198,13 @@ class Command:
 
         rows = []
         for product in sorted_products:
-            row = [product.item_name, product.quantity, product.cost,
-                   product.sell_price, product.profit, product.sell_frequency,
-                   product.value]
+            row = [product.item_name, product.quantity, round(product.cost, 2),
+                   product.sell_price, round(product.profit, 2),
+                   round(product.sell_frequency, 2), round(product.value, 2)]
             rows.append(row)
 
         table = cls.get_table(["Name", "Quantity", "Cost", "Sell Price",
-                               "Profit", "Sell Frequency", "Value"], rows)
+                               "Profit", "Sell Frequency", "Value Score"], rows)
         print(table)
 
     @staticmethod
