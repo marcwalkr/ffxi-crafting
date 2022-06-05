@@ -203,7 +203,7 @@ class Command:
                    round(product.sell_frequency, 2), round(product.value, 2)]
             rows.append(row)
 
-        table = cls.get_table(["Name", "Quantity", "Cost", "Sell Price",
+        table = cls.get_table(["Item", "Quantity", "Cost", "Sell Price",
                                "Profit", "Sell Frequency", "Value Score"], rows)
         print(table)
 
