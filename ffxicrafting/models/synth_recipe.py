@@ -35,4 +35,4 @@ class SynthRecipe:
         self.result_hq1_qty = result_hq1_qty
         self.result_hq2_qty = result_hq2_qty
         self.result_hq3_qty = result_hq3_qty
-        self.result_name - result_name
+        self.result_name = result_name

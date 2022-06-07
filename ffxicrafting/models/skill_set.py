@@ -1,11 +1,11 @@
 class SkillSet:
-    def __init__(self, woodworking, smithing, goldsmithing, clothcraft,
-                 leathercraft, bonecraft, alchemy, cooking) -> None:
-        self.woodworking = woodworking
-        self.smithing = smithing
-        self.goldsmithing = goldsmithing
-        self.clothcraft = clothcraft
-        self.leathercraft = leathercraft
-        self.bonecraft = bonecraft
+    def __init__(self, wood, smith, gold, cloth, leather, bone, alchemy,
+                 cook) -> None:
+        self.wood = wood
+        self.smith = smith
+        self.gold = gold
+        self.cloth = cloth
+        self.leather = leather
+        self.bone = bone
         self.alchemy = alchemy
-        self.cooking = cooking
+        self.cook = cook

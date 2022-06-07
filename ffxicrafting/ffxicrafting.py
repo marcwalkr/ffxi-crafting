@@ -5,6 +5,6 @@ if __name__ == "__main__":
         command = Command.prompt_command()
 
         if command == "1":
-            pass
+            Command.print_products()
         elif command == "q" or command == "Q":
             break

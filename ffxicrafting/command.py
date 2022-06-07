@@ -1,4 +1,5 @@
 from product import Product
+from models.skill_set import SkillSet
 from logger import Logger
 from prettytable import PrettyTable
 
@@ -9,7 +10,9 @@ class Command:
 
     @staticmethod
     def prompt_command():
-        pass
+        command = input("1. Print products\n" +
+                        "Q. Quit\n")
+        return command
 
     @classmethod
     def update_auction_items(cls):
@@ -17,23 +20,25 @@ class Command:
 
     @classmethod
     def print_products(cls):
+        skill_set = cls.prompt_skill_set()
         profit_threshold, freq_threshold = cls.prompt_thresholds()
 
-        products = Product.get_products(profit_threshold, freq_threshold)
+        products = Product.get_products(skill_set, profit_threshold,
+                                        freq_threshold)
 
-        # Sort by value (profit * sell frequency)
-        sorted_products = sorted(products, key=lambda x: x.value, reverse=True)
+        # # Sort by value (profit * sell frequency)
+        # sorted_products = sorted(products, key=lambda x: x.value, reverse=True)
 
-        rows = []
-        for product in sorted_products:
-            row = [product.item_name, product.quantity, round(product.cost, 2),
-                   product.sell_price, round(product.profit, 2),
-                   round(product.sell_frequency, 2), round(product.value, 2)]
-            rows.append(row)
+        # rows = []
+        # for product in sorted_products:
+        #     row = [product.item_name, product.quantity, round(product.cost, 2),
+        #            product.sell_price, round(product.profit, 2),
+        #            round(product.sell_frequency, 2), round(product.value, 2)]
+        #     rows.append(row)
 
-        table = cls.get_table(["Item", "Quantity", "Cost", "Sell Price",
-                               "Profit", "Sell Frequency", "Value Score"], rows)
-        print(table)
+        # table = cls.get_table(["Item", "Quantity", "Cost", "Sell Price",
+        #                        "Profit", "Sell Frequency", "Value Score"], rows)
+        # print(table)
 
     @staticmethod
     def prompt_thresholds():
@@ -44,6 +49,28 @@ class Command:
         freq_threshold = int(freq_threshold)
 
         return profit_threshold, freq_threshold
+
+    @staticmethod
+    def prompt_skill_set():
+        wood = input("Enter woodworking skill: ")
+        smith = input("Enter smithing skill: ")
+        gold = input("Enter goldsmithing skill: ")
+        cloth = input("Enter clothcraft skill: ")
+        leather = input("Enter leathercraft skill: ")
+        bone = input("Enter bonecraft skill: ")
+        alchemy = input("Enter alchemy skill: ")
+        cook = input("Enter cooking skill: ")
+
+        wood = int(wood)
+        smith = int(smith)
+        gold = int(gold)
+        cloth = int(cloth)
+        leather = int(leather)
+        bone = int(bone)
+        alchemy = int(alchemy)
+        cook = int(cook)
+
+        return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
 
     @staticmethod
     def get_table(column_names, rows):

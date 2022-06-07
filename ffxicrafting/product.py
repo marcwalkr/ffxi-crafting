@@ -1,3 +1,6 @@
+from controllers.synth_controller import SynthController
+
+
 class Product:
     def __init__(self, item_name, quantity, sell_price, sell_frequency,
                  cost) -> None:
@@ -10,5 +13,7 @@ class Product:
         self.value = self.profit * sell_frequency
 
     @classmethod
-    def get_products(cls, profit_threshold, freq_threshold):
-        pass
+    def get_products(cls, skill_set, profit_threshold, freq_threshold):
+        recipes = SynthController.get_recipes_by_skill_set(skill_set)
+        for recipe in recipes:
+            print(recipe.result)
