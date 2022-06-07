@@ -1,5 +1,7 @@
 from database import Database
 from models.auction import Auction
+from helpers import older_than
+from auction_scraper import AuctionScraper
 
 
 class AuctionController:
@@ -13,9 +15,23 @@ class AuctionController:
         auction_tuple = cls.db.get_auction(item_id)
 
         if auction_tuple is not None:
-            return Auction(*auction_tuple)
+            auction = Auction(*auction_tuple)
+
+            # If the data is greater than 7 days old, scrape and update
+            if older_than(auction.last_updated, 7):
+                scraper = AuctionScraper(item_id)
+                cls.update_auction(item_id, scraper.single_price,
+                                   scraper.stack_price,
+                                   scraper.single_frequency,
+                                   scraper.stack_frequency)
         else:
-            return None
+            # Scrape and add the auction data
+            scraper = AuctionScraper(item_id)
+            cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
+                            scraper.single_frequency, scraper.stack_frequency)
+            auction = cls.get_auction(item_id)
+
+        return auction
 
     @classmethod
     def add_auction(cls, item_id, single_price, stack_price, single_frequency,
