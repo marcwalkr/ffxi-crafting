@@ -1,5 +1,11 @@
 import re
 import os
+from datetime import datetime
+
+
+def older_than(the_datetime, num_days):
+    time_between = datetime.now() - the_datetime
+    return time_between.days > num_days
 
 
 def scrape_vendor_files(directory):

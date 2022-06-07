@@ -14,7 +14,35 @@ class Database:
     def __del__(self):
         self.connection.close()
 
-    def get_recipes_by_skill_set(self, skill_set):
+    def get_auction(self, item_id):
+        self.cursor.execute("SELECT * FROM auction WHERE itemid=%s",
+                            (item_id,))
+        return self.cursor.fetchone()
+
+    def add_auction(self, item_id, single_price, stack_price, single_frequency,
+                    stack_frequency):
+        self.cursor.execute("""INSERT INTO auction (itemid, single_price, stack_price,
+                            single_frequency, stack_frequency)
+                            VALUES (%s,%s,%s,%s,%s)""",
+                            (item_id, single_price, stack_price,
+                             single_frequency, stack_frequency,))
+        self.commit()
+
+    def update_auction(self, item_id, single_price, stack_price,
+                       single_frequency, stack_frequency):
+        self.cursor.execute("""UPDATE auction SET single_price=%s,
+                            stack_price=%s, single_frequency=%s,
+                            stack_frequency=%s WHERE itemid=%s""",
+                            (single_price, stack_price, single_frequency,
+                             stack_frequency, item_id,))
+        self.commit()
+
+    def get_item(self, item_id):
+        self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s",
+                            (item_id,))
+        return self.cursor.fetchone()
+
+    def get_recipes(self, skill_set):
         # Select within 5 levels of skill
         wood = skill_set.wood + 5
         smith = skill_set.smith + 5

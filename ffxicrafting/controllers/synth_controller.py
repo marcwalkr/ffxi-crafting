@@ -9,9 +9,9 @@ class SynthController:
         pass
 
     @classmethod
-    def get_recipes_by_skill_set(cls, skill_set):
+    def get_recipes(cls, skill_set):
         recipes = []
-        recipe_tuples = cls.db.get_recipes_by_skill_set(skill_set)
+        recipe_tuples = cls.db.get_recipes(skill_set)
         for recipe_tuple in recipe_tuples:
             recipe = SynthRecipe(*recipe_tuple)
             recipes.append(recipe)
