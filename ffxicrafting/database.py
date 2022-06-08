@@ -9,7 +9,7 @@ class Database:
             passwd="root",
             database="ffxi"
         )
-        self.cursor = self.connection.cursor()
+        self.cursor = self.connection.cursor(buffered=True)
 
     def __del__(self):
         self.connection.close()
@@ -37,21 +37,59 @@ class Database:
                              stack_frequency, item_id,))
         self.commit()
 
+    def get_guild_shops(self, item_id):
+        self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s",
+                            (item_id,))
+        return self.cursor.fetchall()
+
+    def get_guild(self, guild_id):
+        self.cursor.execute("SELECT * FROM guilds WHERE guildid=%s",
+                            (guild_id,))
+        return self.cursor.fetchone()
+
     def get_item(self, item_id):
         self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s",
                             (item_id,))
         return self.cursor.fetchone()
 
+    def get_item_cost(self, item_id):
+        self.cursor.execute("SELECT * FROM item_costs WHERE itemid=%s",
+                            (item_id,))
+        return self.cursor.fetchone()
+
+    def add_item_cost(self, item_id, source_id, cost):
+        self.cursor.execute("""INSERT INTO item_costs (itemid, sourceid, cost)
+                            VALUES (%s,%s,%s)""", (item_id, source_id, cost,))
+        self.commit()
+
+    def update_item_cost(self, item_id, source_id, cost):
+        self.cursor.execute("""UPDATE item_costs SET sourceid=%s, cost=%s
+                            WHERE itemid=%s""", (source_id, cost, item_id,))
+        self.commit()
+
+    def get_npc(self, npc_id):
+        self.cursor.execute("SELECT * FROM npc_list WHERE npcid=%s", (npc_id,))
+        return self.cursor.fetchone()
+
+    def get_npc_by_name(self, name):
+        self.cursor.execute("SELECT * FROM npc_list WHERE polutils_name=%s",
+                            (name,))
+        return self.cursor.fetchone()
+
+    def get_recipe(self, recipe_id):
+        self.cursor.execute("SELECT * FROM synth_recipes WHERE id=%s",
+                            (recipe_id,))
+        return self.cursor.fetchone()
+
     def get_recipes(self, skill_set):
-        # Select within 5 levels of skill
-        wood = skill_set.wood + 5
-        smith = skill_set.smith + 5
-        gold = skill_set.gold + 5
-        cloth = skill_set.cloth + 5
-        leather = skill_set.leather + 5
-        bone = skill_set.bone + 5
-        alchemy = skill_set.alchemy + 5
-        cook = skill_set.cook + 5
+        wood = skill_set.wood
+        smith = skill_set.smith
+        gold = skill_set.gold
+        cloth = skill_set.cloth
+        leather = skill_set.leather
+        bone = skill_set.bone
+        alchemy = skill_set.alchemy
+        cook = skill_set.cook
 
         self.cursor.execute("""SELECT * FROM synth_recipes WHERE Wood<=%s and
                             Smith<=%s and Gold<=%s and Cloth<=%s and
@@ -60,6 +98,20 @@ class Database:
                                           bone, alchemy, cook,))
 
         return self.cursor.fetchall()
+
+    def get_vendor_items(self, item_id):
+        self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s",
+                            (item_id,))
+        return self.cursor.fetchall()
+
+    def add_vendor_item(self, item_id, npc_id, price):
+        try:
+            self.cursor.execute("""INSERT INTO vendor_items (itemid, npcid, price)
+                                VALUES (%s,%s,%s)""", (item_id, npc_id, price,))
+        except mysql.connector.errors.IntegrityError:
+            pass
+
+        self.commit()
 
     def commit(self):
         self.connection.commit()

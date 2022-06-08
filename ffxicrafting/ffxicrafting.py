@@ -6,5 +6,7 @@ if __name__ == "__main__":
 
         if command == "1":
             Command.print_products()
+        elif command == "2":
+            Command.print_recipe()
         elif command == "q" or command == "Q":
             break

@@ -1,7 +1,8 @@
-from product import Product
-from models.skill_set import SkillSet
-from logger import Logger
 from prettytable import PrettyTable
+from config import Config
+from product import Product
+from controllers.synth_controller import SynthController
+from controllers.item_controller import ItemController
 
 
 class Command:
@@ -11,66 +12,77 @@ class Command:
     @staticmethod
     def prompt_command():
         command = input("1. Print products\n" +
+                        "2. Print recipe\n" +
                         "Q. Quit\n")
         return command
 
     @classmethod
-    def update_auction_items(cls):
-        pass
-
-    @classmethod
     def print_products(cls):
-        skill_set = cls.prompt_skill_set()
-        profit_threshold, freq_threshold = cls.prompt_thresholds()
+        skill_set = Config.get_skill_set()
+        profit_threshold, freq_threshold = Config.get_thresholds()
 
         products = Product.get_products(skill_set, profit_threshold,
                                         freq_threshold)
 
-        # # Sort by value (profit * sell frequency)
-        # sorted_products = sorted(products, key=lambda x: x.value, reverse=True)
+        rows = []
+        for product in products:
+            recipe_id = product.recipe_id
+            item_name = product.item_name
+            quantity = product.quantity
+            cost = round(product.cost, 2)
+            sell_price = product.sell_price
+            profit = round(product.profit, 2)
+            sell_frequency = round(product.sell_frequency, 2)
+            value = round(product.value, 2)
 
-        # rows = []
-        # for product in sorted_products:
-        #     row = [product.item_name, product.quantity, round(product.cost, 2),
-        #            product.sell_price, round(product.profit, 2),
-        #            round(product.sell_frequency, 2), round(product.value, 2)]
-        #     rows.append(row)
+            row = [recipe_id, item_name, quantity, cost, sell_price, profit,
+                   sell_frequency, value]
+            rows.append(row)
 
-        # table = cls.get_table(["Item", "Quantity", "Cost", "Sell Price",
-        #                        "Profit", "Sell Frequency", "Value Score"], rows)
-        # print(table)
+        table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
+                               "Sell Price", "Profit", "Sell Frequency",
+                               "Value Score"], rows)
+        print(table)
 
-    @staticmethod
-    def prompt_thresholds():
-        profit_threshold = input("Enter the profit threshold: ")
-        freq_threshold = input("Enter the frequency threshold: ")
+    @classmethod
+    def print_recipe(cls):
+        recipe_id = input("Enter the recipe id: ")
+        recipe = SynthController.get_recipe(recipe_id)
 
-        profit_threshold = int(profit_threshold)
-        freq_threshold = int(freq_threshold)
+        item_ids = [recipe.crystal, recipe.ingredient1, recipe.ingredient2,
+                    recipe.ingredient3, recipe.ingredient4, recipe.ingredient5,
+                    recipe.ingredient6, recipe.ingredient7, recipe.ingredient8]
 
-        return profit_threshold, freq_threshold
+        row = [recipe.result_name]
 
-    @staticmethod
-    def prompt_skill_set():
-        wood = input("Enter woodworking skill: ")
-        smith = input("Enter smithing skill: ")
-        gold = input("Enter goldsmithing skill: ")
-        cloth = input("Enter clothcraft skill: ")
-        leather = input("Enter leathercraft skill: ")
-        bone = input("Enter bonecraft skill: ")
-        alchemy = input("Enter alchemy skill: ")
-        cook = input("Enter cooking skill: ")
+        for id in item_ids:
+            if id == 0:
+                row.append("")
+            else:
+                item = ItemController.get_item(id)
+                name = item.sort_name.replace("_", " ").title()
+                row.append(name)
 
-        wood = int(wood)
-        smith = int(smith)
-        gold = int(gold)
-        cloth = int(cloth)
-        leather = int(leather)
-        bone = int(bone)
-        alchemy = int(alchemy)
-        cook = int(cook)
+        wood = str(recipe.wood)
+        smith = str(recipe.smith)
+        gold = str(recipe.gold)
+        cloth = str(recipe.cloth)
+        leather = str(recipe.leather)
+        bone = str(recipe.bone)
+        alchemy = str(recipe.alchemy)
+        cook = str(recipe.cook)
 
-        return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
+        skill_table = cls.get_table(["Wood", "Smith", "Gold", "Cloth",
+                                     "Leather", "Bone", "Alchemy", "Cook"],
+                                    [[wood, smith, gold, cloth, leather, bone,
+                                     alchemy, cook]])
+
+        recipe_table = cls.get_table(["Result", "Crystal", "Ingredient 1",
+                                      "Ingredient 2", "Ingredient 3", "Ingredient 4",
+                                      "Ingredient 5", "Ingredient 6", "Ingredient 7",
+                                      "Ingredient 8"], [row])
+        print(skill_table)
+        print(recipe_table)
 
     @staticmethod
     def get_table(column_names, rows):

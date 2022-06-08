@@ -1,6 +1,7 @@
-import re
 import os
+import re
 from datetime import datetime
+from controllers.npc_controller import NpcController
 
 
 def older_than(the_datetime, num_days):
@@ -8,14 +9,20 @@ def older_than(the_datetime, num_days):
     return time_between.days > num_days
 
 
-def scrape_vendor_files(directory):
-    vendor_data = []
+def generate_vendor_inserts():
+    file_lines = []
 
-    for filename in os.listdir(directory):
-        file = os.path.join(directory, filename)
+    for filename in os.listdir("vendor_files"):
+        file = os.path.join("vendor_files", filename)
 
         with open(file) as f:
             npc_name = filename.split(".")[0]
+            npc_name = npc_name.replace("_", " ")
+            npc = NpcController.get_npc_by_name(npc_name)
+            npc_id = npc.npc_id
+
+            npc_name_comment = "-- {}".format(npc_name)
+            file_lines.append(npc_name_comment)
 
             lines = f.readlines()
             stripped = [s.strip() for s in lines]
@@ -31,7 +38,8 @@ def scrape_vendor_files(directory):
 
             # Get the end index of the stock list by searching for the next "}"
             before_stock_length = len(stripped[:items_start])
-            items_end = stripped[items_start:].index("}") + before_stock_length
+            items_end = stripped[items_start:].index(
+                "}") + before_stock_length
             item_lines = stripped[items_start+1:items_end]
 
             for line in item_lines:
@@ -43,11 +51,26 @@ def scrape_vendor_files(directory):
 
                 # The item_id and price are the first 2 numbers on the line
                 numbers = re.findall('[0-9]+', line)
-                item_id, price = numbers[0:2]
 
-                item_id = int(item_id)
-                price = int(price)
+                try:
+                    item_id, price = numbers[0:2]
+                except ValueError:
+                    continue
 
-                vendor_data.append([item_id, npc_name, price])
+                comment_start = line.index("--")
+                item_comment = line[comment_start:]
+                if item_comment[2] != " ":
+                    item_comment = "-- " + item_comment[2:]
 
-    return vendor_data
+                insert_statement = ("INSERT INTO vendor_items VALUES "
+                                    "({},{},{});\t{}".format(item_id,
+                                                             npc_id,
+                                                             price,
+                                                             item_comment))
+                file_lines.append(insert_statement)
+
+            file_lines.append("")
+
+    with open("vendor_inserts.txt", "w") as writer:
+        for line in file_lines:
+            writer.write(line + "\n")

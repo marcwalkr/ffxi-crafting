@@ -1,6 +1,6 @@
 from database import Database
-from models.auction import Auction
 from helpers import older_than
+from models.auction import Auction
 from auction_scraper import AuctionScraper
 
 
@@ -17,18 +17,10 @@ class AuctionController:
         if auction_tuple is not None:
             auction = Auction(*auction_tuple)
 
-            # If the data is greater than 7 days old, scrape and update
-            if older_than(auction.last_updated, 7):
-                scraper = AuctionScraper(item_id)
-                cls.update_auction(item_id, scraper.single_price,
-                                   scraper.stack_price,
-                                   scraper.single_frequency,
-                                   scraper.stack_frequency)
+            if cls.outdated_auction(auction):
+                cls.scrape_update_auction(item_id)
         else:
-            # Scrape and add the auction data
-            scraper = AuctionScraper(item_id)
-            cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
-                            scraper.single_frequency, scraper.stack_frequency)
+            cls.scrape_add_auction(item_id)
             auction = cls.get_auction(item_id)
 
         return auction
@@ -44,3 +36,20 @@ class AuctionController:
                        single_frequency, stack_frequency):
         cls.db.update_auction(item_id, single_price, stack_price,
                               single_frequency, stack_frequency)
+
+    @classmethod
+    def scrape_add_auction(cls, item_id):
+        scraper = AuctionScraper(item_id)
+        cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
+                        scraper.single_frequency, scraper.stack_frequency)
+
+    @classmethod
+    def scrape_update_auction(cls, item_id):
+        scraper = AuctionScraper(item_id)
+        cls.update_auction(item_id, scraper.single_price, scraper.stack_price,
+                           scraper.single_frequency, scraper.stack_frequency)
+
+    @staticmethod
+    def outdated_auction(auction):
+        """Return True if the auction data is older than 7 days"""
+        return older_than(auction.last_updated, 7)
