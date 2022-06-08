@@ -1,27 +1,76 @@
+import os
 import re
+from datetime import datetime
+from controllers.npc_controller import NpcController
 
 
-def add_nones(a_list, num):
-    """Appends a number of Nones to the end of a list"""
-    with_nones = a_list + [None] * num
-    return with_nones
+def older_than(the_datetime, num_days):
+    time_between = datetime.now() - the_datetime
+    return time_between.days > num_days
 
 
-def remove_nones(a_list):
-    """Removes all empty strings from a list"""
-    return list(filter(None, a_list))
+def generate_vendor_inserts():
+    file_lines = []
 
+    for filename in os.listdir("vendor_files"):
+        file = os.path.join("vendor_files", filename)
 
-def expand_list(condensed_list):
-    """Removes numbers and expands list e.g. Item x3 -> Item Item Item"""
-    expanded_list = []
-    for ele in condensed_list:
-        num_found = re.search(r"\d+", ele)
-        if num_found:
-            num = int(num_found.group(0))
-            name_without_num = ele[:ele.rfind(" ")]
-            expanded_list += [name_without_num] * num
-        else:
-            expanded_list.append(ele)
+        with open(file) as f:
+            npc_name = filename.split(".")[0]
+            npc_name = npc_name.replace("_", " ")
+            npc = NpcController.get_npc_by_name(npc_name)
+            npc_id = npc.npc_id
 
-    return expanded_list
+            npc_name_comment = "-- {}".format(npc_name)
+            file_lines.append(npc_name_comment)
+
+            lines = f.readlines()
+            stripped = [s.strip() for s in lines]
+
+            # Get the start index of the stock list by searching for one of
+            # these lines
+            if "local stock =" in stripped:
+                items_start = stripped.index("local stock =") + 1
+            elif "stock = {" in stripped:
+                items_start = stripped.index("stock = {")
+            else:
+                items_start = stripped.index("local stock = {")
+
+            # Get the end index of the stock list by searching for the next "}"
+            before_stock_length = len(stripped[:items_start])
+            items_end = stripped[items_start:].index(
+                "}") + before_stock_length
+            item_lines = stripped[items_start+1:items_end]
+
+            for line in item_lines:
+                # If the line has too many dashes, the item was commented out,
+                # skip those lines and any empty lines
+                dash_count = len(re.findall("-", line))
+                if dash_count > 2 or len(line) < 1:
+                    continue
+
+                # The item_id and price are the first 2 numbers on the line
+                numbers = re.findall('[0-9]+', line)
+
+                try:
+                    item_id, price = numbers[0:2]
+                except ValueError:
+                    continue
+
+                comment_start = line.index("--")
+                item_comment = line[comment_start:]
+                if item_comment[2] != " ":
+                    item_comment = "-- " + item_comment[2:]
+
+                insert_statement = ("INSERT INTO vendor_items VALUES "
+                                    "({},{},{});\t{}".format(item_id,
+                                                             npc_id,
+                                                             price,
+                                                             item_comment))
+                file_lines.append(insert_statement)
+
+            file_lines.append("")
+
+    with open("vendor_inserts.txt", "w") as writer:
+        for line in file_lines:
+            writer.write(line + "\n")

@@ -6,41 +6,15 @@ from logger import Logger
 
 
 class AuctionScraper:
-    def __init__(self, item_name, item_id=None) -> None:
-        self.item_name = item_name
+    def __init__(self, item_id) -> None:
+        self.item_id = str(item_id)
+        self.quantities, self.prices, self.dates = self.scrape_listing()
 
-        if item_id is None:
-            self.item_id = self.scrape_search()
-        else:
-            self.item_id = str(item_id)
+        self.single_price = self.get_single_price()
+        self.stack_price = self.get_stack_price()
 
-        if self.item_id is not None:
-            self.quantities, self.prices, self.dates = self.scrape_listing()
-
-            self.single_price = self.get_single_price()
-            self.stack_price = self.get_stack_price()
-
-            self.single_frequency = self.get_single_frequency()
-            self.stack_frequency = self.get_stack_frequency()
-
-    def scrape_search(self):
-        search_html = self.get_search_html()
-
-        item_tags = search_html.find_all("a", {"class": "character"})
-
-        if len(item_tags) > 1:
-            index = self.prompt_correct_index(item_tags)
-            correct_tag = item_tags[index]
-        elif len(item_tags) == 1:
-            correct_tag = item_tags[0]
-        else:
-            # Item not found
-            return None
-
-        item_url = correct_tag["href"]
-        item_id = item_url.split("&")[-1][3:]
-
-        return item_id
+        self.single_frequency = self.get_single_frequency()
+        self.stack_frequency = self.get_stack_frequency()
 
     def scrape_listing(self):
         listing_html = self.get_listing_html()
@@ -79,28 +53,6 @@ class AuctionScraper:
         prices = prices[:len(dates)]
 
         return quantities, prices, dates
-
-    def get_url_formatted_name(self):
-        # Replace spaces with +
-        formatted_name = self.item_name.replace(" ", "+")
-        # Remove single quotes, search fails on items with apostrophes
-        formatted_name = formatted_name.replace("'", "")
-
-        return formatted_name
-
-    def get_search_html(self):
-        url_formatted_name = self.get_url_formatted_name()
-
-        url = ("https://www.wingsxi.com/wings/index.php?page=itemsearch&name="
-               "{}&worldid=100").format(url_formatted_name)
-
-        result = requests.get(url)
-        html = BeautifulSoup(result.text, "html.parser")
-
-        # Wait 3 seconds so it's not scraping to fast
-        time.sleep(3)
-
-        return html
 
     def get_listing_html(self):
         url = ("https://www.wingsxi.com/wings/index.php?page=item&worldid=100"
@@ -163,15 +115,3 @@ class AuctionScraper:
             return freq
         except (ValueError, ZeroDivisionError):
             return None
-
-    def prompt_correct_index(self, item_tags):
-        for i, tag in enumerate(item_tags):
-            full_item_name = tag.get_text()
-            Logger.print_yello("{}. {}".format(str(i), full_item_name))
-
-        prompt_str = Logger.get_yellow(("Enter the correct index for the item"
-                                        " \"{}\": ").format(self.item_name))
-
-        correct_index = input(prompt_str)
-
-        return int(correct_index)
