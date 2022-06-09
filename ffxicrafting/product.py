@@ -1,6 +1,7 @@
 from controllers.synth_controller import SynthController
 from controllers.auction_controller import AuctionController
 from controllers.item_controller import ItemController
+from config import Config
 
 
 class Product:
@@ -23,6 +24,10 @@ class Product:
         for recipe in recipes:
             requres_key_item = recipe.key_item > 0
             if requres_key_item and recipe.key_item not in skill_set.key_items:
+                continue
+
+            include_desynth = Config.get_include_desynth()
+            if recipe.desynth and not include_desynth:
                 continue
 
             # TODO: handle HQ results
