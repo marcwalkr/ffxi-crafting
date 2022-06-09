@@ -1,14 +1,16 @@
 import requests
+import time
 from bs4 import BeautifulSoup
 from datetime import date, datetime
-import time
+from helpers import chunker
 from logger import Logger
 
 
 class AuctionScraper:
     def __init__(self, item_id) -> None:
         self.item_id = str(item_id)
-        self.quantities, self.prices, self.dates = self.scrape_listing()
+        self.sellers, self.buyers, self.quantities, self.prices, self.dates = \
+            self.scrape_listing()
 
         self.single_price = self.get_single_price()
         self.stack_price = self.get_stack_price()
@@ -27,32 +29,38 @@ class AuctionScraper:
         price_date_tags = self.get_listing_html().find_all(
             "td", {"style": "width: 10px; text-align: right"})
 
+        sellers = []
+        buyers = []
         quantities = []
-        for tag in seller_buyer_quantity_tags:
-            tag_text = tag.get_text()
-            if tag_text == "Seller":
+        for group in chunker(seller_buyer_quantity_tags[2:], 3):
+            seller_tag, buyer_tag, quantity_tag = group
+            seller = seller_tag.get_text()
+            buyer = buyer_tag.get_text()
+            quantity = quantity_tag.get_text()
+
+            # Start of bazaar html
+            if seller == "Seller" or buyer == "Seller" or quantity == "Seller":
                 break
-            elif tag_text != "Single" and tag_text != "Stack":
-                continue
-            else:
-                quantities.append(tag_text)
 
-        dates = []
+            sellers.append(seller)
+            buyers.append(buyer)
+            quantities.append(quantity)
+
         prices = []
-        for tag in price_date_tags:
-            tag_text = tag.get_text()
-            if tag_text == "Date":
-                continue
-            elif "/" in tag_text:
-                dates.append(tag_text)
-            else:
-                prices.append(tag_text)
+        dates = []
+        for group in chunker(price_date_tags[1:], 2):
+            price_tag, date_tag = group
+            price = price_tag.get_text()
+            date = date_tag.get_text()
 
-        # Remove elements from the end of prices to match the length of dates
-        # The last few prices are from bazaars
-        prices = prices[:len(dates)]
+            # Start of bazaar html
+            if "/" not in date:
+                break
 
-        return quantities, prices, dates
+            prices.append(price)
+            dates.append(date)
+
+        return sellers, buyers, quantities, prices, dates
 
     def get_listing_html(self):
         url = ("https://www.wingsxi.com/wings/index.php?page=item&worldid=100"

@@ -8,5 +8,7 @@ if __name__ == "__main__":
             Command.print_products()
         elif command == "2":
             Command.print_recipe()
+        elif command == "3":
+            Command.print_auction_history()
         elif command == "q" or command == "Q":
             break

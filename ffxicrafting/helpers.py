@@ -9,6 +9,10 @@ def older_than(the_datetime, num_days):
     return time_between.days > num_days
 
 
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+
 def generate_vendor_inserts():
     file_lines = []
 

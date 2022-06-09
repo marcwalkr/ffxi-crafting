@@ -54,3 +54,10 @@ class Config:
     def get_skill_range(cls):
         skill_range = cls.config.get("settings", "skill_range")
         return int(skill_range)
+
+    @classmethod
+    def get_monitored_item_ids(cls):
+        item_ids = cls.config.get("auction_monitor", "item_ids")
+        item_ids = item_ids.split(",")
+
+        return [int(i) for i in item_ids]
