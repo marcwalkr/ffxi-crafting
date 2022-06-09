@@ -3,7 +3,6 @@ from config import Config
 from product import Product
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
-from auction_scraper import AuctionScraper
 from auction_monitor import AuctionMonitor
 
 

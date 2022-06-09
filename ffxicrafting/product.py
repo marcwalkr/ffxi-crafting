@@ -13,7 +13,7 @@ class Product:
         self.sell_frequency = sell_frequency
         self.cost = cost
         self.profit = sell_price - cost
-        self.value = self.profit * sell_frequency
+        self.value = (self.profit * sell_frequency) / 1000
 
     @classmethod
     def get_products(cls, skill_set, profit_threshold, freq_threshold):
@@ -51,7 +51,7 @@ class Product:
                                     auction.stack_frequency, stack_cost)
                 products.append(stack_product)
 
-        # Sort by value (profit * sell frequency)
+        # Sort by value (function of profit and sell frequency)
         products.sort(key=lambda x: x.value, reverse=True)
 
         filtered_products = cls.filter_products(products, profit_threshold,
