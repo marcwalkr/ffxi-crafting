@@ -7,7 +7,7 @@ from models.skill_set import SkillSet
 class Config:
     path = Path(__file__)
     ROOT_DIR = path.parent.absolute()
-    config_path = os.path.join(ROOT_DIR, "config.ini")
+    config_path = os.path.join(ROOT_DIR, "../config.ini")
 
     config = ConfigParser()
     config.read(config_path)
