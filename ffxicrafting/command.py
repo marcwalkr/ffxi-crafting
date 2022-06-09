@@ -4,6 +4,7 @@ from product import Product
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from auction_scraper import AuctionScraper
+from auction_monitor import AuctionMonitor
 
 
 class Command:
@@ -15,6 +16,7 @@ class Command:
         command = input("1. Print products\n" +
                         "2. Print recipe\n" +
                         "3. Print an auction price history\n" +
+                        "4. Monitor auctions\n" +
                         "Q. Quit\n")
         return command
 
@@ -104,6 +106,13 @@ class Command:
         table = cls.get_table(["Seller", "Buyer", "Quantity", "Price", "Date"],
                               rows)
         print(table)
+
+    @classmethod
+    def monitor_auctions(cls):
+        monitored_ids = Config.get_monitored_item_ids()
+        frequency = Config.get_monitor_frequency()
+        auction_monitor = AuctionMonitor(monitored_ids, frequency)
+        auction_monitor.monitor_auctions()
 
     @staticmethod
     def get_table(column_names, rows):

@@ -61,3 +61,8 @@ class Config:
         item_ids = item_ids.split(",")
 
         return [int(i) for i in item_ids]
+
+    @classmethod
+    def get_monitor_frequency(cls):
+        frequency = cls.config.get("settings", "monitor_frequency")
+        return int(frequency)

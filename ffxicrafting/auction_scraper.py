@@ -7,8 +7,10 @@ from logger import Logger
 
 
 class AuctionScraper:
-    def __init__(self, item_id) -> None:
+    def __init__(self, item_id, logging=True) -> None:
         self.item_id = str(item_id)
+        self.logging = logging
+
         self.sellers, self.buyers, self.quantities, self.prices, self.dates = \
             self.scrape_listing()
 
@@ -22,7 +24,9 @@ class AuctionScraper:
         listing_html = self.get_listing_html()
 
         full_item_name = listing_html.find("h2").get_text()
-        Logger.print_cyan("Scraping item: {}".format(full_item_name))
+
+        if self.logging:
+            Logger.print_cyan("Scraping item: {}".format(full_item_name))
 
         seller_buyer_quantity_tags = listing_html.find_all(
             "td", {"style": "width: 10px;"})
@@ -49,16 +53,19 @@ class AuctionScraper:
         prices = []
         dates = []
         for group in chunker(price_date_tags[1:], 2):
-            price_tag, date_tag = group
-            price = price_tag.get_text()
-            date = date_tag.get_text()
+            try:
+                price_tag, date_tag = group
+                price = price_tag.get_text()
+                date = date_tag.get_text()
 
-            # Start of bazaar html
-            if "/" not in date:
+                # Start of bazaar html
+                if "/" not in date:
+                    break
+
+                prices.append(price)
+                dates.append(date)
+            except ValueError:
                 break
-
-            prices.append(price)
-            dates.append(date)
 
         return sellers, buyers, quantities, prices, dates
 
