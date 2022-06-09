@@ -43,8 +43,9 @@ class Config:
     def get_thresholds(cls):
         profit = cls.config.get("thresholds", "profit")
         frequency = cls.config.get("thresholds", "frequency")
+        value = cls.config.get("thresholds", "value")
 
-        return int(profit), int(frequency)
+        return int(profit), int(frequency), int(value)
 
     @classmethod
     def get_ignore_guilds(cls):

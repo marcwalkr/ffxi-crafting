@@ -21,10 +21,9 @@ class Command:
     @classmethod
     def print_products(cls):
         skill_set = Config.get_skill_set()
-        profit_threshold, freq_threshold = Config.get_thresholds()
+        profit, frequency, value = Config.get_thresholds()
 
-        products = Product.get_products(skill_set, profit_threshold,
-                                        freq_threshold)
+        products = Product.get_products(skill_set, profit, frequency, value)
 
         rows = []
         for product in products:

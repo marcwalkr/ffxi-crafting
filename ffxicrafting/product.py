@@ -17,7 +17,7 @@ class Product:
         self.value = (self.profit * sell_frequency) / 1000
 
     @classmethod
-    def get_products(cls, skill_set, profit_threshold, freq_threshold):
+    def get_products(cls, skill_set, profit, frequency, value):
         products = []
         recipes = SynthController.get_recipes(skill_set)
 
@@ -59,14 +59,15 @@ class Product:
         # Sort by value (function of profit and sell frequency)
         products.sort(key=lambda x: x.value, reverse=True)
 
-        filtered_products = cls.filter_products(products, profit_threshold,
-                                                freq_threshold)
+        filtered_products = cls.filter_products(products, profit, frequency,
+                                                value)
         return filtered_products
 
     @staticmethod
-    def filter_products(products, profit_threshold, freq_threshold):
+    def filter_products(products, profit_threshold, freq_threshold,
+                        value_threshold):
         """Removes duplicates from a different recipe that are less profitable
-        and any that don't pass profit and frequency thresholds
+        and any that don't pass thresholds
         """
         filtered = []
         for product in products:
@@ -74,8 +75,9 @@ class Product:
                             x.quantity == product.quantity for x in filtered)
             profitable = product.profit >= profit_threshold
             fast_selling = product.sell_frequency >= freq_threshold
+            valuable = product.value >= value_threshold
 
-            if profitable and fast_selling and not duplicate:
+            if profitable and fast_selling and valuable and not duplicate:
                 filtered.append(product)
 
         return filtered
