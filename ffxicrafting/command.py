@@ -15,8 +15,7 @@ class Command:
     def prompt_command():
         command = input("1. Print products\n" +
                         "2. Print recipe\n" +
-                        "3. Print an auction price history\n" +
-                        "4. Monitor auctions\n" +
+                        "3. Monitor auctions\n" +
                         "Q. Quit\n")
         return command
 
@@ -87,25 +86,6 @@ class Command:
                                       "Ingredient 8"], [row])
         print(skill_table)
         print(recipe_table)
-
-    @classmethod
-    def print_auction_history(cls):
-        item_id = input("Enter the item id: ")
-        scraper = AuctionScraper(item_id)
-
-        rows = []
-        for i in range(len(scraper.sellers)):
-            seller = scraper.sellers[i]
-            buyer = scraper.buyers[i]
-            quantity = scraper.quantities[i]
-            price = scraper.prices[i]
-            date = scraper.dates[i]
-
-            rows.append([seller, buyer, quantity, price, date])
-
-        table = cls.get_table(["Seller", "Buyer", "Quantity", "Price", "Date"],
-                              rows)
-        print(table)
 
     @classmethod
     def monitor_auctions(cls):
