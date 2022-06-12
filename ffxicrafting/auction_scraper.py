@@ -37,18 +37,21 @@ class AuctionScraper:
         buyers = []
         quantities = []
         for group in chunker(seller_buyer_quantity_tags[2:], 3):
-            seller_tag, buyer_tag, quantity_tag = group
-            seller = seller_tag.get_text()
-            buyer = buyer_tag.get_text()
-            quantity = quantity_tag.get_text()
+            try:
+                seller_tag, buyer_tag, quantity_tag = group
+                seller = seller_tag.get_text()
+                buyer = buyer_tag.get_text()
+                quantity = quantity_tag.get_text()
 
-            # Start of bazaar html
-            if seller == "Seller" or buyer == "Seller" or quantity == "Seller":
+                # Start of bazaar html
+                if seller == "Seller" or buyer == "Seller" or quantity == "Seller":
+                    break
+
+                sellers.append(seller)
+                buyers.append(buyer)
+                quantities.append(quantity)
+            except ValueError:
                 break
-
-            sellers.append(seller)
-            buyers.append(buyer)
-            quantities.append(quantity)
 
         prices = []
         dates = []
@@ -86,7 +89,7 @@ class AuctionScraper:
             single_index = self.quantities.index("Single")
             single_price = self.prices[single_index]
             return int(single_price)
-        except ValueError:
+        except (ValueError, IndexError):
             return None
 
     def get_stack_price(self):
@@ -94,7 +97,7 @@ class AuctionScraper:
             stack_index = self.quantities.index("Stack")
             stack_price = self.prices[stack_index]
             return int(stack_price)
-        except ValueError:
+        except (ValueError, IndexError):
             return None
 
     def get_num_days(self):
