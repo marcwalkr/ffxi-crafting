@@ -17,10 +17,16 @@ class AuctionController:
         if auction_tuple is not None:
             auction = Auction(*auction_tuple)
 
-            if cls.outdated_auction(auction):
-                cls.scrape_update_auction(item_id)
+            if older_than(auction.last_updated, 7):
+                scraper = AuctionScraper(item_id)
+                cls.update_auction(item_id, scraper.single_price,
+                                   scraper.stack_price,
+                                   scraper.single_frequency,
+                                   scraper.stack_frequency)
         else:
-            cls.scrape_add_auction(item_id)
+            scraper = AuctionScraper(item_id)
+            cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
+                            scraper.single_frequency, scraper.stack_frequency)
             auction = cls.get_auction(item_id)
 
         return auction
@@ -36,20 +42,3 @@ class AuctionController:
                        single_frequency, stack_frequency):
         cls.db.update_auction(item_id, single_price, stack_price,
                               single_frequency, stack_frequency)
-
-    @classmethod
-    def scrape_add_auction(cls, item_id):
-        scraper = AuctionScraper(item_id)
-        cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
-                        scraper.single_frequency, scraper.stack_frequency)
-
-    @classmethod
-    def scrape_update_auction(cls, item_id):
-        scraper = AuctionScraper(item_id)
-        cls.update_auction(item_id, scraper.single_price, scraper.stack_price,
-                           scraper.single_frequency, scraper.stack_frequency)
-
-    @staticmethod
-    def outdated_auction(auction):
-        """Return True if the auction data is older than 7 days"""
-        return older_than(auction.last_updated, 7)

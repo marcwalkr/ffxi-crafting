@@ -17,13 +17,13 @@ class Product:
         self.value = (self.profit * sell_frequency) / 1000
 
     @classmethod
-    def get_products(cls, skill_set, profit, frequency, value):
+    def get_products(cls, crafter, profit, frequency, value):
         products = []
-        recipes = SynthController.get_recipes(skill_set)
+        recipes = SynthController.get_recipes(crafter.skill_set)
 
         for recipe in recipes:
             requres_key_item = recipe.key_item > 0
-            if requres_key_item and recipe.key_item not in skill_set.key_items:
+            if requres_key_item and recipe.key_item not in crafter.key_items:
                 continue
 
             include_desynth = Config.get_include_desynth()
@@ -37,7 +37,7 @@ class Product:
             if result_item.ah == 0:
                 continue
 
-            synth_cost = SynthController.get_synth_cost(recipe)
+            synth_cost = crafter.calculate_synth_cost(recipe)
             single_cost = synth_cost / recipe.result_qty
             stack_cost = single_cost * result_item.stack_size
 
@@ -66,7 +66,7 @@ class Product:
     @staticmethod
     def filter_products(products, profit_threshold, freq_threshold,
                         value_threshold):
-        """Removes duplicates from a different recipe that are less profitable
+        """Removes duplicates from different recipes that are less profitable
         and any that don't pass thresholds
         """
         filtered = []

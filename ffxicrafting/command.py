@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 from config import Config
 from product import Product
+from crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from auction_monitor import AuctionMonitor
@@ -21,9 +22,10 @@ class Command:
     @classmethod
     def print_products(cls):
         skill_set = Config.get_skill_set()
+        crafter = Crafter(skill_set)
         profit, frequency, value = Config.get_thresholds()
 
-        products = Product.get_products(skill_set, profit, frequency, value)
+        products = Product.get_products(crafter, profit, frequency, value)
 
         rows = []
         for product in products:

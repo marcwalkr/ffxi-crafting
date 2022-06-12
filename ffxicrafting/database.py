@@ -52,21 +52,6 @@ class Database:
                             (item_id,))
         return self.cursor.fetchone()
 
-    def get_item_cost(self, item_id):
-        self.cursor.execute("SELECT * FROM item_costs WHERE itemid=%s",
-                            (item_id,))
-        return self.cursor.fetchone()
-
-    def add_item_cost(self, item_id, source_id, cost):
-        self.cursor.execute("""INSERT INTO item_costs (itemid, sourceid, cost)
-                            VALUES (%s,%s,%s)""", (item_id, source_id, cost,))
-        self.commit()
-
-    def update_item_cost(self, item_id, source_id, cost):
-        self.cursor.execute("""UPDATE item_costs SET sourceid=%s, cost=%s
-                            WHERE itemid=%s""", (source_id, cost, item_id,))
-        self.commit()
-
     def get_npc(self, npc_id):
         self.cursor.execute("SELECT * FROM npc_list WHERE npcid=%s", (npc_id,))
         return self.cursor.fetchone()
