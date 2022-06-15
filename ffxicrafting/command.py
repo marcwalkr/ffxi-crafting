@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 from config import Config
-from product import Product
+from crafted_product import CraftedProduct
+from flipped_product import FlippedProduct
 from crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
@@ -13,19 +14,21 @@ class Command:
 
     @staticmethod
     def prompt_command():
-        command = input("1. Print products\n" +
-                        "2. Print recipe\n" +
-                        "3. Monitor auctions\n" +
+        command = input("1. Print crafted products\n" +
+                        "2. Print flipped products\n" +
+                        "3. Print recipe\n" +
+                        "4. Monitor auctions\n" +
                         "Q. Quit\n")
         return command
 
     @classmethod
-    def print_products(cls):
+    def print_crafted_products(cls):
         skill_set = Config.get_skill_set()
         crafter = Crafter(skill_set)
         profit, frequency, value = Config.get_thresholds()
 
-        products = Product.get_products(crafter, profit, frequency, value)
+        products = CraftedProduct.get_products(crafter, profit, frequency,
+                                               value)
 
         rows = []
         for product in products:
@@ -43,6 +46,32 @@ class Command:
             rows.append(row)
 
         table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
+                               "Sell Price", "Profit", "Sell Frequency",
+                               "Value Score"], rows)
+        print(table)
+
+    @classmethod
+    def print_flipped_products(cls):
+        profit, frequency, value = Config.get_thresholds()
+
+        products = FlippedProduct.get_products(profit, frequency, value)
+
+        rows = []
+        for product in products:
+            vendor_name = product.vendor_name
+            item_name = product.item_name
+            quantity = product.quantity
+            cost = round(product.cost, 2)
+            sell_price = product.sell_price
+            profit = round(product.profit, 2)
+            sell_frequency = round(product.sell_frequency, 2)
+            value = round(product.value, 2)
+
+            row = [vendor_name, item_name, quantity, cost, sell_price, profit,
+                   sell_frequency, value]
+            rows.append(row)
+
+        table = cls.get_table(["Vendor", "Item", "Quantity", "Cost",
                                "Sell Price", "Profit", "Sell Frequency",
                                "Value Score"], rows)
         print(table)

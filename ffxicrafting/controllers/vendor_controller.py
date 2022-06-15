@@ -18,3 +18,14 @@ class VendorController:
             vendor_items.append(vendor_item)
 
         return vendor_items
+
+    @classmethod
+    def get_all_vendor_items(cls):
+        vendor_item_tuples = cls.db.get_all_vendor_items()
+
+        vendor_items = []
+        for vendor_item_tuple in vendor_item_tuples:
+            vendor_item = VendorItem(*vendor_item_tuple)
+            vendor_items.append(vendor_item)
+
+        return vendor_items

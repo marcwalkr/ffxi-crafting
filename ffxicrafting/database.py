@@ -89,6 +89,10 @@ class Database:
                             (item_id,))
         return self.cursor.fetchall()
 
+    def get_all_vendor_items(self):
+        self.cursor.execute("SELECT * FROM vendor_items")
+        return self.cursor.fetchall()
+
     def add_vendor_item(self, item_id, npc_id, price):
         try:
             self.cursor.execute("""INSERT INTO vendor_items (itemid, npcid, price)
