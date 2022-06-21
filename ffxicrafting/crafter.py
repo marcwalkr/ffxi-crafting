@@ -10,6 +10,114 @@ class Crafter:
         self.skill_set = skill_set
         self.key_items = key_items
 
+    def get_outcome_chances(self, recipe):
+        tier = self.get_tier(recipe)
+
+        # Normal recipe, not desynth
+        if recipe.desynth != 1:
+            # After HQ has been decided, the chances for each tier
+            hq1_chance = 0.75
+            hq2_chance = 0.1875
+            hq3_chance = 0.0625
+
+            if tier == -1:
+                skill_diff = self.get_skill_difference(recipe)
+                success_rate = 0.95 - (skill_diff / 10)
+                hq_chance = 0.0006
+
+            elif tier == 0:
+                success_rate = 0.95
+                hq_chance = 0.018
+
+            elif tier == 1:
+                success_rate = 0.95
+                hq_chance = 0.066
+
+            elif tier == 2:
+                success_rate = 0.95
+                hq_chance = 0.285
+
+            elif tier == 3:
+                success_rate = 0.95
+                hq_chance = 0.506
+
+        # Desynth recipe
+        else:
+            # After HQ has been decided, the chances for each tier
+            hq1_chance = 0.375
+            hq2_chance = 0.375
+            hq3_chance = 0.25
+
+            if tier == -1:
+                skill_diff = self.get_skill_difference(recipe)
+                success_rate = 0.45 - (skill_diff / 10)
+                hq_chance = 0.37
+
+            elif tier == 0:
+                success_rate = 0.45
+                hq_chance = 0.4
+
+            elif tier == 1:
+                success_rate = 0.45
+                hq_chance = 0.43
+
+            elif tier == 2:
+                success_rate = 0.45
+                hq_chance = 0.46
+
+            elif tier == 3:
+                success_rate = 0.45
+                hq_chance = 0.49
+
+        nq = success_rate * (1 - hq_chance)
+        hq1 = success_rate * hq_chance * hq1_chance
+        hq2 = success_rate * hq_chance * hq2_chance
+        hq3 = success_rate * hq_chance * hq3_chance
+
+        return nq, hq1, hq2, hq3
+
+    def get_tier(self, recipe):
+        diff = self.get_skill_difference(recipe)
+
+        if diff > 50:
+            tier = 3
+        elif diff > 30:
+            tier = 2
+        elif diff > 10:
+            tier = 1
+        elif diff >= 0:
+            tier = 0
+        else:
+            tier = -1
+
+        return tier
+
+    def get_skill_difference(self, recipe):
+        recipe_skills = [recipe.wood, recipe.smith, recipe.gold, recipe.cloth,
+                         recipe.leather, recipe.bone, recipe.alchemy,
+                         recipe.cook]
+
+        my_skills = [self.skill_set.wood, self.skill_set.smith,
+                     self.skill_set.gold, self.skill_set.cloth,
+                     self.skill_set.leather, self.skill_set.bone,
+                     self.skill_set.alchemy, self.skill_set.cook]
+
+        diffs = []
+
+        for i in range(len(recipe_skills)):
+            recipe_skill = recipe_skills[i]
+
+            # The recipe doesn't require this craft
+            if recipe_skill == 0:
+                continue
+
+            my_skill = my_skills[i]
+            diff = my_skill - recipe_skill
+            diffs.append(diff)
+
+        # The lowest skill difference determines recipe difficulty
+        return min(diffs)
+
     @classmethod
     def search_cheapest_price(cls, item_id):
         auction_price = cls.get_auction_price(item_id)

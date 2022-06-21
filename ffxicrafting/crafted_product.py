@@ -1,3 +1,4 @@
+from collections import defaultdict
 from product import Product
 from config import Config
 from controllers.synth_controller import SynthController
@@ -25,31 +26,52 @@ class CraftedProduct(Product):
             if recipe.desynth and not include_desynth:
                 continue
 
-            # TODO: handle HQ results
-            result_item = ItemController.get_item(recipe.result)
+            nq_item = ItemController.get_item(recipe.result)
 
             # Result item cannot be sold on AH
-            if result_item.ah == 0:
+            if nq_item.ah == 0:
                 continue
 
+            nq, hq1, hq2, hq3 = crafter.get_outcome_chances(recipe)
+
+            # Multiply the quantity of the quality tier by the chance of that
+            # quality tier to get an "expected quantity" for each tier
+            nq_qty = recipe.result_qty * nq
+            hq1_qty = recipe.result_hq1_qty * hq1
+            hq2_qty = recipe.result_hq2_qty * hq2
+            hq3_qty = recipe.result_hq3_qty * hq3
+
+            # Since multiple quality tiers can produce the same item, need to
+            # add together the quantities where the result item is the same
+            # dict key = result item id, value = expected quantity per synth
+            quantities = defaultdict(lambda: 0)
+            quantities[recipe.result] += nq_qty
+            quantities[recipe.result_hq1] += hq1_qty
+            quantities[recipe.result_hq2] += hq2_qty
+            quantities[recipe.result_hq3] += hq3_qty
+
             synth_cost = crafter.calculate_synth_cost(recipe)
-            single_cost = synth_cost / recipe.result_qty
-            stack_cost = single_cost * result_item.stack_size
 
-            auction = AuctionController.get_auction(recipe.result)
+            for item_id in quantities:
+                item = ItemController.get_item(item_id)
+                item_name = item.sort_name.replace("_", " ").title()
+                quantity = quantities[item_id]
+                single_cost = synth_cost / quantity
+                stack_cost = single_cost * item.stack_size
 
-            if auction.single_price is not None:
-                single_product = cls(recipe.id, recipe.result_name, 1,
-                                     auction.single_price,
-                                     auction.single_frequency, single_cost)
-                products.append(single_product)
+                auction = AuctionController.get_auction(item_id)
 
-            if auction.stack_price is not None:
-                stack_product = cls(recipe.id, recipe.result_name,
-                                    result_item.stack_size,
-                                    auction.stack_price,
-                                    auction.stack_frequency, stack_cost)
-                products.append(stack_product)
+                if auction.single_price is not None:
+                    single_product = cls(recipe.id, item_name, 1,
+                                         auction.single_price,
+                                         auction.single_frequency, single_cost)
+                    products.append(single_product)
+
+                if auction.stack_price is not None:
+                    stack_product = cls(recipe.id, item_name, item.stack_size,
+                                        auction.stack_price,
+                                        auction.stack_frequency, stack_cost)
+                    products.append(stack_product)
 
         # Sort by value (function of profit and sell frequency)
         products.sort(key=lambda x: x.value, reverse=True)
