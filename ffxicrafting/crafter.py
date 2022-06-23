@@ -69,6 +69,9 @@ class Crafter:
                 success_rate = 0.45
                 hq_chance = 0.49
 
+        if success_rate < 0.05:
+            success_rate = 0.05
+
         nq = success_rate * (1 - hq_chance)
         hq1 = success_rate * hq_chance * hq1_chance
         hq2 = success_rate * hq_chance * hq2_chance
@@ -79,13 +82,13 @@ class Crafter:
     def get_tier(self, recipe):
         diff = self.get_skill_difference(recipe)
 
-        if diff > 50:
+        if diff < -50:
             tier = 3
-        elif diff > 30:
+        elif diff < -30:
             tier = 2
-        elif diff > 10:
+        elif diff < -10:
             tier = 1
-        elif diff >= 0:
+        elif diff <= 0:
             tier = 0
         else:
             tier = -1
@@ -112,11 +115,11 @@ class Crafter:
                 continue
 
             my_skill = my_skills[i]
-            diff = my_skill - recipe_skill
+            diff = recipe_skill - my_skill
             diffs.append(diff)
 
-        # The lowest skill difference determines recipe difficulty
-        return min(diffs)
+        # The max skill difference determines recipe difficulty
+        return max(diffs)
 
     @classmethod
     def search_cheapest_price(cls, item_id):

@@ -66,15 +66,15 @@ class Database:
                             (recipe_id,))
         return self.cursor.fetchone()
 
-    def get_recipes(self, skill_set):
-        wood = skill_set.wood
-        smith = skill_set.smith
-        gold = skill_set.gold
-        cloth = skill_set.cloth
-        leather = skill_set.leather
-        bone = skill_set.bone
-        alchemy = skill_set.alchemy
-        cook = skill_set.cook
+    def get_recipes(self, skill_set, skill_range):
+        wood = skill_set.wood + skill_range
+        smith = skill_set.smith + skill_range
+        gold = skill_set.gold + skill_range
+        cloth = skill_set.cloth + skill_range
+        leather = skill_set.leather + skill_range
+        bone = skill_set.bone + skill_range
+        alchemy = skill_set.alchemy + skill_range
+        cook = skill_set.cook + skill_range
 
         self.cursor.execute("""SELECT * FROM synth_recipes WHERE Wood<=%s and
                             Smith<=%s and Gold<=%s and Cloth<=%s and

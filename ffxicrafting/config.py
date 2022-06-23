@@ -16,26 +16,24 @@ class Config:
         pass
 
     @classmethod
-    def get_skill_set(cls):
-        wood = cls.config.get("skills", "wood")
-        smith = cls.config.get("skills", "smith")
-        gold = cls.config.get("skills", "gold")
-        cloth = cls.config.get("skills", "cloth")
-        leather = cls.config.get("skills", "leather")
-        bone = cls.config.get("skills", "bone")
-        alchemy = cls.config.get("skills", "alchemy")
-        cook = cls.config.get("skills", "cook")
+    def get_skill_set(cls, character_name):
+        wood = cls.config.get(character_name, "wood")
+        smith = cls.config.get(character_name, "smith")
+        gold = cls.config.get(character_name, "gold")
+        cloth = cls.config.get(character_name, "cloth")
+        leather = cls.config.get(character_name, "leather")
+        bone = cls.config.get(character_name, "bone")
+        alchemy = cls.config.get(character_name, "alchemy")
+        cook = cls.config.get(character_name, "cook")
 
-        skill_range = cls.get_skill_range()
-
-        wood = int(wood) + skill_range
-        smith = int(smith) + skill_range
-        gold = int(gold) + skill_range
-        cloth = int(cloth) + skill_range
-        leather = int(leather) + skill_range
-        bone = int(bone) + skill_range
-        alchemy = int(alchemy) + skill_range
-        cook = int(cook) + skill_range
+        wood = int(wood)
+        smith = int(smith)
+        gold = int(gold)
+        cloth = int(cloth)
+        leather = int(leather)
+        bone = int(bone)
+        alchemy = int(alchemy)
+        cook = int(cook)
 
         return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
 

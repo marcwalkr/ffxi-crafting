@@ -23,11 +23,19 @@ class Command:
 
     @classmethod
     def print_crafted_products(cls):
-        skill_set = Config.get_skill_set()
-        crafter = Crafter(skill_set)
+        kiimomo_skill_set = Config.get_skill_set("Kiimomo")
+        alaula_skill_set = Config.get_skill_set("Alaula")
+        stronks_skill_set = Config.get_skill_set("Stronks")
+
+        kiimomo = Crafter(kiimomo_skill_set)
+        alaula = Crafter(alaula_skill_set)
+        stronks = Crafter(stronks_skill_set)
+
+        crafters = [kiimomo, alaula, stronks]
+
         profit, frequency, value = Config.get_thresholds()
 
-        products = CraftedProduct.get_products(crafter, profit, frequency,
+        products = CraftedProduct.get_products(crafters, profit, frequency,
                                                value)
 
         rows = []
