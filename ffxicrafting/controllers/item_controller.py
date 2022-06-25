@@ -18,6 +18,15 @@ class ItemController:
             return None
 
     @classmethod
+    def get_item_by_name(cls, item_name):
+        item_tuple = cls.db.get_item_by_name(item_name)
+
+        if item_tuple is not None:
+            return Item(*item_tuple)
+        else:
+            return None
+
+    @classmethod
     def add_item_cost(cls, item_id, source_id, cost):
         cls.db.add_item_cost(item_id, source_id, cost)
 

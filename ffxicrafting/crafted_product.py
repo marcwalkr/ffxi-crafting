@@ -58,27 +58,19 @@ class CraftedProduct(Product):
 
                 for item_id in quantities:
                     item = ItemController.get_item(item_id)
-                    item_name = item.sort_name.replace("_", " ").title()
+
                     quantity = quantities[item_id]
                     single_cost = synth_cost / quantity
                     stack_cost = single_cost * item.stack_size
 
-                    auction = AuctionController.get_auction(item_id)
+                    products += cls.create_products(recipe.id, item_id,
+                                                    single_cost)
 
-                    if auction.single_price is not None:
-                        single_product = cls(recipe.id, item_name, 1,
-                                             auction.single_price,
-                                             auction.single_frequency,
-                                             single_cost)
-                        products.append(single_product)
-
-                    if auction.stack_price is not None:
-                        stack_product = cls(recipe.id, item_name,
-                                            item.stack_size,
-                                            auction.stack_price,
-                                            auction.stack_frequency,
-                                            stack_cost)
-                        products.append(stack_product)
+                    bundleable_names = ["arrow", "bolt", "bullet", "card"]
+                    if any(x in item.name for x in bundleable_names):
+                        products += cls.get_bundle_products(recipe.id,
+                                                            item.name,
+                                                            stack_cost)
 
         # Sort by value (function of profit and sell frequency)
         products.sort(key=lambda x: x.value, reverse=True)
@@ -86,3 +78,50 @@ class CraftedProduct(Product):
         filtered_products = cls.filter_products(products, profit, frequency,
                                                 value)
         return filtered_products
+
+    @classmethod
+    def get_bundle_products(cls, recipe_id, item_name, unbundled_cost):
+        if "arrow" in item_name:
+            bundle_name = item_name.removesuffix("_arrow") + "_quiver"
+        elif "bolt" in item_name:
+            bundle_name = item_name + "_quiver"
+        elif "bullet" in item_name:
+            bundle_name = item_name + "_pouch"
+        else:
+            bundle_name = item_name + "_case"
+
+        item = ItemController.get_item_by_name(bundle_name)
+
+        if item is not None:
+            item_id = item.item_id
+
+            # A carnation costs 60 gil, required to bundle each stack
+            bundled_cost = unbundled_cost + 60
+
+            return cls.create_products(recipe_id, item_id, bundled_cost)
+        else:
+            return []
+
+    @classmethod
+    def create_products(cls, recipe_id, item_id, single_cost):
+        item = ItemController.get_item(item_id)
+        item_name = item.sort_name.replace("_", " ").title()
+
+        auction = AuctionController.get_auction(item_id)
+
+        products = []
+
+        if auction.single_price is not None:
+            single_product = cls(recipe_id, item_name, 1,
+                                 auction.single_price,
+                                 auction.single_frequency, single_cost)
+            products.append(single_product)
+
+        if auction.stack_price is not None:
+            stack_cost = single_cost * item.stack_size
+            stack_product = cls(recipe_id, item_name, item.stack_size,
+                                auction.stack_price, auction.stack_frequency,
+                                stack_cost)
+            products.append(stack_product)
+
+        return products
