@@ -24,12 +24,17 @@ class Command:
     @classmethod
     def print_crafted_products(cls):
         kiimomo_skill_set = Config.get_skill_set("Kiimomo")
-        alaula_skill_set = Config.get_skill_set("Alaula")
-        stronks_skill_set = Config.get_skill_set("Stronks")
+        kiimomo_key_items = Config.get_key_items("Kiimomo")
 
-        kiimomo = Crafter(kiimomo_skill_set)
-        alaula = Crafter(alaula_skill_set)
-        stronks = Crafter(stronks_skill_set)
+        alaula_skill_set = Config.get_skill_set("Alaula")
+        alaula_key_items = Config.get_key_items("Alaula")
+
+        stronks_skill_set = Config.get_skill_set("Stronks")
+        stronks_key_items = Config.get_key_items("Stronks")
+
+        kiimomo = Crafter(kiimomo_skill_set, kiimomo_key_items)
+        alaula = Crafter(alaula_skill_set, alaula_key_items)
+        stronks = Crafter(stronks_skill_set, stronks_key_items)
 
         crafters = [kiimomo, alaula, stronks]
 

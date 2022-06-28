@@ -38,6 +38,16 @@ class Config:
         return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
 
     @classmethod
+    def get_key_items(cls, character_name):
+        key_items = cls.config.get(character_name, "key_items")
+        key_items = key_items.split(",")
+
+        try:
+            return [int(i) for i in key_items]
+        except ValueError:
+            return []
+
+    @classmethod
     def get_thresholds(cls):
         profit = cls.config.get("thresholds", "profit")
         frequency = cls.config.get("thresholds", "frequency")
