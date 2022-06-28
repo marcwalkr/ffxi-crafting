@@ -1,3 +1,5 @@
+import datetime
+import time
 from database import Database
 from helpers import older_than
 from models.auction import Auction
@@ -19,10 +21,14 @@ class AuctionController:
 
             if older_than(auction.last_updated, 7):
                 scraper = AuctionScraper(item_id)
+                ts = time.time()
+                timestamp = datetime.datetime.fromtimestamp(
+                    ts).strftime("%Y-%m-%d %H:%M:%S")
+
                 cls.update_auction(item_id, scraper.single_price,
                                    scraper.stack_price,
                                    scraper.single_frequency,
-                                   scraper.stack_frequency)
+                                   scraper.stack_frequency, timestamp)
         else:
             scraper = AuctionScraper(item_id)
             cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
@@ -39,6 +45,6 @@ class AuctionController:
 
     @classmethod
     def update_auction(cls, item_id, single_price, stack_price,
-                       single_frequency, stack_frequency):
+                       single_frequency, stack_frequency, timestamp):
         cls.db.update_auction(item_id, single_price, stack_price,
-                              single_frequency, stack_frequency)
+                              single_frequency, stack_frequency, timestamp)

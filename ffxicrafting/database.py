@@ -29,12 +29,13 @@ class Database:
         self.commit()
 
     def update_auction(self, item_id, single_price, stack_price,
-                       single_frequency, stack_frequency):
+                       single_frequency, stack_frequency, timestamp):
         self.cursor.execute("""UPDATE auction SET single_price=%s,
                             stack_price=%s, single_frequency=%s,
-                            stack_frequency=%s WHERE itemid=%s""",
+                            stack_frequency=%s, last_updated=%s
+                            WHERE itemid=%s""",
                             (single_price, stack_price, single_frequency,
-                             stack_frequency, item_id,))
+                             stack_frequency, timestamp, item_id,))
         self.commit()
 
     def get_guild_shops(self, item_id):
