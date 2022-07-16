@@ -72,8 +72,8 @@ class CraftedProduct(Product):
                                                             item.name,
                                                             stack_cost)
 
-        # Sort by value (function of profit and sell frequency)
-        products.sort(key=lambda x: x.value, reverse=True)
+        # Sort by profit
+        products.sort(key=lambda x: x.profit, reverse=True)
 
         filtered_products = cls.filter_products(products, profit, frequency,
                                                 value)
