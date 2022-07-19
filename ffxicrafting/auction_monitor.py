@@ -13,7 +13,7 @@ class AuctionMonitor:
 
     def monitor_auctions(self):
         self.inititialize_histories()
-        Logger.print_yello("Monitoring auctions. Stop monitoring by typing "
+        Logger.print_yello("Monitoring auctions. Stop monitoring with "
                            "Ctrl+C")
         while True:
             try:
