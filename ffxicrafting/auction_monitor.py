@@ -1,5 +1,7 @@
 import time
 from logger import Logger
+from playsound import playsound
+from pathlib import Path
 from auction_scraper import AuctionScraper
 from models.auction_history import AuctionHistory
 from controllers.item_controller import ItemController
@@ -19,6 +21,9 @@ class AuctionMonitor:
             try:
                 for id in self.monitored_ids:
                     scraper = AuctionScraper(id, False)
+
+                    if len(scraper.quantities) == 0:
+                        continue
 
                     if self.history_changed(id, scraper.sellers, scraper.buyers):
                         item = ItemController.get_item(id)
@@ -63,3 +68,5 @@ class AuctionMonitor:
     def print_sold_alert(item_name, quantity, seller_name):
         Logger.print_red("Item \"{}\" ({}) was recently sold by {}"
                          .format(item_name, quantity, seller_name))
+        audio = Path().cwd().__str__() + "\sounds\Alarm04.wav"
+        playsound(audio)
