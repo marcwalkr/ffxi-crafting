@@ -7,10 +7,8 @@ if __name__ == "__main__":
         if command == "1":
             Command.print_crafted_products()
         elif command == "2":
-            Command.print_flipped_products()
-        elif command == "3":
             Command.print_recipe()
-        elif command == "4":
+        elif command == "3":
             Command.monitor_auctions()
         elif command == "q" or command == "Q":
             break

@@ -15,9 +15,8 @@ class Command:
     @staticmethod
     def prompt_command():
         command = input("1. Print crafted products\n" +
-                        "2. Print flipped products\n" +
-                        "3. Print recipe\n" +
-                        "4. Monitor auctions\n" +
+                        "2. Print recipe\n" +
+                        "3. Monitor auctions\n" +
                         "Q. Quit\n")
         return command
 
@@ -60,32 +59,6 @@ class Command:
             rows.append(row)
 
         table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
-                               "Sell Price", "Profit", "Sell Frequency",
-                               "Value Score"], rows)
-        print(table)
-
-    @classmethod
-    def print_flipped_products(cls):
-        profit, frequency, value = Config.get_thresholds()
-
-        products = FlippedProduct.get_products(profit, frequency, value)
-
-        rows = []
-        for product in products:
-            vendor_name = product.vendor_name
-            item_name = product.item_name
-            quantity = product.quantity
-            cost = round(product.cost, 2)
-            sell_price = product.sell_price
-            profit = round(product.profit, 2)
-            sell_frequency = round(product.sell_frequency, 2)
-            value = round(product.value, 2)
-
-            row = [vendor_name, item_name, quantity, cost, sell_price, profit,
-                   sell_frequency, value]
-            rows.append(row)
-
-        table = cls.get_table(["Vendor", "Item", "Quantity", "Cost",
                                "Sell Price", "Profit", "Sell Frequency",
                                "Value Score"], rows)
         print(table)
