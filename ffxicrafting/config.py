@@ -79,3 +79,7 @@ class Config:
     @classmethod
     def get_include_desynth(cls):
         return cls.config.getboolean("settings", "include_desynth")
+
+    @classmethod
+    def get_sort_column(cls):
+        return cls.config.get("settings", "sort_column")

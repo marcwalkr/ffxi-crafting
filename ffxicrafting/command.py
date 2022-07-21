@@ -39,9 +39,10 @@ class Command:
         crafters = [kiimomo, alaula, stronks]
 
         profit, frequency, value = Config.get_thresholds()
+        sort_column = Config.get_sort_column()
 
         products = CraftedProduct.get_products(crafters, profit, frequency,
-                                               value)
+                                               value, sort_column)
 
         rows = []
         for product in products:

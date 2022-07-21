@@ -27,3 +27,21 @@ class Product:
                 filtered.append(product)
 
         return filtered
+
+    @staticmethod
+    def sort_products(products, sort_method):
+        if sort_method == "item_name":
+            sorted_products = sorted(products, key=lambda x: x.item_name)
+        elif sort_method == "cost":
+            sorted_products = sorted(products, key=lambda x: x.cost)
+        elif sort_method == "profit":
+            sorted_products = sorted(products, key=lambda x: x.profit,
+                                     reverse=True)
+        elif sort_method == "sell_frequency":
+            sorted_products = sorted(products, key=lambda x: x.sell_frequency,
+                                     reverse=True)
+        else:
+            sorted_products = sorted(products, key=lambda x: x.value,
+                                     reverse=True)
+
+        return sorted_products
