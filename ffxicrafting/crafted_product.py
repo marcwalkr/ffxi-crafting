@@ -109,16 +109,22 @@ class CraftedProduct(Product):
 
         products = []
 
-        if auction.single_price is not None:
+        if auction.single_sales > 0:
+            avg_single_price = auction.single_price_sum / auction.single_sales
+            avg_single_frequency = auction.single_sales / auction.days
+
             single_product = cls(recipe_id, item_name, 1,
-                                 auction.single_price,
-                                 auction.single_frequency, single_cost)
+                                 avg_single_price, avg_single_frequency,
+                                 single_cost)
             products.append(single_product)
 
-        if auction.stack_price is not None:
+        if auction.stack_sales > 0:
+            avg_stack_price = auction.stack_price_sum / auction.stack_sales
+            avg_stack_frequency = auction.stack_sales / auction.days
+
             stack_cost = single_cost * item.stack_size
             stack_product = cls(recipe_id, item_name, item.stack_size,
-                                auction.stack_price, auction.stack_frequency,
+                                avg_stack_price, avg_stack_frequency,
                                 stack_cost)
             products.append(stack_product)
 

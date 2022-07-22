@@ -14,11 +14,13 @@ class AuctionScraper:
         self.sellers, self.buyers, self.quantities, self.prices, self.dates = \
             self.scrape_listing()
 
-        self.single_price = self.get_single_price()
-        self.stack_price = self.get_stack_price()
+        self.single_sales = self.get_single_sales()
+        self.single_price_sum = self.get_single_price_sum()
 
-        self.single_frequency = self.get_single_frequency()
-        self.stack_frequency = self.get_stack_frequency()
+        self.stack_sales = self.get_stack_sales()
+        self.stack_price_sum = self.get_stack_price_sum()
+
+        self.days = self.get_num_days()
 
     def scrape_listing(self):
         listing_html = self.get_listing_html()
@@ -84,21 +86,27 @@ class AuctionScraper:
 
         return html
 
-    def get_single_price(self):
-        try:
-            single_index = self.quantities.index("Single")
-            single_price = self.prices[single_index]
-            return int(single_price)
-        except (ValueError, IndexError):
-            return None
+    def get_single_sales(self):
+        return self.quantities.count("Single")
 
-    def get_stack_price(self):
-        try:
-            stack_index = self.quantities.index("Stack")
-            stack_price = self.prices[stack_index]
-            return int(stack_price)
-        except (ValueError, IndexError):
-            return None
+    def get_single_price_sum(self):
+        sum = 0
+        for i in range(len(self.quantities)):
+            if self.quantities[i] == "Single":
+                sum += int(self.prices[i])
+
+        return sum
+
+    def get_stack_sales(self):
+        return self.quantities.count("Stack")
+
+    def get_stack_price_sum(self):
+        sum = 0
+        for i in range(len(self.quantities)):
+            if self.quantities[i] == "Stack":
+                sum += int(self.prices[i])
+
+        return sum
 
     def get_num_days(self):
         """Gets the number of days from the first in history until today,
@@ -117,19 +125,3 @@ class AuctionScraper:
 
         except IndexError:
             return 0
-
-    def get_single_frequency(self):
-        try:
-            single_count = self.quantities.count("Single")
-            freq = single_count / self.get_num_days()
-            return freq
-        except (ValueError, ZeroDivisionError):
-            return None
-
-    def get_stack_frequency(self):
-        try:
-            stack_count = self.quantities.count("Stack")
-            freq = stack_count / self.get_num_days()
-            return freq
-        except (ValueError, ZeroDivisionError):
-            return None

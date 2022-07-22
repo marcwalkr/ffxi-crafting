@@ -25,26 +25,28 @@ class AuctionController:
                 timestamp = datetime.datetime.fromtimestamp(
                     ts).strftime("%Y-%m-%d %H:%M:%S")
 
-                cls.update_auction(item_id, scraper.single_price,
-                                   scraper.stack_price,
-                                   scraper.single_frequency,
-                                   scraper.stack_frequency, timestamp)
+                cls.update_auction(item_id, scraper.single_sales,
+                                   scraper.single_price_sum,
+                                   scraper.stack_sales,
+                                   scraper.stack_price_sum, scraper.days,
+                                   timestamp)
         else:
             scraper = AuctionScraper(item_id)
-            cls.add_auction(item_id, scraper.single_price, scraper.stack_price,
-                            scraper.single_frequency, scraper.stack_frequency)
+            cls.add_auction(item_id, scraper.single_sales,
+                            scraper.single_price_sum, scraper.stack_sales,
+                            scraper.stack_price_sum, scraper.days)
             auction = cls.get_auction(item_id)
 
         return auction
 
     @classmethod
-    def add_auction(cls, item_id, single_price, stack_price, single_frequency,
-                    stack_frequency):
-        cls.db.add_auction(item_id, single_price, stack_price,
-                           single_frequency, stack_frequency)
+    def add_auction(cls, item_id, single_sales, single_price_sum, stack_sales,
+                    stack_price_sum, days):
+        cls.db.add_auction(item_id, single_sales, single_price_sum,
+                           stack_sales, stack_price_sum, days)
 
     @classmethod
-    def update_auction(cls, item_id, single_price, stack_price,
-                       single_frequency, stack_frequency, timestamp):
-        cls.db.update_auction(item_id, single_price, stack_price,
-                              single_frequency, stack_frequency, timestamp)
+    def update_auction(cls, item_id, single_sales, single_price_sum,
+                       stack_sales, stack_price_sum, days, timestamp):
+        cls.db.update_auction(item_id, single_sales, single_price_sum,
+                              stack_sales, stack_price_sum, days, timestamp)

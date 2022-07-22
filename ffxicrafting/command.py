@@ -1,7 +1,6 @@
 from prettytable import PrettyTable
 from config import Config
 from crafted_product import CraftedProduct
-from flipped_product import FlippedProduct
 from crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
@@ -49,7 +48,7 @@ class Command:
             item_name = product.item_name
             quantity = product.quantity
             cost = round(product.cost, 2)
-            sell_price = product.sell_price
+            sell_price = round(product.sell_price, 2)
             profit = round(product.profit, 2)
             sell_frequency = round(product.sell_frequency, 2)
             value = round(product.value, 2)
@@ -59,7 +58,7 @@ class Command:
             rows.append(row)
 
         table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
-                               "Sell Price", "Profit", "Sell Frequency",
+                               "Average Price", "Profit", "Average Frequency",
                                "Value Score"], rows)
         print(table)
 

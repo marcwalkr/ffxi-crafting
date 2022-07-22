@@ -19,23 +19,25 @@ class Database:
                             (item_id,))
         return self.cursor.fetchone()
 
-    def add_auction(self, item_id, single_price, stack_price, single_frequency,
-                    stack_frequency):
-        self.cursor.execute("""INSERT INTO auction (itemid, single_price, stack_price,
-                            single_frequency, stack_frequency)
-                            VALUES (%s,%s,%s,%s,%s)""",
-                            (item_id, single_price, stack_price,
-                             single_frequency, stack_frequency,))
+    def add_auction(self, item_id, single_sales, single_price_sum, stack_sales,
+                    stack_price_sum, days):
+        self.cursor.execute("""INSERT INTO auction (itemid, single_sales,
+                            single_price_sum, stack_sales, stack_price_sum,
+                            days)
+                            VALUES (%s,%s,%s,%s,%s,%s)""",
+                            (item_id, single_sales, single_price_sum,
+                             stack_sales, stack_price_sum, days,))
         self.commit()
 
-    def update_auction(self, item_id, single_price, stack_price,
-                       single_frequency, stack_frequency, timestamp):
-        self.cursor.execute("""UPDATE auction SET single_price=%s,
-                            stack_price=%s, single_frequency=%s,
-                            stack_frequency=%s, last_updated=%s
-                            WHERE itemid=%s""",
-                            (single_price, stack_price, single_frequency,
-                             stack_frequency, timestamp, item_id,))
+    def update_auction(self, item_id, single_sales, single_price_sum,
+                       stack_sales, stack_price_sum, days, timestamp):
+        self.cursor.execute("""UPDATE auction SET single_sales=single_sales+%s,
+                            single_price_sum=single_price_sum+%s,
+                            stack_sales=stack_sales+%s,
+                            stack_price_sum=stack_price_sum+%s, days=days+%s,
+                            last_updated=%s WHERE itemid=%s""",
+                            (single_sales, single_price_sum, stack_sales,
+                             stack_price_sum, days, timestamp, item_id,))
         self.commit()
 
     def get_guild_shops(self, item_id):

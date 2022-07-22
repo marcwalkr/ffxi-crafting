@@ -141,14 +141,16 @@ class Crafter:
 
         prices = []
 
-        if auction.single_price is not None:
-            prices.append(auction.single_price)
+        if auction.single_sales > 0:
+            avg_single_price = auction.single_price_sum / auction.single_sales
+            prices.append(avg_single_price)
 
-        if auction.stack_price is not None:
+        if auction.stack_sales > 0:
             # Get the item for the stack size
             item = ItemController.get_item(item_id)
 
-            single_price_from_stack = auction.stack_price / item.stack_size
+            avg_stack_price = auction.stack_price_sum / auction.stack_sales
+            single_price_from_stack = avg_stack_price / item.stack_size
             prices.append(single_price_from_stack)
 
         if len(prices) > 0:
