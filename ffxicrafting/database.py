@@ -19,6 +19,10 @@ class Database:
                             (item_id,))
         return self.cursor.fetchone()
 
+    def get_all_auctions(self):
+        self.cursor.execute("SELECT * FROM auction")
+        return self.cursor.fetchall()
+
     def add_auction(self, item_id, single_sales, single_price_sum, stack_sales,
                     stack_price_sum, days):
         self.cursor.execute("""INSERT INTO auction (itemid, single_sales,

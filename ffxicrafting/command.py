@@ -4,6 +4,7 @@ from crafted_product import CraftedProduct
 from crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
+from controllers.auction_controller import AuctionController
 from auction_monitor import AuctionMonitor
 
 
@@ -16,6 +17,7 @@ class Command:
         command = input("1. Print crafted products\n" +
                         "2. Print recipe\n" +
                         "3. Monitor auctions\n" +
+                        "4. Update auction data\n" +
                         "Q. Quit\n")
         return command
 
@@ -120,3 +122,7 @@ class Command:
             table.add_row(row)
 
         return table
+
+    @classmethod
+    def update_auction_data(cls):
+        AuctionController.scrape_update_all_auctions()

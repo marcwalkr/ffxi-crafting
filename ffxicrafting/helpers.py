@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from datetime import datetime
 from controllers.npc_controller import NpcController
 
@@ -11,6 +12,11 @@ def older_than(the_datetime, num_days):
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+
+def get_current_timestamp():
+    ts = time.time()
+    return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def generate_vendor_inserts():
