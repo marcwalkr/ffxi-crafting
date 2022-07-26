@@ -15,8 +15,9 @@ class Product:
         """Removes duplicates from different recipes that are less profitable
         and any that don't pass thresholds
         """
+        profit_sorted = sorted(products, key=lambda x: x.profit, reverse=True)
         filtered = []
-        for product in products:
+        for product in profit_sorted:
             duplicate = any(x.item_name == product.item_name and
                             x.quantity == product.quantity for x in filtered)
             profitable = product.profit >= profit_threshold
