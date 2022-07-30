@@ -16,15 +16,15 @@ class Config:
         pass
 
     @classmethod
-    def get_skill_set(cls, character_name):
-        wood = cls.config.get(character_name, "wood")
-        smith = cls.config.get(character_name, "smith")
-        gold = cls.config.get(character_name, "gold")
-        cloth = cls.config.get(character_name, "cloth")
-        leather = cls.config.get(character_name, "leather")
-        bone = cls.config.get(character_name, "bone")
-        alchemy = cls.config.get(character_name, "alchemy")
-        cook = cls.config.get(character_name, "cook")
+    def get_skill_set(cls, character):
+        wood = cls.config.get(character, "wood")
+        smith = cls.config.get(character, "smith")
+        gold = cls.config.get(character, "gold")
+        cloth = cls.config.get(character, "cloth")
+        leather = cls.config.get(character, "leather")
+        bone = cls.config.get(character, "bone")
+        alchemy = cls.config.get(character, "alchemy")
+        cook = cls.config.get(character, "cook")
 
         wood = int(wood)
         smith = int(smith)
@@ -38,8 +38,8 @@ class Config:
         return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
 
     @classmethod
-    def get_key_items(cls, character_name):
-        key_items = cls.config.get(character_name, "key_items")
+    def get_key_items(cls, character):
+        key_items = cls.config.get(character, "key_items")
         key_items = key_items.split(",")
 
         try:

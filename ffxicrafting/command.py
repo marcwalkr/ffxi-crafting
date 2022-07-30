@@ -23,20 +23,20 @@ class Command:
 
     @classmethod
     def print_crafted_products(cls):
-        kiimomo_skill_set = Config.get_skill_set("Kiimomo")
-        kiimomo_key_items = Config.get_key_items("Kiimomo")
+        char1_skill_set = Config.get_skill_set("Character1")
+        char1_key_items = Config.get_key_items("Character1")
 
-        alaula_skill_set = Config.get_skill_set("Alaula")
-        alaula_key_items = Config.get_key_items("Alaula")
+        char2_skill_set = Config.get_skill_set("Character2")
+        char2_key_items = Config.get_key_items("Character2")
 
-        stronks_skill_set = Config.get_skill_set("Stronks")
-        stronks_key_items = Config.get_key_items("Stronks")
+        char3_skill_set = Config.get_skill_set("Character3")
+        char3_key_items = Config.get_key_items("Character3")
 
-        kiimomo = Crafter(kiimomo_skill_set, kiimomo_key_items)
-        alaula = Crafter(alaula_skill_set, alaula_key_items)
-        stronks = Crafter(stronks_skill_set, stronks_key_items)
+        character1 = Crafter(char1_skill_set, char1_key_items)
+        character2 = Crafter(char2_skill_set, char2_key_items)
+        character3 = Crafter(char3_skill_set, char3_key_items)
 
-        crafters = [kiimomo, alaula, stronks]
+        crafters = [character1, character2, character3]
 
         profit, frequency, value = Config.get_thresholds()
         sort_column = Config.get_sort_column()
