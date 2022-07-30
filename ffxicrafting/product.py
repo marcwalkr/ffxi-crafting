@@ -7,11 +7,9 @@ class Product:
         self.sell_frequency = sell_frequency
         self.cost = cost
         self.profit = sell_price - cost
-        self.value = (self.profit * sell_frequency) / 1000
 
     @staticmethod
-    def filter_products(products, profit_threshold, freq_threshold,
-                        value_threshold):
+    def filter_products(products, profit_threshold, freq_threshold):
         """Removes duplicates from different recipes that are less profitable
         and any that don't pass thresholds
         """
@@ -22,9 +20,8 @@ class Product:
                             x.quantity == product.quantity for x in filtered)
             profitable = product.profit >= profit_threshold
             fast_selling = product.sell_frequency >= freq_threshold
-            valuable = product.value >= value_threshold
 
-            if profitable and fast_selling and valuable and not duplicate:
+            if profitable and fast_selling and not duplicate:
                 filtered.append(product)
 
         return filtered
@@ -38,11 +35,8 @@ class Product:
         elif sort_method == "profit":
             sorted_products = sorted(products, key=lambda x: x.profit,
                                      reverse=True)
-        elif sort_method == "sell_frequency":
-            sorted_products = sorted(products, key=lambda x: x.sell_frequency,
-                                     reverse=True)
         else:
-            sorted_products = sorted(products, key=lambda x: x.value,
+            sorted_products = sorted(products, key=lambda x: x.sell_frequency,
                                      reverse=True)
 
         return sorted_products

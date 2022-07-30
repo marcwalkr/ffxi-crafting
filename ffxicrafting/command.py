@@ -38,11 +38,11 @@ class Command:
 
         crafters = [character1, character2, character3]
 
-        profit, frequency, value = Config.get_thresholds()
+        profit, frequency = Config.get_thresholds()
         sort_column = Config.get_sort_column()
 
         products = CraftedProduct.get_products(crafters, profit, frequency,
-                                               value, sort_column)
+                                               sort_column)
 
         rows = []
         for product in products:
@@ -53,15 +53,14 @@ class Command:
             sell_price = round(product.sell_price, 2)
             profit = round(product.profit, 2)
             sell_frequency = round(product.sell_frequency, 2)
-            value = round(product.value, 2)
 
             row = [recipe_id, item_name, quantity, cost, sell_price, profit,
-                   sell_frequency, value]
+                   sell_frequency]
             rows.append(row)
 
         table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
-                               "Average Price", "Profit", "Average Frequency",
-                               "Value Score"], rows)
+                               "Average Price", "Profit", "Average Frequency"],
+                              rows)
         print(table)
 
     @classmethod

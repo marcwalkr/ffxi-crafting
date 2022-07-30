@@ -13,7 +13,7 @@ class CraftedProduct(Product):
         self.recipe_id = recipe_id
 
     @classmethod
-    def get_products(cls, crafters, profit, frequency, value, sort_column):
+    def get_products(cls, crafters, profit, frequency, sort_column):
         products = []
         skill_range = Config.get_skill_range()
 
@@ -72,7 +72,7 @@ class CraftedProduct(Product):
                                                             item.name,
                                                             stack_cost)
 
-        products = cls.filter_products(products, profit, frequency, value)
+        products = cls.filter_products(products, profit, frequency)
         products = cls.sort_products(products, sort_column)
 
         return products
