@@ -124,4 +124,4 @@ class Command:
 
     @classmethod
     def update_auction_data(cls):
-        AuctionController.scrape_update_all_auctions()
+        AuctionController.update_all_auctions()

@@ -5,11 +5,6 @@ from datetime import datetime
 from controllers.npc_controller import NpcController
 
 
-def older_than(the_datetime, num_days):
-    time_between = datetime.now() - the_datetime
-    return time_between.days > num_days
-
-
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
