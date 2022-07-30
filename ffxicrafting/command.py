@@ -107,8 +107,7 @@ class Command:
     @classmethod
     def monitor_auctions(cls):
         monitored_ids = Config.get_monitored_item_ids()
-        frequency = Config.get_monitor_frequency()
-        auction_monitor = AuctionMonitor(monitored_ids, frequency)
+        auction_monitor = AuctionMonitor(monitored_ids)
         auction_monitor.monitor_auctions()
 
     @staticmethod

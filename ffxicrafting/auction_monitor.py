@@ -1,4 +1,3 @@
-import time
 from logger import Logger
 from playsound import playsound
 from pathlib import Path
@@ -8,9 +7,8 @@ from controllers.item_controller import ItemController
 
 
 class AuctionMonitor:
-    def __init__(self, monitored_ids, frequency) -> None:
+    def __init__(self, monitored_ids) -> None:
         self.monitored_ids = monitored_ids
-        self.frequency = frequency
         self.auction_histories = {}
 
     def monitor_auctions(self):
@@ -41,8 +39,6 @@ class AuctionMonitor:
                                                      scraper.prices,
                                                      scraper.dates)
                         self.auction_histories[id] = new_history
-
-                time.sleep(self.frequency * 60)
 
             except KeyboardInterrupt:
                 break

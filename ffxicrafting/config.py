@@ -72,11 +72,6 @@ class Config:
         return [int(i) for i in item_ids]
 
     @classmethod
-    def get_monitor_frequency(cls):
-        frequency = cls.config.get("settings", "monitor_frequency")
-        return int(frequency)
-
-    @classmethod
     def get_include_desynth(cls):
         return cls.config.getboolean("settings", "include_desynth")
 
