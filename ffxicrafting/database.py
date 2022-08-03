@@ -96,6 +96,10 @@ class Database:
 
         return self.cursor.fetchall()
 
+    def get_all_recipes(self):
+        self.cursor.execute("SELECT * FROM synth_recipes")
+        return self.cursor.fetchall()
+
     def get_vendor_items(self, item_id):
         self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s",
                             (item_id,))

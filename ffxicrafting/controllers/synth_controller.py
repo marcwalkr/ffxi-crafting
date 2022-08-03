@@ -26,3 +26,13 @@ class SynthController:
             recipes.append(recipe)
 
         return recipes
+
+    @classmethod
+    def get_all_recipes(cls):
+        recipes = []
+        recipe_tuples = cls.db.get_all_recipes()
+        for recipe_tuple in recipe_tuples:
+            recipe = SynthRecipe(*recipe_tuple)
+            recipes.append(recipe)
+
+        return recipes

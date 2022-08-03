@@ -119,7 +119,10 @@ class Crafter:
             diffs.append(diff)
 
         # The max skill difference determines recipe difficulty
-        return max(diffs)
+        if len(diffs) > 0:
+            return max(diffs)
+        else:
+            return 100
 
     @classmethod
     def search_cheapest_price(cls, item_id):

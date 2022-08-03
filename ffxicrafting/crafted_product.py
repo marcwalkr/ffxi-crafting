@@ -17,60 +17,70 @@ class CraftedProduct(Product):
         products = []
         skill_range = Config.get_skill_range()
 
-        for crafter in crafters:
-            recipes = SynthController.get_recipes(crafter.skill_set,
-                                                  skill_range)
+        recipes = SynthController.get_all_recipes()
+        for recipe in recipes:
+            crafter_skill_diffs = []
+            for crafter in crafters:
+                skill_diff = crafter.get_skill_difference(recipe)
+                crafter_skill_diffs.append(skill_diff)
 
-            for recipe in recipes:
-                requres_key_item = recipe.key_item > 0
-                if requres_key_item and recipe.key_item not in crafter.key_items:
-                    continue
+            min_skill_diff = min(crafter_skill_diffs)
 
-                include_desynth = Config.get_include_desynth()
-                if recipe.desynth and not include_desynth:
-                    continue
+            # None of the crafters can make this recipe
+            if (min_skill_diff - skill_range) > 0:
+                continue
 
-                nq_item = ItemController.get_item(recipe.result)
+            best_crafter_idx = crafter_skill_diffs.index(min_skill_diff)
+            crafter = crafters[best_crafter_idx]
 
-                # Result item cannot be sold on AH
-                if nq_item.ah == 0:
-                    continue
+            requres_key_item = recipe.key_item > 0
+            if requres_key_item and recipe.key_item not in crafter.key_items:
+                continue
 
-                nq, hq1, hq2, hq3 = crafter.get_outcome_chances(recipe)
+            include_desynth = Config.get_include_desynth()
+            if recipe.desynth and not include_desynth:
+                continue
 
-                # Multiply the quantity of the quality tier by the chance of that
-                # quality tier to get an "expected quantity" for each tier
-                nq_qty = recipe.result_qty * nq
-                hq1_qty = recipe.result_hq1_qty * hq1
-                hq2_qty = recipe.result_hq2_qty * hq2
-                hq3_qty = recipe.result_hq3_qty * hq3
+            nq_item = ItemController.get_item(recipe.result)
 
-                # Since multiple quality tiers can produce the same item, need to
-                # add together the quantities where the result item is the same
-                # dict key = result item id, value = expected quantity per synth
-                quantities = defaultdict(lambda: 0)
-                quantities[recipe.result] += nq_qty
-                quantities[recipe.result_hq1] += hq1_qty
-                quantities[recipe.result_hq2] += hq2_qty
-                quantities[recipe.result_hq3] += hq3_qty
+            # Result item cannot be sold on AH
+            if nq_item.ah == 0:
+                continue
 
-                synth_cost = crafter.calculate_synth_cost(recipe)
+            nq, hq1, hq2, hq3 = crafter.get_outcome_chances(recipe)
 
-                for item_id in quantities:
-                    item = ItemController.get_item(item_id)
+            # Multiply the quantity of the quality tier by the chance of that
+            # quality tier to get an "expected quantity" for each tier
+            nq_qty = recipe.result_qty * nq
+            hq1_qty = recipe.result_hq1_qty * hq1
+            hq2_qty = recipe.result_hq2_qty * hq2
+            hq3_qty = recipe.result_hq3_qty * hq3
 
-                    quantity = quantities[item_id]
-                    single_cost = synth_cost / quantity
-                    stack_cost = single_cost * item.stack_size
+            # Since multiple quality tiers can produce the same item, need to
+            # add together the quantities where the result item is the same
+            # dict key = result item id, value = expected quantity per synth
+            quantities = defaultdict(lambda: 0)
+            quantities[recipe.result] += nq_qty
+            quantities[recipe.result_hq1] += hq1_qty
+            quantities[recipe.result_hq2] += hq2_qty
+            quantities[recipe.result_hq3] += hq3_qty
 
-                    products += cls.create_products(recipe.id, item_id,
-                                                    single_cost)
+            synth_cost = crafter.calculate_synth_cost(recipe)
 
-                    bundleable_names = ["arrow", "bolt", "bullet", "card"]
-                    if any(x in item.name for x in bundleable_names):
-                        products += cls.get_bundle_products(recipe.id,
-                                                            item.name,
-                                                            stack_cost)
+            for item_id in quantities:
+                item = ItemController.get_item(item_id)
+
+                quantity = quantities[item_id]
+                single_cost = synth_cost / quantity
+                stack_cost = single_cost * item.stack_size
+
+                products += cls.create_products(recipe.id, item_id,
+                                                single_cost)
+
+                bundleable_names = ["arrow", "bolt", "bullet", "card"]
+                if any(x in item.name for x in bundleable_names):
+                    products += cls.get_bundle_products(recipe.id, item.name,
+                                                        stack_cost)
 
         products = cls.filter_products(products, profit, frequency)
         products = cls.sort_products(products, sort_column)
