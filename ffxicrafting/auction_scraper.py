@@ -1,5 +1,4 @@
 import requests
-import time
 from bs4 import BeautifulSoup
 from datetime import date, datetime
 from helpers import chunker
@@ -80,9 +79,6 @@ class AuctionScraper:
 
         result = requests.get(url)
         html = BeautifulSoup(result.text, "html.parser")
-
-        # Wait 3 seconds so it's not scraping to fast
-        time.sleep(3)
 
         return html
 
