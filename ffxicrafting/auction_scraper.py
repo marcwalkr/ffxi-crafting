@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-from datetime import date, datetime
 from helpers import chunker
 from logger import Logger
+from datetime import datetime, date
 
 
 class AuctionScraper:
@@ -19,7 +19,7 @@ class AuctionScraper:
         self.stack_sales = self.get_stack_sales()
         self.stack_price_sum = self.get_stack_price_sum()
 
-        self.days = self.get_num_days()
+        self.num_days = self.get_num_days()
 
     def scrape_listing(self):
         listing_html = self.get_listing_html()
@@ -71,7 +71,15 @@ class AuctionScraper:
             except ValueError:
                 break
 
-        return sellers, buyers, quantities, prices, dates
+        # If the lists are different sizes, something went wrong
+        # That can happen when there are bazaar listings but no AH sales
+        data_lists = [sellers, buyers, quantities, prices, dates]
+        it = iter(data_lists)
+        the_len = len(next(it))
+        if all(len(l) == the_len for l in it):
+            return sellers, buyers, quantities, prices, dates
+        else:
+            return [], [], [], [], []
 
     def get_listing_html(self):
         url = ("https://www.wingsxi.com/wings/index.php?page=item&worldid=100"

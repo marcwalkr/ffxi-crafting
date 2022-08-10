@@ -5,7 +5,7 @@ if __name__ == "__main__":
         command = Command.prompt_command()
 
         if command == "1":
-            Command.print_crafted_products()
+            Command.print_product_table()
         elif command == "2":
             Command.print_recipe()
         elif command == "3":

@@ -48,20 +48,23 @@ class Config:
             return []
 
     @classmethod
-    def get_thresholds(cls):
+    def get_profit_threshold(cls):
         profit = cls.config.get("thresholds", "profit")
-        frequency = cls.config.get("thresholds", "frequency")
+        return int(profit)
 
-        return int(profit), float(frequency)
+    @classmethod
+    def get_frequency_threshold(cls):
+        frequency = cls.config.get("thresholds", "frequency")
+        return float(frequency)
 
     @classmethod
     def get_ignore_guilds(cls):
         return cls.config.getboolean("settings", "ignore_guilds")
 
     @classmethod
-    def get_skill_range(cls):
-        skill_range = cls.config.get("settings", "skill_range")
-        return int(skill_range)
+    def get_skill_look_ahead(cls):
+        skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
+        return int(skill_look_ahead)
 
     @classmethod
     def get_monitored_item_ids(cls):

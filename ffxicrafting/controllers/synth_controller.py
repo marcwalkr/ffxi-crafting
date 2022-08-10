@@ -18,16 +18,6 @@ class SynthController:
             return None
 
     @classmethod
-    def get_recipes(cls, skill_set, skill_range):
-        recipes = []
-        recipe_tuples = cls.db.get_recipes(skill_set, skill_range)
-        for recipe_tuple in recipe_tuples:
-            recipe = SynthRecipe(*recipe_tuple)
-            recipes.append(recipe)
-
-        return recipes
-
-    @classmethod
     def get_all_recipes(cls):
         recipes = []
         recipe_tuples = cls.db.get_all_recipes()

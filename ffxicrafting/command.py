@@ -1,11 +1,11 @@
-from prettytable import PrettyTable
+from table import Table
 from config import Config
-from crafted_product import CraftedProduct
-from crafter import Crafter
+from models.crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 from auction_monitor import AuctionMonitor
+from product_table import ProductTable
 
 
 class Command:
@@ -14,7 +14,7 @@ class Command:
 
     @staticmethod
     def prompt_command():
-        command = input("1. Print crafted products\n" +
+        command = input("1. Print product table\n" +
                         "2. Print recipe\n" +
                         "3. Monitor auctions\n" +
                         "4. Update auction data\n" +
@@ -22,7 +22,7 @@ class Command:
         return command
 
     @classmethod
-    def print_crafted_products(cls):
+    def print_product_table(cls):
         char1_skill_set = Config.get_skill_set("Character1")
         char1_key_items = Config.get_key_items("Character1")
 
@@ -38,30 +38,13 @@ class Command:
 
         crafters = [character1, character2, character3]
 
-        profit, frequency = Config.get_thresholds()
+        profit_threshold = Config.get_profit_threshold()
+        frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_sort_column()
 
-        products = CraftedProduct.get_products(crafters, profit, frequency,
-                                               sort_column)
-
-        rows = []
-        for product in products:
-            recipe_id = product.recipe_id
-            item_name = product.item_name
-            quantity = product.quantity
-            cost = round(product.cost, 2)
-            sell_price = round(product.sell_price, 2)
-            profit = round(product.profit, 2)
-            sell_frequency = round(product.sell_frequency, 2)
-
-            row = [recipe_id, item_name, quantity, cost, sell_price, profit,
-                   sell_frequency]
-            rows.append(row)
-
-        table = cls.get_table(["Recipe ID", "Item", "Quantity", "Cost",
-                               "Average Price", "Profit", "Average Frequency"],
-                              rows)
-        print(table)
+        table = ProductTable(crafters, profit_threshold, frequency_threshold,
+                             sort_column)
+        table.print()
 
     @classmethod
     def print_recipe(cls):
@@ -91,17 +74,18 @@ class Command:
         alchemy = str(recipe.alchemy)
         cook = str(recipe.cook)
 
-        skill_table = cls.get_table(["Wood", "Smith", "Gold", "Cloth",
-                                     "Leather", "Bone", "Alchemy", "Cook"],
-                                    [[wood, smith, gold, cloth, leather, bone,
-                                     alchemy, cook]])
+        skill_table = Table(["Wood", "Smith", "Gold", "Cloth", "Leather",
+                             "Bone", "Alchemy", "Cook"],
+                            [[wood, smith, gold, cloth, leather, bone,
+                              alchemy, cook]])
 
-        recipe_table = cls.get_table(["Result", "Crystal", "Ingredient 1",
-                                      "Ingredient 2", "Ingredient 3", "Ingredient 4",
-                                      "Ingredient 5", "Ingredient 6", "Ingredient 7",
-                                      "Ingredient 8"], [row])
-        print(skill_table)
-        print(recipe_table)
+        recipe_table = Table(["Result", "Crystal", "Ingredient 1",
+                              "Ingredient 2", "Ingredient 3", "Ingredient 4",
+                              "Ingredient 5", "Ingredient 6", "Ingredient 7",
+                              "Ingredient 8"], [row])
+
+        skill_table.print()
+        recipe_table.print()
 
     @classmethod
     def monitor_auctions(cls):
@@ -109,18 +93,6 @@ class Command:
         auction_monitor = AuctionMonitor(monitored_ids)
         auction_monitor.monitor_auctions()
 
-    @staticmethod
-    def get_table(column_names, rows):
-        table = PrettyTable(column_names)
-
-        for name in column_names:
-            table.align[name] = "l"
-
-        for row in rows:
-            table.add_row(row)
-
-        return table
-
     @classmethod
     def update_auction_data(cls):
-        AuctionController.update_all_auctions()
+        AuctionController.update_auction_data()

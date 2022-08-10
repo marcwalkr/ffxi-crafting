@@ -2,7 +2,6 @@ from logger import Logger
 from playsound import playsound
 from pathlib import Path
 from auction_scraper import AuctionScraper
-from models.auction_history import AuctionHistory
 from controllers.item_controller import ItemController
 
 
@@ -33,12 +32,7 @@ class AuctionMonitor:
                         self.print_sold_alert(
                             item_name, quantity, latest_seller)
 
-                        new_history = AuctionHistory(id, scraper.sellers,
-                                                     scraper.buyers,
-                                                     scraper.quantities,
-                                                     scraper.prices,
-                                                     scraper.dates)
-                        self.auction_histories[id] = new_history
+                        self.auction_histories[id] = scraper
 
             except KeyboardInterrupt:
                 break
@@ -48,10 +42,7 @@ class AuctionMonitor:
 
         for id in self.monitored_ids:
             scraper = AuctionScraper(id, False)
-            history = AuctionHistory(id, scraper.sellers, scraper.buyers,
-                                     scraper.quantities, scraper.prices,
-                                     scraper.dates)
-            self.auction_histories[id] = history
+            self.auction_histories[id] = scraper
 
     def history_changed(self, item_id, new_sellers, new_buyers):
         history = self.auction_histories[item_id]

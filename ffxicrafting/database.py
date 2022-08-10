@@ -14,34 +14,30 @@ class Database:
     def __del__(self):
         self.connection.close()
 
-    def get_auction(self, item_id):
-        self.cursor.execute("SELECT * FROM auction WHERE itemid=%s",
+    def get_auction_pages(self, item_id):
+        self.cursor.execute("SELECT * FROM auction_pages WHERE itemid=%s",
                             (item_id,))
-        return self.cursor.fetchone()
-
-    def get_all_auctions(self):
-        self.cursor.execute("SELECT * FROM auction")
         return self.cursor.fetchall()
 
-    def add_auction(self, item_id, single_sales, single_price_sum, stack_sales,
-                    stack_price_sum, days):
-        self.cursor.execute("""INSERT INTO auction (itemid, single_sales,
+    def get_all_auction_pages(self):
+        self.cursor.execute("SELECT * FROM auction_pages")
+        return self.cursor.fetchall()
+
+    def add_auction_page(self, item_id, single_sales, single_price_sum,
+                         stack_sales, stack_price_sum, num_days, accessed):
+        self.cursor.execute("""INSERT INTO auction_pages (itemid, single_sales,
                             single_price_sum, stack_sales, stack_price_sum,
-                            days)
-                            VALUES (%s,%s,%s,%s,%s,%s)""",
+                            num_days, accessed)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s)""",
                             (item_id, single_sales, single_price_sum,
-                             stack_sales, stack_price_sum, days,))
+                             stack_sales, stack_price_sum, num_days,
+                             accessed,))
         self.commit()
 
-    def update_auction(self, item_id, single_sales, single_price_sum,
-                       stack_sales, stack_price_sum, days, timestamp):
-        self.cursor.execute("""UPDATE auction SET single_sales=single_sales+%s,
-                            single_price_sum=single_price_sum+%s,
-                            stack_sales=stack_sales+%s,
-                            stack_price_sum=stack_price_sum+%s, days=days+%s,
-                            last_updated=%s WHERE itemid=%s""",
-                            (single_sales, single_price_sum, stack_sales,
-                             stack_price_sum, days, timestamp, item_id,))
+    def delete_auction_pages_older_than(self, days):
+        self.cursor.execute("""DELETE FROM auction_listings WHERE
+                            DATEDIFF(UTC_TIMESTAMP(), accessed) > %s""",
+                            (days,))
         self.commit()
 
     def get_guild_shops(self, item_id):
@@ -78,24 +74,6 @@ class Database:
                             (recipe_id,))
         return self.cursor.fetchone()
 
-    def get_recipes(self, skill_set, skill_range):
-        wood = skill_set.wood + skill_range
-        smith = skill_set.smith + skill_range
-        gold = skill_set.gold + skill_range
-        cloth = skill_set.cloth + skill_range
-        leather = skill_set.leather + skill_range
-        bone = skill_set.bone + skill_range
-        alchemy = skill_set.alchemy + skill_range
-        cook = skill_set.cook + skill_range
-
-        self.cursor.execute("""SELECT * FROM synth_recipes WHERE Wood<=%s and
-                            Smith<=%s and Gold<=%s and Cloth<=%s and
-                            Leather<=%s and Bone<=%s and Alchemy<=%s and
-                            Cook<=%s""", (wood, smith, gold, cloth, leather,
-                                          bone, alchemy, cook,))
-
-        return self.cursor.fetchall()
-
     def get_all_recipes(self):
         self.cursor.execute("SELECT * FROM synth_recipes")
         return self.cursor.fetchall()
@@ -103,10 +81,6 @@ class Database:
     def get_vendor_items(self, item_id):
         self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s",
                             (item_id,))
-        return self.cursor.fetchall()
-
-    def get_all_vendor_items(self):
-        self.cursor.execute("SELECT * FROM vendor_items")
         return self.cursor.fetchall()
 
     def add_vendor_item(self, item_id, npc_id, price):
