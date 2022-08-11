@@ -1,3 +1,4 @@
+from collections import defaultdict
 from ingredient import Ingredient
 
 
@@ -9,10 +10,19 @@ class Synth:
         self.skill_difference = self.get_skill_difference()
 
         outcome_chances = self.get_outcome_chances()
-        self.expected_nq_qty = self.recipe.result_qty * outcome_chances[0]
-        self.expected_hq1_qty = self.recipe.result_hq1_qty * outcome_chances[1]
-        self.expected_hq2_qty = self.recipe.result_hq2_qty * outcome_chances[2]
-        self.expected_hq3_qty = self.recipe.result_hq3_qty * outcome_chances[3]
+        expected_nq_qty = recipe.result_qty * outcome_chances[0]
+        expected_hq1_qty = recipe.result_hq1_qty * outcome_chances[1]
+        expected_hq2_qty = recipe.result_hq2_qty * outcome_chances[2]
+        expected_hq3_qty = recipe.result_hq3_qty * outcome_chances[3]
+
+        # Collect quantities in a dictionary to get expected quantity per
+        # result item instead of separated by quality tier
+        # key: result item id, value: expected quantity per synth
+        self.expected_quantities = defaultdict(lambda: 0)
+        self.expected_quantities[recipe.result] += expected_nq_qty
+        self.expected_quantities[recipe.result_hq1] += expected_hq1_qty
+        self.expected_quantities[recipe.result_hq2] += expected_hq2_qty
+        self.expected_quantities[recipe.result_hq3] += expected_hq3_qty
 
     def get_outcome_chances(self):
         tier = self.get_tier()

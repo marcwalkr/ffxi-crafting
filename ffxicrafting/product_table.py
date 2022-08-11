@@ -1,4 +1,3 @@
-from collections import defaultdict
 from synth import Synth
 from table import Table
 from product import Product
@@ -87,21 +86,12 @@ class ProductTable:
         if synth_cost is None:
             return []
 
-        # Collect quantities in a dictionary to get expected quantity per
-        # result item instead of separated by quality tier
-        # key: result item id, value: expected quantity per synth
-        expected_quantities = defaultdict(lambda: 0)
-        expected_quantities[synth.recipe.result] += synth.expected_nq_qty
-        expected_quantities[synth.recipe.result_hq1] += synth.expected_hq1_qty
-        expected_quantities[synth.recipe.result_hq2] += synth.expected_hq2_qty
-        expected_quantities[synth.recipe.result_hq3] += synth.expected_hq3_qty
-
         products = []
 
-        for result_id in expected_quantities:
+        for result_id in synth.expected_quantities:
             item = ItemController.get_item(result_id)
 
-            expected_quantity = expected_quantities[result_id]
+            expected_quantity = synth.expected_quantities[result_id]
             single_cost = synth_cost / expected_quantity
             stack_cost = single_cost * item.stack_size
 
