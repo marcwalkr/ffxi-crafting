@@ -1,81 +1,30 @@
-from collections import defaultdict
-from config import Config
 from synth import Synth
 from table import Table
-from models.product import Product
-from controllers.synth_controller import SynthController
+from product import Product
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 
 
 class ProductTable:
-    def __init__(self, crafters, profit_threshold, frequency_threshold,
-                 sort_column) -> None:
+    def __init__(self, recipes, crafters, include_desynth, skill_look_ahead,
+                 profit_threshold, frequency_threshold, sort_column) -> None:
+        self.recipes = recipes
         self.crafters = crafters
+        self.include_desynth = include_desynth
+        self.skill_look_ahead = skill_look_ahead
         self.profit_threshold = profit_threshold
         self.frequency_threshold = frequency_threshold
         self.sort_column = sort_column
 
     def print(self):
-        include_desynth = Config.get_include_desynth()
-        recipes = SynthController.get_all_recipes()
-
         products = []
 
-        for recipe in recipes:
-            if recipe.desynth and not include_desynth:
+        for recipe in self.recipes:
+            if recipe.desynth and not self.include_desynth:
                 continue
 
             synth = self.get_best_crafter(recipe)
-
-            # None of the crafters can make this recipe
-            if synth is None:
-                continue
-
-            nq_item = ItemController.get_item(recipe.result)
-
-            # Result item cannot be sold on AH
-            if nq_item.ah == 0:
-                continue
-
-            synth_cost = synth.calculate_cost()
-
-            if synth_cost is None:
-                continue
-
-            # Collect quantities in a dictionary to get expected quantity per
-            # result item instead of separated by quality tier
-            # key: result item id, value: expected quantity per synth
-            expected_quantities = defaultdict(lambda: 0)
-            expected_quantities[recipe.result] += synth.expected_nq_qty
-            expected_quantities[recipe.result_hq1] += synth.expected_hq1_qty
-            expected_quantities[recipe.result_hq2] += synth.expected_hq2_qty
-            expected_quantities[recipe.result_hq3] += synth.expected_hq3_qty
-
-            for result_id in expected_quantities:
-                item = ItemController.get_item(result_id)
-
-                expected_quantity = expected_quantities[result_id]
-                single_cost = synth_cost / expected_quantity
-                stack_cost = single_cost * item.stack_size
-
-                products += self.create_products(recipe.id, result_id,
-                                                 single_cost)
-
-                bundleable_names = ["arrow", "bolt",
-                                    "bullet", "shuriken", "card", "uchitake",
-                                    "tsurara", "kawahori-ogi", "makibishi",
-                                    "hiraishin", "mizu-deppo", "shihei",
-                                    "jusatsu", "kaginawa", "sairui-ran",
-                                    "kodoku", "shinobi-tabi",
-                                    "sanjaku-tenugui", "soshi", "kabenro",
-                                    "jinko", "ryuno", "mokujin",
-                                    "inoshishinofuda", "shikanofuda",
-                                    "chonofuda", "ranka", "furu"]
-                if any(i in item.name for i in bundleable_names):
-                    products += self.create_bundle_products(recipe.id,
-                                                            item.name,
-                                                            stack_cost)
+            products += self.create_synth_products(synth)
 
         products = self.filter_products(products, self.profit_threshold,
                                         self.frequency_threshold)
@@ -100,15 +49,14 @@ class ProductTable:
         table.print()
 
     def get_best_crafter(self, recipe):
-        skill_look_ahead = Config.get_skill_look_ahead()
-
         best_crafter = Synth(recipe, self.crafters[0])
         for crafter in self.crafters:
             synth = Synth(recipe, crafter)
             if synth.skill_difference < best_crafter.skill_difference:
                 best_crafter = synth
 
-        enough_skill = (best_crafter.skill_difference - skill_look_ahead) <= 0
+        enough_skill = (best_crafter.skill_difference -
+                        self.skill_look_ahead) <= 0
 
         if recipe.key_item > 0:
             has_key_item = recipe.key_item in best_crafter.crafter.key_items
@@ -120,30 +68,48 @@ class ProductTable:
         else:
             return None
 
-    @staticmethod
-    def create_products(recipe_id, item_id, single_cost):
-        item = ItemController.get_item(item_id)
-        product_name = item.sort_name.replace("_", " ").title()
+    @classmethod
+    def create_synth_products(cls, synth):
+        # None of the crafters can make this recipe
+        if synth is None:
+            return []
 
-        auction_stats = AuctionController.get_auction_stats(item_id)
+        nq_item = ItemController.get_item(synth.recipe.result)
 
-        avg_single_price = auction_stats.average_single_price
-        avg_single_freq = auction_stats.average_single_frequency
-        avg_stack_price = auction_stats.average_stack_price
-        avg_stack_freq = auction_stats.average_stack_frequency
+        # Result item cannot be sold on AH
+        if nq_item.ah == 0:
+            return []
+
+        synth_cost = synth.calculate_cost()
+
+        # An ingredient cannot be purchased
+        if synth_cost is None:
+            return []
 
         products = []
-        if avg_single_price is not None:
-            single_product = Product(recipe_id, product_name, 1, single_cost,
-                                     avg_single_price, avg_single_freq)
-            products.append(single_product)
 
-        if avg_stack_price is not None:
+        for result in synth.results:
+            item = ItemController.get_item(result.item_id)
+
+            single_cost = synth_cost / result.quantity
             stack_cost = single_cost * item.stack_size
-            stack_product = Product(recipe_id, product_name, item.stack_size,
-                                    stack_cost, avg_stack_price,
-                                    avg_stack_freq)
-            products.append(stack_product)
+
+            products += cls.create_products(synth.recipe.id, result.item_id,
+                                            single_cost)
+
+            bundleable_names = ["arrow", "bolt",
+                                "bullet", "shuriken", "card", "uchitake",
+                                "tsurara", "kawahori-ogi", "makibishi",
+                                "hiraishin", "mizu-deppo", "shihei",
+                                "jusatsu", "kaginawa", "sairui-ran",
+                                "kodoku", "shinobi-tabi",
+                                "sanjaku-tenugui", "soshi", "kabenro",
+                                "jinko", "ryuno", "mokujin",
+                                "inoshishinofuda", "shikanofuda",
+                                "chonofuda", "ranka", "furu"]
+            if any(i in item.name for i in bundleable_names):
+                products += cls.create_bundle_products(synth.recipe.id,
+                                                       item.name, stack_cost)
 
         return products
 
@@ -172,6 +138,32 @@ class ProductTable:
             return cls.create_products(recipe_id, item.item_id, bundled_cost)
         else:
             return []
+
+    @staticmethod
+    def create_products(recipe_id, item_id, single_cost):
+        item = ItemController.get_item(item_id)
+
+        auction_stats = AuctionController.get_auction_stats(item_id)
+
+        avg_single_price = auction_stats.average_single_price
+        avg_single_freq = auction_stats.average_single_frequency
+        avg_stack_price = auction_stats.average_stack_price
+        avg_stack_freq = auction_stats.average_stack_frequency
+
+        products = []
+        if avg_single_price is not None:
+            single_product = Product(recipe_id, item_id, 1, single_cost,
+                                     avg_single_price, avg_single_freq)
+            products.append(single_product)
+
+        if avg_stack_price is not None:
+            stack_cost = single_cost * item.stack_size
+            stack_product = Product(recipe_id, item_id, item.stack_size,
+                                    stack_cost, avg_stack_price,
+                                    avg_stack_freq)
+            products.append(stack_product)
+
+        return products
 
     @staticmethod
     def filter_products(products, profit_threshold, frequency_threshold):
