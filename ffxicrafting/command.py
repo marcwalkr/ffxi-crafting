@@ -36,14 +36,18 @@ class Command:
         character2 = Crafter(char2_skill_set, char2_key_items)
         character3 = Crafter(char3_skill_set, char3_key_items)
 
+        recipes = SynthController.get_all_recipes()
         crafters = [character1, character2, character3]
 
+        include_desynth = Config.get_include_desynth()
+        skill_look_ahead = Config.get_skill_look_ahead()
         profit_threshold = Config.get_profit_threshold()
         frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_sort_column()
 
-        table = ProductTable(crafters, profit_threshold, frequency_threshold,
-                             sort_column)
+        table = ProductTable(recipes, crafters, include_desynth,
+                             skill_look_ahead, profit_threshold,
+                             frequency_threshold, sort_column)
         table.print()
 
     @classmethod
