@@ -88,10 +88,9 @@ class ProductTable:
 
         products = []
 
-        for result_id in synth.expected_quantities:
+        for result_id, expected_quantity in synth.expected_quantities.items():
             item = ItemController.get_item(result_id)
 
-            expected_quantity = synth.expected_quantities[result_id]
             single_cost = synth_cost / expected_quantity
             stack_cost = single_cost * item.stack_size
 
