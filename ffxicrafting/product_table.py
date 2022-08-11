@@ -88,13 +88,13 @@ class ProductTable:
 
         products = []
 
-        for result_id, expected_quantity in synth.expected_quantities.items():
-            item = ItemController.get_item(result_id)
+        for result in synth.results:
+            item = ItemController.get_item(result.item_id)
 
-            single_cost = synth_cost / expected_quantity
+            single_cost = synth_cost / result.quantity
             stack_cost = single_cost * item.stack_size
 
-            products += cls.create_products(synth.recipe.id, result_id,
+            products += cls.create_products(synth.recipe.id, result.item_id,
                                             single_cost)
 
             bundleable_names = ["arrow", "bolt",
