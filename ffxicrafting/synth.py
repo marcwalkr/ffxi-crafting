@@ -119,28 +119,35 @@ class Synth:
 
         return hq_tier[0]
 
+    def synth(self):
+        success = self.attempt_success()
+        if success:
+            hq = self.attempt_hq()
+            if hq:
+                hq_tier = self.get_hq_tier()
+                if hq_tier == 1:
+                    item_id = self.recipe.result_hq1
+                    quantity = self.recipe.result_hq1_qty
+                elif hq_tier == 2:
+                    item_id = self.recipe.result_hq2
+                    quantity = self.recipe.result_hq2_qty
+                else:
+                    item_id = self.recipe.result_hq3
+                    quantity = self.recipe.result_hq3_qty
+            else:
+                item_id = self.recipe.result
+                quantity = self.recipe.result_qty
+
+            return item_id, quantity
+        else:
+            return None, None
+
     def simulate(self, num_synths):
         results = defaultdict(lambda: 0)
 
         for _ in range(num_synths):
-            success = self.attempt_success()
-            if success:
-                hq = self.attempt_hq()
-                if hq:
-                    hq_tier = self.get_hq_tier()
-                    if hq_tier == 1:
-                        item_id = self.recipe.result_hq1
-                        quantity = self.recipe.result_hq1_qty
-                    elif hq_tier == 2:
-                        item_id = self.recipe.result_hq2
-                        quantity = self.recipe.result_hq2_qty
-                    else:
-                        item_id = self.recipe.result_hq3
-                        quantity = self.recipe.result_hq3_qty
-                else:
-                    item_id = self.recipe.result
-                    quantity = self.recipe.result_qty
-
+            item_id, quantity = self.synth()
+            if item_id is not None:
                 results[item_id] += quantity
 
         return results
