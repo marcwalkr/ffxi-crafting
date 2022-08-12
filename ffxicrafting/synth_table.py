@@ -1,5 +1,5 @@
+from operator import attrgetter
 from synth import Synth
-from synth_row import SynthRow
 from table import Table
 from controllers.item_controller import ItemController
 
@@ -22,78 +22,78 @@ class SynthTable:
                          "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost", "Avg Profit",
                          "Avg Sell Frequency"]
 
-        synth_rows = []
+        synths = []
 
         for recipe in self.recipes:
             synth = self.get_best_crafter(recipe)
 
+            # None of the crafters can make this recipe
             if synth is None:
                 continue
 
-            synth_cost = synth.calculate_cost()
+            synth.cost = synth.calculate_cost()
 
-            if synth_cost is None:
+            # An ingredient price couldn't be found
+            if synth.cost is None:
                 continue
 
-            hq1_item = ItemController.get_item(recipe.result_hq1)
+            averages = synth.calculate_averages(synth.cost, self.synth_trials)
+            synth.average_profit, synth.average_frequency = averages
+
+            synths.append(synth)
+
+        synths = self.filter_synths(synths)
+
+        rows = []
+        for synth in synths:
+            hq1_item = ItemController.get_item(synth.recipe.result_hq1)
             hq1_name = hq1_item.sort_name.replace("_", " ").title()
 
-            hq2_item = ItemController.get_item(recipe.result_hq2)
+            hq2_item = ItemController.get_item(synth.recipe.result_hq2)
             hq2_name = hq2_item.sort_name.replace("_", " ").title()
 
-            hq3_item = ItemController.get_item(recipe.result_hq3)
+            hq3_item = ItemController.get_item(synth.recipe.result_hq3)
             hq3_name = hq3_item.sort_name.replace("_", " ").title()
 
-            averages = synth.calculate_averages(synth_cost, self.synth_trials)
-            average_profit, average_sell_frequency = averages
+            row = [synth.recipe.id, synth.recipe.result_name,
+                   synth.recipe.result_qty, hq1_name,
+                   synth.recipe.result_hq1_qty, hq2_name,
+                   synth.recipe.result_hq2_qty, hq3_name,
+                   synth.recipe.result_hq3_qty, synth.cost,
+                   synth.average_profit, synth.average_frequency]
 
-            row = SynthRow(recipe.id, recipe.result_name, recipe.result_qty,
-                           hq1_name, recipe.result_hq1_qty, hq2_name,
-                           recipe.result_hq2_qty, hq3_name,
-                           recipe.result_hq3_qty, synth_cost, average_profit,
-                           average_sell_frequency)
-            synth_rows.append(row)
-
-        synth_rows = self.filter_rows(synth_rows)
-
-        rows = [i.get() for i in synth_rows]
+            rows.append(row)
 
         table = Table(column_labels, rows, self.sort_column, self.reverse_sort)
         table.print()
 
     def get_best_crafter(self, recipe):
-        best_crafter = Synth(recipe, self.crafters[0])
+        can_craft = []
         for crafter in self.crafters:
             synth = Synth(recipe, crafter)
-            skill_difference = synth.get_skill_difference()
-            if skill_difference > best_crafter.get_skill_difference():
-                best_crafter = synth
+            if synth.can_craft:
+                can_craft.append(synth)
 
-        enough_skill = (best_crafter.get_skill_difference() +
-                        self.skill_look_ahead) >= 0
-
-        has_key_item = True
-        if recipe.key_item > 0:
-            has_key_item = recipe.key_item in best_crafter.crafter.key_items
-
-        if enough_skill and has_key_item:
-            return best_crafter
-        else:
+        if len(can_craft) == 0:
             return None
 
-    def filter_rows(self, synth_rows):
-        profit_sorted = sorted(synth_rows, key=lambda i: i.average_profit,
+        best_crafter = min(can_craft, key=attrgetter("difficulty"))
+        return best_crafter
+
+    def filter_synths(self, synths):
+        profit_sorted = sorted(synths, key=lambda s: s.average_profit,
                                reverse=True)
-        filtered_rows = []
-        for row in profit_sorted:
-            duplicate = any(i.nq_name == row.nq_name and
-                            i.hq1_name == row.hq1_name and
-                            i.hq2_name == row.hq2_name and
-                            i.hq3_name == row.hq3_name for i in filtered_rows)
-            meets_profit = row.average_profit >= self.profit_threshold
-            meets_frequency = row.average_frequency >= self.frequency_threshold
+        filtered_synths = []
+        for synth in profit_sorted:
+            duplicate = any(s.recipe.result == synth.recipe.result and
+                            s.recipe.result_hq1 == synth.recipe.result_hq1 and
+                            s.recipe.result_hq2 == synth.recipe.result_hq2 and
+                            s.recipe.result_hq3 == synth.recipe.result_hq3
+                            for s in filtered_synths)
+            meets_profit = synth.average_profit >= self.profit_threshold
+            meets_frequency = synth.average_frequency >= self.frequency_threshold
 
             if meets_profit and meets_frequency and not duplicate:
-                filtered_rows.append(row)
+                filtered_synths.append(synth)
 
-        return filtered_rows
+        return filtered_synths
