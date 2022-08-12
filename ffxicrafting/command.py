@@ -1,6 +1,6 @@
 from table import Table
 from config import Config
-from models.crafter import Crafter
+from crafter import Crafter
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
@@ -36,8 +36,43 @@ class Command:
         character2 = Crafter(char2_skill_set, char2_key_items)
         character3 = Crafter(char3_skill_set, char3_key_items)
 
-        recipes = SynthController.get_all_recipes()
         crafters = [character1, character2, character3]
+
+        # wood_skill_set = Config.get_skill_set("TestWood")
+        # smith_skill_set = Config.get_skill_set("TestSmith")
+        # gold_skill_set = Config.get_skill_set("TestGold")
+        # cloth_skill_set = Config.get_skill_set("TestCloth")
+        # leather_skill_set = Config.get_skill_set("TestLeather")
+        # bone_skill_set = Config.get_skill_set("TestBone")
+        # alchemy_skill_set = Config.get_skill_set("TestAlchemy")
+        # cook_skill_set = Config.get_skill_set("TestCook")
+
+        # wood_key_items = Config.get_key_items("TestWood")
+        # smith_key_items = Config.get_key_items("TestSmith")
+        # gold_key_items = Config.get_key_items("TestGold")
+        # cloth_key_items = Config.get_key_items("TestCloth")
+        # leather_key_items = Config.get_key_items("TestLeather")
+        # bone_key_items = Config.get_key_items("TestBone")
+        # alchemy_key_items = Config.get_key_items("TestAlchemy")
+        # cook_key_items = Config.get_key_items("TestCook")
+
+        # wood = Crafter(wood_skill_set, wood_key_items)
+        # smith = Crafter(smith_skill_set, smith_key_items)
+        # gold = Crafter(gold_skill_set, gold_key_items)
+        # cloth = Crafter(cloth_skill_set, cloth_key_items)
+        # leather = Crafter(leather_skill_set, leather_key_items)
+        # bone = Crafter(bone_skill_set, bone_key_items)
+        # alchemy = Crafter(alchemy_skill_set, alchemy_key_items)
+        # cook = Crafter(cook_skill_set, cook_key_items)
+
+        # crafters = [wood, smith, gold, cloth, leather, bone, alchemy, cook]
+
+        # test_skill_set = Config.get_skill_set("TestCharacter")
+        # test_char = Crafter(test_skill_set)
+
+        # crafters = [test_char]
+
+        recipes = SynthController.get_all_recipes()
         synth_trials = Config.get_synth_trials()
         skill_look_ahead = Config.get_skill_look_ahead()
         profit_threshold = Config.get_profit_threshold()

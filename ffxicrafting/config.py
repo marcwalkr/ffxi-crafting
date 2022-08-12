@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from configparser import ConfigParser
-from models.skill_set import SkillSet
+from skill_set import SkillSet
 
 
 class Config:
