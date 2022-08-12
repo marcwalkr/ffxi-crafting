@@ -69,7 +69,7 @@ class SynthTable:
             if skill_difference > best_crafter.get_skill_difference():
                 best_crafter = synth
 
-        enough_skill = (best_crafter.get_skill_difference() -
+        enough_skill = (best_crafter.get_skill_difference() +
                         self.skill_look_ahead) >= 0
 
         has_key_item = True

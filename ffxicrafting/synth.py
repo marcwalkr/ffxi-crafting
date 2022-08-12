@@ -72,7 +72,7 @@ class Synth:
         else:
             if self.tier == -1:
                 skill_difference = self.get_skill_difference()
-                success_probability = 0.45 + (self.skill_difference / 10)
+                success_probability = 0.45 + (skill_difference / 10)
             else:
                 success_probability = 0.45
 
