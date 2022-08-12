@@ -5,7 +5,7 @@ from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 from auction_monitor import AuctionMonitor
-from product_table import ProductTable
+from synth_table import SynthTable
 
 
 class Command:
@@ -14,7 +14,7 @@ class Command:
 
     @staticmethod
     def prompt_command():
-        command = input("1. Print product table\n" +
+        command = input("1. Print synth table\n" +
                         "2. Print recipe\n" +
                         "3. Monitor auctions\n" +
                         "4. Update auction data\n" +
@@ -22,7 +22,7 @@ class Command:
         return command
 
     @classmethod
-    def print_product_table(cls):
+    def print_synth_table(cls):
         char1_skill_set = Config.get_skill_set("Character1")
         char1_key_items = Config.get_key_items("Character1")
 
@@ -38,16 +38,16 @@ class Command:
 
         recipes = SynthController.get_all_recipes()
         crafters = [character1, character2, character3]
-
-        include_desynth = Config.get_include_desynth()
+        synth_trials = Config.get_synth_trials()
         skill_look_ahead = Config.get_skill_look_ahead()
         profit_threshold = Config.get_profit_threshold()
         frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_sort_column()
+        reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(recipes, crafters, include_desynth,
-                             skill_look_ahead, profit_threshold,
-                             frequency_threshold, sort_column)
+        table = SynthTable(recipes, crafters, synth_trials, skill_look_ahead,
+                           profit_threshold, frequency_threshold, sort_column,
+                           reverse_sort)
         table.print()
 
     @classmethod

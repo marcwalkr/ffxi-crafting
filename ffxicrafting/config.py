@@ -67,16 +67,21 @@ class Config:
         return int(skill_look_ahead)
 
     @classmethod
+    def get_synth_trials(cls):
+        trials = cls.config.get("settings", "synth_trials")
+        return int(trials)
+
+    @classmethod
+    def get_sort_column(cls):
+        return cls.config.get("settings", "sort_column")
+
+    @classmethod
+    def get_reverse_sort(cls):
+        return cls.config.getboolean("settings", "reverse_sort")
+
+    @classmethod
     def get_monitored_item_ids(cls):
         item_ids = cls.config.get("auction_monitor", "item_ids")
         item_ids = item_ids.split(",")
 
         return [int(i) for i in item_ids]
-
-    @classmethod
-    def get_include_desynth(cls):
-        return cls.config.getboolean("settings", "include_desynth")
-
-    @classmethod
-    def get_sort_column(cls):
-        return cls.config.get("settings", "sort_column")

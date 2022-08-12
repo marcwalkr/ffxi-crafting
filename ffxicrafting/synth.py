@@ -1,6 +1,8 @@
+import random
 from collections import defaultdict
 from ingredient import Ingredient
-from models.synth_result import SynthResult
+from controllers.item_controller import ItemController
+from controllers.auction_controller import AuctionController
 
 
 class Synth:
@@ -8,119 +10,9 @@ class Synth:
         self.recipe = recipe
         self.crafter = crafter
 
-        self.skill_difference = self.get_skill_difference()
-
-        outcome_chances = self.get_outcome_chances()
-        expected_nq_qty = recipe.result_qty * outcome_chances[0]
-        expected_hq1_qty = recipe.result_hq1_qty * outcome_chances[1]
-        expected_hq2_qty = recipe.result_hq2_qty * outcome_chances[2]
-        expected_hq3_qty = recipe.result_hq3_qty * outcome_chances[3]
-
-        # Collect quantities in a dictionary to get expected quantity per
-        # result item instead of separated by quality tier
-        # key: result item id, value: expected quantity per synth
-        expected_quantities = defaultdict(lambda: 0)
-        expected_quantities[recipe.result] += expected_nq_qty
-        expected_quantities[recipe.result_hq1] += expected_hq1_qty
-        expected_quantities[recipe.result_hq2] += expected_hq2_qty
-        expected_quantities[recipe.result_hq3] += expected_hq3_qty
-
-        self.results = []
-        for item_id, quantity in expected_quantities.items():
-            result = SynthResult(item_id, quantity)
-            self.results.append(result)
-
-    def get_outcome_chances(self):
-        tier = self.get_tier()
-
-        # Normal recipe, not desynth
-        if self.recipe.desynth != 1:
-            # After HQ has been decided, the chances for each tier
-            hq1_chance = 0.75
-            hq2_chance = 0.1875
-            hq3_chance = 0.0625
-
-            if tier == -1:
-                skill_diff = self.get_skill_difference()
-                success_rate = 0.95 - (skill_diff / 10)
-                hq_chance = 0.0006
-
-            elif tier == 0:
-                success_rate = 0.95
-                hq_chance = 0.018
-
-            elif tier == 1:
-                success_rate = 0.95
-                hq_chance = 0.066
-
-            elif tier == 2:
-                success_rate = 0.95
-                hq_chance = 0.285
-
-            elif tier == 3:
-                success_rate = 0.95
-                hq_chance = 0.506
-
-        # Desynth recipe
-        else:
-            # After HQ has been decided, the chances for each tier
-            hq1_chance = 0.375
-            hq2_chance = 0.375
-            hq3_chance = 0.25
-
-            if tier == -1:
-                skill_diff = self.get_skill_difference()
-                success_rate = 0.45 - (skill_diff / 10)
-                hq_chance = 0.37
-
-            elif tier == 0:
-                success_rate = 0.45
-                hq_chance = 0.4
-
-            elif tier == 1:
-                success_rate = 0.45
-                hq_chance = 0.43
-
-            elif tier == 2:
-                success_rate = 0.45
-                hq_chance = 0.46
-
-            elif tier == 3:
-                success_rate = 0.45
-                hq_chance = 0.49
-
-        if success_rate < 0.05:
-            success_rate = 0.05
-
-        nq = success_rate * (1 - hq_chance)
-        hq1 = success_rate * hq_chance * hq1_chance
-        hq2 = success_rate * hq_chance * hq2_chance
-        hq3 = success_rate * hq_chance * hq3_chance
-
-        return nq, hq1, hq2, hq3
-
-    def get_tier(self):
-        diff = self.get_skill_difference()
-
-        if diff < -50:
-            tier = 3
-        elif diff < -30:
-            tier = 2
-        elif diff < -10:
-            tier = 1
-        elif diff <= 0:
-            tier = 0
-        else:
-            tier = -1
-
-        return tier
+        self.tier = self.get_tier()
 
     def get_skill_difference(self):
-        recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
-                         self.recipe.cloth, self.recipe.leather,
-                         self.recipe.bone, self.recipe.alchemy,
-                         self.recipe.cook]
-
         crafter_skills = [self.crafter.skill_set.wood,
                           self.crafter.skill_set.smith,
                           self.crafter.skill_set.gold,
@@ -130,24 +22,128 @@ class Synth:
                           self.crafter.skill_set.alchemy,
                           self.crafter.skill_set.cook]
 
-        diffs = []
+        recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
+                         self.recipe.cloth, self.recipe.leather,
+                         self.recipe.bone, self.recipe.alchemy,
+                         self.recipe.cook]
 
-        for i in range(len(recipe_skills)):
-            recipe_skill = recipe_skills[i]
+        skill_differences = []
 
+        for (crafter, recipe) in zip(crafter_skills, recipe_skills):
             # The recipe doesn't require this craft
-            if recipe_skill == 0:
+            if recipe == 0:
                 continue
 
-            crafter_skill = crafter_skills[i]
-            diff = recipe_skill - crafter_skill
-            diffs.append(diff)
+            skill_difference = crafter - recipe
+            skill_differences.append(skill_difference)
 
-        # The max skill difference determines recipe difficulty
-        if len(diffs) > 0:
-            return max(diffs)
+        # The recipe difficulty is determined by the smallest skill difference
+        # of the required skills
+        if len(skill_differences) > 0:
+            return min(skill_differences)
         else:
-            return 100
+            return 0
+
+    def get_tier(self):
+        difference = self.get_skill_difference()
+
+        if difference > 50:
+            tier = 3
+        elif difference > 30:
+            tier = 2
+        elif difference > 10:
+            tier = 1
+        elif difference >= 0:
+            tier = 0
+        else:
+            tier = -1
+
+        return tier
+
+    def attempt_success(self):
+        # Normal recipe, not desynth
+        if not self.recipe.desynth:
+            if self.tier == -1:
+                skill_difference = self.get_skill_difference()
+                success_probability = 0.95 + (skill_difference / 10)
+            else:
+                success_probability = 0.95
+        # Desynth recipe
+        else:
+            if self.tier == -1:
+                skill_difference = self.get_skill_difference()
+                success_probability = 0.45 + (self.skill_difference / 10)
+            else:
+                success_probability = 0.45
+
+        if success_probability < 0.05:
+            success_probability = 0.05
+
+        return random.random() < success_probability
+
+    def attempt_hq(self):
+        # Normal recipe, not desynth
+        if not self.recipe.desynth:
+            if self.tier == -1:
+                hq_probability = 0.006
+            elif self.tier == 0:
+                hq_probability = 0.018
+            elif self.tier == 1:
+                hq_probability = 0.066
+            elif self.tier == 2:
+                hq_probability = 0.285
+            else:
+                hq_probability = 0.506
+        # Desynth recipe
+        else:
+            if self.tier == -1:
+                hq_probability = 0.37
+            elif self.tier == 0:
+                hq_probability = 0.4
+            elif self.tier == 1:
+                hq_probability = 0.43
+            elif self.tier == 2:
+                hq_probability = 0.46
+            else:
+                hq_probability = 0.49
+
+        return random.random() < hq_probability
+
+    def get_hq_tier(self):
+        # Normal recipe, not desynth
+        if not self.recipe.desynth:
+            hq_tier = random.choices([1, 2, 3], weights=[75, 18.75, 6.25])
+        # Desynth recipe
+        else:
+            hq_tier = random.choices([1, 2, 3], weights=[37.5, 37.5, 25])
+
+        return hq_tier[0]
+
+    def simulate(self, num_synths):
+        results = defaultdict(lambda: 0)
+
+        for _ in range(num_synths):
+            success = self.attempt_success()
+            if success:
+                hq = self.attempt_hq()
+                if hq:
+                    hq_tier = self.get_hq_tier()
+                    if hq_tier == 1:
+                        item_id = self.recipe.result_hq1
+                        quantity = self.recipe.result_hq1_qty
+                    elif hq_tier == 2:
+                        item_id = self.recipe.result_hq2
+                        quantity = self.recipe.result_hq2_qty
+                    else:
+                        item_id = self.recipe.result_hq3
+                        quantity = self.recipe.result_hq3_qty
+                else:
+                    item_id = self.recipe.result
+                    quantity = self.recipe.result_qty
+
+                results[item_id] += quantity
+
+        return results
 
     def calculate_cost(self):
         ingredient_ids = [self.recipe.crystal, self.recipe.ingredient1,
@@ -168,4 +164,41 @@ class Synth:
 
             cost += ingredient.price
 
-        return cost
+        return round(cost, 2)
+
+    def calculate_averages(self, synth_cost, num_trials):
+        total_cost = synth_cost * num_trials
+        results = self.simulate(num_trials)
+        num_items = sum(results.values())
+
+        gil_sum = 0
+        average_frequency = 0
+        for item_id, quantity in results.items():
+            item = ItemController.get_item(item_id)
+            auction_stats = AuctionController.get_auction_stats(item_id)
+
+            if (auction_stats.average_single_price is None and
+                    auction_stats.average_stack_price is None):
+                gil_sum += 0
+                average_frequency += 0
+                continue
+
+            # Use the sell price and frequency for the stack if it sells faster
+            # or equally fast compared to single
+            if (auction_stats.stack_sells_faster or
+                    auction_stats.single_stack_equal_frequency):
+                single_cost = auction_stats.average_stack_price / item.stack_size
+                frequency = auction_stats.average_stack_frequency
+            else:
+                single_cost = auction_stats.average_single_price
+                frequency = auction_stats.average_single_frequency
+
+            gil_sum += single_cost * quantity
+
+            weight = quantity / num_items
+            weighted_frequency = frequency * weight
+            average_frequency += weighted_frequency
+
+        average_profit = (gil_sum - total_cost) / num_trials
+
+        return round(average_profit, 2), round(average_frequency, 2)
