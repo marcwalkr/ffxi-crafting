@@ -21,6 +21,9 @@ class Synth:
         self.sell_frequency = None
 
     def get_difficulty(self):
+        """Returns the largest skill difference between the recipe and the
+        crafter of the required skills
+        """
         recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
                          self.recipe.cloth, self.recipe.leather,
                          self.recipe.bone, self.recipe.alchemy,
@@ -53,6 +56,9 @@ class Synth:
             return 0
 
     def get_tier(self):
+        """Returns the tier of the synth, which is determined by the skill
+        difference between the recipe and the crafter and affects success and
+        HQ rates"""
         if self.difficulty < -50:
             tier = 3
         elif self.difficulty < -30:
@@ -67,6 +73,9 @@ class Synth:
         return tier
 
     def can_craft(self):
+        """Returns True if the crafter is able to craft the recipe, determined
+        by if their skill is high enough, taking into account the skill look
+        ahead setting, and if the crafter has any required key item"""
         skill_look_ahead = Config.get_skill_look_ahead()
         enough_skill = self.difficulty - skill_look_ahead <= 0
 
@@ -77,6 +86,8 @@ class Synth:
         return enough_skill and has_key_item
 
     def attempt_success(self):
+        """Used in a synth simulation, returns True if the synth was a
+        success (not break)"""
         # Normal recipe, not desynth
         if not self.recipe.desynth:
             if self.tier == -1:
@@ -96,6 +107,8 @@ class Synth:
         return random.random() < success_probability
 
     def attempt_hq(self):
+        """Used in a synth simulation after success has been determined,
+        returns True if the synth was HQ"""
         # Normal recipe, not desynth
         if not self.recipe.desynth:
             if self.tier == -1:
@@ -124,6 +137,8 @@ class Synth:
         return random.random() < hq_probability
 
     def get_hq_tier(self):
+        """Used in a synth simulation after HQ has been determined, returns
+        which tier of HQ (1, 2, or 3)"""
         # Normal recipe, not desynth
         if not self.recipe.desynth:
             hq_tier = random.choices([1, 2, 3], weights=[75, 18.75, 6.25])
@@ -134,6 +149,9 @@ class Synth:
         return hq_tier[0]
 
     def synth(self):
+        """Simulates a single synth. Returns the item id of what was created
+        and the quantity of the item, or (None, None) if the synth was a
+        break"""
         success = self.attempt_success()
         if success:
             hq = self.attempt_hq()
@@ -157,6 +175,9 @@ class Synth:
             return None, None
 
     def simulate(self):
+        """Simulates the synth multiple times, the amount of times determined
+        by the synth trials setting. Returns a dictionary containing all of the
+        results and their quantities"""
         results = defaultdict(lambda: 0)
 
         for _ in range(self.num_trials):
@@ -167,6 +188,7 @@ class Synth:
         return results
 
     def calculate_cost(self):
+        """Returns the cost of a single synth"""
         ingredient_ids = [self.recipe.crystal, self.recipe.ingredient1,
                           self.recipe.ingredient2, self.recipe.ingredient3,
                           self.recipe.ingredient4, self.recipe.ingredient5,
@@ -188,27 +210,41 @@ class Synth:
         return round(cost, 2)
 
     def calculate_profit_and_frequency(self):
+        """Returns the average profit and sell frequency of a single synth. The
+        sell frequencies of each possible result are weighted by the
+        probability of obtaining that result and added together to obtain a
+        single sell frequency"""
         if self.cost is None:
             return None, None
 
+        # The total cost is the cost of a single synth * the number of times
+        # the synth will be simulated
         total_cost = self.cost * self.num_trials
+
+        # A dictionary containing all of the results from simulating the synth
+        # several times
+        # key: result item id, value: quantity
         results = self.simulate()
+
+        # The total number of items that were produced in the simulation
         num_items = sum(results.values())
 
         gil_sum = 0
-        average_frequency = 0
+        overall_frequency = 0
+
+        # Loop through each result item in the dictionary
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
             auction_stats = AuctionController.get_auction_stats(item_id)
 
+            # The item either can't be sold or was never sold on the AH
             if (auction_stats.average_single_price is None and
                     auction_stats.average_stack_price is None):
-                gil_sum += 0
-                average_frequency += 0
                 continue
 
-            # Use the sell price and frequency for the stack if it sells faster
-            # or equally fast compared to single
+            # Use the sell price and frequency of whichever form of the item
+            # sells faster: single or stack, prioritizing stack if they sell
+            # equally fast
             if (auction_stats.stack_sells_faster or
                     auction_stats.single_stack_equal_frequency):
                 single_cost = auction_stats.average_stack_price / item.stack_size
@@ -219,10 +255,21 @@ class Synth:
 
             gil_sum += single_cost * quantity
 
+            # The weight is the proportion of the results that this item takes
+            # up, e.g. 0.5 if this result is exactly half of the results
             weight = quantity / num_items
+
+            # Multiply this result's sell frequency by its weight. This
+            # determines how this result's sell frequency affects the overall
+            # frequency calculation. If the result is very uncommon, e.g. HQ3
+            # only, then it will only affect the overall frequency a small
+            # amount.
             weighted_frequency = frequency * weight
-            average_frequency += weighted_frequency
+
+            # Add all of the weighted frequencies together to determine the
+            # overall sell frequency
+            overall_frequency += weighted_frequency
 
         average_profit = (gil_sum - total_cost) / self.num_trials
 
-        return round(average_profit, 2), round(average_frequency, 2)
+        return round(average_profit, 2), round(overall_frequency, 2)
