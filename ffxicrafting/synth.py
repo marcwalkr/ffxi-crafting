@@ -13,12 +13,12 @@ class Synth:
 
         self.difficulty = self.get_difficulty()
         self.tier = self.get_tier()
-
         self.can_craft = self.can_craft()
+        self.num_trials = Config.get_synth_trials()
 
         self.cost = None
-        self.average_profit = None
-        self.average_frequency = None
+        self.profit = None
+        self.sell_frequency = None
 
     def get_difficulty(self):
         recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
@@ -156,10 +156,10 @@ class Synth:
         else:
             return None, None
 
-    def simulate(self, num_synths):
+    def simulate(self):
         results = defaultdict(lambda: 0)
 
-        for _ in range(num_synths):
+        for _ in range(self.num_trials):
             item_id, quantity = self.synth()
             if item_id is not None:
                 results[item_id] += quantity
@@ -187,12 +187,12 @@ class Synth:
 
         return round(cost, 2)
 
-    def calculate_averages(self, synth_cost, num_trials):
-        if synth_cost is None:
+    def calculate_profit_and_frequency(self):
+        if self.cost is None:
             return None, None
 
-        total_cost = synth_cost * num_trials
-        results = self.simulate(num_trials)
+        total_cost = self.cost * self.num_trials
+        results = self.simulate()
         num_items = sum(results.values())
 
         gil_sum = 0
@@ -223,6 +223,6 @@ class Synth:
             weighted_frequency = frequency * weight
             average_frequency += weighted_frequency
 
-        average_profit = (gil_sum - total_cost) / num_trials
+        average_profit = (gil_sum - total_cost) / self.num_trials
 
         return round(average_profit, 2), round(average_frequency, 2)

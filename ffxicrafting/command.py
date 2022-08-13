@@ -73,16 +73,13 @@ class Command:
         # crafters = [test_char]
 
         recipes = SynthController.get_all_recipes()
-        synth_trials = Config.get_synth_trials()
-        skill_look_ahead = Config.get_skill_look_ahead()
         profit_threshold = Config.get_profit_threshold()
         frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = SynthTable(recipes, crafters, synth_trials, skill_look_ahead,
-                           profit_threshold, frequency_threshold, sort_column,
-                           reverse_sort)
+        table = SynthTable(recipes, crafters, profit_threshold,
+                           frequency_threshold, sort_column, reverse_sort)
         table.print()
 
     @classmethod

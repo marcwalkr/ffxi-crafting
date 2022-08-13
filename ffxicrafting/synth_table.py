@@ -5,13 +5,10 @@ from controllers.item_controller import ItemController
 
 
 class SynthTable:
-    def __init__(self, recipes, crafters, synth_trials, skill_look_ahead,
-                 profit_threshold, frequency_threshold, sort_column,
-                 reverse_sort) -> None:
+    def __init__(self, recipes, crafters, profit_threshold,
+                 frequency_threshold, sort_column, reverse_sort) -> None:
         self.recipes = recipes
         self.crafters = crafters
-        self.synth_trials = synth_trials
-        self.skill_look_ahead = skill_look_ahead
         self.profit_threshold = profit_threshold
         self.frequency_threshold = frequency_threshold
         self.sort_column = sort_column
@@ -19,8 +16,8 @@ class SynthTable:
 
     def print(self):
         column_labels = ["Recipe ID", "NQ", "NQ Qty", "HQ1", "HQ1 Qty", "HQ2",
-                         "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost", "Avg Profit",
-                         "Avg Sell Frequency"]
+                         "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost",
+                         "Profit Per Synth", "Sell Frequency"]
 
         synths = []
 
@@ -37,8 +34,8 @@ class SynthTable:
             if synth.cost is None:
                 continue
 
-            averages = synth.calculate_averages(synth.cost, self.synth_trials)
-            synth.average_profit, synth.average_frequency = averages
+            synth.profit, synth.sell_frequency = \
+                synth.calculate_profit_and_frequency()
 
             synths.append(synth)
 
@@ -60,7 +57,7 @@ class SynthTable:
                    synth.recipe.result_hq1_qty, hq2_name,
                    synth.recipe.result_hq2_qty, hq3_name,
                    synth.recipe.result_hq3_qty, synth.cost,
-                   synth.average_profit, synth.average_frequency]
+                   synth.profit, synth.sell_frequency]
 
             rows.append(row)
 
@@ -81,8 +78,8 @@ class SynthTable:
         return best_crafter
 
     def filter_synths(self, synths):
-        profit_sorted = sorted(synths, key=lambda s: s.average_profit,
-                               reverse=True)
+        profit_sorted = sorted(synths, key=lambda s: s.profit, reverse=True)
+
         filtered_synths = []
         for synth in profit_sorted:
             duplicate = any(s.recipe.result == synth.recipe.result and
@@ -90,8 +87,8 @@ class SynthTable:
                             s.recipe.result_hq2 == synth.recipe.result_hq2 and
                             s.recipe.result_hq3 == synth.recipe.result_hq3
                             for s in filtered_synths)
-            meets_profit = synth.average_profit >= self.profit_threshold
-            meets_frequency = synth.average_frequency >= self.frequency_threshold
+            meets_profit = synth.profit >= self.profit_threshold
+            meets_frequency = synth.sell_frequency >= self.frequency_threshold
 
             if meets_profit and meets_frequency and not duplicate:
                 filtered_synths.append(synth)
