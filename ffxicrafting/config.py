@@ -48,13 +48,23 @@ class Config:
             return []
 
     @classmethod
-    def get_profit_threshold(cls):
-        profit = cls.config.get("thresholds", "profit")
+    def get_synth_profit_threshold(cls):
+        profit = cls.config.get("thresholds", "synth_profit")
         return int(profit)
 
     @classmethod
-    def get_frequency_threshold(cls):
-        frequency = cls.config.get("thresholds", "frequency")
+    def get_synth_frequency_threshold(cls):
+        frequency = cls.config.get("thresholds", "synth_frequency")
+        return float(frequency)
+
+    @classmethod
+    def get_product_profit_threshold(cls):
+        profit = cls.config.get("thresholds", "product_profit")
+        return int(profit)
+
+    @classmethod
+    def get_product_frequency_threshold(cls):
+        frequency = cls.config.get("thresholds", "product_frequency")
         return float(frequency)
 
     @classmethod

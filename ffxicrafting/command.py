@@ -1,8 +1,7 @@
 from table import Table
 from config import Config
 from crafter import Crafter
-from product_table import ProductTable
-from synth_table import SynthTable
+from crafting_table import CraftingTable
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
@@ -75,14 +74,14 @@ class Command:
         # crafters = [test_char]
 
         recipes = SynthController.get_all_recipes()
-        profit_threshold = Config.get_profit_threshold()
-        frequency_threshold = Config.get_frequency_threshold()
+        profit_threshold = Config.get_synth_profit_threshold()
+        frequency_threshold = Config.get_synth_frequency_threshold()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = SynthTable(recipes, crafters, profit_threshold,
-                           frequency_threshold, sort_column, reverse_sort)
-        table.print()
+        table = CraftingTable(recipes, crafters, profit_threshold,
+                              frequency_threshold, sort_column, reverse_sort)
+        table.print_synth_view()
 
     @staticmethod
     def print_product_table():
@@ -136,14 +135,14 @@ class Command:
         # crafters = [test_char]
 
         recipes = SynthController.get_all_recipes()
-        profit_threshold = Config.get_profit_threshold()
-        frequency_threshold = Config.get_frequency_threshold()
+        profit_threshold = Config.get_product_profit_threshold()
+        frequency_threshold = Config.get_product_frequency_threshold()
         sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(recipes, crafters, profit_threshold,
-                             frequency_threshold, sort_column, reverse_sort)
-        table.print()
+        table = CraftingTable(recipes, crafters, profit_threshold,
+                              frequency_threshold, sort_column, reverse_sort)
+        table.print_product_view()
 
     @staticmethod
     def print_recipe():
