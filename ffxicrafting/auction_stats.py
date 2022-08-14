@@ -24,11 +24,11 @@ class AuctionStats:
                                    and self.average_stack_frequency is not None
                                    or self.average_single_frequency is not None
                                    and self.average_stack_frequency is not None
-                                   and self.average_single_frequency <
+                                   and self.average_single_frequency <=
                                    self.average_stack_frequency)
 
-        self.single_stack_equal_frequency = (not self.single_sells_faster and
-                                             not self.stack_sells_faster)
+        self.no_sales = (self.average_single_price is None and
+                         self.average_stack_price is None)
 
     def calculate_averages(self):
         single_price_averages = []
