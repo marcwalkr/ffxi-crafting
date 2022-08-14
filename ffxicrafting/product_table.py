@@ -16,8 +16,8 @@ class ProductTable:
         self.reverse_sort = reverse_sort
 
     def print(self):
-        column_labels = ["Recipe ID", "Name", "Quantity", "Cost",
-                         "Product Profit", "Total Profit", "Sell Frequency"]
+        column_labels = ["Recipe ID", "Name", "Quantity", "Cost", "Sell Price",
+                         "Profit", "Sell Frequency"]
 
         products = []
 
@@ -38,8 +38,8 @@ class ProductTable:
                 item = ItemController.get_item(result_id)
                 single_product = Product(recipe, synth.crafter, result_id, 1)
                 if (single_product.cost is not None and
-                    single_product.product_profit is not None and
-                    single_product.total_profit is not None and
+                    single_product.sell_price is not None and
+                    single_product.profit is not None and
                         single_product.sell_frequency is not None):
                     products.append(single_product)
 
@@ -47,8 +47,8 @@ class ProductTable:
                     stack_product = Product(recipe, synth.crafter, result_id,
                                             item.stack_size)
                     if (stack_product.cost is not None and
-                        stack_product.product_profit is not None and
-                        stack_product.total_profit is not None and
+                        stack_product.sell_price is not None and
+                        stack_product.profit is not None and
                             stack_product.sell_frequency is not None):
                         products.append(stack_product)
 
@@ -60,7 +60,7 @@ class ProductTable:
             name = item.sort_name.replace("_", " ").title()
 
             row = [product.synth.recipe.id, name, product.quantity,
-                   product.cost, product.product_profit, product.total_profit,
+                   product.cost, product.sell_price, product.profit,
                    product.sell_frequency]
 
             rows.append(row)
@@ -82,15 +82,14 @@ class ProductTable:
         return best_crafter
 
     def filter_products(self, products):
-        profit_sorted = sorted(products, key=lambda s: s.product_profit,
-                               reverse=True)
+        profit_sorted = sorted(products, key=lambda s: s.profit, reverse=True)
 
         filtered_products = []
         for product in profit_sorted:
             duplicate = any(p.item_id == product.item_id and
                             p.quantity == product.quantity
                             for p in filtered_products)
-            meets_profit = product.product_profit >= self.profit_threshold
+            meets_profit = product.profit >= self.profit_threshold
             meets_frequency = (product.sell_frequency >=
                                self.frequency_threshold)
 

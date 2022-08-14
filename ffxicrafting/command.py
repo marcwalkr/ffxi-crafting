@@ -77,7 +77,7 @@ class Command:
         recipes = SynthController.get_all_recipes()
         profit_threshold = Config.get_profit_threshold()
         frequency_threshold = Config.get_frequency_threshold()
-        sort_column = Config.get_sort_column()
+        sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
         table = SynthTable(recipes, crafters, profit_threshold,
@@ -138,7 +138,7 @@ class Command:
         recipes = SynthController.get_all_recipes()
         profit_threshold = Config.get_profit_threshold()
         frequency_threshold = Config.get_frequency_threshold()
-        sort_column = Config.get_sort_column()
+        sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
         table = ProductTable(recipes, crafters, profit_threshold,

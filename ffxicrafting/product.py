@@ -1,5 +1,4 @@
 from synth import Synth
-from config import Config
 from controllers.auction_controller import AuctionController
 
 
@@ -14,10 +13,11 @@ class Product:
         self.item_id = item_id
         self.quantity = quantity
 
-        self.cost, self.product_profit, self.total_profit, \
-            self.sell_frequency = self.calculate_cost_profits_frequency()
+        self.cost, self.sell_price, self.profit, self.sell_frequency = \
+            self.calculate_stats()
 
-    def calculate_cost_profits_frequency(self):
+    def calculate_stats(self):
+        """Returns the product cost, sell price, profit, and sell frequency"""
         # An ingredient price could not be found
         if self.synth.cost is None:
             return None, None, None, None
@@ -29,62 +29,37 @@ class Product:
 
         # The total cost is the cost of a single synth * the number of times
         # the synth was simulated
-        total_cost = self.synth.cost * self.synth.num_trials
+        simulation_cost = self.synth.cost * self.synth.num_trials
 
-        # The total amount of the product made in the simulation
+        # The total amount of the product made in the simulation, taking into
+        # account the target quantity. If the product is a stack, this is the
+        # number of stacks
         product_quantity = results[self.item_id] / self.quantity
 
         # The total cost of the simulation / the amount of product made in the
         # simulation = the cost to make each product
-        product_cost = total_cost / product_quantity
+        cost = simulation_cost / product_quantity
 
-        product_gil_sum = 0
-        other_gil_sum = 0
-        sell_frequency = 0
-        for item_id, quantity in results.items():
-            auction_stats = AuctionController.get_auction_stats(item_id)
+        auction_stats = AuctionController.get_auction_stats(self.item_id)
 
-            # This result is the target product, calculate gil using the
-            # product quantity rather than the individual quantity
-            if item_id == self.item_id:
-                gil = self.calculate_product_gil(auction_stats,
-                                                 product_quantity)
-                if gil is not None:
-                    product_gil_sum += gil
-                    # The product frequency is the only one needed, don't need the
-                    # frequency of other results
-                    if self.quantity == 1:
-                        sell_frequency = auction_stats.average_single_frequency
-                    else:
-                        sell_frequency = auction_stats.average_stack_frequency
-            else:
-                # Not the target product, but interested in the gil sum
-                gil = self.synth.calculate_gil(auction_stats, quantity)
-                if gil is not None:
-                    other_gil_sum += gil
-
-        # The profit made per product if only selling the product, not any
-        # other results crafted while crafting the product
-        product_profit = (product_gil_sum - total_cost) / product_quantity
-
-        # The profit made per product if selling everything made in the process
-        # of crafting the product
-        total_gil_sum = product_gil_sum + other_gil_sum
-        total_profit = (total_gil_sum - total_cost) / product_quantity
-
-        return round(product_cost, 2), round(product_profit, 2), \
-            round(total_profit, 2), round(sell_frequency, 2)
-
-    def calculate_product_gil(self, auction_stats, product_quantity):
-        """Returns the total amount of gil a quantity of a product is worth.
-        If the product is a stack, the product_quantity is the number of
-        stacks"""
         if self.quantity == 1:
-            price = auction_stats.average_single_price
+            sell_price = auction_stats.average_single_price
+            sell_frequency = auction_stats.average_single_frequency
         else:
-            price = auction_stats.average_stack_price
+            sell_price = auction_stats.average_stack_price
+            sell_frequency = auction_stats.average_stack_frequency
 
-        if price is None:
-            return None
+        if sell_price is None or sell_frequency is None:
+            return None, None, None, None
 
-        return price * product_quantity
+        # The total gil from the products made in the simulation
+        simulation_product_gil = sell_price * product_quantity
+
+        # The total profit made if all the simulation products were sold
+        simulation_profit = simulation_product_gil - simulation_cost
+
+        # The profit made per product
+        profit = simulation_profit / product_quantity
+
+        return round(cost, 2), round(sell_price, 2), round(profit, 2), \
+            round(sell_frequency, 2)

@@ -72,8 +72,12 @@ class Config:
         return int(trials)
 
     @classmethod
-    def get_sort_column(cls):
-        return cls.config.get("settings", "sort_column")
+    def get_synth_sort_column(cls):
+        return cls.config.get("settings", "synth_sort_column")
+
+    @classmethod
+    def get_product_sort_column(cls):
+        return cls.config.get("settings", "product_sort_column")
 
     @classmethod
     def get_reverse_sort(cls):
