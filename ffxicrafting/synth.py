@@ -214,17 +214,19 @@ class Synth:
         sell frequencies of each possible result are weighted by the
         probability of obtaining that result and added together to obtain a
         single sell frequency"""
+
+        # An ingredient price could not be found
         if self.cost is None:
             return None, None
-
-        # The total cost is the cost of a single synth * the number of times
-        # the synth will be simulated
-        total_cost = self.cost * self.num_trials
 
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
         results = self.simulate()
+
+        # The total cost is the cost of a single synth * the number of times
+        # the synth was simulated
+        total_cost = self.cost * self.num_trials
 
         # The total number of items that were produced in the simulation
         num_items = sum(results.values())
@@ -232,44 +234,62 @@ class Synth:
         gil_sum = 0
         overall_frequency = 0
 
-        # Loop through each result item in the dictionary
         for item_id, quantity in results.items():
-            item = ItemController.get_item(item_id)
             auction_stats = AuctionController.get_auction_stats(item_id)
 
-            # The item either can't be sold or was never sold on the AH
-            if (auction_stats.average_single_price is None and
-                    auction_stats.average_stack_price is None):
-                continue
+            gil = self.calculate_gil(auction_stats, quantity)
+            weighted_freq = self.calculate_weighted_frequency(auction_stats,
+                                                              quantity, num_items)
 
-            # Use the sell price and frequency of whichever form of the item
-            # sells faster: single or stack, prioritizing stack if they sell
-            # equally fast
-            if (auction_stats.stack_sells_faster or
-                    auction_stats.single_stack_equal_frequency):
-                single_cost = auction_stats.average_stack_price / item.stack_size
-                frequency = auction_stats.average_stack_frequency
-            else:
-                single_cost = auction_stats.average_single_price
-                frequency = auction_stats.average_single_frequency
-
-            gil_sum += single_cost * quantity
-
-            # The weight is the proportion of the results that this item takes
-            # up, e.g. 0.5 if this result is exactly half of the results
-            weight = quantity / num_items
-
-            # Multiply this result's sell frequency by its weight. This
-            # determines how this result's sell frequency affects the overall
-            # frequency calculation. If the result is very uncommon, e.g. HQ3
-            # only, then it will only affect the overall frequency a small
-            # amount.
-            weighted_frequency = frequency * weight
-
-            # Add all of the weighted frequencies together to determine the
-            # overall sell frequency
-            overall_frequency += weighted_frequency
+            if gil is not None and weighted_freq is not None:
+                gil_sum += gil
+                overall_frequency += weighted_freq
 
         average_profit = (gil_sum - total_cost) / self.num_trials
 
         return round(average_profit, 2), round(overall_frequency, 2)
+
+    @staticmethod
+    def calculate_gil(auction_stats, quantity):
+        """Returns the total amount of gil a quantity of an item is worth"""
+        item = ItemController.get_item(auction_stats.item_id)
+
+        # The item either can't be sold or was never sold on the AH
+        if auction_stats.no_sales:
+            return None
+
+        # Use the sell price of whichever form of the item sells faster:
+        # single or stack
+        if auction_stats.stack_sells_faster:
+            single_price = auction_stats.average_stack_price / item.stack_size
+        else:
+            single_price = auction_stats.average_single_price
+
+        return single_price * quantity
+
+    @staticmethod
+    def calculate_weighted_frequency(auction_stats, quantity, total_items):
+        """Returns the sell frequency of an item weighted by the quantity of
+        the item compared to the total number of items"""
+        # The item either can't be sold or was never sold on the AH
+        if auction_stats.no_sales:
+            return None
+
+        # Use the frequency of whichever form of the item sells faster:
+        # single or stack
+        if auction_stats.stack_sells_faster:
+            frequency = auction_stats.average_stack_frequency
+        else:
+            frequency = auction_stats.average_single_frequency
+
+        # The weight is the proportion of the results that this item takes up,
+        # e.g. 0.5 if this result is exactly half of the results
+        weight = quantity / total_items
+
+        # Multiply this result's sell frequency by its weight. This determines
+        # how this result's sell frequency affects the overall frequency
+        # calculation. If the result is very uncommon, e.g. HQ3 only, then it
+        # will only affect the overall frequency a small amount.
+        weighted_frequency = frequency * weight
+
+        return weighted_frequency

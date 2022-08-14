@@ -30,7 +30,7 @@ class SynthTable:
 
             synth.cost = synth.calculate_cost()
 
-            # An ingredient price couldn't be found
+            # An ingredient price could not be found
             if synth.cost is None:
                 continue
 
