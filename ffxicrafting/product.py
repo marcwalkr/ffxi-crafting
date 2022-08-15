@@ -2,13 +2,21 @@ from controllers.auction_controller import AuctionController
 
 
 class Product:
-    def __init__(self, synth, item_id, quantity) -> None:
+    def __init__(self, synth, item_id, quantity, cost=None, sell_price=None,
+                 profit=None, sell_frequency=None) -> None:
         self.synth = synth
         self.item_id = item_id
         self.quantity = quantity
 
-        self.cost, self.sell_price, self.profit, self.sell_frequency = \
-            self.calculate_stats()
+        if all(i is not None for i in [cost, sell_price, profit,
+                                       sell_frequency]):
+            self.cost = round(cost, 2)
+            self.sell_price = round(sell_price, 2)
+            self.profit = round(profit, 2)
+            self.sell_frequency = round(sell_frequency, 2)
+        else:
+            self.cost, self.sell_price, self.profit, self.sell_frequency = \
+                self.calculate_stats()
 
     def calculate_stats(self):
         """Returns the product cost, sell price, profit, and sell frequency"""
