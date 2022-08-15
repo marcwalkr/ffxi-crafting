@@ -14,7 +14,7 @@ class Synth:
         self.difficulty = self.get_difficulty()
         self.tier = self.get_tier()
         self.can_craft = self.can_craft()
-        self.num_trials = Config.get_synth_trials()
+        self.num_trials = Config.get_simulation_trials()
 
         self.cost = None
         self.profit = None
@@ -73,9 +73,8 @@ class Synth:
         return tier
 
     def can_craft(self):
-        """Returns True if the crafter is able to craft the recipe, determined
-        by if their skill is high enough, taking into account the skill look
-        ahead setting, and if the crafter has any required key item"""
+        """Returns True if the crafter is able to craft the recipe, taking into
+        account the skill look ahead setting"""
         skill_look_ahead = Config.get_skill_look_ahead()
         enough_skill = self.difficulty - skill_look_ahead <= 0
 

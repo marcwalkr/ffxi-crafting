@@ -77,8 +77,8 @@ class Config:
         return int(skill_look_ahead)
 
     @classmethod
-    def get_synth_trials(cls):
-        trials = cls.config.get("settings", "synth_trials")
+    def get_simulation_trials(cls):
+        trials = cls.config.get("settings", "simulation_trials")
         return int(trials)
 
     @classmethod
