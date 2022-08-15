@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from configparser import ConfigParser
-from models.skill_set import SkillSet
+from skill_set import SkillSet
 
 
 class Config:
@@ -48,13 +48,23 @@ class Config:
             return []
 
     @classmethod
-    def get_profit_threshold(cls):
-        profit = cls.config.get("thresholds", "profit")
+    def get_synth_profit_threshold(cls):
+        profit = cls.config.get("thresholds", "synth_profit")
         return int(profit)
 
     @classmethod
-    def get_frequency_threshold(cls):
-        frequency = cls.config.get("thresholds", "frequency")
+    def get_synth_frequency_threshold(cls):
+        frequency = cls.config.get("thresholds", "synth_frequency")
+        return float(frequency)
+
+    @classmethod
+    def get_product_profit_threshold(cls):
+        profit = cls.config.get("thresholds", "product_profit")
+        return int(profit)
+
+    @classmethod
+    def get_product_frequency_threshold(cls):
+        frequency = cls.config.get("thresholds", "product_frequency")
         return float(frequency)
 
     @classmethod
@@ -67,16 +77,25 @@ class Config:
         return int(skill_look_ahead)
 
     @classmethod
+    def get_simulation_trials(cls):
+        trials = cls.config.get("settings", "simulation_trials")
+        return int(trials)
+
+    @classmethod
+    def get_synth_sort_column(cls):
+        return cls.config.get("settings", "synth_sort_column")
+
+    @classmethod
+    def get_product_sort_column(cls):
+        return cls.config.get("settings", "product_sort_column")
+
+    @classmethod
+    def get_reverse_sort(cls):
+        return cls.config.getboolean("settings", "reverse_sort")
+
+    @classmethod
     def get_monitored_item_ids(cls):
         item_ids = cls.config.get("auction_monitor", "item_ids")
         item_ids = item_ids.split(",")
 
         return [int(i) for i in item_ids]
-
-    @classmethod
-    def get_include_desynth(cls):
-        return cls.config.getboolean("settings", "include_desynth")
-
-    @classmethod
-    def get_sort_column(cls):
-        return cls.config.get("settings", "sort_column")

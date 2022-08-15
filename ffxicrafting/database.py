@@ -35,7 +35,7 @@ class Database:
         self.commit()
 
     def delete_auction_pages_older_than(self, days):
-        self.cursor.execute("""DELETE FROM auction_listings WHERE
+        self.cursor.execute("""DELETE FROM auction_pages WHERE
                             DATEDIFF(UTC_TIMESTAMP(), accessed) > %s""",
                             (days,))
         self.commit()
