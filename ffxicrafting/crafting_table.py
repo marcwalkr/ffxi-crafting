@@ -79,6 +79,12 @@ class CraftingTable:
             if synth is None:
                 continue
 
+            synth.cost = synth.calculate_cost()
+
+            # An ingredient price could not be found
+            if synth.cost is None:
+                continue
+
             result_ids = [recipe.result, recipe.result_hq1, recipe.result_hq2,
                           recipe.result_hq3]
 
@@ -87,21 +93,12 @@ class CraftingTable:
 
             for result_id in result_ids:
                 item = ItemController.get_item(result_id)
-                single_product = Product(recipe, synth.crafter, result_id, 1)
-                if (single_product.cost is not None and
-                    single_product.sell_price is not None and
-                    single_product.profit is not None and
-                        single_product.sell_frequency is not None):
-                    products.append(single_product)
+                single_product = Product(synth, result_id, 1)
+                products.append(single_product)
 
                 if item.stack_size > 1:
-                    stack_product = Product(recipe, synth.crafter, result_id,
-                                            item.stack_size)
-                    if (stack_product.cost is not None and
-                        stack_product.sell_price is not None and
-                        stack_product.profit is not None and
-                            stack_product.sell_frequency is not None):
-                        products.append(stack_product)
+                    stack_product = Product(synth, result_id, item.stack_size)
+                    products.append(stack_product)
 
         products = self.filter_thresholds(products)
         products = self.remove_product_duplicates(products)

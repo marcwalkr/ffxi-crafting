@@ -1,15 +1,9 @@
-from synth import Synth
 from controllers.auction_controller import AuctionController
 
 
 class Product:
-    def __init__(self, recipe, crafter, item_id, quantity) -> None:
-        if item_id not in [recipe.result, recipe.result_hq1, recipe.result_hq2,
-                           recipe.result_hq3]:
-            raise ValueError("Product cannot be crafted from recipe")
-
-        self.synth = Synth(recipe, crafter)
-        self.synth.cost = self.synth.calculate_cost()
+    def __init__(self, synth, item_id, quantity) -> None:
+        self.synth = synth
         self.item_id = item_id
         self.quantity = quantity
 
@@ -18,10 +12,6 @@ class Product:
 
     def calculate_stats(self):
         """Returns the product cost, sell price, profit, and sell frequency"""
-        # An ingredient price could not be found
-        if self.synth.cost is None:
-            return None, None, None, None
-
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
@@ -49,10 +39,10 @@ class Product:
             sell_price = auction_stats.average_stack_price
             sell_frequency = auction_stats.average_stack_frequency
 
-        if sell_price is None or sell_frequency is None:
-            return None, None, None, None
+        if sell_price is None:
+            sell_price = 0
 
-        # The total gil from the products made in the simulation
+            # The total gil from the products made in the simulation
         simulation_product_gil = sell_price * product_quantity
 
         # The total profit made if all the simulation products were sold

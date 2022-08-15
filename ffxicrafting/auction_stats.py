@@ -13,17 +13,17 @@ class AuctionStats:
         self.average_stack_price = averages[2]
         self.average_stack_frequency = averages[3]
 
-        self.single_sells_faster = (self.average_single_frequency is not None
-                                    and self.average_stack_frequency is None
-                                    or self.average_single_frequency is not None
-                                    and self.average_stack_frequency is not None
+        self.single_sells_faster = (self.average_single_frequency > 0
+                                    and self.average_stack_frequency == 0
+                                    or self.average_single_frequency > 0
+                                    and self.average_stack_frequency > 0
                                     and self.average_single_frequency >
                                     self.average_stack_frequency)
 
-        self.stack_sells_faster = (self.average_single_frequency is None
-                                   and self.average_stack_frequency is not None
-                                   or self.average_single_frequency is not None
-                                   and self.average_stack_frequency is not None
+        self.stack_sells_faster = (self.average_single_frequency == 0
+                                   and self.average_stack_frequency > 0
+                                   or self.average_single_frequency > 0
+                                   and self.average_stack_frequency > 0
                                    and self.average_single_frequency <=
                                    self.average_stack_frequency)
 
@@ -69,7 +69,7 @@ class AuctionStats:
             single_frequency_average = (sum(single_frequencies) /
                                         len(single_frequencies))
         else:
-            single_frequency_average = None
+            single_frequency_average = 0
 
         if len(stack_price_averages) > 0:
             overall_stack_price_average = (sum(stack_price_averages) /
@@ -81,7 +81,7 @@ class AuctionStats:
             stack_frequency_average = (sum(stack_frequencies) /
                                        len(stack_frequencies))
         else:
-            stack_frequency_average = None
+            stack_frequency_average = 0
 
         return overall_single_price_average, single_frequency_average, \
             overall_stack_price_average, stack_frequency_average
