@@ -2,7 +2,6 @@ from operator import attrgetter
 from synth import Synth
 from product import Product
 from table import Table
-from ingredient import Ingredient
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 
@@ -47,20 +46,11 @@ class CraftingTable:
 
         rows = []
         for synth in synths:
-            hq1_item = ItemController.get_item(synth.recipe.result_hq1)
-            hq1_name = hq1_item.sort_name.replace("_", " ").title()
+            nq_name, hq1_name, hq2_name, hq3_name = synth.get_result_names()
+            nq_qty, hq1_qty, hq2_qty, hq3_qty = synth.get_result_quantities()
 
-            hq2_item = ItemController.get_item(synth.recipe.result_hq2)
-            hq2_name = hq2_item.sort_name.replace("_", " ").title()
-
-            hq3_item = ItemController.get_item(synth.recipe.result_hq3)
-            hq3_name = hq3_item.sort_name.replace("_", " ").title()
-
-            row = [synth.recipe.id, synth.recipe.result_name,
-                   synth.recipe.result_qty, hq1_name,
-                   synth.recipe.result_hq1_qty, hq2_name,
-                   synth.recipe.result_hq2_qty, hq3_name,
-                   synth.recipe.result_hq3_qty, synth.cost,
+            row = [synth.recipe.id, nq_name, nq_qty, hq1_name, hq1_qty,
+                   hq2_name, hq2_qty, hq3_name, hq3_qty, synth.cost,
                    synth.profit, synth.sell_frequency]
 
             rows.append(row)
@@ -94,9 +84,7 @@ class CraftingTable:
             result_ids = [*set(result_ids)]
 
             for result_id in result_ids:
-                item = ItemController.get_item(result_id)
-                stack_size = item.stack_size
-                products += self.create_products(synth, result_id, stack_size)
+                products += self.create_products(synth, result_id)
 
         products += self.create_bundle_products(products)
 
@@ -105,10 +93,7 @@ class CraftingTable:
 
         rows = []
         for product in products:
-            item = ItemController.get_item(product.item_id)
-            name = item.sort_name.replace("_", " ").title()
-
-            row = [product.synth.recipe.id, name, product.quantity,
+            row = [product.synth.recipe.id, product.name, product.quantity,
                    product.cost, product.sell_price, product.profit,
                    product.sell_frequency]
 
@@ -172,14 +157,15 @@ class CraftingTable:
         return filtered
 
     @staticmethod
-    def create_products(synth, item_id, stack_size):
+    def create_products(synth, item_id):
+        item = ItemController.get_item(item_id)
         products = []
 
         single_product = Product(synth, item_id, 1)
         products.append(single_product)
 
-        if stack_size > 1:
-            stack_product = Product(synth, item_id, stack_size)
+        if item.stack_size > 1:
+            stack_product = Product(synth, item_id, item.stack_size)
             products.append(stack_product)
 
         return products
@@ -194,61 +180,64 @@ class CraftingTable:
                             "ryuno", "mokujin", "inoshishinofuda",
                             "shikanofuda", "chonofuda", "ranka", "furu"]
 
-        wijnruit_item = ItemController.get_item_by_name("wijnruit")
-        carnation_item = ItemController.get_item_by_name("carnation")
-
-        wijnruit = Ingredient(wijnruit_item.item_id)
-        carnation = Ingredient(carnation_item.item_id)
+        wijnruit_price = 110
+        carnation_price = 60
 
         products = []
 
         for product in all_products:
+            if product.quantity != 99:
+                continue
+
             item = ItemController.get_item(product.item_id)
             is_bundleable = any(i in item.name for i in bundleable_names)
 
-            if product.quantity == 99 and is_bundleable:
-                if item.name.endswith("arrow"):
-                    bundle_name = item.name.removesuffix("_arrow") + "_quiver"
-                elif item.name.endswith("bolt"):
-                    bundle_name = item.name + "_quiver"
-                elif item.name.endswith("bullet") or "shuriken" in item.name:
-                    bundle_name = item.name + "_pouch"
-                elif item.name.endswith("card"):
-                    bundle_name = item.name + "_case"
-                else:
-                    bundle_name = "toolbag_(" + item.name + ")"
+            if not is_bundleable:
+                continue
 
-                bundle = ItemController.get_item_by_name(bundle_name)
+            if item.name.endswith("arrow"):
+                bundle_name = item.name.removesuffix("_arrow") + "_quiver"
+            elif item.name.endswith("bolt"):
+                bundle_name = item.name + "_quiver"
+            elif item.name.endswith("bullet") or "shuriken" in item.name:
+                bundle_name = item.name + "_pouch"
+            elif item.name.endswith("card"):
+                bundle_name = item.name + "_case"
+            else:
+                bundle_name = "toolbag_(" + item.name + ")"
 
-                if bundle is not None:
-                    stats = AuctionController.get_auction_stats(bundle.item_id)
+            bundle = ItemController.get_item_by_name(bundle_name)
 
-                    if "shuriken" in bundle.name or "toolbag" in bundle.name:
-                        single_bundled_cost = product.cost + wijnruit.price
-                    else:
-                        single_bundled_cost = product.cost + carnation.price
+            if bundle is None:
+                continue
 
-                    stack_bundled_cost = single_bundled_cost * bundle.stack_size
+            auction_stats = AuctionController.get_auction_stats(bundle.item_id)
 
-                    if stats.average_single_price is not None:
-                        single_price = stats.average_single_price
-                        profit = single_price - single_bundled_cost
-                        single_freq = stats.average_single_frequency
-                        single_product = Product(product.synth, bundle.item_id,
-                                                 1, single_bundled_cost,
-                                                 single_price, profit,
-                                                 single_freq)
-                        products.append(single_product)
+            if auction_stats.no_sales:
+                continue
 
-                    if stats.average_stack_price is not None:
-                        stack_price = stats.average_stack_price
-                        profit = stack_price - stack_bundled_cost
-                        stack_freq = stats.average_stack_frequency
-                        stack_product = Product(product.synth, bundle.item_id,
-                                                bundle.stack_size,
-                                                stack_bundled_cost,
-                                                stack_price, profit,
-                                                stack_freq)
-                        products.append(stack_product)
+            if "shuriken" in bundle.name or "toolbag" in bundle.name:
+                single_bundled_cost = product.cost + wijnruit_price
+            else:
+                single_bundled_cost = product.cost + carnation_price
+
+            if auction_stats.average_single_price is not None:
+                single_price = auction_stats.average_single_price
+                profit = single_price - single_bundled_cost
+                single_freq = auction_stats.average_single_frequency
+                single_product = Product(product.synth, bundle.item_id, 1,
+                                         single_bundled_cost, single_price,
+                                         profit, single_freq)
+                products.append(single_product)
+
+            if auction_stats.average_stack_price is not None:
+                stack_bundled_cost = single_bundled_cost * bundle.stack_size
+                stack_price = auction_stats.average_stack_price
+                profit = stack_price - stack_bundled_cost
+                stack_freq = auction_stats.average_stack_frequency
+                stack_product = Product(product.synth, bundle.item_id,
+                                        bundle.stack_size, stack_bundled_cost,
+                                        stack_price, profit, stack_freq)
+                products.append(stack_product)
 
         return products

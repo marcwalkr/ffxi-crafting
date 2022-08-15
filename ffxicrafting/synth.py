@@ -20,6 +20,28 @@ class Synth:
         self.profit = None
         self.sell_frequency = None
 
+    def get_result_names(self):
+        nq_name = self.recipe.result_name
+
+        hq1_item = ItemController.get_item(self.recipe.result_hq1)
+        hq1_name = hq1_item.sort_name.replace("_", " ").title()
+
+        hq2_item = ItemController.get_item(self.recipe.result_hq2)
+        hq2_name = hq2_item.sort_name.replace("_", " ").title()
+
+        hq3_item = ItemController.get_item(self.recipe.result_hq3)
+        hq3_name = hq3_item.sort_name.replace("_", " ").title()
+
+        return nq_name, hq1_name, hq2_name, hq3_name
+
+    def get_result_quantities(self):
+        nq_quantity = self.recipe.result_qty
+        hq1_quantity = self.recipe.result_hq1_qty
+        hq2_quantity = self.recipe.result_hq2_qty
+        hq3_quantity = self.recipe.result_hq3_qty
+
+        return nq_quantity, hq1_quantity, hq2_quantity, hq3_quantity
+
     def get_difficulty(self):
         """Returns the largest skill difference between the recipe and the
         crafter of the required skills

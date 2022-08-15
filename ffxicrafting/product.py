@@ -1,11 +1,15 @@
 from controllers.auction_controller import AuctionController
+from controllers.item_controller import ItemController
 
 
 class Product:
     def __init__(self, synth, item_id, quantity, cost=None, sell_price=None,
                  profit=None, sell_frequency=None) -> None:
+
         self.synth = synth
         self.item_id = item_id
+        item = ItemController.get_item(item_id)
+        self.name = item.sort_name.replace("_", " ").title()
         self.quantity = quantity
 
         if all(i is not None for i in [cost, sell_price, profit,
@@ -36,7 +40,10 @@ class Product:
 
         # The total cost of the simulation / the amount of product made in the
         # simulation = the cost to make each product
-        cost = simulation_cost / product_quantity
+        if product_quantity == 0:
+            cost = simulation_cost
+        else:
+            cost = simulation_cost / product_quantity
 
         auction_stats = AuctionController.get_auction_stats(self.item_id)
 
@@ -57,7 +64,10 @@ class Product:
         simulation_profit = simulation_product_gil - simulation_cost
 
         # The profit made per product
-        profit = simulation_profit / product_quantity
+        if product_quantity == 0:
+            profit = simulation_profit
+        else:
+            profit = simulation_profit / product_quantity
 
         return round(cost, 2), round(sell_price, 2), round(profit, 2), \
             round(sell_frequency, 2)
