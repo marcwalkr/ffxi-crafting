@@ -12,8 +12,8 @@ class Synth:
         self.crafter = crafter
 
         self.difficulty = self.get_difficulty()
-        self.tier = self.get_tier()
         self.can_craft = self.can_craft()
+        self.tier = self.get_tier()
         self.num_trials = Config.get_simulation_trials()
 
         self.cost = None

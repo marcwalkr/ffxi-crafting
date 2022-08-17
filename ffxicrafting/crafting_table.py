@@ -21,7 +21,7 @@ class CraftingTable:
                          "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost",
                          "Profit Per Synth", "Sell Frequency"]
 
-        synths = []
+        rows = []
 
         for recipe in self.recipes:
             synth = self.get_best_crafter(recipe)
@@ -39,13 +39,9 @@ class CraftingTable:
             synth.profit, synth.sell_frequency = \
                 synth.calculate_profit_and_frequency()
 
-            synths.append(synth)
+            if not self.meets_thresholds(synth):
+                continue
 
-        synths = self.filter_thresholds(synths)
-        synths = self.remove_synth_duplicates(synths)
-
-        rows = []
-        for synth in synths:
             nq_name, hq1_name, hq2_name, hq3_name = synth.get_result_names()
             nq_qty, hq1_qty, hq2_qty, hq3_qty = synth.get_result_quantities()
 
@@ -53,7 +49,22 @@ class CraftingTable:
                    hq2_name, hq2_qty, hq3_name, hq3_qty, synth.cost,
                    synth.profit, synth.sell_frequency]
 
-            rows.append(row)
+            # A row already exists in the list with the same synth results
+            duplicate = [r for r in rows if r[1] == row[1] and
+                         r[3] == row[3] and r[5] == row[5] and r[7] == row[7]]
+
+            if duplicate:
+                duplicate_row = duplicate[0]
+
+                # Take the row with the highest profit value
+                row_profit = row[10]
+                duplicate_profit = duplicate_row[10]
+
+                if row_profit > duplicate_profit:
+                    rows.remove(duplicate_row)
+                    rows.append(row)
+            else:
+                rows.append(row)
 
         table = Table(column_labels, rows, self.sort_column, self.reverse_sort)
         table.print()
@@ -103,33 +114,23 @@ class CraftingTable:
         table.print()
 
     def get_best_crafter(self, recipe):
-        can_craft = []
-        for crafter in self.crafters:
-            synth = Synth(recipe, crafter)
-            if synth.can_craft:
-                can_craft.append(synth)
+        synths = [Synth(recipe, c) for c in self.crafters]
+        can_craft = [s for s in synths if s.can_craft]
 
         if len(can_craft) == 0:
             return None
 
+        # Synth object containing the crafter with the highest skill,
+        # lowest synth "difficulty"
         best_crafter = min(can_craft, key=attrgetter("difficulty"))
+
         return best_crafter
 
-    def remove_synth_duplicates(self, synths):
-        profit_sorted = sorted(synths, key=lambda s: s.profit, reverse=True)
+    def meets_thresholds(self, obj):
+        meets_profit = obj.profit >= self.profit_threshold
+        meets_frequency = obj.sell_frequency >= self.frequency_threshold
 
-        removed_duplicates = []
-        for synth in profit_sorted:
-            duplicate = any(s.recipe.result == synth.recipe.result and
-                            s.recipe.result_hq1 == synth.recipe.result_hq1 and
-                            s.recipe.result_hq2 == synth.recipe.result_hq2 and
-                            s.recipe.result_hq3 == synth.recipe.result_hq3
-                            for s in removed_duplicates)
-
-            if not duplicate:
-                removed_duplicates.append(synth)
-
-        return removed_duplicates
+        return meets_profit and meets_frequency
 
     def remove_product_duplicates(self, products):
         profit_sorted = sorted(products, key=lambda p: p.profit, reverse=True)
