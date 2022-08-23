@@ -34,6 +34,11 @@ class Database:
                              accessed,))
         self.commit()
 
+    def get_bundle(self, unbundled_id):
+        self.cursor.execute("SELECT * FROM bundles WHERE unbundled_id=%s",
+                            (unbundled_id,))
+        return self.cursor.fetchone()
+
     def delete_auction_pages_older_than(self, days):
         self.cursor.execute("""DELETE FROM auction_pages WHERE
                             DATEDIFF(UTC_TIMESTAMP(), accessed) > %s""",
