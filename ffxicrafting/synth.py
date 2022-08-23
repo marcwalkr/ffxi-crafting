@@ -17,7 +17,8 @@ class Synth:
         self.num_trials = Config.get_simulation_trials()
 
         self.cost = None
-        self.profit = None
+        self.profit_per_synth = None
+        self.profit_per_inventory = None
         self.sell_frequency = None
 
     def get_result_names(self):
@@ -230,11 +231,11 @@ class Synth:
 
         return round(cost, 2)
 
-    def calculate_profit_and_frequency(self):
-        """Returns the average profit and sell frequency of a single synth. The
-        sell frequencies of each possible result are weighted by the
-        probability of obtaining that result and added together to obtain a
-        single sell frequency"""
+    def calculate_stats(self):
+        """Returns the average profit per synth, profit per inventory space,
+        and sell frequency. The sell frequencies of each possible result are
+        weighted by the probability of obtaining that result and added together
+        for a single sell frequency"""
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
@@ -246,11 +247,14 @@ class Synth:
         # The total number of items that were produced in the simulation
         simulation_num_items = sum(results.values())
 
-        gil_sum = 0
+        total_inventory_space = 0
+        total_gil = 0
         overall_frequency = 0
 
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
+
+            total_inventory_space += quantity / item.stack_size
             auction_stats = AuctionController.get_auction_stats(item_id)
 
             if auction_stats.no_sales:
@@ -273,9 +277,12 @@ class Synth:
             # more the more commonly the result item is obtained from the synth
             weighted_frequency = frequency * weight
 
-            gil_sum += gil
+            total_gil += gil
             overall_frequency += weighted_frequency
 
-        average_profit = (gil_sum - simulation_cost) / self.num_trials
+        total_profit = total_gil - simulation_cost
+        profit_per_synth = total_profit / self.num_trials
+        profit_per_inventory = total_profit / total_inventory_space
 
-        return round(average_profit, 2), round(overall_frequency, 2)
+        return round(profit_per_synth, 2), round(profit_per_inventory, 2), \
+            round(overall_frequency, 2)
