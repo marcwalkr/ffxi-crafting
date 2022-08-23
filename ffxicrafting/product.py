@@ -1,5 +1,7 @@
 from controllers.auction_controller import AuctionController
 from controllers.item_controller import ItemController
+from controllers.bundle_controller import BundleController
+from ingredient import Ingredient
 
 
 class Product:
@@ -8,9 +10,10 @@ class Product:
 
         self.synth = synth
         self.item_id = item_id
+        self.quantity = quantity
+
         item = ItemController.get_item(item_id)
         self.name = item.sort_name.replace("_", " ").title()
-        self.quantity = quantity
 
         if all(i is not None for i in [cost, sell_price, profit,
                                        sell_frequency]):
@@ -21,6 +24,12 @@ class Product:
         else:
             self.cost, self.sell_price, self.profit, self.sell_frequency = \
                 self.calculate_stats()
+
+        self.bundle = BundleController.get_bundle(item_id)
+        if self.bundle is not None and quantity > 1:
+            self.can_bundle = True
+        else:
+            self.can_bundle = False
 
     def calculate_stats(self):
         """Returns the product cost, sell price, profit, and sell frequency"""
@@ -71,3 +80,37 @@ class Product:
 
         return round(cost, 2), round(sell_price, 2), round(profit, 2), \
             round(sell_frequency, 2)
+
+    def create_bundle_products(self):
+        bundle_item = ItemController.get_item(self.bundle.bundled_id)
+        trade_item = Ingredient(self.bundle.trade_item_id)
+
+        auction = AuctionController.get_auction_stats(bundle_item.item_id)
+
+        if auction.no_sales:
+            return []
+
+        single_bundled_cost = self.cost + trade_item.price
+
+        products = []
+
+        if auction.average_single_price is not None:
+            single_price = auction.average_single_price
+            profit = single_price - single_bundled_cost
+            single_frequency = auction.average_single_frequency
+            single_product = Product(self.synth, bundle_item.item_id, 1,
+                                     single_bundled_cost, single_price, profit,
+                                     single_frequency)
+            products.append(single_product)
+
+        if auction.average_stack_price is not None:
+            stack_bundled_cost = single_bundled_cost * bundle_item.stack_size
+            stack_price = auction.average_stack_price
+            profit = stack_price - stack_bundled_cost
+            stack_frequency = auction.average_stack_frequency
+            stack_product = Product(self.synth, bundle_item.item_id,
+                                    bundle_item.stack_size, stack_bundled_cost,
+                                    stack_price, profit, stack_frequency)
+            products.append(stack_product)
+
+        return products
