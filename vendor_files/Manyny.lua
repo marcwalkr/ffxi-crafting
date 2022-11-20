@@ -7,12 +7,14 @@
 local ID = require("scripts/zones/Windurst_Woods/IDs")
 require("scripts/globals/shop")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
-    local stock = {
+entity.onTrigger = function(player, npc)
+    local stock =
+    {
         5032,  3112,       --Sinewy Etude
         5033,  2784,       --Dextrous Etude
         5034,  2184,       --Vivacious Etude
@@ -22,11 +24,13 @@ function onTrigger(player, npc)
         5038,   990        --Enchanting Etude
     }
     player:showText(npc, ID.text.MANYNY_SHOP_DIALOG)
-    tpz.shop.general(player, stock, WINDURST)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

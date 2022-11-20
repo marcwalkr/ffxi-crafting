@@ -7,11 +7,13 @@
 -----------------------------------
 local ID = require("scripts/zones/The_Eldieme_Necropolis_[S]/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         6049,  8060,    -- Firestorm Schema
@@ -22,22 +24,24 @@ function onTrigger(player, npc)
         6054,  6786,    -- Windstorm Schema
         6055, 11440,    -- Aurorastorm Schema
         6056, 10725,    -- Voidstorm Schema
-        6041,  15750,    -- Pyrohelix Schema
-        6042,  13325,    -- Hydrohelix Schema
-        6043,  18375,    -- Ionohelix Schema
-        6044,  16450,    -- Cryohelix Schema
-        6045,  12675,    -- Geohelix Schema
-        6046,  13975,    -- Anemohelix Schema
-        6047,  19875,    -- Luminohelix Schema
-        6048,  19125,    -- Noctohelix Schema
+        6041,  7714,    -- Pyrohelix Schema
+        6042,  6786,    -- Hydrohelix Schema
+        6043,  8625,    -- Ionohelix Schema
+        6044,  7896,    -- Cryohelix Schema
+        6045,  6591,    -- Geohelix Schema
+        6046,  6981,    -- Anemohelix Schema
+        6047,  8940,    -- Luminohelix Schema
+        6048,  8790,    -- Noctohelix Schema
     }
 
     player:showText(npc, ID.text.LAYTON_SHOP_DIALOG)
-    tpz.shop.general(player, stock)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

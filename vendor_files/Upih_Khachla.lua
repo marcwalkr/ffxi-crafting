@@ -9,15 +9,17 @@ require("scripts/globals/shop")
 require("scripts/globals/conquest")
 local ID = require("scripts/zones/Windurst_Waters/IDs")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
     onHalloweenTrade(player, trade, npc)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     player:showText(npc, ID.text.UPIHKHACHLA_SHOP_DIALOG)
 
-    stock = {
+    local stock =
+    {
         17313,  1107, 1,     --Grenade
         4112,   837, 1,     --Potion
         951,   108, 1,     --Wijnruit
@@ -34,27 +36,27 @@ function onTrigger(player, npc)
         1893,  3960, 3,     --Salinator
         1020,   276, 3,     --Sickle
         1241,   354, 3      --Twinkle Powder
-		1022, 3643, 3,      -- Thief's Tools
-		1023, 5520, 3       -- Living Key
     }
 
-    rank = getNationRank(tpz.nation.WINDURST)
-    if (rank ~= 1) then
+    local rank = GetNationRank(xi.nation.WINDURST)
+    if rank ~= 1 then
         table.insert(stock, 1022) --Thief's Tools
         table.insert(stock, 3643)
         table.insert(stock, 3)
     end
-    if (rank == 3) then
+    if rank == 3 then
         table.insert(stock, 1023) --Living Key
         table.insert(stock, 5520)
         table.insert(stock, 3)
     end
-    tpz.shop.nation(player, stock, tpz.nation.WINDURST)
+    xi.shop.nation(player, stock, xi.nation.WINDURST)
 
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

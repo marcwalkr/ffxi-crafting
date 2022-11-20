@@ -5,14 +5,13 @@
 -----------------------------------
 local ID = require("scripts/zones/Port_Windurst/IDs")
 require("scripts/globals/shop")
-require("scripts/globals/events/starlight_festivals")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
-    onStarlightSmilebringersTrade(player, trade, npc)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4862,  114, 1,    -- Blind
@@ -34,11 +33,13 @@ function onTrigger(player, npc)
     }
 
     player:showText(npc, ID.text.ARORO_SHOP_DIALOG)
-    tpz.shop.nation(player, stock, tpz.nation.WINDURST)
+    xi.shop.nation(player, stock, xi.nation.WINDURST)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

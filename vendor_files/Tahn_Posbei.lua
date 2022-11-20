@@ -5,11 +5,13 @@
 -----------------------------------
 local ID = require("scripts/zones/Kazham/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         12289,   110,    -- Lauan Shield
@@ -19,7 +21,7 @@ function onTrigger(player, npc)
         12583, 10833,    -- Beetle Harness
         12711,  5707,    -- Beetle Mittens
         12835,  8666,    -- Beetle Subligar
-        12967,  5332,    -- Beetre Leggings
+        12967,  5332,    -- Beetre Leggins
         12440,   404,    -- Leather Bandana
         12568,   618,    -- Leather Vest
         12696,   331,    -- Leather Gloves
@@ -28,11 +30,13 @@ function onTrigger(player, npc)
     }
 
     player:showText(npc, ID.text.TAHNPOSBEI_SHOP_DIALOG)
-    tpz.shop.general(player, stock, KAZHAM)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

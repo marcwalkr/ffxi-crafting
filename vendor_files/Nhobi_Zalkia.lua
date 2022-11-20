@@ -8,17 +8,17 @@ local ID = require("scripts/zones/Windurst_Woods/IDs")
 require("scripts/globals/events/harvest_festivals")
 require("scripts/globals/shop")
 require("scripts/globals/zone")
-require("scripts/globals/events/starlight_festivals")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
-    onStarlightSmilebringersTrade(player, trade, npc)
+entity.onTrade = function(player, npc, trade)
     onHalloweenTrade(player, trade, npc)
 end
 
-function onTrigger(player, npc)
-    local RegionOwner = GetRegionOwner(tpz.region.KUZOTZ)
-    if RegionOwner ~= tpz.nation.WINDURST then
+entity.onTrigger = function(player, npc)
+    local regionOwner = GetRegionOwner(xi.region.KUZOTZ)
+
+    if regionOwner ~= xi.nation.WINDURST then
         player:showText(npc, ID.text.NHOBI_ZALKIA_CLOSED_DIALOG)
     else
         player:showText(npc, ID.text.NHOBI_ZALKIA_OPEN_DIALOG)
@@ -29,12 +29,14 @@ function onTrigger(player, npc)
             4412,  299,  -- Thundermelon
             4491,  184   -- Watermelon
         }
-        tpz.shop.general(player, stock, WINDURST)
+        xi.shop.general(player, stock, xi.quest.fame_area.WINDURST)
     end
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

@@ -5,11 +5,13 @@
 -----------------------------------
 local ID = require("scripts/zones/Aht_Urhgan_Whitegate/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4881, 11200,    -- Scroll of Sleepga
@@ -26,16 +28,18 @@ function onTrigger(player, npc)
         4883, 27000,    -- Absorb-TP
         4854, 30780,    -- Drain II
         4885, 70560,    -- Dread Spikes
-        4886, 44000    -- Absorb-ACC
-        --4856, 79800     -- Aspir II
+        4886, 44000,    -- Absorb-ACC
+        4856, 79800     -- Aspir II
     }
 
     player:showText(npc, ID.text.MAZWEEN_SHOP_DIALOG)
-    tpz.shop.general(player, stock, JEUNO)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

@@ -6,30 +6,33 @@
 local ID = require("scripts/zones/Port_San_dOria/IDs")
 require("scripts/globals/shop")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
-    if GetRegionOwner(tpz.region.MOVALPOLOS) ~= tpz.nation.SANDORIA then
+entity.onTrigger = function(player, npc)
+    if GetRegionOwner(xi.region.MOVALPOLOS) ~= xi.nation.SANDORIA then
         player:showText(npc, ID.text.VENDAVOQ_CLOSED_DIALOG)
     else
         local stock =
         {
             640,    11,    -- Copper Ore
             4450,  694,    -- Coral Fungus
-            4375, 4121,    -- Danceshroom
+            4375, 4032,    -- Danceshroom
             1650, 6500,    -- Kopparnickel Ore
             5165,  736,    -- Movalpolos Water
         }
 
         player:showText(npc, ID.text.VENDAVOQ_OPEN_DIALOG)
-        tpz.shop.general(player, stock, SANDORIA)
+        xi.shop.general(player, stock, xi.quest.fame_area.SANDORIA)
     end
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

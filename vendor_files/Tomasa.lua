@@ -5,49 +5,25 @@
 -----------------------------------
 local ID = require("scripts/zones/Metalworks/IDs")
 require("scripts/globals/shop")
-require("scripts/globals/pathfind")
 -----------------------------------
-local flags = tpz.path.flag.NONE
-local path =
+local entity = {}
+
+local pathNodes =
 {
-    -13.796, -10.000, -19.127, -- 1
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -13.796, -10.000, -19.127,
-    -12.339, -10.000, -29.710, -- 9
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
-    -12.339, -10.000, -29.710,
+    { x = -13, y = -10, z = -19, rotation = 0, wait = 4000 },
+    { z = -29, rotation = 0, wait = 4000 },
 }
 
-function onSpawn(npc)
+entity.onSpawn = function(npc)
     npc:initNpcAi()
-    npc:setPos(tpz.path.first(path))
-    onPath(npc)
+    npc:setPos(xi.path.first(pathNodes))
+    npc:pathThrough(pathNodes, xi.path.flag.PATROL)
 end
 
-function onPath(npc)
-    tpz.path.patrolsimple(npc, path, flags)
-    if npc:atPoint(tpz.path.get(path, 1)) then
-        npc:setPos(-13.796, -10.000, -19.127, 131)
-    elseif npc:atPoint(tpz.path.get(path, 10)) then
-        npc:setPos(-12.339, -10.000, -29.710, 0)
-    end
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrade(player, npc, trade)
-end
-
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4396,  257, 1,    -- Sausage Roll
@@ -64,11 +40,13 @@ function onTrigger(player, npc)
     }
 
     player:showText(npc, ID.text.TOMASA_SHOP_DIALOG)
-    tpz.shop.nation(player, stock, tpz.nation.BASTOK)
+    xi.shop.nation(player, stock, xi.nation.BASTOK)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

@@ -7,13 +7,14 @@ local ID = require("scripts/zones/Port_San_dOria/IDs")
 require("scripts/globals/missions")
 require("scripts/globals/shop")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
-    if player:getCurrentMission(COP) >= tpz.mission.id.cop.THE_SAVAGE then
-        if GetRegionOwner(tpz.region.TAVNAZIANARCH) ~= tpz.nation.SANDORIA then
+entity.onTrigger = function(player, npc)
+    if player:getCurrentMission(xi.mission.log_id.COP) >= xi.mission.id.cop.THE_SAVAGE then
+        if GetRegionOwner(xi.region.TAVNAZIANARCH) ~= xi.nation.SANDORIA then
             player:showText(npc, ID.text.DEGUERENDARS_CLOSED_DIALOG)
         else
             local stock =
@@ -22,19 +23,21 @@ function onTrigger(player, npc)
                 5164, 1945,    -- Ground Wasabi
                 17005,  99,    -- Lufaise Fly
                 5195,  233,    -- Misareaux Parsley
-                --1695,  920,    -- Habanero Peppers
+                1695,  920,    -- Habanero Peppers
             }
 
             player:showText(npc, ID.text.DEGUERENDARS_OPEN_DIALOG)
-            tpz.shop.general(player, stock, SANDORIA)
+            xi.shop.general(player, stock, xi.quest.fame_area.SANDORIA)
         end
     else
         player:showText(npc, ID.text.DEGUERENDARS_COP_NOT_COMPLETED)
     end
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

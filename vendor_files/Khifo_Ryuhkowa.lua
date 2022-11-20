@@ -5,11 +5,13 @@
 -----------------------------------
 local ID = require("scripts/zones/Kazham/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         16473,   5713,    -- Kukri
@@ -25,15 +27,17 @@ function onTrigger(player, npc)
         17163,  39744,    -- Battle Bow
         17308,     55,    -- Hawkeye
         17280,   1610,    -- Boomerang
-        17318,      3,    -- Wooden Arrow
+        17318,      3,    -- Woden Arrow
     }
 
     player:showText(npc, ID.text.KHIFORYUHKOWA_SHOP_DIALOG)
-    tpz.shop.general(player, stock, KAZHAM)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

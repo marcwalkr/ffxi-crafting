@@ -3,13 +3,15 @@
 --  NPC: Brave Wolf
 -- Standard Merchant NPC
 -----------------------------------
-local ID = require("scripts/zones/Rabao/IDs");
-require("scripts/globals/shop");
+local ID = require("scripts/zones/Rabao/IDs")
+require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player,npc,trade)
-end;
+entity.onTrade = function(player, npc, trade)
+end
 
-function onTrigger(player,npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         12301, 31201,    -- Buckler
@@ -26,15 +28,17 @@ function onTrigger(player,npc)
         12578, 28654,    -- Padded Armor
         12706, 15724,    -- Iron Mittens
         12836, 23063,    -- Iron Subligar
-        12962, 14327,    -- Leggings
+        12962, 14327,    -- Leggins
     }
 
     player:showText(npc, ID.text.BRAVEWOLF_SHOP_DIALOG)
-    tpz.shop.general(player, stock, SELBINA)
-end;
+    xi.shop.general(player, stock)
+end
 
-function onEventUpdate(player,csid,option)
-end;
+entity.onEventUpdate = function(player, csid, option)
+end
 
-function onEventFinish(player,csid,option)
-end;
+entity.onEventFinish = function(player, csid, option)
+end
+
+return entity

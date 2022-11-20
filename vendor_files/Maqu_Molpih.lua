@@ -9,14 +9,16 @@ local ID = require("scripts/zones/Windurst_Waters/IDs")
 require("scripts/globals/conquest")
 require("scripts/globals/shop")
 -----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
     onHalloweenTrade(player, trade, npc)
 end
 
-function onTrigger(player, npc)
-    local RegionOwner = GetRegionOwner(tpz.region.ARAGONEU)
-    if (RegionOwner ~= tpz.nation.WINDURST) then
+entity.onTrigger = function(player, npc)
+    local regionOwner = GetRegionOwner(xi.region.ARAGONEU)
+
+    if regionOwner ~= xi.nation.WINDURST then
         player:showText(npc, ID.text.MAQUMOLPIH_CLOSED_DIALOG)
     else
         player:showText(npc, ID.text.MAQUMOLPIH_OPEN_DIALOG)
@@ -29,14 +31,14 @@ function onTrigger(player, npc)
             4505,   92,  -- Sunflower Seeds
             841,    36   -- Yagudo Feather
         }
-        tpz.shop.general(player, stock, WINDURST)
-
+        xi.shop.general(player, stock, xi.quest.fame_area.WINDURST)
     end
-
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

@@ -7,58 +7,34 @@ local ID = require("scripts/zones/Port_Bastok/IDs")
 require("scripts/globals/shop")
 require("scripts/globals/pathfind")
 -----------------------------------
-local flags = tpz.path.flag.NONE
-local path =
+local entity = {}
+
+local pathNodes =
 {
-    -161.608, -7.480, -0.832,
-    -161.454, -7.480, -0.954,
-    -161.454, -7.480, -0.954,
-    -161.454, -7.480, -0.954,
-    -161.454, -7.480, -0.954,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.449, -7.480, -0.919,
-    -161.454, -7.480, -0.954,
-    -161.716, -7.480, -0.927,
-    -162.779, -7.480, -0.820,
-    -163.727, -7.480, -0.455,
-    -168.236, -7.480, 4.670,
-    -168.236, -7.480, 4.670,
-    -168.236, -7.480, 4.670,
-    -168.236, -7.480, 4.670,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -168.211, -7.480, 4.695,
-    -163.727, -7.480, -0.455,
-    -162.779, -7.480, -0.820,
-    -161.716, -7.480, -0.927,
+    { x = -161.608, y = -7.480, z = -0.832 },
+    { x = -161.454, z = -0.954, wait = 2000 },
+    { x = -161.449, z = -0.919, wait = 5000 },
+    { x = -161.454, z = -0.954 },
+    { x = -161.716, z = -0.927 },
+    { x = -162.779, z = -0.820 },
+    { x = -163.727, z = -0.455 },
+    { x = -168.236, z = 4.670, wait = 2000 },
+    { x = -168.211, z = 4.695, wait = 5000 },
+    { x = -163.727, z = -0.455 },
+    { x = -162.779, z = -0.820 },
+    { x = -161.716, z = -0.927 },
 }
 
-function onSpawn(npc)
+entity.onSpawn = function(npc)
     npc:initNpcAi()
-    npc:setPos(tpz.path.first(path))
-    onPath(npc)
+    npc:setPos(xi.path.first(pathNodes))
+    npc:pathThrough(pathNodes, xi.path.flag.PATROL)
 end
 
-function onPath(npc)
-    tpz.path.patrolsimple(npc, path, flags)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrade(player, npc, trade)
-end
-
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4591,  147, 1,    -- Pumpernickel
@@ -75,11 +51,13 @@ function onTrigger(player, npc)
     }
 
     player:showText(npc, ID.text.MELLOA_SHOP_DIALOG)
-    tpz.shop.nation(player, stock, tpz.nation.BASTOK)
+    xi.shop.nation(player, stock, xi.nation.BASTOK)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity
