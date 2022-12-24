@@ -4,6 +4,7 @@ from ingredient import Ingredient
 from config import Config
 from auction_stats import AuctionStats
 from controllers.item_controller import ItemController
+from helpers import clamp
 
 
 class Synth:
@@ -197,18 +198,52 @@ class Synth:
         else:
             return None, None
 
+    def do_synth_fail(self):
+        """Returns a dict of remaining ingredients and their quantities after a
+        failed synth"""
+        if self.difficulty > 0:
+            loss_probability = clamp(0.15 - (self.difficulty / 20), 0, 1)
+        else:
+            loss_probability = 0.15
+
+        if self.recipe.desynth:
+            loss_probability += 0.35
+
+        ingredient_ids = [self.recipe.ingredient1, self.recipe.ingredient2,
+                          self.recipe.ingredient3, self.recipe.ingredient4,
+                          self.recipe.ingredient5, self.recipe.ingredient6,
+                          self.recipe.ingredient7, self.recipe.ingredient8]
+
+        # Remove zeros (empty ingredient slots)
+        ingredient_ids = [i for i in ingredient_ids if i > 0]
+
+        retained_ingredients = defaultdict(lambda: 0)
+
+        for item_id in ingredient_ids:
+            if not random.random() < loss_probability:
+                retained_ingredients[item_id] += 1
+
+        return retained_ingredients
+
     def simulate(self):
         """Simulates the synth multiple times, the amount of times determined
-        by the synth trials setting. Returns a dictionary containing all of the
-        results and their quantities"""
+        by the synth trials setting. Returns 2 dicts: the synth results and
+        their quantities, and retained ingredients from failures and their
+        quantities"""
         results = defaultdict(lambda: 0)
+        retained_ingredients = defaultdict(lambda: 0)
 
         for _ in range(self.num_trials):
             item_id, quantity = self.synth()
             if item_id is not None:
                 results[item_id] += quantity
+            else:
+                # The synth failed, get list of retained ingredients
+                retained = self.do_synth_fail()
+                for key, value in retained.items():
+                    retained_ingredients[key] += value
 
-        return results
+        return results, retained_ingredients
 
     def calculate_cost(self):
         """Returns the cost of a single synth"""
@@ -240,10 +275,18 @@ class Synth:
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
-        results = self.simulate()
+        results, retained_ingredients = self.simulate()
 
         # The total cost of every synth in the simulation
         simulation_cost = self.cost * self.num_trials
+
+        # Subtract the price of remaining ingredients from the cost
+        saved_cost = 0
+        for ingredient_id, amount in retained_ingredients.items():
+            ingredient = Ingredient(ingredient_id)
+            saved_cost += ingredient.price * amount
+
+        simulation_cost -= saved_cost
 
         # The total number of items that were produced in the simulation
         simulation_num_items = sum(results.values())

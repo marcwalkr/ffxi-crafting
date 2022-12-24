@@ -36,11 +36,19 @@ class Product:
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
-        results = self.synth.simulate()
+        results, retained_ingredients = self.synth.simulate()
 
         # The total cost is the cost of a single synth * the number of times
         # the synth was simulated
         simulation_cost = self.synth.cost * self.synth.num_trials
+
+        # Subtract the price of remaining ingredients from the cost
+        saved_cost = 0
+        for ingredient_id, amount in retained_ingredients.items():
+            ingredient = Ingredient(ingredient_id)
+            saved_cost += ingredient.price * amount
+
+        simulation_cost -= saved_cost
 
         # The total amount of the product made in the simulation, taking into
         # account the target quantity. If the product is a stack, this is the

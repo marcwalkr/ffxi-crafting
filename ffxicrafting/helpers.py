@@ -15,6 +15,10 @@ def get_utc_timestamp():
     return utc_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
+
+
 def generate_vendor_inserts():
     file_lines = []
 
