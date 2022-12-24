@@ -1,13 +1,14 @@
 from crafting_table import CraftingTable
 from product import Product
 from table import Table
+from synth import Synth
 from controllers.item_controller import ItemController
 
 
 class ProductTable(CraftingTable):
-    def __init__(self, crafters, profit_threshold, frequency_threshold,
+    def __init__(self, crafter, profit_threshold, frequency_threshold,
                  sort_column, reverse_sort) -> None:
-        super().__init__(crafters, frequency_threshold, sort_column,
+        super().__init__(crafter, frequency_threshold, sort_column,
                          reverse_sort)
         self.profit_threshold = profit_threshold
 
@@ -18,11 +19,7 @@ class ProductTable(CraftingTable):
         products = []
 
         for recipe in self.recipes:
-            synth = self.get_best_crafter(recipe)
-
-            # None of the crafters can make this recipe
-            if synth is None:
-                continue
+            synth = Synth(recipe, self.crafter)
 
             synth.cost = synth.calculate_cost()
 

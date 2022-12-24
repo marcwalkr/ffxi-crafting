@@ -1,7 +1,7 @@
-from controllers.auction_controller import AuctionController
 from controllers.item_controller import ItemController
 from controllers.vendor_controller import VendorController
 from controllers.guild_controller import GuildController
+from auction_stats import AuctionStats
 from config import Config
 
 
@@ -34,18 +34,15 @@ class Ingredient:
             return None
 
     def get_auction_price(self):
-        auction_stats = AuctionController.get_auction_stats(self.item_id)
+        item = ItemController.get_item(self.item_id)
+        auction_stats = AuctionStats(item.name)
 
         prices = []
+        if auction_stats.single_price is not None:
+            prices.append(auction_stats.single_price)
 
-        if auction_stats.average_single_price is not None:
-            prices.append(auction_stats.average_single_price)
-
-        if auction_stats.average_stack_price is not None:
-            # Get the item for the stack size
-            item = ItemController.get_item(self.item_id)
-
-            single_price_from_stack = (auction_stats.average_stack_price /
+        if auction_stats.stack_price is not None:
+            single_price_from_stack = (auction_stats.stack_price /
                                        item.stack_size)
             prices.append(single_price_from_stack)
 

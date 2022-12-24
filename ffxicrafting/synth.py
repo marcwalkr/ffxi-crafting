@@ -2,8 +2,8 @@ import random
 from collections import defaultdict
 from ingredient import Ingredient
 from config import Config
+from auction_stats import AuctionStats
 from controllers.item_controller import ItemController
-from controllers.auction_controller import AuctionController
 
 
 class Synth:
@@ -22,7 +22,8 @@ class Synth:
         self.sell_frequency = None
 
     def get_result_names(self):
-        nq_name = self.recipe.result_name
+        nq_item = ItemController.get_item(self.recipe.result)
+        nq_name = nq_item.sort_name.replace("_", " ").title()
 
         hq1_item = ItemController.get_item(self.recipe.result_hq1)
         hq1_name = hq1_item.sort_name.replace("_", " ").title()
@@ -255,18 +256,17 @@ class Synth:
             item = ItemController.get_item(item_id)
 
             total_inventory_space += quantity / item.stack_size
-            auction_stats = AuctionController.get_auction_stats(item_id)
+            auction_stats = AuctionStats(item.name)
 
             if auction_stats.no_sales:
                 continue
 
             if auction_stats.stack_sells_faster:
-                single_price = (auction_stats.average_stack_price /
-                                item.stack_size)
-                frequency = auction_stats.average_stack_frequency
+                single_price = auction_stats.stack_price / item.stack_size
+                frequency = auction_stats.stack_frequency
             else:
-                single_price = auction_stats.average_single_price
-                frequency = auction_stats.average_single_frequency
+                single_price = auction_stats.single_price
+                frequency = auction_stats.single_frequency
 
             gil = single_price * quantity
 

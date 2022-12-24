@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from configparser import ConfigParser
+from configparser import NoOptionError
 from skill_set import SkillSet
 
 
@@ -14,38 +15,6 @@ class Config:
 
     def __init__(self) -> None:
         pass
-
-    @classmethod
-    def get_skill_set(cls, character):
-        wood = cls.config.get(character, "wood")
-        smith = cls.config.get(character, "smith")
-        gold = cls.config.get(character, "gold")
-        cloth = cls.config.get(character, "cloth")
-        leather = cls.config.get(character, "leather")
-        bone = cls.config.get(character, "bone")
-        alchemy = cls.config.get(character, "alchemy")
-        cook = cls.config.get(character, "cook")
-
-        wood = int(wood)
-        smith = int(smith)
-        gold = int(gold)
-        cloth = int(cloth)
-        leather = int(leather)
-        bone = int(bone)
-        alchemy = int(alchemy)
-        cook = int(cook)
-
-        return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
-
-    @classmethod
-    def get_key_items(cls, character):
-        key_items = cls.config.get(character, "key_items")
-        key_items = key_items.split(",")
-
-        try:
-            return [int(i) for i in key_items]
-        except ValueError:
-            return []
 
     @classmethod
     def get_profit_per_synth(cls):
@@ -63,7 +32,7 @@ class Config:
         return int(profit)
 
     @classmethod
-    def get_sell_frequency(cls):
+    def get_frequency_threshold(cls):
         frequency = cls.config.get("thresholds", "sell_frequency")
         return float(frequency)
 
@@ -82,6 +51,10 @@ class Config:
         return int(trials)
 
     @classmethod
+    def get_recipe_sort_column(cls):
+        return cls.config.get("settings", "recipe_sort_column")
+
+    @classmethod
     def get_synth_sort_column(cls):
         return cls.config.get("settings", "synth_sort_column")
 
@@ -94,8 +67,51 @@ class Config:
         return cls.config.getboolean("settings", "reverse_sort")
 
     @classmethod
-    def get_monitored_item_ids(cls):
-        item_ids = cls.config.get("auction_monitor", "item_ids")
-        item_ids = item_ids.split(",")
+    def get_skill_set(cls):
+        wood = cls.config.get("character", "wood")
+        smith = cls.config.get("character", "smith")
+        gold = cls.config.get("character", "gold")
+        cloth = cls.config.get("character", "cloth")
+        leather = cls.config.get("character", "leather")
+        bone = cls.config.get("character", "bone")
+        alchemy = cls.config.get("character", "alchemy")
+        cook = cls.config.get("character", "cook")
 
-        return [int(i) for i in item_ids]
+        wood = int(wood)
+        smith = int(smith)
+        gold = int(gold)
+        cloth = int(cloth)
+        leather = int(leather)
+        bone = int(bone)
+        alchemy = int(alchemy)
+        cook = int(cook)
+
+        return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
+
+    @classmethod
+    def get_key_items(cls):
+        key_items = cls.config.get("character", "key_items")
+        key_items = key_items.split(",")
+
+        try:
+            return [int(i) for i in key_items]
+        except ValueError:
+            return []
+
+    @classmethod
+    def get_auction_prices(cls, item_name):
+        try:
+            prices = cls.config.get("auction_prices", item_name)
+            prices = prices.split(",")
+            return [int(i) for i in prices]
+        except NoOptionError:
+            return [0, 0]
+
+    @classmethod
+    def get_sell_frequencies(cls, item_name):
+        try:
+            freqs = cls.config.get("sell_frequencies", item_name)
+            freqs = freqs.split(",")
+            return [float(i) / 15 for i in freqs]
+        except NoOptionError:
+            return [0, 0]

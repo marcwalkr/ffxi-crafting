@@ -1,12 +1,13 @@
 from crafting_table import CraftingTable
+from synth import Synth
 from table import Table
 
 
 class SynthTable(CraftingTable):
-    def __init__(self, crafters, synth_profit_threshold,
+    def __init__(self, crafter, synth_profit_threshold,
                  inventory_profit_threshold, frequency_threshold, sort_column,
                  reverse_sort) -> None:
-        super().__init__(crafters, frequency_threshold, sort_column,
+        super().__init__(crafter, frequency_threshold, sort_column,
                          reverse_sort)
         self.synth_profit_threshold = synth_profit_threshold
         self.inventory_profit_threshold = inventory_profit_threshold
@@ -20,11 +21,7 @@ class SynthTable(CraftingTable):
         rows = []
 
         for recipe in self.recipes:
-            synth = self.get_best_crafter(recipe)
-
-            # None of the crafters can make this recipe
-            if synth is None:
-                continue
+            synth = Synth(recipe, self.crafter)
 
             synth.cost = synth.calculate_cost()
 

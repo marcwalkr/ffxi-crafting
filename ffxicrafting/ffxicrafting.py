@@ -11,8 +11,6 @@ if __name__ == "__main__":
         elif command == "3":
             Command.print_recipe()
         elif command == "4":
-            Command.monitor_auctions()
-        elif command == "5":
-            Command.update_auction_data()
+            Command.print_craftable_recipes()
         elif command == "q" or command == "Q":
             break

@@ -3,10 +3,9 @@ from config import Config
 from crafter import Crafter
 from synth_table import SynthTable
 from product_table import ProductTable
+from recipe_table import RecipeTable
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
-from controllers.auction_controller import AuctionController
-from auction_monitor import AuctionMonitor
 
 
 class Command:
@@ -16,64 +15,66 @@ class Command:
     @staticmethod
     def prompt_command():
         command = input("1. Print synth table\n" +
-                        "2. Print product table\n"
-                        "3. Print recipe\n" +
-                        "4. Monitor auctions\n" +
-                        "5. Update auction data\n" +
+                        "2. Print product table\n" +
+                        "3. Print recipe by ID\n" +
+                        "4. Print craftable recipes\n" +
                         "Q. Quit\n")
         return command
 
     @staticmethod
+    def print_craftable_recipes():
+        character_skill_set = Config.get_skill_set()
+        character_key_items = Config.get_key_items()
+        crafter = Crafter(character_skill_set, character_key_items)
+
+        sort_column = Config.get_recipe_sort_column()
+        reverse_sort = Config.get_reverse_sort()
+
+        craft_id = input("Select a craft\n" +
+                         "1. Wood\n" +
+                         "2. Smith\n" +
+                         "3. Gold\n" +
+                         "4. Cloth\n" +
+                         "5. Leather\n" +
+                         "6. Bone\n" +
+                         "7. Alchemy\n" +
+                         "8. Cook\n")
+        craft_id = int(craft_id)
+
+        table = RecipeTable(crafter, craft_id, sort_column, reverse_sort)
+        table.print()
+
+    @staticmethod
     def print_synth_table():
-        char1_skill_set = Config.get_skill_set("Character1")
-        char1_key_items = Config.get_key_items("Character1")
+        skill_set = Config.get_skill_set()
+        key_items = Config.get_key_items()
 
-        char2_skill_set = Config.get_skill_set("Character2")
-        char2_key_items = Config.get_key_items("Character2")
-
-        char3_skill_set = Config.get_skill_set("Character3")
-        char3_key_items = Config.get_key_items("Character3")
-
-        character1 = Crafter(char1_skill_set, char1_key_items)
-        character2 = Crafter(char2_skill_set, char2_key_items)
-        character3 = Crafter(char3_skill_set, char3_key_items)
-
-        crafters = [character1, character2, character3]
+        crafter = Crafter(skill_set, key_items)
 
         synth_profit_threshold = Config.get_profit_per_synth()
         inventory_profit_threshold = Config.get_profit_per_inventory()
-        frequency_threshold = Config.get_sell_frequency()
+        frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = SynthTable(crafters, synth_profit_threshold,
+        table = SynthTable(crafter, synth_profit_threshold,
                            inventory_profit_threshold, frequency_threshold,
                            sort_column, reverse_sort)
         table.print()
 
     @staticmethod
     def print_product_table():
-        char1_skill_set = Config.get_skill_set("Character1")
-        char1_key_items = Config.get_key_items("Character1")
+        skill_set = Config.get_skill_set()
+        key_items = Config.get_key_items()
 
-        char2_skill_set = Config.get_skill_set("Character2")
-        char2_key_items = Config.get_key_items("Character2")
-
-        char3_skill_set = Config.get_skill_set("Character3")
-        char3_key_items = Config.get_key_items("Character3")
-
-        character1 = Crafter(char1_skill_set, char1_key_items)
-        character2 = Crafter(char2_skill_set, char2_key_items)
-        character3 = Crafter(char3_skill_set, char3_key_items)
-
-        crafters = [character1, character2, character3]
+        crafter = Crafter(skill_set, key_items)
 
         profit_threshold = Config.get_profit_per_product()
-        frequency_threshold = Config.get_sell_frequency()
+        frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(crafters, profit_threshold,
+        table = ProductTable(crafter, profit_threshold,
                              frequency_threshold, sort_column, reverse_sort)
         table.print()
 
@@ -117,13 +118,3 @@ class Command:
 
         skill_table.print()
         recipe_table.print()
-
-    @staticmethod
-    def monitor_auctions():
-        monitored_ids = Config.get_monitored_item_ids()
-        auction_monitor = AuctionMonitor(monitored_ids)
-        auction_monitor.monitor_auctions()
-
-    @staticmethod
-    def update_auction_data():
-        AuctionController.update_auction_data()
