@@ -311,6 +311,9 @@ class Synth:
                 single_price = auction_stats.single_price
                 frequency = auction_stats.single_frequency
 
+            if single_price is None:
+                single_price = 0
+
             gil = single_price * quantity
 
             # The weight is the proportion of the results that is this item
