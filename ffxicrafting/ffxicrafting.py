@@ -10,7 +10,5 @@ if __name__ == "__main__":
             Command.print_product_table()
         elif command == "3":
             Command.print_recipe()
-        elif command == "4":
-            Command.print_craftable_recipes()
         elif command == "q" or command == "Q":
             break

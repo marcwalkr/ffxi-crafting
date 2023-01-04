@@ -3,7 +3,6 @@ from config import Config
 from crafter import Crafter
 from synth_table import SynthTable
 from product_table import ProductTable
-from recipe_table import RecipeTable
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 
@@ -17,32 +16,8 @@ class Command:
         command = input("1. Print synth table\n" +
                         "2. Print product table\n" +
                         "3. Print recipe by ID\n" +
-                        "4. Print craftable recipes\n" +
                         "Q. Quit\n")
         return command
-
-    @staticmethod
-    def print_craftable_recipes():
-        character_skill_set = Config.get_skill_set()
-        character_key_items = Config.get_key_items()
-        crafter = Crafter(character_skill_set, character_key_items)
-
-        sort_column = Config.get_recipe_sort_column()
-        reverse_sort = Config.get_reverse_sort()
-
-        craft_id = input("Select a craft\n" +
-                         "1. Wood\n" +
-                         "2. Smith\n" +
-                         "3. Gold\n" +
-                         "4. Cloth\n" +
-                         "5. Leather\n" +
-                         "6. Bone\n" +
-                         "7. Alchemy\n" +
-                         "8. Cook\n")
-        craft_id = int(craft_id)
-
-        table = RecipeTable(crafter, craft_id, sort_column, reverse_sort)
-        table.print()
 
     @staticmethod
     def print_synth_table():
