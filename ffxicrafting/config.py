@@ -112,6 +112,6 @@ class Config:
         try:
             freqs = cls.config.get("sell_frequencies", item_name)
             freqs = freqs.split(",")
-            return [float(i) / 15 for i in freqs]
+            return [int(i) for i in freqs]
         except NoOptionError:
             return [0, 0]
