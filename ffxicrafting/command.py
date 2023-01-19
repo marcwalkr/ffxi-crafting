@@ -28,13 +28,12 @@ class Command:
 
         synth_profit_threshold = Config.get_profit_per_synth()
         inventory_profit_threshold = Config.get_profit_per_inventory()
-        frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
         table = SynthTable(crafter, synth_profit_threshold,
-                           inventory_profit_threshold, frequency_threshold,
-                           sort_column, reverse_sort)
+                           inventory_profit_threshold, sort_column,
+                           reverse_sort)
         table.print()
 
     @staticmethod
@@ -45,12 +44,11 @@ class Command:
         crafter = Crafter(skill_set, key_items)
 
         profit_threshold = Config.get_profit_per_product()
-        frequency_threshold = Config.get_frequency_threshold()
         sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(crafter, profit_threshold,
-                             frequency_threshold, sort_column, reverse_sort)
+        table = ProductTable(crafter, profit_threshold, sort_column,
+                             reverse_sort)
         table.print()
 
     @staticmethod

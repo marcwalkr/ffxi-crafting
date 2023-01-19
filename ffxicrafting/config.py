@@ -106,12 +106,3 @@ class Config:
             return [int(i) for i in prices]
         except NoOptionError:
             return [0, 0]
-
-    @classmethod
-    def get_sell_frequencies(cls, item_name):
-        try:
-            freqs = cls.config.get("sell_frequencies", item_name)
-            freqs = freqs.split(",")
-            return [int(i) for i in freqs]
-        except NoOptionError:
-            return [0, 0]

@@ -6,15 +6,14 @@ from controllers.item_controller import ItemController
 
 
 class ProductTable(CraftingTable):
-    def __init__(self, crafter, profit_threshold, frequency_threshold,
-                 sort_column, reverse_sort) -> None:
-        super().__init__(crafter, frequency_threshold, sort_column,
-                         reverse_sort)
+    def __init__(self, crafter, profit_threshold, sort_column,
+                 reverse_sort) -> None:
+        super().__init__(crafter, sort_column, reverse_sort)
         self.profit_threshold = profit_threshold
 
     def print(self):
         column_labels = ["Recipe ID", "Name", "Quantity", "Cost", "Sell Price",
-                         "Profit", "Sell Frequency"]
+                         "Profit"]
 
         products = []
 
@@ -39,8 +38,7 @@ class ProductTable(CraftingTable):
         rows = []
         for product in products:
             row = [product.synth.recipe.id, product.name, product.quantity,
-                   product.cost, product.sell_price, product.profit,
-                   product.sell_frequency]
+                   product.cost, product.sell_price, product.profit]
 
             # A row already exists in the list with the same name and quantity
             duplicate = [r for r in rows if r[1:3] == row[1:3]]
@@ -75,5 +73,4 @@ class ProductTable(CraftingTable):
                 products += stack_product.create_bundle_products()
 
         return [p for p in products if
-                p.profit >= self.profit_threshold and
-                p.sell_frequency >= self.frequency_threshold]
+                p.profit >= self.profit_threshold]

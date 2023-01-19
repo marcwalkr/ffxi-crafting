@@ -5,18 +5,16 @@ from table import Table
 
 class SynthTable(CraftingTable):
     def __init__(self, crafter, synth_profit_threshold,
-                 inventory_profit_threshold, frequency_threshold, sort_column,
+                 inventory_profit_threshold, sort_column,
                  reverse_sort) -> None:
-        super().__init__(crafter, frequency_threshold, sort_column,
-                         reverse_sort)
+        super().__init__(crafter, sort_column, reverse_sort)
         self.synth_profit_threshold = synth_profit_threshold
         self.inventory_profit_threshold = inventory_profit_threshold
 
     def print(self):
         column_labels = ["Recipe ID", "NQ", "NQ Qty", "HQ1", "HQ1 Qty", "HQ2",
                          "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost",
-                         "Profit Per Synth", "Profit Per Inventory",
-                         "Sell Frequency"]
+                         "Profit Per Synth", "Profit Per Inventory"]
 
         rows = []
 
@@ -29,17 +27,15 @@ class SynthTable(CraftingTable):
             if synth.cost is None:
                 continue
 
-            synth.profit_per_synth, synth.profit_per_inventory, \
-                synth.sell_frequency = synth.calculate_stats()
+            synth.profit_per_synth, synth.profit_per_inventory\
+                = synth.calculate_stats()
 
             meets_synth_profit = (synth.profit_per_synth >=
                                   self.synth_profit_threshold)
             meets_inventory_profit = (synth.profit_per_inventory >=
                                       self.inventory_profit_threshold)
-            meets_frequency = synth.sell_frequency >= self.frequency_threshold
 
-            if (not meets_synth_profit or not meets_inventory_profit or
-                    not meets_frequency):
+            if (not meets_synth_profit or not meets_inventory_profit):
                 continue
 
             nq_name, hq1_name, hq2_name, hq3_name = synth.get_result_names()
@@ -47,8 +43,7 @@ class SynthTable(CraftingTable):
 
             row = [synth.recipe.id, nq_name, nq_qty, hq1_name, hq1_qty,
                    hq2_name, hq2_qty, hq3_name, hq3_qty, synth.cost,
-                   synth.profit_per_synth, synth.profit_per_inventory,
-                   synth.sell_frequency]
+                   synth.profit_per_synth, synth.profit_per_inventory]
 
             # A row already exists in the list with the same synth results
             duplicate = [r for r in rows if r[1] == row[1] and

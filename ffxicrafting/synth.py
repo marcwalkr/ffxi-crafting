@@ -288,12 +288,8 @@ class Synth:
 
         simulation_cost -= saved_cost
 
-        # The total number of items that were produced in the simulation
-        simulation_num_items = sum(results.values())
-
         total_inventory_space = 0
         total_gil = 0
-        overall_frequency = 0
 
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
@@ -304,31 +300,20 @@ class Synth:
             if auction_stats.no_sales:
                 continue
 
-            if auction_stats.stack_sells_faster:
+            if auction_stats.stack_price is not None:
                 single_price = auction_stats.stack_price / item.stack_size
-                frequency = auction_stats.stack_frequency
             else:
                 single_price = auction_stats.single_price
-                frequency = auction_stats.single_frequency
 
             if single_price is None:
                 single_price = 0
 
             gil = single_price * quantity
 
-            # The weight is the proportion of the results that is this item
-            weight = quantity / simulation_num_items
-
-            # The frequency is weighted so it affects the overall frequency
-            # more the more commonly the result item is obtained from the synth
-            weighted_frequency = frequency * weight
-
             total_gil += gil
-            overall_frequency += weighted_frequency
 
         total_profit = total_gil - simulation_cost
         profit_per_synth = total_profit / self.num_trials
         profit_per_inventory = total_profit / total_inventory_space
 
-        return round(profit_per_synth, 2), round(profit_per_inventory, 2), \
-            round(overall_frequency, 2)
+        return round(profit_per_synth, 2), round(profit_per_inventory, 2)
