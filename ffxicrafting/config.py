@@ -32,11 +32,6 @@ class Config:
         return int(profit)
 
     @classmethod
-    def get_frequency_threshold(cls):
-        frequency = cls.config.get("thresholds", "sell_frequency")
-        return float(frequency)
-
-    @classmethod
     def get_ignore_guilds(cls):
         return cls.config.getboolean("settings", "ignore_guilds")
 
