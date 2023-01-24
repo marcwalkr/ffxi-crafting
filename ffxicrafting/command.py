@@ -21,33 +21,53 @@ class Command:
 
     @staticmethod
     def print_synth_table():
-        skill_set = Config.get_skill_set()
-        key_items = Config.get_key_items()
+        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
+        melonsoda_key_items = Config.get_key_items("Melonsoda")
 
-        crafter = Crafter(skill_set, key_items)
+        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
+        rootbeer_key_items = Config.get_key_items("Rootbeer")
+
+        milktea_skill_set = Config.get_skill_set("Milktea")
+        milktea_key_items = Config.get_key_items("Milktea")
+
+        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
+        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
+        milktea = Crafter(milktea_skill_set, milktea_key_items)
+
+        crafters = [melonsoda, rootbeer, milktea]
 
         synth_profit_threshold = Config.get_profit_per_synth()
         inventory_profit_threshold = Config.get_profit_per_inventory()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = SynthTable(crafter, synth_profit_threshold,
+        table = SynthTable(crafters, synth_profit_threshold,
                            inventory_profit_threshold, sort_column,
                            reverse_sort)
         table.print()
 
     @staticmethod
     def print_product_table():
-        skill_set = Config.get_skill_set()
-        key_items = Config.get_key_items()
+        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
+        melonsoda_key_items = Config.get_key_items("Melonsoda")
 
-        crafter = Crafter(skill_set, key_items)
+        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
+        rootbeer_key_items = Config.get_key_items("Rootbeer")
+
+        milktea_skill_set = Config.get_skill_set("Milktea")
+        milktea_key_items = Config.get_key_items("Milktea")
+
+        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
+        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
+        milktea = Crafter(milktea_skill_set, milktea_key_items)
+
+        crafters = [melonsoda, rootbeer, milktea]
 
         profit_threshold = Config.get_profit_per_product()
         sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(crafter, profit_threshold, sort_column,
+        table = ProductTable(crafters, profit_threshold, sort_column,
                              reverse_sort)
         table.print()
 
