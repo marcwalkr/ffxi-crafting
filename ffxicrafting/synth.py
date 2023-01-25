@@ -225,7 +225,7 @@ class Synth:
 
         return retained_ingredients
 
-    def simulate(self):
+    def simulate(self, num_times):
         """Simulates the synth multiple times, the amount of times determined
         by the synth trials setting. Returns 2 dicts: the synth results and
         their quantities, and retained ingredients from failures and their
@@ -233,7 +233,7 @@ class Synth:
         results = defaultdict(lambda: 0)
         retained_ingredients = defaultdict(lambda: 0)
 
-        for _ in range(self.num_trials):
+        for _ in range(num_times):
             item_id, quantity = self.synth()
             if item_id is not None:
                 results[item_id] += quantity
@@ -275,7 +275,8 @@ class Synth:
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
-        results, retained_ingredients = self.simulate()
+        num_trials = Config.get_simulation_trials()
+        results, retained_ingredients = self.simulate(num_trials)
 
         # The total cost of every synth in the simulation
         simulation_cost = self.cost * self.num_trials

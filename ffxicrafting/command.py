@@ -1,6 +1,7 @@
 from table import Table
 from config import Config
 from crafter import Crafter
+from synth import Synth
 from synth_table import SynthTable
 from product_table import ProductTable
 from controllers.synth_controller import SynthController
@@ -16,6 +17,7 @@ class Command:
         command = input("1. Print synth table\n" +
                         "2. Print product table\n" +
                         "3. Print recipe by ID\n" +
+                        "4. Simulate synth\n" +
                         "Q. Quit\n")
         return command
 
@@ -111,3 +113,29 @@ class Command:
 
         skill_table.print()
         recipe_table.print()
+
+    @staticmethod
+    def simulate_synth():
+        character = input("Enter character name: ")
+        recipe_id = input("Enter recipe ID: ")
+        num_times = input("Enter the number of synths: ")
+
+        character = character.capitalize()
+        recipe_id = int(recipe_id)
+        num_times = int(num_times)
+
+        skill_set = Config.get_skill_set(character)
+        key_items = Config.get_key_items(character)
+        crafter = Crafter(skill_set, key_items)
+        recipe = SynthController.get_recipe(recipe_id)
+        synth = Synth(recipe, crafter)
+
+        results, _ = synth.simulate(num_times)
+        for item_id, amount in results.items():
+            item = ItemController.get_item(item_id)
+            if item.stack_size > 1:
+                num_stacks = round(amount / item.stack_size, 2)
+                print("\n{}: {} ({} stacks)\n".format(item.sort_name, amount,
+                                                      num_stacks))
+            else:
+                print("\n{}: {}\n".format(item.sort_name, amount))

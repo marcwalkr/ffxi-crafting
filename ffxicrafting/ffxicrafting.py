@@ -10,5 +10,7 @@ if __name__ == "__main__":
             Command.print_product_table()
         elif command == "3":
             Command.print_recipe()
+        elif command == "4":
+            Command.simulate_synth()
         elif command == "q" or command == "Q":
             break
