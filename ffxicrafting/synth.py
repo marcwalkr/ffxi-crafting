@@ -136,15 +136,15 @@ class Synth:
         # Normal recipe, not desynth
         if not self.recipe.desynth:
             if self.tier == -1:
-                hq_probability = 0.006
+                hq_probability = 0.0006
             elif self.tier == 0:
                 hq_probability = 0.018
             elif self.tier == 1:
-                hq_probability = 0.066
+                hq_probability = 0.0625
             elif self.tier == 2:
-                hq_probability = 0.285
+                hq_probability = 0.25
             else:
-                hq_probability = 0.506
+                hq_probability = 0.5
         # Desynth recipe
         else:
             if self.tier == -1:
