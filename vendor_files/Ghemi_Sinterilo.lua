@@ -5,31 +5,35 @@
 -----------------------------------
 local ID = require("scripts/zones/Kazham/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4468,   72,    -- Pamamas
-        4432,   55,    -- Kazham Pineapple
+        4432,   54,    -- Kazham Pineapple
         4390,   36,    -- Mithran Tomato
-        612,    55,    -- Kazham Peppers
+        612,    54,    -- Kazham Peppers
         628,   236,    -- Cinnamon
-        632,   110,    -- Kukuru Bean
-        5187,  158,    -- Elshimo Coconut
+        632,   109,    -- Kukuru Bean
+        5187,  156,    -- Elshimo Coconut
         5604,  154,    -- Elshimo Pachira Fruit
-        --2869, 9100,    -- Kazham Waystone
-        --731,  2877,    -- Aquilaria Log
+        2869, 9100,    -- Kazham Waystone
+        731,  2877,    -- Aquilaria Log
     }
 
     player:showText(npc, ID.text.GHEMISENTERILO_SHOP_DIALOG)
-    tpz.shop.general(player, stock, KAZHAM)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

@@ -2,8 +2,9 @@ import random
 from collections import defaultdict
 from ingredient import Ingredient
 from config import Config
+from auction_stats import AuctionStats
 from controllers.item_controller import ItemController
-from controllers.auction_controller import AuctionController
+from helpers import clamp
 
 
 class Synth:
@@ -22,7 +23,8 @@ class Synth:
         self.sell_frequency = None
 
     def get_result_names(self):
-        nq_name = self.recipe.result_name
+        nq_item = ItemController.get_item(self.recipe.result)
+        nq_name = nq_item.sort_name.replace("_", " ").title()
 
         hq1_item = ItemController.get_item(self.recipe.result_hq1)
         hq1_name = hq1_item.sort_name.replace("_", " ").title()
@@ -196,18 +198,52 @@ class Synth:
         else:
             return None, None
 
-    def simulate(self):
-        """Simulates the synth multiple times, the amount of times determined
-        by the synth trials setting. Returns a dictionary containing all of the
-        results and their quantities"""
-        results = defaultdict(lambda: 0)
+    def do_synth_fail(self):
+        """Returns a dict of remaining ingredients and their quantities after a
+        failed synth"""
+        if self.difficulty > 0:
+            loss_probability = clamp(0.15 - (self.difficulty / 20), 0, 1)
+        else:
+            loss_probability = 0.15
 
-        for _ in range(self.num_trials):
+        if self.recipe.desynth:
+            loss_probability += 0.35
+
+        ingredient_ids = [self.recipe.ingredient1, self.recipe.ingredient2,
+                          self.recipe.ingredient3, self.recipe.ingredient4,
+                          self.recipe.ingredient5, self.recipe.ingredient6,
+                          self.recipe.ingredient7, self.recipe.ingredient8]
+
+        # Remove zeros (empty ingredient slots)
+        ingredient_ids = [i for i in ingredient_ids if i > 0]
+
+        retained_ingredients = defaultdict(lambda: 0)
+
+        for item_id in ingredient_ids:
+            if not random.random() < loss_probability:
+                retained_ingredients[item_id] += 1
+
+        return retained_ingredients
+
+    def simulate(self, num_times):
+        """Simulates the synth multiple times, the amount of times determined
+        by the synth trials setting. Returns 2 dicts: the synth results and
+        their quantities, and retained ingredients from failures and their
+        quantities"""
+        results = defaultdict(lambda: 0)
+        retained_ingredients = defaultdict(lambda: 0)
+
+        for _ in range(num_times):
             item_id, quantity = self.synth()
             if item_id is not None:
                 results[item_id] += quantity
+            else:
+                # The synth failed, get list of retained ingredients
+                retained = self.do_synth_fail()
+                for key, value in retained.items():
+                    retained_ingredients[key] += value
 
-        return results
+        return results, retained_ingredients
 
     def calculate_cost(self):
         """Returns the cost of a single synth"""
@@ -239,50 +275,46 @@ class Synth:
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
-        results = self.simulate()
+        num_trials = Config.get_simulation_trials()
+        results, retained_ingredients = self.simulate(num_trials)
 
         # The total cost of every synth in the simulation
         simulation_cost = self.cost * self.num_trials
 
-        # The total number of items that were produced in the simulation
-        simulation_num_items = sum(results.values())
+        # Subtract the price of remaining ingredients from the cost
+        saved_cost = 0
+        for ingredient_id, amount in retained_ingredients.items():
+            ingredient = Ingredient(ingredient_id)
+            saved_cost += ingredient.price * amount
+
+        simulation_cost -= saved_cost
 
         total_inventory_space = 0
         total_gil = 0
-        overall_frequency = 0
 
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
 
             total_inventory_space += quantity / item.stack_size
-            auction_stats = AuctionController.get_auction_stats(item_id)
+            auction_stats = AuctionStats(item.name)
 
             if auction_stats.no_sales:
                 continue
 
-            if auction_stats.stack_sells_faster:
-                single_price = (auction_stats.average_stack_price /
-                                item.stack_size)
-                frequency = auction_stats.average_stack_frequency
+            if auction_stats.stack_price is not None:
+                single_price = auction_stats.stack_price / item.stack_size
             else:
-                single_price = auction_stats.average_single_price
-                frequency = auction_stats.average_single_frequency
+                single_price = auction_stats.single_price
+
+            if single_price is None:
+                single_price = 0
 
             gil = single_price * quantity
 
-            # The weight is the proportion of the results that is this item
-            weight = quantity / simulation_num_items
-
-            # The frequency is weighted so it affects the overall frequency
-            # more the more commonly the result item is obtained from the synth
-            weighted_frequency = frequency * weight
-
             total_gil += gil
-            overall_frequency += weighted_frequency
 
         total_profit = total_gil - simulation_cost
         profit_per_synth = total_profit / self.num_trials
         profit_per_inventory = total_profit / total_inventory_space
 
-        return round(profit_per_synth, 2), round(profit_per_inventory, 2), \
-            round(overall_frequency, 2)
+        return round(profit_per_synth, 2), round(profit_per_inventory, 2)

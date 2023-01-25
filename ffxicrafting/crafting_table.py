@@ -1,14 +1,20 @@
 from operator import attrgetter
-from synth import Synth
 from controllers.synth_controller import SynthController
+from synth import Synth
 
 
 class CraftingTable:
-    def __init__(self, crafters, frequency_threshold, sort_column,
-                 reverse_sort) -> None:
-        self.recipes = SynthController.get_all_recipes()
+    def __init__(self, crafters, sort_column, reverse_sort) -> None:
         self.crafters = crafters
-        self.frequency_threshold = frequency_threshold
+
+        all_recipes = SynthController.get_all_recipes()
+        self.recipes = []
+
+        for crafter in crafters:
+            synths = [Synth(r, crafter) for r in all_recipes]
+            self.recipes += [s.recipe for s in synths if s.can_craft and
+                             s.recipe not in self.recipes]
+
         self.sort_column = sort_column
         self.reverse_sort = reverse_sort
 

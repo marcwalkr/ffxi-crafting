@@ -3,40 +3,44 @@
 --  NPC: Emaliveulaux
 -- Tavnazian Archipelago Regional Merchant
 -----------------------------------
-require("scripts/globals/events/harvest_festivals")
 local ID = require("scripts/zones/Bastok_Mines/IDs")
+require("scripts/globals/events/harvest_festivals")
 require("scripts/globals/conquest")
 require("scripts/globals/missions")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
     onHalloweenTrade(player, trade, npc)
 end
 
-function onTrigger(player, npc)
-    if player:getCurrentMission(COP) >= tpz.mission.id.cop.THE_SAVAGE then
-        if GetRegionOwner(tpz.region.TAVNAZIANARCH) ~= tpz.nation.BASTOK then
+entity.onTrigger = function(player, npc)
+    if player:getCurrentMission(xi.mission.log_id.COP) >= xi.mission.id.cop.THE_SAVAGE then
+        if GetRegionOwner(xi.region.TAVNAZIANARCH) ~= xi.nation.BASTOK then
             player:showText(npc, ID.text.EMALIVEULAUX_CLOSED_DIALOG)
         else
             local stock =
             {
-                1523,  290,    -- Apple Mint
-                5164, 1945,    -- Ground Wasabi
-                17005,  99,    -- Lufaise Fly
-                5195,  233,    -- Misareaux Parsley
-                --1695,  920,    -- Habanero Peppers
+                1523,  290, -- Apple Mint
+                5164, 1945, -- Ground Wasabi
+                17005,  99, -- Lufaise Fly
+                5195,  233, -- Misareaux Parsley
+                1695,  920, -- Habanero Peppers
             }
 
             player:showText(npc, ID.text.EMALIVEULAUX_OPEN_DIALOG)
-            tpz.shop.general(player, stock, BASTOK)
+            xi.shop.general(player, stock, xi.quest.fame_area.BASTOK)
         end
     else
         player:showText(npc, ID.text.EMALIVEULAUX_COP_NOT_COMPLETED)
     end
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

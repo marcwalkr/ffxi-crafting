@@ -1,41 +1,19 @@
------------------------------------
--- Area: Lower Jeuno
---  NPC: Susu
--- Standard Merchant NPC
------------------------------------
-local ID = require("scripts/zones/Lower_Jeuno/IDs")
-require("scripts/globals/shop")
-
-function onTrade(player, npc, trade)
-end
-
-function onTrigger(player, npc)
-    local stock =
-    {
-        4647,20000,--banishga ii
-        4683,2030,--barblind
-        4697,2030,--barblindra
-        4682,780,--barparalyze
-        4696,780,--barparalyzra
-        4681,400,--barpoison
-        4695,400,--barpoisonra
-        4684,4608,--barsilence
-        4698,4608,--barsilencera
-        4680,244,--barsleep
-        4694,244,--barsleepra
-        4628,8586,--cursna
-        4629,35000,--holy
-        4625,2330,--silena
-        4626,19200,--stona
-        4627,13300,--viruna
-    }
-
-    player:showText(npc, ID.text.SUSU_SHOP_DIALOG)
-    tpz.shop.general(player, stock, JEUNO)
-end
-
-function onEventUpdate(player, csid, option)
-end
-
-function onEventFinish(player, csid, option)
-end
+xi.eraShops.Susu =
+{
+    4647, 20000, -- Scroll of Banishga II
+    4683,  2030, -- Scroll of Barblind
+    4697,  2030, -- Scroll of Barblindra
+    4682,   780, -- Scroll of Barparalyze
+    4696,   780, -- Scroll of Barparalyzra
+    4681,   400, -- Scroll of Barpoison
+    4695,   400, -- Scroll of Barpoisonra
+    4684,  4608, -- Scroll of Barsilence
+    4698,  4608, -- Scroll of Barsilencera
+    4680,   244, -- Scroll of Barsleep
+    4694,   244, -- Scroll of Barsleepra
+    4628,  8586, -- Scroll of Cursna
+    4629, 35000, -- Scroll of Holy
+    4625,  2330, -- Scroll of Silena
+    4626, 19200, -- Scroll of Stona
+    4627, 13300, -- Scroll of Viruna
+}

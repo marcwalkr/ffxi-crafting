@@ -7,22 +7,22 @@ CREATE TABLE vendor_items (
 );
 
 -- Adelflete
-INSERT INTO vendor_items VALUES (806,17780861,1552);	-- Tourmaline
-INSERT INTO vendor_items VALUES (807,17780861,1552);	-- Sardonyx
-INSERT INTO vendor_items VALUES (800,17780861,1552);	-- Amethyst
-INSERT INTO vendor_items VALUES (814,17780861,1552);	-- Amber
-INSERT INTO vendor_items VALUES (795,17780861,1552);	-- Lapis Lazuli
-INSERT INTO vendor_items VALUES (809,17780861,1552);	-- Clear Topaz
-INSERT INTO vendor_items VALUES (799,17780861,1552);	-- Onyx
-INSERT INTO vendor_items VALUES (796,17780861,1552);	-- Light Opal
+INSERT INTO vendor_items VALUES (806,17780861,1863);	-- Tourmaline
+INSERT INTO vendor_items VALUES (807,17780861,1863);	-- Sardonyx
+INSERT INTO vendor_items VALUES (800,17780861,1863);	-- Amethyst
+INSERT INTO vendor_items VALUES (814,17780861,1863);	-- Amber
+INSERT INTO vendor_items VALUES (795,17780861,1863);	-- Lapis Lazuli
+INSERT INTO vendor_items VALUES (809,17780861,1863);	-- Clear Topaz
+INSERT INTO vendor_items VALUES (799,17780861,1863);	-- Onyx
+INSERT INTO vendor_items VALUES (796,17780861,1863);	-- Light Opal
 INSERT INTO vendor_items VALUES (13327,17780861,1250);	-- Silver Earring
 INSERT INTO vendor_items VALUES (13456,17780861,1250);	-- Silver Ring
 
 -- Ahyeekih
 INSERT INTO vendor_items VALUES (4503,17752103,184);	-- Buburimu Grape
-INSERT INTO vendor_items VALUES (1120,17752103,1656);	-- Casablanca
+INSERT INTO vendor_items VALUES (1120,17752103,1620);	-- Casablanca
 INSERT INTO vendor_items VALUES (4359,17752103,220);	-- Dhalmel Meat
-INSERT INTO vendor_items VALUES (614,17752103,73);	-- Mhaura Garlic
+INSERT INTO vendor_items VALUES (614,17752103,72);	-- Mhaura Garlic
 INSERT INTO vendor_items VALUES (4445,17752103,40);	-- Yagudo Cherry
 
 -- Albinie
@@ -42,6 +42,7 @@ INSERT INTO vendor_items VALUES (1523,17760320,290);	-- Apple Mint
 INSERT INTO vendor_items VALUES (5164,17760320,1945);	-- Ground Wasabi
 INSERT INTO vendor_items VALUES (17005,17760320,99);	-- Lufaise Fly
 INSERT INTO vendor_items VALUES (5195,17760320,233);	-- Misareaux Parsley
+INSERT INTO vendor_items VALUES (1695,17760320,920);	-- Habanero Peppers
 
 -- Allard
 INSERT INTO vendor_items VALUES (12466,16974278,20000);	-- Red Cap
@@ -52,34 +53,78 @@ INSERT INTO vendor_items VALUES (12978,16974278,16000);	-- Socks
 
 -- Amalasanda
 INSERT INTO vendor_items VALUES (704,17780858,144);	-- Bamboo Stick
-INSERT INTO vendor_items VALUES (829,17780858,36720);	-- Silk Cloth
-INSERT INTO vendor_items VALUES (1240,17780858,180);	-- Koma
+INSERT INTO vendor_items VALUES (829,17780858,21000);	-- Silk Cloth
+INSERT INTO vendor_items VALUES (1240,17780858,220);	-- Koma
+INSERT INTO vendor_items VALUES (657,17780858,7000);	-- Tama-Hagane
+INSERT INTO vendor_items VALUES (1415,17780858,73530);	-- Urushi
+INSERT INTO vendor_items VALUES (1161,17780858,40);	-- Uchitake
+INSERT INTO vendor_items VALUES (1164,17780858,40);	-- Tsurara
+INSERT INTO vendor_items VALUES (1167,17780858,40);	-- Kawahori-Ogi
+INSERT INTO vendor_items VALUES (1170,17780858,40);	-- Makibishi
+INSERT INTO vendor_items VALUES (1173,17780858,40);	-- Hiraishin
+INSERT INTO vendor_items VALUES (1176,17780858,40);	-- Mizu-Deppo
+INSERT INTO vendor_items VALUES (1179,17780858,125);	-- Shihei
+INSERT INTO vendor_items VALUES (1182,17780858,125);	-- Jusatsu
+INSERT INTO vendor_items VALUES (1185,17780858,125);	-- Kaginawa
+INSERT INTO vendor_items VALUES (1188,17780858,125);	-- Sairui-Ran
+INSERT INTO vendor_items VALUES (1191,17780858,125);	-- Kodoku
+INSERT INTO vendor_items VALUES (1194,17780858,125);	-- Shinobi-Tabi
 INSERT INTO vendor_items VALUES (1471,17780858,316);	-- Sticky Rice
-INSERT INTO vendor_items VALUES (1554,17780858,490);	-- Turmeric
-INSERT INTO vendor_items VALUES (1555,17780858,1110);	-- Coriander
+INSERT INTO vendor_items VALUES (1554,17780858,645);	-- Turmeric
+INSERT INTO vendor_items VALUES (1555,17780858,1585);	-- Coriander
 INSERT INTO vendor_items VALUES (1590,17780858,800);	-- Holy Basil
 INSERT INTO vendor_items VALUES (1475,17780858,990);	-- Curry Powder
-INSERT INTO vendor_items VALUES (5164,17780858,2159);	-- Ground Wasabi
-INSERT INTO vendor_items VALUES (1652,17780858,175);	-- Rice Vinegar
-INSERT INTO vendor_items VALUES (5237,17780858,392);	-- Shirataki
-INSERT INTO vendor_items VALUES (2702,17780858,1500);	-- Buckwheat Flour
+INSERT INTO vendor_items VALUES (5164,17780858,2595);	-- Ground Wasabi
+INSERT INTO vendor_items VALUES (1652,17780858,200);	-- Rice Vinegar
+INSERT INTO vendor_items VALUES (5237,17780858,492);	-- Shirataki
+INSERT INTO vendor_items VALUES (2702,17780858,5000);	-- Buckwheat Flour
+INSERT INTO vendor_items VALUES (4928,17780858,2331);	-- Katon: Ichi
+INSERT INTO vendor_items VALUES (4931,17780858,2331);	-- Hyoton: Ichi
+INSERT INTO vendor_items VALUES (4934,17780858,2331);	-- Huton: Ichi
+INSERT INTO vendor_items VALUES (4937,17780858,2331);	-- Doton: Ichi
+INSERT INTO vendor_items VALUES (4940,17780858,2331);	-- Raiton: Ichi
+INSERT INTO vendor_items VALUES (4943,17780858,2331);	-- Suiton: Ichi
+INSERT INTO vendor_items VALUES (4949,17780858,2849);	-- Jubaku: Ichi
+INSERT INTO vendor_items VALUES (4952,17780858,2849);	-- Hojo: Ichi
+INSERT INTO vendor_items VALUES (4955,17780858,2849);	-- Kurayami: Ichi
+INSERT INTO vendor_items VALUES (4958,17780858,2849);	-- Dokumori: Ichi
+INSERT INTO vendor_items VALUES (4961,17780858,2849);	-- Tonko: Ichi
+INSERT INTO vendor_items VALUES (4964,17780858,9590);	-- Monomi: Ichi
+INSERT INTO vendor_items VALUES (4687,17780858,60750);	-- Recall-Jugner
+INSERT INTO vendor_items VALUES (4688,17780858,60750);	-- Recall-Pashh
+INSERT INTO vendor_items VALUES (4689,17780858,60750);	-- Recall-Meriph
+INSERT INTO vendor_items VALUES (4747,17780858,34656);	-- Teleport-Vahzl
+INSERT INTO vendor_items VALUES (4728,17780858,34656);	-- Teleport-Yhoat
+INSERT INTO vendor_items VALUES (4729,17780858,34656);	-- Teleport-Altep
+INSERT INTO vendor_items VALUES (4730,17780858,34656);	-- Teleport-Holla
+INSERT INTO vendor_items VALUES (4731,17780858,34656);	-- Teleport-Dem
+INSERT INTO vendor_items VALUES (4732,17780858,34656);	-- Teleport-Mea
+INSERT INTO vendor_items VALUES (4853,17780858,10428);	-- Drain
+INSERT INTO vendor_items VALUES (4855,17780858,12850);	-- Aspir
+INSERT INTO vendor_items VALUES (4857,17780858,10428);	-- Blaze Spikes
+INSERT INTO vendor_items VALUES (4869,17780858,11953);	-- Warp
+INSERT INTO vendor_items VALUES (4870,17780858,37200);	-- Warp II
+INSERT INTO vendor_items VALUES (4873,17780858,32320);	-- Retrace
+INSERT INTO vendor_items VALUES (4882,17780858,67818);	-- Sleepga II
+INSERT INTO vendor_items VALUES (4946,17780858,13133);	-- Utsusemi: Ichi
+INSERT INTO vendor_items VALUES (4994,17780858,11830);	-- Mage's Ballad
 
 -- Antonia
-INSERT INTO vendor_items VALUES (17061,17776715,6256);	-- mythril rod
-INSERT INTO vendor_items VALUES (17027,17776715,11232);	-- oak cudgel
-INSERT INTO vendor_items VALUES (17036,17776715,18048);	-- mythril mace
-INSERT INTO vendor_items VALUES (17044,17776715,6033);	-- warhammer
-INSERT INTO vendor_items VALUES (17089,17776715,37440);	-- oak pole
-INSERT INTO vendor_items VALUES (16836,17776715,44550);	-- halberd
-INSERT INTO vendor_items VALUES (16774,17776715,10596);	-- scythe
-INSERT INTO vendor_items VALUES (17320,17776715,7);	-- iron arrow
+INSERT INTO vendor_items VALUES (17061,17776715,6256);	-- Mythril Rod
+INSERT INTO vendor_items VALUES (17027,17776715,11232);	-- Oak Cudgel
+INSERT INTO vendor_items VALUES (17036,17776715,18048);	-- Mythril Mace
+INSERT INTO vendor_items VALUES (17044,17776715,6033);	-- Warhammer
+INSERT INTO vendor_items VALUES (17098,17776715,37440);	-- Oak Pole
+INSERT INTO vendor_items VALUES (16836,17776715,44550);	-- Halberd
+INSERT INTO vendor_items VALUES (16774,17776715,10596);	-- Scythe
+INSERT INTO vendor_items VALUES (17320,17776715,7);	-- Iron Arrow
 
 -- Antonian
 INSERT INTO vendor_items VALUES (631,17723492,36);	-- Horo Flour
-INSERT INTO vendor_items VALUES (629,17723492,44);	-- Millioncorn
-INSERT INTO vendor_items VALUES (4415,17723492,114);	-- Roasted Corn
+INSERT INTO vendor_items VALUES (629,17723492,43);	-- Millioncorn
+INSERT INTO vendor_items VALUES (4415,17723492,111);	-- Roasted Corn
 INSERT INTO vendor_items VALUES (841,17723492,36);	-- Yagudo Feather
-INSERT INTO vendor_items VALUES (4505,17723492,92);	-- Sunflower Seeds
+INSERT INTO vendor_items VALUES (4505,17723492,90);	-- Sunflower Seeds
 
 -- Apairemant
 INSERT INTO vendor_items VALUES (1108,17719306,703);	-- Sulfur
@@ -106,24 +151,23 @@ INSERT INTO vendor_items VALUES (949,17776718,96);	-- Rain Lily
 INSERT INTO vendor_items VALUES (956,17776718,120);	-- Lilac
 INSERT INTO vendor_items VALUES (957,17776718,120);	-- Amaryllis
 INSERT INTO vendor_items VALUES (958,17776718,120);	-- Marguerite
-INSERT INTO vendor_items VALUES (2370,17776718,520);	-- Flower Seeds
 
 -- Arlenne
 INSERT INTO vendor_items VALUES (17051,17723446,1409);	-- Yew Wand
 INSERT INTO vendor_items VALUES (17090,17723446,3245);	-- Elm Staff
 INSERT INTO vendor_items VALUES (17097,17723446,16416);	-- Elm Pole
-INSERT INTO vendor_items VALUES (16770,17723446,11286);	-- Zaghnal
 INSERT INTO vendor_items VALUES (16835,17723446,15876);	-- Spear
 INSERT INTO vendor_items VALUES (16845,17723446,16578);	-- Lance
-INSERT INTO vendor_items VALUES (16834,17723446,4680);	-- Brass spear
-INSERT INTO vendor_items VALUES (17096,17723446,4568);	-- Holly Pole
-INSERT INTO vendor_items VALUES (16833,17723446,792);	-- Bronze spear
-INSERT INTO vendor_items VALUES (17049,17723446,46);	-- Maple Wand
+INSERT INTO vendor_items VALUES (16770,17723446,11286);	-- Zaghnal
 INSERT INTO vendor_items VALUES (17050,17723446,333);	-- Willow Wand
-INSERT INTO vendor_items VALUES (17088,17723446,57);	-- Ash Staff
 INSERT INTO vendor_items VALUES (17089,17723446,571);	-- Holly Staff
-INSERT INTO vendor_items VALUES (16768,17723446,309);	-- Bronze Zaghnal
+INSERT INTO vendor_items VALUES (17096,17723446,4568);	-- Holly Pole
+INSERT INTO vendor_items VALUES (16834,17723446,4680);	-- Brass Spear
 INSERT INTO vendor_items VALUES (16769,17723446,2542);	-- Brass Zaghnal
+INSERT INTO vendor_items VALUES (17049,17723446,46);	-- Maple Wand
+INSERT INTO vendor_items VALUES (17088,17723446,57);	-- Ash Staff
+INSERT INTO vendor_items VALUES (16833,17723446,792);	-- Brass Baghnakhs
+INSERT INTO vendor_items VALUES (16768,17723446,309);	-- Bronze Zaghnal
 
 -- Aroro
 INSERT INTO vendor_items VALUES (4862,17760312,114);	-- Blind
@@ -152,22 +196,22 @@ INSERT INTO vendor_items VALUES (16524,17719354,13406);	-- Fleuret
 INSERT INTO vendor_items VALUES (16450,17719354,1827);	-- Dagger
 INSERT INTO vendor_items VALUES (16536,17719354,7128);	-- Iron Sword
 INSERT INTO vendor_items VALUES (16566,17719354,8294);	-- Longsword
+INSERT INTO vendor_items VALUES (16385,17719354,129);	-- Cesti
 INSERT INTO vendor_items VALUES (16448,17719354,140);	-- Bronze Dagger
 INSERT INTO vendor_items VALUES (16449,17719354,837);	-- Brass Dagger
 INSERT INTO vendor_items VALUES (16531,17719354,3523);	-- Brass Xiphos
 INSERT INTO vendor_items VALUES (16535,17719354,241);	-- Bronze Sword
 INSERT INTO vendor_items VALUES (16565,17719354,1674);	-- Spatha
-INSERT INTO vendor_items VALUES (16385,17719354,129);	-- Cesti
 
 -- Attarena
 INSERT INTO vendor_items VALUES (623,17723497,119);	-- Bay Leaves
 INSERT INTO vendor_items VALUES (4154,17723497,6440);	-- Holy Water
 
 -- Aulavia
-INSERT INTO vendor_items VALUES (636,17735747,117);	-- Chamomile
-INSERT INTO vendor_items VALUES (864,17735747,86);	-- Fish Scales
+INSERT INTO vendor_items VALUES (636,17735747,119);	-- Chamomile
+INSERT INTO vendor_items VALUES (864,17735747,88);	-- Fish Scales
 INSERT INTO vendor_items VALUES (936,17735747,14);	-- Rock Salt
-INSERT INTO vendor_items VALUES (1410,17735747,1620);	-- Sweet William
+INSERT INTO vendor_items VALUES (1410,17735747,1656);	-- Sweet William
 
 -- Aveline
 INSERT INTO vendor_items VALUES (625,17719318,79);	-- Apple Vinegar
@@ -191,7 +235,7 @@ INSERT INTO vendor_items VALUES (635,17752104,18);	-- Windurstian Tea Leaves
 -- Bagnobrok
 INSERT INTO vendor_items VALUES (640,17744032,11);	-- Copper Ore
 INSERT INTO vendor_items VALUES (4450,17744032,694);	-- Coral Fungus
-INSERT INTO vendor_items VALUES (4375,17744032,4121);	-- Danceshroom
+INSERT INTO vendor_items VALUES (4375,17744032,4032);	-- Danceshroom
 INSERT INTO vendor_items VALUES (1650,17744032,6500);	-- Kopparnickel Ore
 INSERT INTO vendor_items VALUES (5165,17744032,736);	-- Movalpolos Water
 
@@ -227,10 +271,8 @@ INSERT INTO vendor_items VALUES (628,17719317,234);	-- Cinnamon
 INSERT INTO vendor_items VALUES (629,17719317,43);	-- Millioncorn
 INSERT INTO vendor_items VALUES (622,17719317,43);	-- Dried Marjoram
 INSERT INTO vendor_items VALUES (610,17719317,54);	-- San d'Orian Flour
-INSERT INTO vendor_items VALUES (627,17719317,36);	-- Maple Sugar
 INSERT INTO vendor_items VALUES (1840,17719317,1800);	-- Semolina
-INSERT INTO vendor_items VALUES (5726,17719317,442);	-- Zucchini
-INSERT INTO vendor_items VALUES (5740,17719317,511);	-- Paprika
+INSERT INTO vendor_items VALUES (627,17719317,36);	-- Maple Sugar
 INSERT INTO vendor_items VALUES (621,17719317,25);	-- Crying Mustard
 INSERT INTO vendor_items VALUES (611,17719317,36);	-- Rye Flour
 INSERT INTO vendor_items VALUES (936,17719317,14);	-- Rock Salt
@@ -247,6 +289,8 @@ INSERT INTO vendor_items VALUES (4366,17764461,22);	-- La Theine Cabbage
 INSERT INTO vendor_items VALUES (4378,17764461,55);	-- Selbina Milk
 
 -- Blingbrix
+INSERT INTO vendor_items VALUES (4116,17134075,4500);	-- Hi-Potion
+INSERT INTO vendor_items VALUES (4132,17134075,28000);	-- Hi-Ether
 INSERT INTO vendor_items VALUES (605,17134075,200);	-- Pickaxe
 INSERT INTO vendor_items VALUES (1020,17134075,300);	-- Sickle
 
@@ -277,8 +321,6 @@ INSERT INTO vendor_items VALUES (4150,17735724,2387);	-- Eye Drops
 INSERT INTO vendor_items VALUES (4148,17735724,290);	-- Antidote
 INSERT INTO vendor_items VALUES (17320,17735724,7);	-- Iron Arrow
 INSERT INTO vendor_items VALUES (17336,17735724,5);	-- Crossbow Bolt
-INSERT INTO vendor_items VALUES (1022,17735724,3643);	-- Thief's Tools
-INSERT INTO vendor_items VALUES (1023,17735724,5520);	-- Living Key
 
 -- Brave Ox
 INSERT INTO vendor_items VALUES (4654,17788945,77350);	-- Protect IV
@@ -288,10 +330,10 @@ INSERT INTO vendor_items VALUES (4860,17788945,31850);	-- Stun
 INSERT INTO vendor_items VALUES (4720,17788945,31850);	-- Flash
 INSERT INTO vendor_items VALUES (4750,17788945,546000);	-- Reraise III
 INSERT INTO vendor_items VALUES (4638,17788945,78260);	-- Banish III
-INSERT INTO vendor_items VALUES (4701,17788945,20092);	-- Cura
-INSERT INTO vendor_items VALUES (4702,17788945,62192);	-- Sacrifice
-INSERT INTO vendor_items VALUES (4703,17788945,64584);	-- Esuna
-INSERT INTO vendor_items VALUES (4704,17788945,30967);	-- Auspice
+INSERT INTO vendor_items VALUES (4701,17788945,20092);	-- 4701, 20092, -- Cura
+INSERT INTO vendor_items VALUES (4702,17788945,62192);	-- 4702, 62192, -- Sacrifice
+INSERT INTO vendor_items VALUES (4703,17788945,64584);	-- 4703, 64584, -- Esuna
+INSERT INTO vendor_items VALUES (4704,17788945,30967);	-- 4704, 30967, -- Auspice
 
 -- Brave Wolf
 INSERT INTO vendor_items VALUES (12301,17788944,31201);	-- Buckler
@@ -308,29 +350,29 @@ INSERT INTO vendor_items VALUES (12993,17788944,4084);	-- Sandals
 INSERT INTO vendor_items VALUES (12578,17788944,28654);	-- Padded Armor
 INSERT INTO vendor_items VALUES (12706,17788944,15724);	-- Iron Mittens
 INSERT INTO vendor_items VALUES (12836,17788944,23063);	-- Iron Subligar
-INSERT INTO vendor_items VALUES (12962,17788944,14327);	-- Leggings
+INSERT INTO vendor_items VALUES (12962,17788944,14327);	-- Leggins
 
 -- Brunhilde
 INSERT INTO vendor_items VALUES (12448,17739801,154);	-- Bronze Cap
-INSERT INTO vendor_items VALUES (12432,17739801,1305);	-- Faceguard
+INSERT INTO vendor_items VALUES (12432,17739801,1334);	-- Faceguard
 INSERT INTO vendor_items VALUES (12433,17739801,11776);	-- Brass Mask
 INSERT INTO vendor_items VALUES (12416,17739801,29311);	-- Sallet
-INSERT INTO vendor_items VALUES (12576,17739801,230);	-- Bronze Harness
-INSERT INTO vendor_items VALUES (12560,17739801,2007);	-- Scale Mail
+INSERT INTO vendor_items VALUES (12576,17739801,235);	-- Bronze Harness
+INSERT INTO vendor_items VALUES (12560,17739801,2051);	-- Scale Mail
 INSERT INTO vendor_items VALUES (12561,17739801,17928);	-- Brass Scale Mail
-INSERT INTO vendor_items VALUES (12704,17739801,126);	-- Bronze Mittens
-INSERT INTO vendor_items VALUES (12688,17739801,1071);	-- Scale Finger Gauntlets
+INSERT INTO vendor_items VALUES (12704,17739801,128);	-- Bronze Mittens
+INSERT INTO vendor_items VALUES (12688,17739801,1094);	-- Scale Finger Gauntlets
 INSERT INTO vendor_items VALUES (12689,17739801,9479);	-- Brass Finger Gauntlets
 INSERT INTO vendor_items VALUES (12417,17739801,52289);	-- Mythril Sallet
 INSERT INTO vendor_items VALUES (12544,17739801,45208);	-- Breastplate
 INSERT INTO vendor_items VALUES (12672,17739801,23846);	-- Gauntlets
 
 -- Caiphimonride
-INSERT INTO vendor_items VALUES (16450,16883792,1867);	-- Dagger
-INSERT INTO vendor_items VALUES (16566,16883792,8478);	-- Longsword
-INSERT INTO vendor_items VALUES (17335,16883792,8);	-- Rusty Bolt
-INSERT INTO vendor_items VALUES (18375,16883792,93240);	-- Falx
-INSERT INTO vendor_items VALUES (18214,16883792,51905);	-- Voulge
+INSERT INTO vendor_items VALUES (16450,16883792,2030);	-- Dagger
+INSERT INTO vendor_items VALUES (16566,16883792,9216);	-- Longsword
+INSERT INTO vendor_items VALUES (17335,16883792,4);	-- Rusty Bolt
+INSERT INTO vendor_items VALUES (18375,16883792,37296);	-- Falx
+INSERT INTO vendor_items VALUES (18214,16883792,20762);	-- Voulge
 
 -- Capucine
 INSERT INTO vendor_items VALUES (12473,17719352,1904);	-- Poet's Circlet
@@ -350,7 +392,6 @@ INSERT INTO vendor_items VALUES (12306,17719388,10281);	-- Kite Shield
 INSERT INTO vendor_items VALUES (12292,17719388,4482);	-- Mahogany Shield
 INSERT INTO vendor_items VALUES (12826,17719388,16552);	-- Studded Trousers
 INSERT INTO vendor_items VALUES (12954,17719388,10054);	-- Studded Boots
-INSERT INTO vendor_items VALUES (12289,17719388,110);	-- Lauan Shield
 INSERT INTO vendor_items VALUES (12290,17719388,544);	-- Maple Shield
 INSERT INTO vendor_items VALUES (12832,17719388,187);	-- Bronze Subligar
 INSERT INTO vendor_items VALUES (12833,17719388,1800);	-- Brass Subligar
@@ -360,19 +401,19 @@ INSERT INTO vendor_items VALUES (12961,17719388,1116);	-- Brass Leggings
 INSERT INTO vendor_items VALUES (12952,17719388,302);	-- Leather Highboots
 
 -- Carmelide
-INSERT INTO vendor_items VALUES (806,17739810,1676);	-- Tourmaline
-INSERT INTO vendor_items VALUES (807,17739810,1676);	-- Sardonyx
-INSERT INTO vendor_items VALUES (800,17739810,1676);	-- Amethyst
-INSERT INTO vendor_items VALUES (814,17739810,1676);	-- Amber
-INSERT INTO vendor_items VALUES (795,17739810,1676);	-- Lapis Lazuli
-INSERT INTO vendor_items VALUES (809,17739810,1676);	-- Clear Topaz
-INSERT INTO vendor_items VALUES (799,17739810,1676);	-- Onyx
-INSERT INTO vendor_items VALUES (796,17739810,1676);	-- Light Opal
+INSERT INTO vendor_items VALUES (806,17739810,1713);	-- Tourmaline
+INSERT INTO vendor_items VALUES (807,17739810,1713);	-- Sardonyx
+INSERT INTO vendor_items VALUES (800,17739810,1713);	-- Amethyst
+INSERT INTO vendor_items VALUES (814,17739810,1713);	-- Amber
+INSERT INTO vendor_items VALUES (795,17739810,1713);	-- Lapis Lazuli
+INSERT INTO vendor_items VALUES (809,17739810,1713);	-- Clear Topaz
+INSERT INTO vendor_items VALUES (799,17739810,1713);	-- Onyx
+INSERT INTO vendor_items VALUES (796,17739810,1713);	-- Light Opal
 INSERT INTO vendor_items VALUES (13454,17739810,69);	-- Copper Ring
 
 -- Challoux
 INSERT INTO vendor_items VALUES (4545,17784886,62);	-- Gysahl Greens
-INSERT INTO vendor_items VALUES (840,17784886,7);	-- Chocobo Feather
+INSERT INTO vendor_items VALUES (840,17784886,4);	-- Chocobo Feather
 INSERT INTO vendor_items VALUES (17307,17784886,9);	-- Dart
 
 -- Champalpieu
@@ -384,17 +425,17 @@ INSERT INTO vendor_items VALUES (5064,17776717,567);	-- Wind Threnody
 INSERT INTO vendor_items VALUES (5067,17776717,420);	-- Water Threnody
 
 -- Charging Chocobo
-INSERT INTO vendor_items VALUES (12832,17739802,191);	-- Bronze Subligar
-INSERT INTO vendor_items VALUES (12816,17739802,1646);	-- Scale Cuisses
+INSERT INTO vendor_items VALUES (12801,17739802,58738);	-- Mythril Cuisses
+INSERT INTO vendor_items VALUES (12929,17739802,36735);	-- Mythril Leggings
 INSERT INTO vendor_items VALUES (12817,17739802,14131);	-- Brass Cuisses
 INSERT INTO vendor_items VALUES (12800,17739802,34776);	-- Cuisses
-INSERT INTO vendor_items VALUES (12960,17739802,117);	-- Bronze Leggings
-INSERT INTO vendor_items VALUES (12944,17739802,998);	-- Scale Greaves
 INSERT INTO vendor_items VALUES (12945,17739802,8419);	-- Brass Greaves
 INSERT INTO vendor_items VALUES (12928,17739802,21859);	-- Plate Leggings
 INSERT INTO vendor_items VALUES (13080,17739802,16891);	-- Gorget
-INSERT INTO vendor_items VALUES (12801,17739802,58738);	-- Mythril Cuisses
-INSERT INTO vendor_items VALUES (12929,17739802,36735);	-- Mythril Leggings
+INSERT INTO vendor_items VALUES (12832,17739802,191);	-- Bronze Subligar
+INSERT INTO vendor_items VALUES (12816,17739802,1646);	-- Scale Cuisses
+INSERT INTO vendor_items VALUES (12960,17739802,117);	-- Bronze Leggings
+INSERT INTO vendor_items VALUES (12944,17739802,998);	-- Scale Greaves
 
 -- Chayaya
 INSERT INTO vendor_items VALUES (17307,16974277,10);	-- Dart
@@ -482,19 +523,19 @@ INSERT INTO vendor_items VALUES (4833,17793068,4644);	-- Scroll of Poisonga
 INSERT INTO vendor_items VALUES (4859,17793068,8100);	-- Scroll of Shock Spikes
 
 -- Ciqala
-INSERT INTO vendor_items VALUES (16392,17739799,5447);	-- Metal Knuckles
-INSERT INTO vendor_items VALUES (16643,17739799,12757);	-- Battleaxe
-INSERT INTO vendor_items VALUES (16705,17739799,4732);	-- Greataxe
-INSERT INTO vendor_items VALUES (17044,17739799,6820);	-- Warhammer
-INSERT INTO vendor_items VALUES (16391,17739799,936);	-- Brass Knuckles
-INSERT INTO vendor_items VALUES (17043,17739799,2407);	-- Brass Hammer
-INSERT INTO vendor_items VALUES (16641,17739799,1622);	-- Brass Axe
-INSERT INTO vendor_items VALUES (16704,17739799,698);	-- Butterfly Axe
-INSERT INTO vendor_items VALUES (16390,17739799,253);	-- Bronze Knuckles
-INSERT INTO vendor_items VALUES (16640,17739799,328);	-- Bronze Axe
-INSERT INTO vendor_items VALUES (17042,17739799,353);	-- Bronze Hammer
-INSERT INTO vendor_items VALUES (17049,17739799,54);	-- Maple Wand
-INSERT INTO vendor_items VALUES (17088,17739799,66);	-- Ash Staff
+INSERT INTO vendor_items VALUES (16392,17739799,4818);	-- Metal Knuckles
+INSERT INTO vendor_items VALUES (17044,17739799,6033);	-- Warhammer
+INSERT INTO vendor_items VALUES (16643,17739799,11285);	-- Battleaxe
+INSERT INTO vendor_items VALUES (16705,17739799,4186);	-- Greataxe
+INSERT INTO vendor_items VALUES (16391,17739799,828);	-- Brass Knuckles
+INSERT INTO vendor_items VALUES (17043,17739799,2083);	-- Brass Hammer
+INSERT INTO vendor_items VALUES (16641,17739799,1435);	-- Brass Axe
+INSERT INTO vendor_items VALUES (16704,17739799,618);	-- Butterfly Axe
+INSERT INTO vendor_items VALUES (16390,17739799,224);	-- Bronze Knuckles
+INSERT INTO vendor_items VALUES (17042,17739799,312);	-- Bronze Hammer
+INSERT INTO vendor_items VALUES (16640,17739799,290);	-- Bronze Axe
+INSERT INTO vendor_items VALUES (17049,17739799,47);	-- Maple Wand
+INSERT INTO vendor_items VALUES (17088,17739799,58);	-- Ash Staff
 
 -- Corua
 INSERT INTO vendor_items VALUES (4389,17719304,29);	-- San d'Orian Carrot
@@ -505,14 +546,14 @@ INSERT INTO vendor_items VALUES (610,17719304,55);	-- San d'Orian Flour
 -- Coullave
 INSERT INTO vendor_items VALUES (4128,17727523,4445);	-- Ether
 INSERT INTO vendor_items VALUES (17313,17727523,1107);	-- Grenade
-INSERT INTO vendor_items VALUES (4112,17727523,837);	-- Potion
-INSERT INTO vendor_items VALUES (704,17727523,96);	-- Bamboo Stick
-INSERT INTO vendor_items VALUES (4151,17727523,736);	-- Echo Drops
 INSERT INTO vendor_items VALUES (12456,17727523,552);	-- Hachimaki
 INSERT INTO vendor_items VALUES (12584,17727523,833);	-- Kenpogi
 INSERT INTO vendor_items VALUES (12968,17727523,424);	-- Kyahan
-INSERT INTO vendor_items VALUES (12840,17727523,666);	-- Sitabaki
+INSERT INTO vendor_items VALUES (4112,17727523,837);	-- Potion
 INSERT INTO vendor_items VALUES (12712,17727523,458);	-- Tekko
+INSERT INTO vendor_items VALUES (12840,17727523,666);	-- Sitabaki
+INSERT INTO vendor_items VALUES (704,17727523,96);	-- Bamboo Stick
+INSERT INTO vendor_items VALUES (4151,17727523,736);	-- Echo Drops
 INSERT INTO vendor_items VALUES (4148,17727523,290);	-- Antidote
 INSERT INTO vendor_items VALUES (4150,17727523,2387);	-- Eye Drops
 INSERT INTO vendor_items VALUES (13469,17727523,1150);	-- Leather Ring
@@ -523,6 +564,7 @@ INSERT INTO vendor_items VALUES (16518,17776714,31000);	-- Mythril Degen
 INSERT INTO vendor_items VALUES (16460,17776714,12096);	-- Kris
 INSERT INTO vendor_items VALUES (16467,17776714,14560);	-- Mythril Knife
 INSERT INTO vendor_items VALUES (16399,17776714,15488);	-- Katars
+INSERT INTO vendor_items VALUES (16589,17776714,13962);	-- Two-Handed Sword
 INSERT INTO vendor_items VALUES (16412,17776714,29760);	-- Mythril Claws
 INSERT INTO vendor_items VALUES (16567,17776714,85250);	-- Knight's Sword
 
@@ -545,23 +587,14 @@ INSERT INTO vendor_items VALUES (4509,17727503,10);	-- Distilled Water
 INSERT INTO vendor_items VALUES (4455,17727503,180);	-- Pebble Soup
 
 -- Dabih Jajalioh
+INSERT INTO vendor_items VALUES (957,17772597,120);	-- Amaryllis
 INSERT INTO vendor_items VALUES (948,17772597,60);	-- Carnation
 INSERT INTO vendor_items VALUES (636,17772597,119);	-- Chamomile
+INSERT INTO vendor_items VALUES (956,17772597,120);	-- Lilac
 INSERT INTO vendor_items VALUES (958,17772597,120);	-- Marguerite
 INSERT INTO vendor_items VALUES (949,17772597,96);	-- Rain Lily
 INSERT INTO vendor_items VALUES (941,17772597,80);	-- Red Rose
 INSERT INTO vendor_items VALUES (951,17772597,110);	-- Wijnruit
-INSERT INTO vendor_items VALUES (957,17772597,120);	-- Amaryllis (Occasionally)
-INSERT INTO vendor_items VALUES (574,17772597,900);	-- Fruit Seeds (Occasionally)
-INSERT INTO vendor_items VALUES (1239,17772597,490);	-- Goblin Doll (Occasionally)
-INSERT INTO vendor_items VALUES (1240,17772597,165);	-- Koma (Occasionally)
-INSERT INTO vendor_items VALUES (956,17772597,120);	-- Lilac (Occasionally)
-INSERT INTO vendor_items VALUES (1446,17772597,50000);	-- Lacquer Tree Log (Occasionally)
-INSERT INTO vendor_items VALUES (1441,17772597,250000);	-- Libation Abjuration (Occasionally)
-INSERT INTO vendor_items VALUES (630,17772597,88);	-- Ogre Pumpkin (Occasionally)
-INSERT INTO vendor_items VALUES (4750,17772597,500000);	-- Scroll of Reraise III (Occasionally)
-INSERT INTO vendor_items VALUES (1241,17772597,354);	-- Twinkle Powder (Occasionally)
-INSERT INTO vendor_items VALUES (2312,17772597,1040);	-- Chocobo Egg (Occasionally)
 
 -- Deadly Minnow
 INSERT INTO vendor_items VALUES (12442,17776696,13179);	-- Studded Bandana
@@ -597,6 +630,7 @@ INSERT INTO vendor_items VALUES (1523,17727527,290);	-- Apple Mint
 INSERT INTO vendor_items VALUES (5164,17727527,1945);	-- Ground Wasabi
 INSERT INTO vendor_items VALUES (17005,17727527,99);	-- Lufaise Fly
 INSERT INTO vendor_items VALUES (5195,17727527,233);	-- Misareaux Parsley
+INSERT INTO vendor_items VALUES (1695,17727527,920);	-- Habanero Peppers
 
 -- Denvihr
 INSERT INTO vendor_items VALUES (699,17743975,5688);	-- Oak Log
@@ -650,6 +684,7 @@ INSERT INTO vendor_items VALUES (1523,17735818,290);	-- Apple Mint
 INSERT INTO vendor_items VALUES (5164,17735818,1945);	-- Ground Wasabi
 INSERT INTO vendor_items VALUES (17005,17735818,99);	-- Lufaise Fly
 INSERT INTO vendor_items VALUES (5195,17735818,233);	-- Misareaux Parsley
+INSERT INTO vendor_items VALUES (1695,17735818,920);	-- Habanero Peppers
 
 -- Ensasa
 INSERT INTO vendor_items VALUES (104,17752097,3881);	-- Tarutaru Folding Screen
@@ -759,14 +794,15 @@ INSERT INTO vendor_items VALUES (4112,16982088,910);	-- Potion
 INSERT INTO vendor_items VALUES (4128,16982088,4832);	-- Ether
 INSERT INTO vendor_items VALUES (4155,16982088,3360);	-- Remedy
 INSERT INTO vendor_items VALUES (4509,16982088,12);	-- Distilled Water
-INSERT INTO vendor_items VALUES (18731,16982088,200);	-- Automaton Oil
-INSERT INTO vendor_items VALUES (18732,16982088,500);	-- Automaton Oil +1
-INSERT INTO vendor_items VALUES (18733,16982088,1000);	-- Automaton Oil +2
+INSERT INTO vendor_items VALUES (18731,16982088,50);	-- Automaton Oil
+INSERT INTO vendor_items VALUES (18732,16982088,250);	-- Automaton Oil +1
+INSERT INTO vendor_items VALUES (18733,16982088,500);	-- Automaton Oil +2
+INSERT INTO vendor_items VALUES (19185,16982088,1000);	-- Automaton Oil +3
 
 -- Gekko
 INSERT INTO vendor_items VALUES (4150,17784834,2387);	-- Eye Drops
 INSERT INTO vendor_items VALUES (4148,17784834,290);	-- Antidote
-INSERT INTO vendor_items VALUES (4151,17784834,736);	-- Echo Drops
+INSERT INTO vendor_items VALUES (4151,17784834,720);	-- Echo Drops
 INSERT INTO vendor_items VALUES (4112,17784834,837);	-- Potion
 INSERT INTO vendor_items VALUES (4128,17784834,4445);	-- Ether
 INSERT INTO vendor_items VALUES (4365,17784834,120);	-- Rolanberry
@@ -809,13 +845,15 @@ INSERT INTO vendor_items VALUES (4467,17780742,3);	-- Garlic Cracker
 
 -- Ghemi Sinterilo
 INSERT INTO vendor_items VALUES (4468,17801253,72);	-- Pamamas
-INSERT INTO vendor_items VALUES (4432,17801253,55);	-- Kazham Pineapple
+INSERT INTO vendor_items VALUES (4432,17801253,54);	-- Kazham Pineapple
 INSERT INTO vendor_items VALUES (4390,17801253,36);	-- Mithran Tomato
-INSERT INTO vendor_items VALUES (612,17801253,55);	-- Kazham Peppers
+INSERT INTO vendor_items VALUES (612,17801253,54);	-- Kazham Peppers
 INSERT INTO vendor_items VALUES (628,17801253,236);	-- Cinnamon
-INSERT INTO vendor_items VALUES (632,17801253,110);	-- Kukuru Bean
-INSERT INTO vendor_items VALUES (5187,17801253,158);	-- Elshimo Coconut
+INSERT INTO vendor_items VALUES (632,17801253,109);	-- Kukuru Bean
+INSERT INTO vendor_items VALUES (5187,17801253,156);	-- Elshimo Coconut
 INSERT INTO vendor_items VALUES (5604,17801253,154);	-- Elshimo Pachira Fruit
+INSERT INTO vendor_items VALUES (2869,17801253,9100);	-- Kazham Waystone
+INSERT INTO vendor_items VALUES (731,17801253,2877);	-- Aquilaria Log
 
 -- Glyke
 INSERT INTO vendor_items VALUES (4499,17776677,92);	-- Iron Bread
@@ -834,19 +872,19 @@ INSERT INTO vendor_items VALUES (4424,17776677,1012);	-- Mellon Juice
 INSERT INTO vendor_items VALUES (4441,17776677,855);	-- Grape Juice
 
 -- Graine
-INSERT INTO vendor_items VALUES (12440,17797130,404);	-- Leather Bandana
-INSERT INTO vendor_items VALUES (12448,17797130,154);	-- Bronze Cap
-INSERT INTO vendor_items VALUES (12449,17797130,1504);	-- Brass Cap
-INSERT INTO vendor_items VALUES (12568,17797130,618);	-- Leather Vest
+INSERT INTO vendor_items VALUES (12440,17797130,457);	-- Leather Bandana
+INSERT INTO vendor_items VALUES (12448,17797130,174);	-- Bronze Cap
+INSERT INTO vendor_items VALUES (12449,17797130,1700);	-- Brass Cap
+INSERT INTO vendor_items VALUES (12568,17797130,698);	-- Leather Vest
 INSERT INTO vendor_items VALUES (12576,17797130,235);	-- Bronze Harness
 INSERT INTO vendor_items VALUES (12577,17797130,2286);	-- Brass Harness
-INSERT INTO vendor_items VALUES (12696,17797130,331);	-- Leather Gloves
+INSERT INTO vendor_items VALUES (12696,17797130,374);	-- Leather Gloves
 INSERT INTO vendor_items VALUES (12704,17797130,128);	-- Bronze Mittens
 INSERT INTO vendor_items VALUES (12705,17797130,1255);	-- Brass Mittens
-INSERT INTO vendor_items VALUES (12824,17797130,493);	-- Leather Trousesrs
+INSERT INTO vendor_items VALUES (12824,17797130,557);	-- Leather Trousesrs
 INSERT INTO vendor_items VALUES (12832,17797130,191);	-- Bronze Subligar
 INSERT INTO vendor_items VALUES (12833,17797130,1840);	-- Brass Subligar
-INSERT INTO vendor_items VALUES (12952,17797130,309);	-- Leather Highboots
+INSERT INTO vendor_items VALUES (12952,17797130,349);	-- Leather Highboots
 INSERT INTO vendor_items VALUES (12960,17797130,117);	-- Bronze Leggings
 INSERT INTO vendor_items VALUES (12961,17797130,1140);	-- Brass Leggings
 
@@ -860,20 +898,20 @@ INSERT INTO vendor_items VALUES (4376,17735726,108);	-- Meat Jerky
 INSERT INTO vendor_items VALUES (4509,17735726,10);	-- Distilled Water
 
 -- Guruna-Maguruna
+INSERT INTO vendor_items VALUES (13090,17760315,4714);	-- Beetle Gorget
+INSERT INTO vendor_items VALUES (12601,17760315,2776);	-- Linen Robe
+INSERT INTO vendor_items VALUES (12729,17760315,1570);	-- Linen Cuffs
+INSERT INTO vendor_items VALUES (12608,17760315,1260);	-- Tunic
 INSERT INTO vendor_items VALUES (12593,17760315,12355);	-- Cotton Doublet
+INSERT INTO vendor_items VALUES (12696,17760315,324);	-- Leather Gloves
+INSERT INTO vendor_items VALUES (12736,17760315,589);	-- Mitts
 INSERT INTO vendor_items VALUES (12721,17760315,6696);	-- Cotton Gloves
 INSERT INTO vendor_items VALUES (13085,17760315,972);	-- Hemp Gorget
 INSERT INTO vendor_items VALUES (12592,17760315,2470);	-- Doublet
 INSERT INTO vendor_items VALUES (12600,17760315,216);	-- Robe
 INSERT INTO vendor_items VALUES (12568,17760315,604);	-- Leather Vest
-INSERT INTO vendor_items VALUES (12608,17760315,1260);	-- Tunic
-INSERT INTO vendor_items VALUES (12601,17760315,2776);	-- Linen Robe
 INSERT INTO vendor_items VALUES (12720,17760315,1363);	-- Gloves
 INSERT INTO vendor_items VALUES (12728,17760315,118);	-- Cuffs
-INSERT INTO vendor_items VALUES (12696,17760315,324);	-- Leather Gloves
-INSERT INTO vendor_items VALUES (12736,17760315,589);	-- Mitts
-INSERT INTO vendor_items VALUES (12729,17760315,1570);	-- Linen Cuffs
-INSERT INTO vendor_items VALUES (13090,17760315,4201);	-- beetle gorget
 
 -- Hagakoff
 INSERT INTO vendor_items VALUES (16399,16982096,15448);	-- Katars (Requires Astral Candescence)
@@ -909,10 +947,6 @@ INSERT INTO vendor_items VALUES (17345,17739808,43);	-- Flute
 INSERT INTO vendor_items VALUES (5045,17739808,54000);	-- Scroll of Bewitching Etude
 
 -- Hasim
-INSERT INTO vendor_items VALUES (4612,17780866,23400);	-- Scroll of Cure IV
-INSERT INTO vendor_items VALUES (4616,17780866,11200);	-- Scroll of Curaga II
-INSERT INTO vendor_items VALUES (4617,17780866,19932);	-- Scroll of Curaga III
-INSERT INTO vendor_items VALUES (4653,17780866,32000);	-- Scroll of Protect III
 INSERT INTO vendor_items VALUES (4668,17780866,1760);	-- Scroll of Barfire
 INSERT INTO vendor_items VALUES (4669,17780866,3624);	-- Scroll of Barblizzard
 INSERT INTO vendor_items VALUES (4670,17780866,930);	-- Scroll of Baraero
@@ -925,6 +959,11 @@ INSERT INTO vendor_items VALUES (4676,17780866,930);	-- Scroll of Baraera
 INSERT INTO vendor_items VALUES (4677,17780866,156);	-- Scroll of Barstonra
 INSERT INTO vendor_items VALUES (4678,17780866,5754);	-- Scroll of Barthundra
 INSERT INTO vendor_items VALUES (4679,17780866,360);	-- Scroll of Barwatera
+INSERT INTO vendor_items VALUES (4680,17780866,244);	-- Scroll of Barsleep
+INSERT INTO vendor_items VALUES (4612,17780866,23400);	-- Scroll of Cure IV
+INSERT INTO vendor_items VALUES (4616,17780866,11200);	-- Scroll of Curaga II
+INSERT INTO vendor_items VALUES (4617,17780866,19932);	-- Scroll of Curaga III
+INSERT INTO vendor_items VALUES (4653,17780866,32000);	-- Scroll of Protect III
 
 -- Herminia
 INSERT INTO vendor_items VALUES (12456,17793033,552);	-- Hachimaki
@@ -958,17 +997,17 @@ INSERT INTO vendor_items VALUES (4773,17752096,28520);	-- Scroll of Thunder II
 INSERT INTO vendor_items VALUES (17051,17760313,1440);	-- Yew Wand
 INSERT INTO vendor_items VALUES (17090,17760313,3642);	-- Elm Staff
 INSERT INTO vendor_items VALUES (17097,17760313,18422);	-- Elm Pole
+INSERT INTO vendor_items VALUES (17059,17760313,91);	-- Bronze Rod
+INSERT INTO vendor_items VALUES (17050,17760313,340);	-- Willow Wand
 INSERT INTO vendor_items VALUES (17026,17760313,4945);	-- Bone Cudgel
+INSERT INTO vendor_items VALUES (17089,17760313,584);	-- Holly Staff
 INSERT INTO vendor_items VALUES (17096,17760313,4669);	-- Holly Pole
 INSERT INTO vendor_items VALUES (17049,17760313,47);	-- Maple Wand
-INSERT INTO vendor_items VALUES (17050,17760313,340);	-- Willow Wand
-INSERT INTO vendor_items VALUES (17059,17760313,91);	-- Bronze Rod
 INSERT INTO vendor_items VALUES (17024,17760313,66);	-- Ash Club
 INSERT INTO vendor_items VALUES (17025,17760313,1600);	-- Chestnut Club
 INSERT INTO vendor_items VALUES (17088,17760313,58);	-- Ash Staff
-INSERT INTO vendor_items VALUES (17089,17760313,584);	-- Holly Staff
 INSERT INTO vendor_items VALUES (17095,17760313,386);	-- Ash Pole
-INSERT INTO vendor_items VALUES (16448,17760313,143);	-- bronze dagger
+INSERT INTO vendor_items VALUES (16448,17760313,140);	-- Bronze Dagger
 
 -- Hortense
 INSERT INTO vendor_items VALUES (4976,17739812,64);	-- Scroll of Foe Requiem
@@ -984,7 +1023,8 @@ INSERT INTO vendor_items VALUES (5003,17739812,1101);	-- Scroll of Valor Minuet 
 INSERT INTO vendor_items VALUES (5004,17739812,5544);	-- Scroll of Valor Minuet III
 
 -- Ilita
-INSERT INTO vendor_items VALUES (512,17743974,8000);	-- Linkshell
+INSERT INTO vendor_items VALUES (512,17743974,6000);	-- Linkshell
+INSERT INTO vendor_items VALUES (16285,17743974,375);	-- Pendant Compass
 
 -- Jajaroon
 INSERT INTO vendor_items VALUES (2176,16994341,48);	-- Fire Card
@@ -995,13 +1035,14 @@ INSERT INTO vendor_items VALUES (2180,16994341,48);	-- Thunder Card
 INSERT INTO vendor_items VALUES (2181,16994341,48);	-- Water Card
 INSERT INTO vendor_items VALUES (2182,16994341,48);	-- Light Card
 INSERT INTO vendor_items VALUES (2183,16994341,48);	-- Dark Card
+INSERT INTO vendor_items VALUES (5870,16994341,10000);	-- Trump Card Case
 INSERT INTO vendor_items VALUES (5488,16994341,35200);	-- Samurai Die
 INSERT INTO vendor_items VALUES (5489,16994341,600);	-- Ninja Die
-INSERT INTO vendor_items VALUES (5490,16994341,82500);	-- Dragoon Die
+INSERT INTO vendor_items VALUES (5490,16994341,9216);	-- Dragoon Die
 INSERT INTO vendor_items VALUES (5491,16994341,40000);	-- Summoner Die
 INSERT INTO vendor_items VALUES (5492,16994341,3525);	-- Blue Mage Die
 INSERT INTO vendor_items VALUES (5493,16994341,316);	-- Corsair Die
-INSERT INTO vendor_items VALUES (5494,16994341,9216);	-- Puppetmaster Die
+INSERT INTO vendor_items VALUES (5494,16994341,82500);	-- Puppetmaster Die
 
 -- Jourille
 INSERT INTO vendor_items VALUES (639,17752107,110);	-- Chestnut
@@ -1034,6 +1075,7 @@ INSERT INTO vendor_items VALUES (5576,16982095,800);	-- Ayran
 INSERT INTO vendor_items VALUES (5590,16982095,3750);	-- Balik Sandvici
 INSERT INTO vendor_items VALUES (2235,16982095,320);	-- Wildgrass Seeds
 INSERT INTO vendor_items VALUES (5075,16982095,4400);	-- Scroll of Raptor Mazurka
+INSERT INTO vendor_items VALUES (2872,16982095,10000);	-- Empire Waystone
 
 -- Khel Pahlhama
 INSERT INTO vendor_items VALUES (512,17760323,8000);	-- Linkshell
@@ -1049,6 +1091,7 @@ INSERT INTO vendor_items VALUES (12938,17776716,32637);	-- Sollerets
 
 -- Khifo Ryuhkowa
 INSERT INTO vendor_items VALUES (16473,17801256,5713);	-- Kukri
+INSERT INTO vendor_items VALUES (16595,17801256,153014);	-- Ram-Dao
 INSERT INTO vendor_items VALUES (16833,17801256,809);	-- Bronze Spear
 INSERT INTO vendor_items VALUES (16835,17801256,16228);	-- Spear
 INSERT INTO vendor_items VALUES (16839,17801256,75541);	-- Partisan
@@ -1060,7 +1103,7 @@ INSERT INTO vendor_items VALUES (17099,17801256,99176);	-- Mahogany Pole
 INSERT INTO vendor_items VALUES (17163,17801256,39744);	-- Battle Bow
 INSERT INTO vendor_items VALUES (17308,17801256,55);	-- Hawkeye
 INSERT INTO vendor_items VALUES (17280,17801256,1610);	-- Boomerang
-INSERT INTO vendor_items VALUES (17318,17801256,3);	-- Wooden Arrow
+INSERT INTO vendor_items VALUES (17318,17801256,3);	-- Woden Arrow
 
 -- Kindlix
 INSERT INTO vendor_items VALUES (4250,17784984,22);	-- Crackler
@@ -1085,12 +1128,12 @@ INSERT INTO vendor_items VALUES (4376,16883791,110);	-- Meat Jerky
 INSERT INTO vendor_items VALUES (936,16883791,14);	-- Rock Salt
 INSERT INTO vendor_items VALUES (611,16883791,36);	-- Rye Flour
 INSERT INTO vendor_items VALUES (4509,16883791,10);	-- Distilled Water
-INSERT INTO vendor_items VALUES (625,16883791,91);	-- Apple Vinegar
-INSERT INTO vendor_items VALUES (4364,16883791,110);	-- Black Bread
-INSERT INTO vendor_items VALUES (610,16883791,55);	-- San d'Orian Flour
-INSERT INTO vendor_items VALUES (4389,16883791,29);	-- San d'Orian Carrot
-INSERT INTO vendor_items VALUES (629,16883791,44);	-- Millioncorn
-INSERT INTO vendor_items VALUES (1523,16883791,290);	-- Apple Mint
+INSERT INTO vendor_items VALUES (625,16883791,88);	-- Apple Vinegar
+INSERT INTO vendor_items VALUES (4364,16883791,120);	-- Black Bread
+INSERT INTO vendor_items VALUES (610,16883791,60);	-- San d'Orian Flour
+INSERT INTO vendor_items VALUES (4389,16883791,32);	-- San d'Orian Carrot
+INSERT INTO vendor_items VALUES (629,16883791,48);	-- Millioncorn
+INSERT INTO vendor_items VALUES (1523,16883791,316);	-- Apple Mint
 
 -- Kucha Malkobhi
 INSERT INTO vendor_items VALUES (12635,17760438,273);	-- Tarutaru Kaftan
@@ -1110,21 +1153,20 @@ INSERT INTO vendor_items VALUES (5460,16982094,4650);	-- Kayabaligi (Requires As
 INSERT INTO vendor_items VALUES (5461,16982094,130);	-- Alabaligi (Requires Astral Candescence)
 
 -- Kumama
-INSERT INTO vendor_items VALUES (12292,17760316,4560);	-- mahogany shield
-INSERT INTO vendor_items VALUES (12849,17760316,9936);	-- Cotton Brais
-INSERT INTO vendor_items VALUES (12977,17760316,6633);	-- Cotton Gaiters
-INSERT INTO vendor_items VALUES (12848,17760316,1899);	-- Brais
-INSERT INTO vendor_items VALUES (12856,17760316,172);	-- Slops
-INSERT INTO vendor_items VALUES (12824,17760316,482);	-- Leather Trousers
-INSERT INTO vendor_items VALUES (12864,17760316,860);	-- Slacks
 INSERT INTO vendor_items VALUES (12857,17760316,2268);	-- Linen Slops
-INSERT INTO vendor_items VALUES (12976,17760316,1269);	-- Gaiters
-INSERT INTO vendor_items VALUES (12984,17760316,111);	-- Ash Clogs
+INSERT INTO vendor_items VALUES (12985,17760316,1462);	-- Holly Clogs
+INSERT INTO vendor_items VALUES (12292,17760316,4481);	-- Mahogony Shield
+INSERT INTO vendor_items VALUES (12824,17760316,482);	-- Leather Trousers
+INSERT INTO vendor_items VALUES (12849,17760316,9936);	-- Cotton Brais
 INSERT INTO vendor_items VALUES (12952,17760316,309);	-- Leather Highboots
 INSERT INTO vendor_items VALUES (12992,17760316,544);	-- Solea
-INSERT INTO vendor_items VALUES (12985,17760316,1462);	-- Holly Clogs
-INSERT INTO vendor_items VALUES (12289,17760316,110);	-- Lauan Shield
+INSERT INTO vendor_items VALUES (12977,17760316,6633);	-- Cotton Gaiters
 INSERT INTO vendor_items VALUES (12290,17760316,556);	-- Maple Shield
+INSERT INTO vendor_items VALUES (12848,17760316,1899);	-- Brais
+INSERT INTO vendor_items VALUES (12856,17760316,172);	-- Slops
+INSERT INTO vendor_items VALUES (12976,17760316,1269);	-- Gaiters
+INSERT INTO vendor_items VALUES (12984,17760316,111);	-- Ash Clogs
+INSERT INTO vendor_items VALUES (12289,17760316,110);	-- Lauan Shield
 
 -- Kususu
 INSERT INTO vendor_items VALUES (4641,17760311,1165);	-- Diaga
@@ -1145,22 +1187,22 @@ INSERT INTO vendor_items VALUES (4656,17760311,1584);	-- Shell
 INSERT INTO vendor_items VALUES (4663,17760311,360);	-- Aquaveil
 
 -- Layton
-INSERT INTO vendor_items VALUES (6049,17494713,8060);	-- Firestorm Schema
-INSERT INTO vendor_items VALUES (6050,17494713,6318);	-- Rainstorm Schema
-INSERT INTO vendor_items VALUES (6051,17494713,9100);	-- Thunderstorm Schema
-INSERT INTO vendor_items VALUES (6052,17494713,8580);	-- Hailstorm Schema
-INSERT INTO vendor_items VALUES (6053,17494713,5200);	-- Sandstorm Schema
-INSERT INTO vendor_items VALUES (6054,17494713,6786);	-- Windstorm Schema
-INSERT INTO vendor_items VALUES (6055,17494713,11440);	-- Aurorastorm Schema
-INSERT INTO vendor_items VALUES (6056,17494713,10725);	-- Voidstorm Schema
-INSERT INTO vendor_items VALUES (6041,17494713,15750);	-- Pyrohelix Schema
-INSERT INTO vendor_items VALUES (6042,17494713,13325);	-- Hydrohelix Schema
-INSERT INTO vendor_items VALUES (6043,17494713,18375);	-- Ionohelix Schema
-INSERT INTO vendor_items VALUES (6044,17494713,16450);	-- Cryohelix Schema
-INSERT INTO vendor_items VALUES (6045,17494713,12675);	-- Geohelix Schema
-INSERT INTO vendor_items VALUES (6046,17494713,13975);	-- Anemohelix Schema
-INSERT INTO vendor_items VALUES (6047,17494713,19875);	-- Luminohelix Schema
-INSERT INTO vendor_items VALUES (6048,17494713,19125);	-- Noctohelix Schema
+INSERT INTO vendor_items VALUES (6049,17494719,8060);	-- Firestorm Schema
+INSERT INTO vendor_items VALUES (6050,17494719,6318);	-- Rainstorm Schema
+INSERT INTO vendor_items VALUES (6051,17494719,9100);	-- Thunderstorm Schema
+INSERT INTO vendor_items VALUES (6052,17494719,8580);	-- Hailstorm Schema
+INSERT INTO vendor_items VALUES (6053,17494719,5200);	-- Sandstorm Schema
+INSERT INTO vendor_items VALUES (6054,17494719,6786);	-- Windstorm Schema
+INSERT INTO vendor_items VALUES (6055,17494719,11440);	-- Aurorastorm Schema
+INSERT INTO vendor_items VALUES (6056,17494719,10725);	-- Voidstorm Schema
+INSERT INTO vendor_items VALUES (6041,17494719,7714);	-- Pyrohelix Schema
+INSERT INTO vendor_items VALUES (6042,17494719,6786);	-- Hydrohelix Schema
+INSERT INTO vendor_items VALUES (6043,17494719,8625);	-- Ionohelix Schema
+INSERT INTO vendor_items VALUES (6044,17494719,7896);	-- Cryohelix Schema
+INSERT INTO vendor_items VALUES (6045,17494719,6591);	-- Geohelix Schema
+INSERT INTO vendor_items VALUES (6046,17494719,6981);	-- Anemohelix Schema
+INSERT INTO vendor_items VALUES (6047,17494719,8940);	-- Luminohelix Schema
+INSERT INTO vendor_items VALUES (6048,17494719,8790);	-- Noctohelix Schema
 
 -- Lebondur
 INSERT INTO vendor_items VALUES (636,17760435,119);	-- Chamomile
@@ -1200,8 +1242,9 @@ INSERT INTO vendor_items VALUES (5066,17719350,1265);	-- Scroll of Lightning Thr
 INSERT INTO vendor_items VALUES (17391,17719350,66);	-- Willow Fishing Rod
 
 -- Macchi Gazlitah
-INSERT INTO vendor_items VALUES (5703,17772598,300);	-- Uleguerand Milk
-INSERT INTO vendor_items VALUES (5684,17772598,600);	-- Chalaimbille
+INSERT INTO vendor_items VALUES (5703,17772598,100);	-- Uleguerand Milk
+INSERT INTO vendor_items VALUES (5684,17772598,250);	-- Chalaimbille
+INSERT INTO vendor_items VALUES (17905,17772598,100);	-- Wormy Broth
 INSERT INTO vendor_items VALUES (5686,17772598,800);	-- Cheese Sandwich
 INSERT INTO vendor_items VALUES (5729,17772598,3360);	-- Bavarois
 INSERT INTO vendor_items VALUES (5718,17772598,1300);	-- Cream Puff
@@ -1213,6 +1256,7 @@ INSERT INTO vendor_items VALUES (4724,17772598,27968);	-- Enaero II
 INSERT INTO vendor_items VALUES (4725,17772598,26112);	-- Enstone II
 INSERT INTO vendor_items VALUES (4726,17772598,25600);	-- Enthunder II
 INSERT INTO vendor_items VALUES (4727,17772598,33000);	-- Enwater II
+INSERT INTO vendor_items VALUES (4850,17772598,150000);	-- Refresh II
 
 -- Machielle
 INSERT INTO vendor_items VALUES (688,17719303,18);	-- Arrowwood Log
@@ -1275,15 +1319,19 @@ INSERT INTO vendor_items VALUES (4505,17752102,92);	-- Sunflower Seeds
 INSERT INTO vendor_items VALUES (841,17752102,36);	-- Yagudo Feather
 
 -- Matoaka
-INSERT INTO vendor_items VALUES (13327,17780863,1150);	-- Silver Earring
-INSERT INTO vendor_items VALUES (13456,17780863,1150);	-- Silver Ring
+INSERT INTO vendor_items VALUES (13327,17780863,1250);	-- Silver Earring
+INSERT INTO vendor_items VALUES (13456,17780863,1250);	-- Silver Ring
 INSERT INTO vendor_items VALUES (13328,17780863,4140);	-- Mythril Earring
 
 -- Mazuro-Oozuro
 INSERT INTO vendor_items VALUES (17005,16883790,108);	-- Lufaise Fly
 INSERT INTO vendor_items VALUES (17383,16883790,2640);	-- Clothespole
-INSERT INTO vendor_items VALUES (688,16883790,200);	-- Arrowwood Log
+INSERT INTO vendor_items VALUES (688,16883790,20);	-- Arrowwood Log
 INSERT INTO vendor_items VALUES (690,16883790,7800);	-- Elm Log
+INSERT INTO vendor_items VALUES (2871,16883790,10000);	-- Safehold Waystone
+INSERT INTO vendor_items VALUES (4913,16883790,175827);	-- Scroll of Distract II
+INSERT INTO vendor_items VALUES (4915,16883790,217000);	-- Scroll of Frazzle II
+INSERT INTO vendor_items VALUES (4638,16883790,66000);	-- Banish III
 
 -- Mazween
 INSERT INTO vendor_items VALUES (4881,16982098,11200);	-- Scroll of Sleepga
@@ -1297,8 +1345,11 @@ INSERT INTO vendor_items VALUES (4764,16982098,27744);	-- Aero III
 INSERT INTO vendor_items VALUES (4754,16982098,33306);	-- Fire III
 INSERT INTO vendor_items VALUES (4759,16982098,39368);	-- Blizzard III
 INSERT INTO vendor_items VALUES (4774,16982098,45930);	-- Thunder III
+INSERT INTO vendor_items VALUES (4883,16982098,27000);	-- Absorb-TP
 INSERT INTO vendor_items VALUES (4854,16982098,30780);	-- Drain II
 INSERT INTO vendor_items VALUES (4885,16982098,70560);	-- Dread Spikes
+INSERT INTO vendor_items VALUES (4886,16982098,44000);	-- Absorb-ACC
+INSERT INTO vendor_items VALUES (4856,16982098,79800);	-- Aspir II
 
 -- Mejuone
 INSERT INTO vendor_items VALUES (4545,17776711,62);	-- Gysahl Greens
@@ -1306,11 +1357,11 @@ INSERT INTO vendor_items VALUES (840,17776711,7);	-- Chocobo Feather
 INSERT INTO vendor_items VALUES (17307,17776711,9);	-- Dart
 
 -- Melleupaux
-INSERT INTO vendor_items VALUES (16450,16883793,1867);	-- Dagger
-INSERT INTO vendor_items VALUES (16566,16883793,8478);	-- Longsword
-INSERT INTO vendor_items VALUES (17335,16883793,8);	-- Rusty Bolt
-INSERT INTO vendor_items VALUES (18375,16883793,93240);	-- Falx
-INSERT INTO vendor_items VALUES (18214,16883793,51905);	-- Voulge
+INSERT INTO vendor_items VALUES (16450,16883793,2030);	-- Dagger
+INSERT INTO vendor_items VALUES (16566,16883793,9216);	-- Longsword
+INSERT INTO vendor_items VALUES (17335,16883793,4);	-- Rusty Bolt
+INSERT INTO vendor_items VALUES (18375,16883793,37296);	-- Falx
+INSERT INTO vendor_items VALUES (18214,16883793,20762);	-- Voulge
 
 -- Melloa
 INSERT INTO vendor_items VALUES (4591,17743888,147);	-- Pumpernickel
@@ -1328,9 +1379,9 @@ INSERT INTO vendor_items VALUES (4509,17743888,10);	-- Distilled Water
 -- Migran
 INSERT INTO vendor_items VALUES (12577,16883795,2485);	-- Brass Harness
 INSERT INTO vendor_items VALUES (12985,16883795,1625);	-- Holly Clogs
-INSERT INTO vendor_items VALUES (14317,16883795,4042200);	-- Barone Cosciales
-INSERT INTO vendor_items VALUES (15305,16883795,25210200);	-- Barone Gambieras
-INSERT INTO vendor_items VALUES (14848,16883795,7276200);	-- Barone Manopolas
+INSERT INTO vendor_items VALUES (14317,16883795,101055);	-- Barone Cosciales
+INSERT INTO vendor_items VALUES (15305,16883795,630255);	-- Barone Gambieras
+INSERT INTO vendor_items VALUES (14848,16883795,181905);	-- Barone Manopolas
 INSERT INTO vendor_items VALUES (15389,16883795,8000000);	-- Vir Subligar
 INSERT INTO vendor_items VALUES (15390,16883795,8000000);	-- Femina Subligar
 
@@ -1347,7 +1398,7 @@ INSERT INTO vendor_items VALUES (936,17723498,14);	-- Rock Salt
 INSERT INTO vendor_items VALUES (1410,17723498,1656);	-- Sweet William
 
 -- Millerovieunet
-INSERT INTO vendor_items VALUES (954,17764465,4121);	-- Magic Pot Shard
+INSERT INTO vendor_items VALUES (954,17764465,4032);	-- Magic Pot Shard
 
 -- Milva
 INSERT INTO vendor_items VALUES (4444,17727525,22);	-- Rarab Tail
@@ -1368,7 +1419,7 @@ INSERT INTO vendor_items VALUES (12449,17719387,1504);	-- Brass Cap
 INSERT INTO vendor_items VALUES (12577,17719387,2286);	-- Brass Harness
 INSERT INTO vendor_items VALUES (12705,17719387,1255);	-- Brass Mittens
 INSERT INTO vendor_items VALUES (12448,17719387,154);	-- Bronze Cap
-INSERT INTO vendor_items VALUES (12576,17719387,235);	-- Bronze Harness
+INSERT INTO vendor_items VALUES (12576,17719387,576);	-- Bronze Harness
 INSERT INTO vendor_items VALUES (12704,17719387,128);	-- Bronze Mittens
 INSERT INTO vendor_items VALUES (12440,17719387,396);	-- Leather Bandana
 INSERT INTO vendor_items VALUES (12696,17719387,331);	-- Leather Gloves
@@ -1377,9 +1428,9 @@ INSERT INTO vendor_items VALUES (12568,17719387,618);	-- Leather Vest
 -- Misseulieu
 INSERT INTO vendor_items VALUES (12577,16883794,2485);	-- Brass Harness
 INSERT INTO vendor_items VALUES (12985,16883794,1625);	-- Holly Clogs
-INSERT INTO vendor_items VALUES (14317,16883794,4042200);	-- Barone Cosciales
-INSERT INTO vendor_items VALUES (15305,16883794,25210200);	-- Barone Gambieras
-INSERT INTO vendor_items VALUES (14848,16883794,7276200);	-- Barone Manopolas
+INSERT INTO vendor_items VALUES (14317,16883794,101055);	-- Barone Cosciales
+INSERT INTO vendor_items VALUES (15305,16883794,630255);	-- Barone Gambieras
+INSERT INTO vendor_items VALUES (14848,16883794,181905);	-- Barone Manopolas
 INSERT INTO vendor_items VALUES (15389,16883794,8000000);	-- Vir Subligar
 INSERT INTO vendor_items VALUES (15390,16883794,8000000);	-- Femina Subligar
 
@@ -1399,8 +1450,8 @@ INSERT INTO vendor_items VALUES (17336,17764455,5);	-- Crossbow Bolt
 INSERT INTO vendor_items VALUES (5009,17764455,2649);	-- Scroll of Hunter's Prelude
 
 -- Morefie
-INSERT INTO vendor_items VALUES (13327,17780862,1150);	-- Silver Earring
-INSERT INTO vendor_items VALUES (13456,17780862,1150);	-- Silver Ring
+INSERT INTO vendor_items VALUES (13327,17780862,1250);	-- Silver Earring
+INSERT INTO vendor_items VALUES (13456,17780862,1250);	-- Silver Ring
 INSERT INTO vendor_items VALUES (13328,17780862,4140);	-- Mythril Earring
 
 -- Mulnith
@@ -1426,6 +1477,7 @@ INSERT INTO vendor_items VALUES (4394,17752101,10);	-- Ginger Cookie
 INSERT INTO vendor_items VALUES (4407,17752101,727);	-- Carp Sushi
 INSERT INTO vendor_items VALUES (4425,17752101,323);	-- Tomato Juice
 INSERT INTO vendor_items VALUES (4459,17752101,1656);	-- Nebimonite Bake
+INSERT INTO vendor_items VALUES (4397,17752101,14);	-- Cinna-cookie
 INSERT INTO vendor_items VALUES (4422,17752101,184);	-- Orange Juice
 INSERT INTO vendor_items VALUES (4456,17752101,2070);	-- Boiled Crab
 INSERT INTO vendor_items VALUES (4510,17752101,21);	-- Acorn Cookie
@@ -1441,9 +1493,12 @@ INSERT INTO vendor_items VALUES (4491,17764464,184);	-- Watermelon
 -- Nilerouche
 INSERT INTO vendor_items VALUES (17005,16883789,108);	-- Lufaise Fly
 INSERT INTO vendor_items VALUES (17383,16883789,2640);	-- Clothespole
-INSERT INTO vendor_items VALUES (688,16883789,200);	-- Arrowwood Log
+INSERT INTO vendor_items VALUES (688,16883789,20);	-- Arrowwood Log
 INSERT INTO vendor_items VALUES (690,16883789,7800);	-- Elm Log
-INSERT INTO vendor_items VALUES (4638,16883789,66000);	-- scroll of banish iii
+INSERT INTO vendor_items VALUES (2871,16883789,10000);	-- Safehold Waystone
+INSERT INTO vendor_items VALUES (4913,16883789,175827);	-- Scroll of Distract II
+INSERT INTO vendor_items VALUES (4915,16883789,217000);	-- Scroll of Frazzle II
+INSERT INTO vendor_items VALUES (4638,16883789,66000);	-- Banish III
 
 -- Nimia
 INSERT INTO vendor_items VALUES (612,17727528,55);	-- Kazham Peppers
@@ -1457,7 +1512,6 @@ INSERT INTO vendor_items VALUES (1411,17727528,1656);	-- Phalaenopsis
 -- Nogga
 INSERT INTO vendor_items VALUES (17316,17747977,675);	-- Bomb Arm
 INSERT INTO vendor_items VALUES (17313,17747977,1083);	-- Grenade
-INSERT INTO vendor_items VALUES (2792,17747977,92);	-- Catalytic Oil
 
 -- Nuh Celodehki
 INSERT INTO vendor_items VALUES (4398,17801261,993);	-- Fish Mithkabob
@@ -1524,22 +1578,19 @@ INSERT INTO vendor_items VALUES (12448,17752094,151);	-- Bronze Cap
 INSERT INTO vendor_items VALUES (12449,17752094,1471);	-- Brass Cap
 
 -- Ostalie
-INSERT INTO vendor_items VALUES (4128,17719351,4397);	-- Ether
-INSERT INTO vendor_items VALUES (4112,17719351,828);	-- Potion
-INSERT INTO vendor_items VALUES (13196,17719351,10166);	-- silver belt
-INSERT INTO vendor_items VALUES (4151,17719351,720);	-- Echo Drops
-INSERT INTO vendor_items VALUES (4148,17719351,284);	-- Antidote
+INSERT INTO vendor_items VALUES (4128,17719351,4445);	-- Ether
+INSERT INTO vendor_items VALUES (4112,17719351,837);	-- Potion
+INSERT INTO vendor_items VALUES (4151,17719351,736);	-- Echo Drops
+INSERT INTO vendor_items VALUES (4148,17719351,290);	-- Antidote
 INSERT INTO vendor_items VALUES (12472,17719351,144);	-- Circlet
 INSERT INTO vendor_items VALUES (12728,17719351,118);	-- Cuffs
-INSERT INTO vendor_items VALUES (4150,17719351,2335);	-- Eye Drops
+INSERT INTO vendor_items VALUES (4150,17719351,2387);	-- Eye Drops
 INSERT INTO vendor_items VALUES (1021,17719351,450);	-- Hatchet
 INSERT INTO vendor_items VALUES (13192,17719351,382);	-- Leather Belt
 INSERT INTO vendor_items VALUES (13193,17719351,2430);	-- Lizard Belt
 INSERT INTO vendor_items VALUES (605,17719351,180);	-- Pickaxe
 INSERT INTO vendor_items VALUES (12600,17719351,216);	-- Robe
 INSERT INTO vendor_items VALUES (12856,17719351,172);	-- Slops
-INSERT INTO vendor_items VALUES (1022,17719351,3564);	-- Thief's Tools
-INSERT INTO vendor_items VALUES (1023,17719351,5520);	-- Living Key
 
 -- Otete
 INSERT INTO vendor_items VALUES (623,17752106,119);	-- Bay Leaves
@@ -1566,6 +1617,7 @@ INSERT INTO vendor_items VALUES (4491,17727529,184);	-- Watermelon
 
 -- Paunelie
 INSERT INTO vendor_items VALUES (512,17719488,8000);	-- Linkshell
+INSERT INTO vendor_items VALUES (16285,17719488,375);	-- Pendant Compass
 
 -- Pawkrix
 INSERT INTO vendor_items VALUES (631,17780760,36);	-- Horo Flour
@@ -1577,16 +1629,18 @@ INSERT INTO vendor_items VALUES (952,17780760,515);	-- Poison Flour
 INSERT INTO vendor_items VALUES (1239,17780760,490);	-- Goblin Doll
 
 -- Pelftrix
+INSERT INTO vendor_items VALUES (4116,17162831,4500);	-- Hi-Potion
+INSERT INTO vendor_items VALUES (4132,17162831,28000);	-- Hi-Ether
 INSERT INTO vendor_items VALUES (1020,17162831,300);	-- Sickle
-INSERT INTO vendor_items VALUES (1021,17162831,300);	-- Hatchet
+INSERT INTO vendor_items VALUES (1021,17162831,500);	-- Hatchet
 
 -- Peritrage
-INSERT INTO vendor_items VALUES (17218,17739800,14158);	-- zamburak
-INSERT INTO vendor_items VALUES (17298,17739800,294);	-- tathlum
-INSERT INTO vendor_items VALUES (17217,17739800,2166);	-- crossbow
-INSERT INTO vendor_items VALUES (17337,17739800,22);	-- mythril bolt
-INSERT INTO vendor_items VALUES (17216,17739800,165);	-- light crossbow
-INSERT INTO vendor_items VALUES (17336,17739800,5);	-- crossbow bolt
+INSERT INTO vendor_items VALUES (17218,17739800,14158);	-- Zamburak
+INSERT INTO vendor_items VALUES (17298,17739800,294);	-- Tathlum
+INSERT INTO vendor_items VALUES (17217,17739800,2166);	-- Crossbow
+INSERT INTO vendor_items VALUES (17337,17739800,22);	-- Mythril Bolt
+INSERT INTO vendor_items VALUES (17216,17739800,165);	-- Light Crossbow
+INSERT INTO vendor_items VALUES (17336,17739800,5);	-- Crossbow Bolt
 
 -- Phamelise
 INSERT INTO vendor_items VALUES (4372,17719305,44);	-- Giant Sheep Meat
@@ -1603,18 +1657,17 @@ INSERT INTO vendor_items VALUES (4148,17797138,284);	-- Antidote
 INSERT INTO vendor_items VALUES (4151,17797138,720);	-- Echo Drops
 INSERT INTO vendor_items VALUES (4112,17797138,819);	-- Potion
 INSERT INTO vendor_items VALUES (4509,17797138,10);	-- Distilled Water
+INSERT INTO vendor_items VALUES (917,17797138,1821);	-- Parchment
 INSERT INTO vendor_items VALUES (17395,17797138,9);	-- Lugworm
 INSERT INTO vendor_items VALUES (1021,17797138,450);	-- Hatchet
 INSERT INTO vendor_items VALUES (4376,17797138,108);	-- Meat Jerky
 INSERT INTO vendor_items VALUES (5299,17797138,133);	-- Salsa
-INSERT INTO vendor_items VALUES (4716,17797138,3888);	-- scroll of regen
-INSERT INTO vendor_items VALUES (4718,17797138,7047);	-- scroll of regen ii
-INSERT INTO vendor_items VALUES (4881,17797138,10080);	-- scroll of sleepga
 
 -- Pipiroon
 INSERT INTO vendor_items VALUES (17313,16994348,1204);	-- Grenade
 INSERT INTO vendor_items VALUES (17315,16994348,6000);	-- Riot Grenade
 INSERT INTO vendor_items VALUES (928,16994348,515);	-- Bomb Ash
+INSERT INTO vendor_items VALUES (2873,16994348,10000);	-- Nashmau Waystone
 
 -- Pirvidiauce
 INSERT INTO vendor_items VALUES (12986,17723486,9180);	-- Chestnut Sabbots
@@ -1631,9 +1684,9 @@ INSERT INTO vendor_items VALUES (1774,17723486,1984);	-- Red Gravel
 INSERT INTO vendor_items VALUES (17318,17723486,3);	-- Wooden Arrow
 
 -- Pohka Chichiyowahl
-INSERT INTO vendor_items VALUES (17388,16793916,1238);	-- Fastwater F. Rod
-INSERT INTO vendor_items VALUES (17382,16793916,11845);	-- S.H. Fishing Rod
-INSERT INTO vendor_items VALUES (4148,16793916,290);	-- Antidote
+INSERT INTO vendor_items VALUES (17388,16793986,1238);	-- Fastwater F. Rod
+INSERT INTO vendor_items VALUES (17382,16793986,11845);	-- S.H. Fishing Rod
+INSERT INTO vendor_items VALUES (4148,16793986,290);	-- Antidote
 
 -- Poporoon
 INSERT INTO vendor_items VALUES (12952,16994349,336);	-- Leather Highboots
@@ -1643,7 +1696,7 @@ INSERT INTO vendor_items VALUES (12955,16994349,20532);	-- Cuir Highboots
 
 -- Posso Ruhbini
 INSERT INTO vendor_items VALUES (688,17760317,18);	-- Arrowwood Log
-INSERT INTO vendor_items VALUES (698,17760317,88);	-- Ash Log
+INSERT INTO vendor_items VALUES (698,17760317,87);	-- Ash Log
 INSERT INTO vendor_items VALUES (618,17760317,25);	-- Blue Peas
 INSERT INTO vendor_items VALUES (621,17760317,25);	-- Crying Mustard
 
@@ -1658,7 +1711,7 @@ INSERT INTO vendor_items VALUES (951,17719493,110);	-- Wijnruit
 -- Prestapiq
 INSERT INTO vendor_items VALUES (640,17752108,11);	-- Copper Ore
 INSERT INTO vendor_items VALUES (4450,17752108,694);	-- Coral Fungus
-INSERT INTO vendor_items VALUES (4375,17752108,4121);	-- Danceshroom
+INSERT INTO vendor_items VALUES (4375,17752108,4032);	-- Danceshroom
 INSERT INTO vendor_items VALUES (1650,17752108,6500);	-- Kopparnickel Ore
 INSERT INTO vendor_items VALUES (5165,17752108,736);	-- Movalpolos Water
 
@@ -1724,9 +1777,9 @@ INSERT INTO vendor_items VALUES (17866,17764454,695);	-- Carrion Broth
 INSERT INTO vendor_items VALUES (5073,17764454,50784);	-- Scroll of Chocobo Mazurka
 
 -- Raghd
-INSERT INTO vendor_items VALUES (13456,17739811,1125);	-- Silver Ring
-INSERT INTO vendor_items VALUES (13327,17739811,1125);	-- Silver Earring
-INSERT INTO vendor_items VALUES (13465,17739811,180);	-- Brass Ring
+INSERT INTO vendor_items VALUES (13456,17739811,1150);	-- Silver Ring
+INSERT INTO vendor_items VALUES (13327,17739811,1150);	-- Silver Earring
+INSERT INTO vendor_items VALUES (13465,17739811,184);	-- Brass Ring
 INSERT INTO vendor_items VALUES (13454,17739811,69);	-- Copper Ring
 
 -- Regine
@@ -1765,13 +1818,13 @@ INSERT INTO vendor_items VALUES (4777,17318611,140);	-- Scroll of Water
 
 -- Rhimonne
 INSERT INTO vendor_items VALUES (4545,17780869,62);	-- Gysahl Greens
-INSERT INTO vendor_items VALUES (840,17780869,7);	-- Chocobo Feather
+INSERT INTO vendor_items VALUES (840,17780869,4);	-- Chocobo Feather
 INSERT INTO vendor_items VALUES (17307,17780869,9);	-- Dart
 
 -- Rodellieux
 INSERT INTO vendor_items VALUES (4571,17735743,90);	-- Beaugreens
 INSERT INTO vendor_items VALUES (4363,17735743,39);	-- Faerie Apple
-INSERT INTO vendor_items VALUES (691,17735743,55);	-- Maple Log
+INSERT INTO vendor_items VALUES (691,17735743,54);	-- Maple Log
 
 -- Rosswald
 INSERT INTO vendor_items VALUES (4372,17743933,44);	-- Giant Sheep Meat
@@ -1858,11 +1911,12 @@ INSERT INTO vendor_items VALUES (4148,17788946,284);	-- Antidote
 INSERT INTO vendor_items VALUES (4163,17788946,1080);	-- Blinding Potion
 INSERT INTO vendor_items VALUES (13328,17788946,4050);	-- Mythril Earring
 INSERT INTO vendor_items VALUES (107,17788946,180);	-- Water Jug
+INSERT INTO vendor_items VALUES (2868,17788946,9000);	-- Rabao Waystone
 
 -- Sheia Pohrichamaha
 INSERT INTO vendor_items VALUES (4571,17760318,90);	-- Beaugreens
 INSERT INTO vendor_items VALUES (4363,17760318,39);	-- Faerie Apple
-INSERT INTO vendor_items VALUES (691,17760318,55);	-- Maple Log
+INSERT INTO vendor_items VALUES (691,17760318,54);	-- Maple Log
 
 -- Shilah
 INSERT INTO vendor_items VALUES (4434,17719321,4500);	-- Mushroom Risotto
@@ -1945,9 +1999,12 @@ INSERT INTO vendor_items VALUES (4624,17739807,990);	-- Blindna
 INSERT INTO vendor_items VALUES (4606,17739807,82);	-- Dia
 INSERT INTO vendor_items VALUES (4651,17739807,219);	-- Protect
 INSERT INTO vendor_items VALUES (4656,17739807,1584);	-- Shell
-INSERT INTO vendor_items VALUES (4721,17739807,29700);	-- Repose
+INSERT INTO vendor_items VALUES (4721,17739807,29700);	-- 4721, 29700, 3, -- Repose (WoTG)
+INSERT INTO vendor_items VALUES (4663,17739807,368);	-- Aquaveil
 
 -- Spondulix
+INSERT INTO vendor_items VALUES (4116,17171113,4500);	-- Hi-Potion
+INSERT INTO vendor_items VALUES (4132,17171113,28000);	-- Hi-Ether
 INSERT INTO vendor_items VALUES (2563,17171113,3035);	-- Karugo Clay
 
 -- Stinknix
@@ -1974,22 +2031,22 @@ INSERT INTO vendor_items VALUES (16517,16839271,9201);	-- Degen
 INSERT INTO vendor_items VALUES (16551,16839271,698);	-- Sapara
 
 -- Susu
-INSERT INTO vendor_items VALUES (4647,17780867,20000);	-- banishga ii
-INSERT INTO vendor_items VALUES (4683,17780867,2030);	-- barblind
-INSERT INTO vendor_items VALUES (4697,17780867,2030);	-- barblindra
-INSERT INTO vendor_items VALUES (4682,17780867,780);	-- barparalyze
-INSERT INTO vendor_items VALUES (4696,17780867,780);	-- barparalyzra
-INSERT INTO vendor_items VALUES (4681,17780867,400);	-- barpoison
-INSERT INTO vendor_items VALUES (4695,17780867,400);	-- barpoisonra
-INSERT INTO vendor_items VALUES (4684,17780867,4608);	-- barsilence
-INSERT INTO vendor_items VALUES (4698,17780867,4608);	-- barsilencera
-INSERT INTO vendor_items VALUES (4680,17780867,244);	-- barsleep
-INSERT INTO vendor_items VALUES (4694,17780867,244);	-- barsleepra
-INSERT INTO vendor_items VALUES (4628,17780867,8586);	-- cursna
-INSERT INTO vendor_items VALUES (4629,17780867,35000);	-- holy
-INSERT INTO vendor_items VALUES (4625,17780867,2330);	-- silena
-INSERT INTO vendor_items VALUES (4626,17780867,19200);	-- stona
-INSERT INTO vendor_items VALUES (4627,17780867,13300);	-- viruna
+INSERT INTO vendor_items VALUES (4647,17780867,20000);	-- Scroll of Banishga II
+INSERT INTO vendor_items VALUES (4683,17780867,2030);	-- Scroll of Barblind
+INSERT INTO vendor_items VALUES (4697,17780867,2030);	-- Scroll of Barblindra
+INSERT INTO vendor_items VALUES (4682,17780867,780);	-- Scroll of Barparalyze
+INSERT INTO vendor_items VALUES (4696,17780867,780);	-- Scroll of Barparalyzra
+INSERT INTO vendor_items VALUES (4681,17780867,400);	-- Scroll of Barpoison
+INSERT INTO vendor_items VALUES (4695,17780867,400);	-- Scroll of Barpoisonra
+INSERT INTO vendor_items VALUES (4684,17780867,4608);	-- Scroll of Barsilence
+INSERT INTO vendor_items VALUES (4698,17780867,4608);	-- Scroll of Barsilencera
+INSERT INTO vendor_items VALUES (4680,17780867,244);	-- Scroll of Barsleep
+INSERT INTO vendor_items VALUES (4694,17780867,244);	-- Scroll of Barsleepra
+INSERT INTO vendor_items VALUES (4628,17780867,8586);	-- Scroll of Cursna
+INSERT INTO vendor_items VALUES (4629,17780867,35000);	-- Scroll of Holy
+INSERT INTO vendor_items VALUES (4625,17780867,2330);	-- Scroll of Silena
+INSERT INTO vendor_items VALUES (4626,17780867,19200);	-- Scroll of Stona
+INSERT INTO vendor_items VALUES (4627,17780867,13300);	-- Scroll of Viruna
 
 -- Taajiji
 INSERT INTO vendor_items VALUES (4411,17752100,756);	-- Dhalmel Pie
@@ -2016,7 +2073,7 @@ INSERT INTO vendor_items VALUES (12455,17801254,7026);	-- Beetle Mask
 INSERT INTO vendor_items VALUES (12583,17801254,10833);	-- Beetle Harness
 INSERT INTO vendor_items VALUES (12711,17801254,5707);	-- Beetle Mittens
 INSERT INTO vendor_items VALUES (12835,17801254,8666);	-- Beetle Subligar
-INSERT INTO vendor_items VALUES (12967,17801254,5332);	-- Beetre Leggings
+INSERT INTO vendor_items VALUES (12967,17801254,5332);	-- Beetre Leggins
 INSERT INTO vendor_items VALUES (12440,17801254,404);	-- Leather Bandana
 INSERT INTO vendor_items VALUES (12568,17801254,618);	-- Leather Vest
 INSERT INTO vendor_items VALUES (12696,17801254,331);	-- Leather Gloves
@@ -2024,23 +2081,25 @@ INSERT INTO vendor_items VALUES (12952,17801254,309);	-- Leather Highboots
 INSERT INTO vendor_items VALUES (13092,17801254,28777);	-- Coeurl Gorget
 
 -- Takiyah
-INSERT INTO vendor_items VALUES (954,17748138,4121);	-- Magic Pot Shard
+INSERT INTO vendor_items VALUES (954,17748139,4121);	-- Magic Pot Shard
 
 -- Taniko-Maniko
-INSERT INTO vendor_items VALUES (17154,17760314,7128);	-- wrapped bow
-INSERT INTO vendor_items VALUES (17323,17760314,126);	-- ice arrow
-INSERT INTO vendor_items VALUES (17324,17760314,126);	-- lightning arrow
-INSERT INTO vendor_items VALUES (16649,17760314,5864);	-- Bone Pick
-INSERT INTO vendor_items VALUES (17153,17760314,482);	-- self bow
-INSERT INTO vendor_items VALUES (17308,17760314,54);	-- hawkeye
-INSERT INTO vendor_items VALUES (17280,17760314,1576);	-- boomerang
-INSERT INTO vendor_items VALUES (17318,17760314,3);	-- wooden arrow
+INSERT INTO vendor_items VALUES (16769,17760314,2542);	-- Brass Zaghnal
+INSERT INTO vendor_items VALUES (17154,17760314,7999);	-- Wrapped Bow
+INSERT INTO vendor_items VALUES (17323,17760314,141);	-- Ice Arrow
+INSERT INTO vendor_items VALUES (17324,17760314,141);	-- Lighning Arrow
 INSERT INTO vendor_items VALUES (16405,17760314,104);	-- Cat Baghnakhs
 INSERT INTO vendor_items VALUES (16385,17760314,129);	-- Cesti
+INSERT INTO vendor_items VALUES (16649,17760314,5864);	-- Bone Pick
+INSERT INTO vendor_items VALUES (17153,17760314,493);	-- Self Bow
+INSERT INTO vendor_items VALUES (17318,17760314,3);	-- Wooden Arrow
+INSERT INTO vendor_items VALUES (17308,17760314,55);	-- Hawkeye
+INSERT INTO vendor_items VALUES (17280,17760314,1610);	-- Boomerang
 INSERT INTO vendor_items VALUES (16642,17760314,4198);	-- Bone Axe
 INSERT INTO vendor_items VALUES (16768,17760314,309);	-- Bronze Zaghnal
-INSERT INTO vendor_items VALUES (16769,17760314,2542);	-- Brass Zaghnal
 INSERT INTO vendor_items VALUES (16832,17760314,97);	-- Harpoon
+INSERT INTO vendor_items VALUES (17152,17760314,40);	-- Bone Axe
+INSERT INTO vendor_items VALUES (17319,17760314,1610);	-- Bone Arrow
 
 -- Taraihi-Perunhi
 INSERT INTO vendor_items VALUES (4352,17670767,128);	-- Derfland Pear
@@ -2059,7 +2118,6 @@ INSERT INTO vendor_items VALUES (16465,17723447,147);	-- Bronze Knife
 INSERT INTO vendor_items VALUES (17081,17723447,621);	-- Brass Rod
 INSERT INTO vendor_items VALUES (16583,17723447,2448);	-- Claymore
 INSERT INTO vendor_items VALUES (17035,17723447,4363);	-- Mace
-INSERT INTO vendor_items VALUES (17059,17723447,90);	-- Bronze Rod
 INSERT INTO vendor_items VALUES (17034,17723447,169);	-- Bronze Mace
 
 -- Taza
@@ -2135,10 +2193,10 @@ INSERT INTO vendor_items VALUES (17880,17801278,695);	-- Seedbed Soil
 INSERT INTO vendor_items VALUES (1021,17801278,450);	-- Hatchet
 INSERT INTO vendor_items VALUES (4987,17801278,328);	-- Scroll of Army's Paeon II
 INSERT INTO vendor_items VALUES (4988,17801278,3312);	-- Scroll of Army's Paeon III
-INSERT INTO vendor_items VALUES (4964,17801278,8726);	-- Scroll of Monomi: Ichi
 
 -- Tomasa
 INSERT INTO vendor_items VALUES (4396,17748005,257);	-- Sausage Roll
+INSERT INTO vendor_items VALUES (4409,17748005,73);	-- Hard-Boiled Egg
 INSERT INTO vendor_items VALUES (4417,17748005,3036);	-- Egg Soup
 INSERT INTO vendor_items VALUES (4442,17748005,368);	-- Pineapple Juice
 INSERT INTO vendor_items VALUES (4391,17748005,22);	-- Bretzel
@@ -2203,8 +2261,6 @@ INSERT INTO vendor_items VALUES (605,17752098,180);	-- Pickaxe
 INSERT INTO vendor_items VALUES (1893,17752098,3960);	-- Salinator
 INSERT INTO vendor_items VALUES (1020,17752098,276);	-- Sickle
 INSERT INTO vendor_items VALUES (1241,17752098,354);	-- Twinkle Powder
-INSERT INTO vendor_items VALUES (1022,17752098,3643);	-- Thief's Tools
-INSERT INTO vendor_items VALUES (1023,17752098,5520);	-- Living Key
 
 -- Valeriano
 INSERT INTO vendor_items VALUES (4394,17719424,10);	-- Ginger Cookie
@@ -2224,14 +2280,14 @@ INSERT INTO vendor_items VALUES (4491,17743923,184);	-- Watermelon
 -- Vendavoq
 INSERT INTO vendor_items VALUES (640,17727526,11);	-- Copper Ore
 INSERT INTO vendor_items VALUES (4450,17727526,694);	-- Coral Fungus
-INSERT INTO vendor_items VALUES (4375,17727526,4121);	-- Danceshroom
+INSERT INTO vendor_items VALUES (4375,17727526,4032);	-- Danceshroom
 INSERT INTO vendor_items VALUES (1650,17727526,6500);	-- Kopparnickel Ore
 INSERT INTO vendor_items VALUES (5165,17727526,736);	-- Movalpolos Water
 
 -- Vichuel
 INSERT INTO vendor_items VALUES (4571,17723487,90);	-- Beaugreens
 INSERT INTO vendor_items VALUES (4363,17723487,39);	-- Faerie Apple
-INSERT INTO vendor_items VALUES (691,17723487,55);	-- Maple Log
+INSERT INTO vendor_items VALUES (691,17723487,54);	-- Maple Log
 
 -- Victoire
 INSERT INTO vendor_items VALUES (12432,17719389,1450);	-- Faceguard
@@ -2294,6 +2350,7 @@ INSERT INTO vendor_items VALUES (5050,17780842,7920);	-- Scroll of Lightning Car
 INSERT INTO vendor_items VALUES (5051,17780842,5000);	-- Scroll of Water Carol
 INSERT INTO vendor_items VALUES (5052,17780842,4200);	-- Scroll of Light Carol
 INSERT INTO vendor_items VALUES (5053,17780842,8400);	-- Scroll of Dark Carol
+INSERT INTO vendor_items VALUES (5078,17780842,60000);	-- Scroll of Sentinel's Scherzo
 
 -- Yoyoroon
 INSERT INTO vendor_items VALUES (2239,16994344,4940);	-- Tension Spring
@@ -2302,6 +2359,7 @@ INSERT INTO vendor_items VALUES (2246,16994344,4940);	-- Accelerator
 INSERT INTO vendor_items VALUES (2251,16994344,4940);	-- Armor Plate
 INSERT INTO vendor_items VALUES (2254,16994344,4940);	-- Stabilizer
 INSERT INTO vendor_items VALUES (2258,16994344,4940);	-- Mana Jammer
+INSERT INTO vendor_items VALUES (2262,16994344,4940);	-- Auto-Repair Kit
 INSERT INTO vendor_items VALUES (2266,16994344,4940);	-- Mana Tank
 INSERT INTO vendor_items VALUES (2240,16994344,9925);	-- Inhibitor
 INSERT INTO vendor_items VALUES (2242,16994344,9925);	-- Mana Booster
@@ -2325,7 +2383,7 @@ INSERT INTO vendor_items VALUES (4625,16974280,2330);	-- Scroll of Silena
 INSERT INTO vendor_items VALUES (4626,16974280,19200);	-- Scroll of Stona
 INSERT INTO vendor_items VALUES (4627,16974280,13300);	-- Scroll of Viruna
 INSERT INTO vendor_items VALUES (4628,16974280,8586);	-- Scroll of Cursna
-INSERT INTO vendor_items VALUES (4868,16974280,77600);	-- Scroll of Dispel
+INSERT INTO vendor_items VALUES (4868,16974280,77600);	-- Scroll of Dispell
 INSERT INTO vendor_items VALUES (4720,16974280,27000);	-- Scroll of Flash
 INSERT INTO vendor_items VALUES (4750,16974280,99375);	-- Scroll of Reraise III
 INSERT INTO vendor_items VALUES (4715,16974280,28500);	-- Scroll of Reprisal
@@ -2351,35 +2409,35 @@ INSERT INTO vendor_items VALUES (4848,17739806,6366);	-- Scroll of Drown
 -- Zemedars
 INSERT INTO vendor_items VALUES (12836,17735723,23316);	-- Iron Subligar
 INSERT INTO vendor_items VALUES (12825,17735723,5003);	-- Lizard Trousers
-INSERT INTO vendor_items VALUES (12962,17735723,14484);	-- Leggings
+INSERT INTO vendor_items VALUES (12962,17735723,14484);	-- Leggins
 INSERT INTO vendor_items VALUES (12953,17735723,3162);	-- Lizard Ledelsens
 INSERT INTO vendor_items VALUES (12301,17735723,31544);	-- Buckler
 INSERT INTO vendor_items VALUES (12833,17735723,1840);	-- Brass Subligar
 INSERT INTO vendor_items VALUES (12824,17735723,493);	-- Leather Trousers
-INSERT INTO vendor_items VALUES (12961,17735723,1140);	-- Brass Leggings
+INSERT INTO vendor_items VALUES (12961,17735723,1140);	-- Brass Leggins
 INSERT INTO vendor_items VALUES (12952,17735723,309);	-- Leather Highboots
 INSERT INTO vendor_items VALUES (12300,17735723,11076);	-- Targe
 INSERT INTO vendor_items VALUES (12832,17735723,191);	-- Bronze Subligar
 INSERT INTO vendor_items VALUES (12808,17735723,11592);	-- Chain Gose
 INSERT INTO vendor_items VALUES (12960,17735723,117);	-- Bronze Leggins
 INSERT INTO vendor_items VALUES (12936,17735723,7120);	-- Greaves
+INSERT INTO vendor_items VALUES (12290,17735723,556);	-- Maple Shield
 INSERT INTO vendor_items VALUES (12289,17735723,110);	-- Lauan Shield
 
 -- Zhikkom
-INSERT INTO vendor_items VALUES (16473,17739798,5589);	-- kukri
-INSERT INTO vendor_items VALUES (16537,17739798,30960);	-- Mythril Sword
-INSERT INTO vendor_items VALUES (16545,17739798,21067);	-- Broadsword
-INSERT INTO vendor_items VALUES (16513,17739798,11588);	-- Tuck
-INSERT INTO vendor_items VALUES (16558,17739798,61200);	-- Falchion
-INSERT INTO vendor_items VALUES (16466,17739798,2182);	-- knife
+INSERT INTO vendor_items VALUES (16473,17739798,5713);	-- Kukri
+INSERT INTO vendor_items VALUES (16537,17739798,31648);	-- Mythril Sword
+INSERT INTO vendor_items VALUES (16545,17739798,21535);	-- Broadsword
+INSERT INTO vendor_items VALUES (16513,17739798,11845);	-- Tuck
+INSERT INTO vendor_items VALUES (16558,17739798,62560);	-- Falchion
 INSERT INTO vendor_items VALUES (16536,17739798,7286);	-- Iron Sword
 INSERT INTO vendor_items VALUES (16552,17739798,4163);	-- Scimitar
+INSERT INTO vendor_items VALUES (16466,17739798,2231);	-- Knife
+INSERT INTO vendor_items VALUES (16465,17739798,150);	-- Bronze Knife
+INSERT INTO vendor_items VALUES (16405,17739798,106);	-- Cat Baghnakhs
 INSERT INTO vendor_items VALUES (16535,17739798,246);	-- Bronze Sword
-INSERT INTO vendor_items VALUES (16517,17739798,9201);	-- Degen
-INSERT INTO vendor_items VALUES (16551,17739798,689);	-- Sapara
-INSERT INTO vendor_items VALUES (16512,17739798,3215);	-- Bilbo
-INSERT INTO vendor_items VALUES (16465,17739798,147);	-- bronze knife
-INSERT INTO vendor_items VALUES (16405,17739798,104);	-- cat baghnakhs
+INSERT INTO vendor_items VALUES (16517,17739798,9406);	-- Degen
+INSERT INTO vendor_items VALUES (16551,17739798,713);	-- Sapara
 
 -- Zoby Quhyo
 INSERT INTO vendor_items VALUES (626,17744005,234);	-- Black Pepper

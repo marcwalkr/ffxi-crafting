@@ -15,6 +15,10 @@ def get_utc_timestamp():
     return utc_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
+
+
 def generate_vendor_inserts():
     file_lines = []
 
@@ -31,40 +35,21 @@ def generate_vendor_inserts():
             file_lines.append(npc_name_comment)
 
             lines = f.readlines()
-            stripped = [s.strip() for s in lines]
+            stripped_lines = [s.strip() for s in lines]
 
-            # Get the start index of the stock list by searching for one of
-            # these lines
-            if "local stock =" in stripped:
-                items_start = stripped.index("local stock =") + 1
-            elif "stock = {" in stripped:
-                items_start = stripped.index("stock = {")
-            else:
-                items_start = stripped.index("local stock = {")
-
-            # Get the end index of the stock list by searching for the next "}"
-            before_stock_length = len(stripped[:items_start])
-            items_end = stripped[items_start:].index(
-                "}") + before_stock_length
-            item_lines = stripped[items_start+1:items_end]
-
-            for line in item_lines:
-                # If the line has too many dashes, the item was commented out,
-                # skip those lines and any empty lines
-                dash_count = len(re.findall("-", line))
-                if dash_count > 2 or len(line) < 1:
+            for line in stripped_lines:
+                # The line has 2 numbers separated by a comma and a comment
+                # e.g. 13327, 1250, -- Silver Earring
+                if not re.search("\d+,\s*\d+.*--.+", line):
                     continue
 
                 # The item_id and price are the first 2 numbers on the line
                 numbers = re.findall('[0-9]+', line)
-
-                try:
-                    item_id, price = numbers[0:2]
-                except ValueError:
-                    continue
+                item_id, price = numbers[0:2]
 
                 comment_start = line.index("--")
                 item_comment = line[comment_start:]
+                # Add a space after the -- if there isn't already
                 if item_comment[2] != " ":
                     item_comment = "-- " + item_comment[2:]
 
@@ -73,7 +58,9 @@ def generate_vendor_inserts():
                                                              npc_id,
                                                              price,
                                                              item_comment))
-                file_lines.append(insert_statement)
+
+                if insert_statement not in file_lines:
+                    file_lines.append(insert_statement)
 
             file_lines.append("")
 

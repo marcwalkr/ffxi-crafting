@@ -5,11 +5,13 @@
 -----------------------------------
 local ID = require("scripts/zones/Rabao/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4509,    10,    -- Distilled Waterr
@@ -24,15 +26,17 @@ function onTrigger(player, npc)
         4163,  1080,    -- Blinding Potion
         13328, 4050,    -- Mythril Earring
         107,    180,    -- Water Jug
-        --2868,  9000,    -- Rabao Waystone
+        2868,  9000,    -- Rabao Waystone
     }
 
     player:showText(npc, ID.text.SCAMPLIX_SHOP_DIALOG)
-    tpz.shop.general(player, stock, SELBINA)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

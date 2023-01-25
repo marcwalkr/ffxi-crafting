@@ -5,29 +5,46 @@
 -----------------------------------
 local ID = require("scripts/zones/Tavnazian_Safehold/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         17005,   108,    -- Lufaise Fly
         17383,  2640,    -- Clothespole
-        688,     200,    -- Arrowwood Log
+        688,      20,    -- Arrowwood Log
         690,    7800,    -- Elm Log
-        --2871,  10000,    -- Safehold Waystone
-        --4913, 175827,    -- Scroll of Distract II
-        --4915, 217000,    -- Scroll of Frazzle II
-        4638,  66000,    -- scroll of banish iii
+        2871,  10000,    -- Safehold Waystone
+        4913, 175827,    -- Scroll of Distract II
+        4915, 217000,    -- Scroll of Frazzle II
     }
 
+    if player:getCurrentMission(xi.mission.log_id.COP) >= xi.mission.id.cop.SHELTERING_DOUBT then
+        stock =
+        {
+            17005,   108,    -- Lufaise Fly
+            17383,  2640,    -- Clothespole
+            688,      20,    -- Arrowwood Log
+            690,    7800,    -- Elm Log
+            4638,  66000,    -- Banish III
+            2871,  10000,    -- Safehold Waystone
+            4913, 175827,    -- Scroll of Distract II
+            4915, 217000,    -- Scroll of Frazzle II
+        }
+    end
+
     player:showText(npc, ID.text.NILEROUCHE_SHOP_DIALOG)
-    tpz.shop.general(player, stock, JEUNO)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

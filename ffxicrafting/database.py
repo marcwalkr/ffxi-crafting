@@ -14,46 +14,15 @@ class Database:
     def __del__(self):
         self.connection.close()
 
-    def get_auction_pages(self, item_id):
-        self.cursor.execute("SELECT * FROM auction_pages WHERE itemid=%s",
-                            (item_id,))
-        return self.cursor.fetchall()
-
-    def get_all_auction_pages(self):
-        self.cursor.execute("SELECT * FROM auction_pages")
-        return self.cursor.fetchall()
-
-    def add_auction_page(self, item_id, single_sales, single_price_sum,
-                         stack_sales, stack_price_sum, num_days, accessed):
-        self.cursor.execute("""INSERT INTO auction_pages (itemid, single_sales,
-                            single_price_sum, stack_sales, stack_price_sum,
-                            num_days, accessed)
-                            VALUES (%s,%s,%s,%s,%s,%s,%s)""",
-                            (item_id, single_sales, single_price_sum,
-                             stack_sales, stack_price_sum, num_days,
-                             accessed,))
-        self.commit()
-
     def get_bundle(self, unbundled_id):
         self.cursor.execute("SELECT * FROM bundles WHERE unbundled_id=%s",
                             (unbundled_id,))
         return self.cursor.fetchone()
 
-    def delete_auction_pages_older_than(self, days):
-        self.cursor.execute("""DELETE FROM auction_pages WHERE
-                            DATEDIFF(UTC_TIMESTAMP(), accessed) > %s""",
-                            (days,))
-        self.commit()
-
     def get_guild_shops(self, item_id):
         self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s",
                             (item_id,))
         return self.cursor.fetchall()
-
-    def get_guild(self, guild_id):
-        self.cursor.execute("SELECT * FROM guilds WHERE guildid=%s",
-                            (guild_id,))
-        return self.cursor.fetchone()
 
     def get_item(self, item_id):
         self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s",

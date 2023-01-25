@@ -5,24 +5,28 @@
 -----------------------------------
 local ID = require("scripts/zones/Port_Jeuno/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         4545, 62,    -- Gysahl Greens
-        840,   7,    -- Chocobo Feather
+        840,   4,    -- Chocobo Feather
         17307, 9,    -- Dart
     }
 
     player:showText(npc, ID.text.CHALLOUX_SHOP_DIALOG)
-    tpz.shop.general(player, stock, JEUNO)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

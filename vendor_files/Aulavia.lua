@@ -3,34 +3,38 @@
 --  NPC: Aulavia
 -- Vollbow Regional Merchant
 -----------------------------------
-require("scripts/globals/events/harvest_festivals")
 local ID = require("scripts/zones/Bastok_Mines/IDs")
+require("scripts/globals/events/harvest_festivals")
 require("scripts/globals/conquest")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
     onHalloweenTrade(player, trade, npc)
 end
 
-function onTrigger(player, npc)
-    if GetRegionOwner(tpz.region.VOLLBOW) ~= tpz.nation.BASTOK then
+entity.onTrigger = function(player, npc)
+    if GetRegionOwner(xi.region.VOLLBOW) ~= xi.nation.BASTOK then
         player:showText(npc, ID.text.AULAVIA_CLOSED_DIALOG)
     else
         local stock =
         {
-            636,   117,    -- Chamomile
-            864,    86,    -- Fish Scales
+            636,   119,    -- Chamomile
+            864,    88,    -- Fish Scales
             936,    14,    -- Rock Salt
-            1410, 1620,     -- Sweet William
+            1410, 1656,     -- Sweet William
         }
 
         player:showText(npc, ID.text.AULAVIA_OPEN_DIALOG)
-        tpz.shop.general(player, stock, BASTOK)
+        xi.shop.general(player, stock, xi.quest.fame_area.BASTOK)
     end
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

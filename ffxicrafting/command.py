@@ -1,12 +1,11 @@
 from table import Table
 from config import Config
 from crafter import Crafter
+from synth import Synth
 from synth_table import SynthTable
 from product_table import ProductTable
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
-from controllers.auction_controller import AuctionController
-from auction_monitor import AuctionMonitor
 
 
 class Command:
@@ -16,65 +15,62 @@ class Command:
     @staticmethod
     def prompt_command():
         command = input("1. Print synth table\n" +
-                        "2. Print product table\n"
-                        "3. Print recipe\n" +
-                        "4. Monitor auctions\n" +
-                        "5. Update auction data\n" +
+                        "2. Print product table\n" +
+                        "3. Print recipe by ID\n" +
+                        "4. Simulate synth\n" +
                         "Q. Quit\n")
         return command
 
     @staticmethod
     def print_synth_table():
-        char1_skill_set = Config.get_skill_set("Character1")
-        char1_key_items = Config.get_key_items("Character1")
+        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
+        melonsoda_key_items = Config.get_key_items("Melonsoda")
 
-        char2_skill_set = Config.get_skill_set("Character2")
-        char2_key_items = Config.get_key_items("Character2")
+        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
+        rootbeer_key_items = Config.get_key_items("Rootbeer")
 
-        char3_skill_set = Config.get_skill_set("Character3")
-        char3_key_items = Config.get_key_items("Character3")
+        milktea_skill_set = Config.get_skill_set("Milktea")
+        milktea_key_items = Config.get_key_items("Milktea")
 
-        character1 = Crafter(char1_skill_set, char1_key_items)
-        character2 = Crafter(char2_skill_set, char2_key_items)
-        character3 = Crafter(char3_skill_set, char3_key_items)
+        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
+        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
+        milktea = Crafter(milktea_skill_set, milktea_key_items)
 
-        crafters = [character1, character2, character3]
+        crafters = [melonsoda, rootbeer, milktea]
 
         synth_profit_threshold = Config.get_profit_per_synth()
         inventory_profit_threshold = Config.get_profit_per_inventory()
-        frequency_threshold = Config.get_sell_frequency()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
         table = SynthTable(crafters, synth_profit_threshold,
-                           inventory_profit_threshold, frequency_threshold,
-                           sort_column, reverse_sort)
+                           inventory_profit_threshold, sort_column,
+                           reverse_sort)
         table.print()
 
     @staticmethod
     def print_product_table():
-        char1_skill_set = Config.get_skill_set("Character1")
-        char1_key_items = Config.get_key_items("Character1")
+        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
+        melonsoda_key_items = Config.get_key_items("Melonsoda")
 
-        char2_skill_set = Config.get_skill_set("Character2")
-        char2_key_items = Config.get_key_items("Character2")
+        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
+        rootbeer_key_items = Config.get_key_items("Rootbeer")
 
-        char3_skill_set = Config.get_skill_set("Character3")
-        char3_key_items = Config.get_key_items("Character3")
+        milktea_skill_set = Config.get_skill_set("Milktea")
+        milktea_key_items = Config.get_key_items("Milktea")
 
-        character1 = Crafter(char1_skill_set, char1_key_items)
-        character2 = Crafter(char2_skill_set, char2_key_items)
-        character3 = Crafter(char3_skill_set, char3_key_items)
+        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
+        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
+        milktea = Crafter(milktea_skill_set, milktea_key_items)
 
-        crafters = [character1, character2, character3]
+        crafters = [melonsoda, rootbeer, milktea]
 
         profit_threshold = Config.get_profit_per_product()
-        frequency_threshold = Config.get_sell_frequency()
         sort_column = Config.get_product_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = ProductTable(crafters, profit_threshold,
-                             frequency_threshold, sort_column, reverse_sort)
+        table = ProductTable(crafters, profit_threshold, sort_column,
+                             reverse_sort)
         table.print()
 
     @staticmethod
@@ -119,11 +115,27 @@ class Command:
         recipe_table.print()
 
     @staticmethod
-    def monitor_auctions():
-        monitored_ids = Config.get_monitored_item_ids()
-        auction_monitor = AuctionMonitor(monitored_ids)
-        auction_monitor.monitor_auctions()
+    def simulate_synth():
+        character = input("Enter character name: ")
+        recipe_id = input("Enter recipe ID: ")
+        num_times = input("Enter the number of synths: ")
 
-    @staticmethod
-    def update_auction_data():
-        AuctionController.update_auction_data()
+        character = character.capitalize()
+        recipe_id = int(recipe_id)
+        num_times = int(num_times)
+
+        skill_set = Config.get_skill_set(character)
+        key_items = Config.get_key_items(character)
+        crafter = Crafter(skill_set, key_items)
+        recipe = SynthController.get_recipe(recipe_id)
+        synth = Synth(recipe, crafter)
+
+        results, _ = synth.simulate(num_times)
+        for item_id, amount in results.items():
+            item = ItemController.get_item(item_id)
+            if item.stack_size > 1:
+                num_stacks = round(amount / item.stack_size, 2)
+                print("\n{}: {} ({} stacks)\n".format(item.sort_name, amount,
+                                                      num_stacks))
+            else:
+                print("\n{}: {}\n".format(item.sort_name, amount))

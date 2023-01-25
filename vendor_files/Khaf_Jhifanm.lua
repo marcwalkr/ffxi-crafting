@@ -5,27 +5,31 @@
 -----------------------------------
 local ID = require("scripts/zones/Aht_Urhgan_Whitegate/IDs")
 require("scripts/globals/shop")
+-----------------------------------
+local entity = {}
 
-function onTrade(player, npc, trade)
+entity.onTrade = function(player, npc, trade)
 end
 
-function onTrigger(player, npc)
+entity.onTrigger = function(player, npc)
     local stock =
     {
         5567,   200,    -- Dried Date
         5576,   800,    -- Ayran
         5590,  3750,    -- Balik Sandvici
         2235,   320,    -- Wildgrass Seeds
-        5075,  4400    -- Scroll of Raptor Mazurka
-        --2872, 10000     -- Empire Waystone
+        5075,  4400,    -- Scroll of Raptor Mazurka
+        2872, 10000     -- Empire Waystone
     }
 
     player:showText(npc, ID.text.KHAFJHIFANM_SHOP_DIALOG)
-    tpz.shop.general(player, stock, JEUNO)
+    xi.shop.general(player, stock)
 end
 
-function onEventUpdate(player, csid, option)
+entity.onEventUpdate = function(player, csid, option)
 end
 
-function onEventFinish(player, csid, option)
+entity.onEventFinish = function(player, csid, option)
 end
+
+return entity

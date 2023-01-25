@@ -25,11 +25,3 @@ class ItemController:
             return Item(*item_tuple)
         else:
             return None
-
-    @classmethod
-    def add_item_cost(cls, item_id, source_id, cost):
-        cls.db.add_item_cost(item_id, source_id, cost)
-
-    @classmethod
-    def update_item_cost(cls, item_id, source_id, cost):
-        cls.db.update_item_cost(item_id, source_id, cost)

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from configparser import ConfigParser
+from configparser import NoOptionError
 from skill_set import SkillSet
 
 
@@ -14,6 +15,51 @@ class Config:
 
     def __init__(self) -> None:
         pass
+
+    @classmethod
+    def get_profit_per_synth(cls):
+        profit = cls.config.get("thresholds", "profit_per_synth")
+        return int(profit)
+
+    @classmethod
+    def get_profit_per_inventory(cls):
+        profit = cls.config.get("thresholds", "profit_per_inventory")
+        return int(profit)
+
+    @classmethod
+    def get_profit_per_product(cls):
+        profit = cls.config.get("thresholds", "profit_per_product")
+        return int(profit)
+
+    @classmethod
+    def get_ignore_guilds(cls):
+        return cls.config.getboolean("settings", "ignore_guilds")
+
+    @classmethod
+    def get_skill_look_ahead(cls):
+        skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
+        return int(skill_look_ahead)
+
+    @classmethod
+    def get_simulation_trials(cls):
+        trials = cls.config.get("settings", "simulation_trials")
+        return int(trials)
+
+    @classmethod
+    def get_recipe_sort_column(cls):
+        return cls.config.get("settings", "recipe_sort_column")
+
+    @classmethod
+    def get_synth_sort_column(cls):
+        return cls.config.get("settings", "synth_sort_column")
+
+    @classmethod
+    def get_product_sort_column(cls):
+        return cls.config.get("settings", "product_sort_column")
+
+    @classmethod
+    def get_reverse_sort(cls):
+        return cls.config.getboolean("settings", "reverse_sort")
 
     @classmethod
     def get_skill_set(cls, character):
@@ -48,54 +94,10 @@ class Config:
             return []
 
     @classmethod
-    def get_profit_per_synth(cls):
-        profit = cls.config.get("thresholds", "profit_per_synth")
-        return int(profit)
-
-    @classmethod
-    def get_profit_per_inventory(cls):
-        profit = cls.config.get("thresholds", "profit_per_inventory")
-        return int(profit)
-
-    @classmethod
-    def get_profit_per_product(cls):
-        profit = cls.config.get("thresholds", "profit_per_product")
-        return int(profit)
-
-    @classmethod
-    def get_sell_frequency(cls):
-        frequency = cls.config.get("thresholds", "sell_frequency")
-        return float(frequency)
-
-    @classmethod
-    def get_ignore_guilds(cls):
-        return cls.config.getboolean("settings", "ignore_guilds")
-
-    @classmethod
-    def get_skill_look_ahead(cls):
-        skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
-        return int(skill_look_ahead)
-
-    @classmethod
-    def get_simulation_trials(cls):
-        trials = cls.config.get("settings", "simulation_trials")
-        return int(trials)
-
-    @classmethod
-    def get_synth_sort_column(cls):
-        return cls.config.get("settings", "synth_sort_column")
-
-    @classmethod
-    def get_product_sort_column(cls):
-        return cls.config.get("settings", "product_sort_column")
-
-    @classmethod
-    def get_reverse_sort(cls):
-        return cls.config.getboolean("settings", "reverse_sort")
-
-    @classmethod
-    def get_monitored_item_ids(cls):
-        item_ids = cls.config.get("auction_monitor", "item_ids")
-        item_ids = item_ids.split(",")
-
-        return [int(i) for i in item_ids]
+    def get_auction_prices(cls, item_name):
+        try:
+            prices = cls.config.get("auction_prices", item_name)
+            prices = prices.split(",")
+            return [int(i) for i in prices]
+        except NoOptionError:
+            return [0, 0]
