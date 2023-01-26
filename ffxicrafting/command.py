@@ -131,11 +131,15 @@ class Command:
         synth = Synth(recipe, crafter)
 
         results, _ = synth.simulate(num_times)
+
+        print()
         for item_id, amount in results.items():
             item = ItemController.get_item(item_id)
+
             if item.stack_size > 1:
                 num_stacks = round(amount / item.stack_size, 2)
-                print("\n{}: {} ({} stacks)\n".format(item.sort_name, amount,
-                                                      num_stacks))
+                print("{}: {} ({} stacks)".format(item.sort_name, amount,
+                                                  num_stacks))
             else:
-                print("\n{}: {}\n".format(item.sort_name, amount))
+                print("{}: {}".format(item.sort_name, amount))
+        print()
