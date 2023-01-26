@@ -130,9 +130,11 @@ class Command:
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)
 
+        cost = synth.calculate_cost() * num_times
         results, _ = synth.simulate(num_times)
 
         print()
+        print("Cost: {}".format(cost))
         for item_id, amount in results.items():
             item = ItemController.get_item(item_id)
 
