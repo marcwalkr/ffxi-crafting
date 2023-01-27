@@ -130,7 +130,7 @@ class Command:
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)
 
-        cost = synth.calculate_cost() * num_times
+        cost = round(synth.calculate_cost() * num_times, 2)
         results, _ = synth.simulate(num_times)
 
         print()
