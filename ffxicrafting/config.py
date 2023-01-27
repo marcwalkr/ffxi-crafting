@@ -36,6 +36,66 @@ class Config:
         return cls.config.getboolean("settings", "ignore_guilds")
 
     @classmethod
+    def get_ignored_regions(cls):
+        ignored_regions = []
+
+        if cls.config.getboolean("settings", "ignore_aragoneu"):
+            ignored_regions.append("Aragoneu")
+
+        if cls.config.getboolean("settings", "ignore_derfland"):
+            ignored_regions.append("Derfland")
+
+        if cls.config.getboolean("settings", "ignore_elshimo_lowlands"):
+            ignored_regions.append("Elshimo Lowlands")
+
+        if cls.config.getboolean("settings", "ignore_elshimo_uplands"):
+            ignored_regions.append("Elshimo Uplands")
+
+        if cls.config.getboolean("settings", "ignore_fauregandi"):
+            ignored_regions.append("Fauregandi")
+
+        if cls.config.getboolean("settings", "ignore_gustaberg"):
+            ignored_regions.append("Gustaberg")
+
+        if cls.config.getboolean("settings", "ignore_kolshushu"):
+            ignored_regions.append("Kolshushu")
+
+        if cls.config.getboolean("settings", "ignore_kuzotz"):
+            ignored_regions.append("Kuzotz")
+
+        if cls.config.getboolean("settings", "ignore_li_telor"):
+            ignored_regions.append("Li'Telor")
+
+        if cls.config.getboolean("settings", "ignore_movalpolos"):
+            ignored_regions.append("Movalpolos")
+
+        if cls.config.getboolean("settings", "ignore_norvallen"):
+            ignored_regions.append("Norvallen")
+
+        if cls.config.getboolean("settings", "ignore_qufim"):
+            ignored_regions.append("Qufim")
+
+        if cls.config.getboolean("settings", "ignore_ronfaure"):
+            ignored_regions.append("Ronfaure")
+
+        if cls.config.getboolean("settings", "ignore_sarutabaruta"):
+            ignored_regions.append("Sarutabaruta")
+
+        if cls.config.getboolean("settings", "ignore_tavnazian_archipelago"):
+            ignored_regions.append("Tavnazian Archipelago")
+
+        if cls.config.getboolean("settings", "ignore_valdeaunia"):
+            ignored_regions.append("Valeaunia")
+
+        if cls.config.getboolean("settings", "ignore_vollbow"):
+            ignored_regions.append("Vollbow")
+
+        if cls.config.getboolean("settings", "ignore_zulkheim"):
+            ignored_regions.append("Zulkheim")
+
+        return ignored_regions
+
+    @classmethod
     def get_skill_look_ahead(cls):
         skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
         return int(skill_look_ahead)
