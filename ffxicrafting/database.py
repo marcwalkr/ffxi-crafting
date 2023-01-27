@@ -57,14 +57,9 @@ class Database:
                             (item_id,))
         return self.cursor.fetchall()
 
-    def add_vendor_item(self, item_id, npc_id, price):
-        try:
-            self.cursor.execute("""INSERT INTO vendor_items (itemid, npcid, price)
-                                VALUES (%s,%s,%s)""", (item_id, npc_id, price,))
-        except mysql.connector.errors.IntegrityError:
-            pass
-
-        self.commit()
+    def get_regional_vendors(self):
+        self.cursor.execute("Select * FROM regional_vendors")
+        return self.cursor.fetchall()
 
     def commit(self):
         self.connection.commit()
