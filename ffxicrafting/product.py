@@ -2,6 +2,7 @@ from controllers.item_controller import ItemController
 from controllers.bundle_controller import BundleController
 from ingredient import Ingredient
 from auction_stats import AuctionStats
+from config import Config
 
 
 class Product:
@@ -33,7 +34,8 @@ class Product:
         # A dictionary containing all of the results from simulating the synth
         # several times
         # key: result item id, value: quantity
-        results, retained_ingredients = self.synth.simulate()
+        num_trials = Config.get_simulation_trials()
+        results, retained_ingredients = self.synth.simulate(num_trials)
 
         # The total cost is the cost of a single synth * the number of times
         # the synth was simulated
