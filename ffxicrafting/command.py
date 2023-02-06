@@ -4,11 +4,17 @@ from crafter import Crafter
 from synth import Synth
 from synth_table import SynthTable
 from product_table import ProductTable
+from auction_spreadsheet import AuctionSpreadsheet
+from auction import Auction
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 
 
 class Command:
+    auction_spreadsheet = AuctionSpreadsheet()
+    auction_items = auction_spreadsheet.get_auction_items()
+    auction = Auction(auction_items)
+
     def __init__(self) -> None:
         pass
 
@@ -21,8 +27,8 @@ class Command:
                         "Q. Quit\n")
         return command
 
-    @staticmethod
-    def print_synth_table():
+    @classmethod
+    def print_synth_table(cls):
         melonsoda_skill_set = Config.get_skill_set("Melonsoda")
         melonsoda_key_items = Config.get_key_items("Melonsoda")
 
@@ -45,11 +51,11 @@ class Command:
 
         table = SynthTable(crafters, synth_profit_threshold,
                            inventory_profit_threshold, sort_column,
-                           reverse_sort)
+                           reverse_sort, cls.auction)
         table.print()
 
-    @staticmethod
-    def print_product_table():
+    @classmethod
+    def print_product_table(cls):
         melonsoda_skill_set = Config.get_skill_set("Melonsoda")
         melonsoda_key_items = Config.get_key_items("Melonsoda")
 
@@ -70,7 +76,7 @@ class Command:
         reverse_sort = Config.get_reverse_sort()
 
         table = ProductTable(crafters, profit_threshold, sort_column,
-                             reverse_sort)
+                             reverse_sort, cls.auction)
         table.print()
 
     @staticmethod
@@ -114,8 +120,8 @@ class Command:
         skill_table.print()
         recipe_table.print()
 
-    @staticmethod
-    def simulate_synth():
+    @classmethod
+    def simulate_synth(cls):
         character = input("Enter character name: ")
         recipe_id = input("Enter recipe ID: ")
         num_times = input("Enter the number of synths: ")
@@ -128,7 +134,7 @@ class Command:
         key_items = Config.get_key_items(character)
         crafter = Crafter(skill_set, key_items)
         recipe = SynthController.get_recipe(recipe_id)
-        synth = Synth(recipe, crafter)
+        synth = Synth(recipe, crafter, cls.auction)
 
         cost = round(synth.calculate_cost() * num_times, 2)
         results, _ = synth.simulate(num_times)

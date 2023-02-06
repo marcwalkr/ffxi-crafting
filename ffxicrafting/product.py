@@ -1,17 +1,17 @@
 from controllers.item_controller import ItemController
 from controllers.bundle_controller import BundleController
 from ingredient import Ingredient
-from auction_stats import AuctionStats
 from config import Config
 
 
 class Product:
-    def __init__(self, synth, item_id, quantity, cost=None, sell_price=None,
-                 profit=None) -> None:
+    def __init__(self, synth, item_id, quantity, auction, cost=None,
+                 sell_price=None, profit=None) -> None:
 
         self.synth = synth
         self.item_id = item_id
         self.quantity = quantity
+        self.auction = auction
 
         self.item = ItemController.get_item(item_id)
         self.name = self.item.sort_name.replace("_", " ").title()
@@ -44,7 +44,7 @@ class Product:
         # Subtract the price of remaining ingredients from the cost
         saved_cost = 0
         for ingredient_id, amount in retained_ingredients.items():
-            ingredient = Ingredient(ingredient_id)
+            ingredient = Ingredient(ingredient_id, self.auction)
             saved_cost += ingredient.price * amount
 
         simulation_cost -= saved_cost
@@ -61,12 +61,12 @@ class Product:
         else:
             cost = simulation_cost / product_quantity
 
-        auction_stats = AuctionStats(self.item.name)
+        auction_item = self.auction.get_auction_item(self.item.name)
 
         if self.quantity == 1:
-            sell_price = auction_stats.single_price
+            sell_price = auction_item.single_price
         else:
-            sell_price = auction_stats.stack_price
+            sell_price = auction_item.stack_price
 
         if sell_price is None:
             sell_price = 0
@@ -87,31 +87,32 @@ class Product:
 
     def create_bundle_products(self):
         bundle_item = ItemController.get_item(self.bundle.bundled_id)
-        trade_item = Ingredient(self.bundle.trade_item_id)
+        trade_item = Ingredient(self.bundle.trade_item_id, self.auction)
 
-        auction_stats = AuctionStats(bundle_item.name)
+        auction_item = self.auction.get_auction_item(bundle_item.name)
 
-        if auction_stats.no_sales:
+        if auction_item.no_sales:
             return []
 
         single_bundled_cost = self.cost + trade_item.price
 
         products = []
 
-        if auction_stats.single_price is not None:
-            single_price = auction_stats.single_price
+        if auction_item.single_price is not None:
+            single_price = auction_item.single_price
             profit = single_price - single_bundled_cost
             single_product = Product(self.synth, bundle_item.item_id, 1,
-                                     single_bundled_cost, single_price, profit)
+                                     self.auction, single_bundled_cost,
+                                     single_price, profit)
             products.append(single_product)
 
-        if auction_stats.stack_price is not None:
+        if auction_item.stack_price is not None:
             stack_bundled_cost = single_bundled_cost * bundle_item.stack_size
-            stack_price = auction_stats.stack_price
+            stack_price = auction_item.stack_price
             profit = stack_price - stack_bundled_cost
             stack_product = Product(self.synth, bundle_item.item_id,
-                                    bundle_item.stack_size, stack_bundled_cost,
-                                    stack_price, profit)
+                                    bundle_item.stack_size, self.auction,
+                                    stack_bundled_cost, stack_price, profit)
             products.append(stack_product)
 
         return products

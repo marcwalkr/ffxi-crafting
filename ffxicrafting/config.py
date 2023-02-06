@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from configparser import ConfigParser
-from configparser import NoOptionError
 from skill_set import SkillSet
 
 
@@ -96,6 +95,10 @@ class Config:
         return ignored_regions
 
     @classmethod
+    def get_spreadsheet_id(cls):
+        return cls.config.get("secrets", "spreadsheet_id")
+
+    @classmethod
     def get_skill_look_ahead(cls):
         skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
         return int(skill_look_ahead)
@@ -152,12 +155,3 @@ class Config:
             return [int(i) for i in key_items]
         except ValueError:
             return []
-
-    @classmethod
-    def get_auction_prices(cls, item_name):
-        try:
-            prices = cls.config.get("auction_prices", item_name)
-            prices = prices.split(",")
-            return [int(i) for i in prices]
-        except NoOptionError:
-            return [0, 0]

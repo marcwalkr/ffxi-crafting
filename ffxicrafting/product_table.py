@@ -6,8 +6,8 @@ from controllers.item_controller import ItemController
 
 class ProductTable(CraftingTable):
     def __init__(self, crafters, profit_threshold, sort_column,
-                 reverse_sort) -> None:
-        super().__init__(crafters, sort_column, reverse_sort)
+                 reverse_sort, auction) -> None:
+        super().__init__(crafters, sort_column, reverse_sort, auction)
         self.profit_threshold = profit_threshold
 
     def print(self):
@@ -66,11 +66,12 @@ class ProductTable(CraftingTable):
         item = ItemController.get_item(item_id)
         products = []
 
-        single_product = Product(synth, item_id, 1)
+        single_product = Product(synth, item_id, 1, self.auction)
         products.append(single_product)
 
         if item.stack_size > 1:
-            stack_product = Product(synth, item_id, item.stack_size)
+            stack_product = Product(synth, item_id, item.stack_size,
+                                    self.auction)
             products.append(stack_product)
             if stack_product.can_bundle:
                 products += stack_product.create_bundle_products()
