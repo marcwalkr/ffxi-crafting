@@ -3,14 +3,14 @@ from collections import defaultdict
 from ingredient import Ingredient
 from config import Config
 from controllers.item_controller import ItemController
+from controllers.auction_controller import AuctionController
 from helpers import clamp
 
 
 class Synth:
-    def __init__(self, recipe, crafter, auction) -> None:
+    def __init__(self, recipe, crafter) -> None:
         self.recipe = recipe
         self.crafter = crafter
-        self.auction = auction
 
         self.difficulty = self.get_difficulty()
         self.can_craft = self.can_craft()
@@ -258,7 +258,7 @@ class Synth:
 
         cost = 0
         for item_id in ingredient_ids:
-            ingredient = Ingredient(item_id, self.auction)
+            ingredient = Ingredient(item_id)
 
             if ingredient.price is None:
                 return None
@@ -284,7 +284,7 @@ class Synth:
         # Subtract the price of remaining ingredients from the cost
         saved_cost = 0
         for ingredient_id, amount in retained_ingredients.items():
-            ingredient = Ingredient(ingredient_id, self.auction)
+            ingredient = Ingredient(ingredient_id)
             saved_cost += ingredient.price * amount
 
         simulation_cost -= saved_cost
@@ -295,18 +295,15 @@ class Synth:
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
 
-            auction_item = self.auction.get_auction_item(item.name)
+            auction_item = AuctionController.get_auction_item(item_id)
 
-            if auction_item.no_sales:
+            if auction_item is None:
                 continue
 
-            if auction_item.stack_price is not None:
+            if auction_item.stack_price > 0:
                 single_price = auction_item.stack_price / item.stack_size
             else:
                 single_price = auction_item.single_price
-
-            if single_price is None:
-                single_price = 0
 
             # Add to the storage only if the price meets the threshold
             # Items that are too cheap get sold to a vendor, not stored

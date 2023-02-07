@@ -1,6 +1,8 @@
 import os
 from config import Config
-from auction_item import AuctionItem
+from controllers.auction_controller import AuctionController
+from models.auction_item import AuctionItem
+from controllers.item_controller import ItemController
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -34,7 +36,7 @@ class AuctionSpreadsheet:
             with open("token.json", "w") as token:
                 token.write(self.creds.to_json())
 
-    def get_auction_items(self):
+    def update_auction_database(self):
         try:
             service = build("sheets", "v4", credentials=self.creds)
 
@@ -48,12 +50,17 @@ class AuctionSpreadsheet:
                 print("No data found.")
                 return
 
-            auction_items = []
-            for row in values:
-                auction_item = AuctionItem(row[0], int(row[1]), int(row[2]))
-                auction_items.append(auction_item)
+            AuctionController.delete_auction_items()
 
-            return auction_items
+            for row in values:
+                item = ItemController.get_item_by_name(row[0])
+                if item is None:
+                    print("Could not find item: {}".format(row[0]))
+                    continue
+
+                AuctionController.add_auction_item(item.item_id, row[1],
+                                                   row[2])
+
         except HttpError as err:
             print(err)
             return None

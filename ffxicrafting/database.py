@@ -14,10 +14,19 @@ class Database:
     def __del__(self):
         self.connection.close()
 
-    def get_bundle(self, unbundled_id):
-        self.cursor.execute("SELECT * FROM bundles WHERE unbundled_id=%s",
-                            (unbundled_id,))
+    def get_auction_item(self, item_id):
+        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s",
+                            (item_id,))
         return self.cursor.fetchone()
+
+    def add_auction_item(self, item_id, single_price, stack_price):
+        self.cursor.execute("INSERT INTO auction_items VALUES (%s, %s, %s)",
+                            (item_id, single_price, stack_price,))
+        self.commit()
+
+    def delete_auction_items(self):
+        self.cursor.execute("DELETE FROM auction_items")
+        self.commit()
 
     def get_guild_shops(self, item_id):
         self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s",
@@ -58,7 +67,7 @@ class Database:
         return self.cursor.fetchall()
 
     def get_regional_vendors(self):
-        self.cursor.execute("Select * FROM regional_vendors")
+        self.cursor.execute("SELECT * FROM regional_vendors")
         return self.cursor.fetchall()
 
     def commit(self):
