@@ -26,11 +26,6 @@ class Config:
         return int(profit)
 
     @classmethod
-    def get_profit_per_product(cls):
-        profit = cls.config.get("thresholds", "profit_per_product")
-        return int(profit)
-
-    @classmethod
     def get_store_item(cls):
         store_item = cls.config.get("thresholds", "store_item")
         return int(store_item)
@@ -114,16 +109,8 @@ class Config:
         return int(trials)
 
     @classmethod
-    def get_recipe_sort_column(cls):
-        return cls.config.get("settings", "recipe_sort_column")
-
-    @classmethod
     def get_synth_sort_column(cls):
         return cls.config.get("settings", "synth_sort_column")
-
-    @classmethod
-    def get_product_sort_column(cls):
-        return cls.config.get("settings", "product_sort_column")
 
     @classmethod
     def get_reverse_sort(cls):

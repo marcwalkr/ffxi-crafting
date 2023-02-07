@@ -3,7 +3,6 @@ from config import Config
 from crafter import Crafter
 from synth import Synth
 from synth_table import SynthTable
-from product_table import ProductTable
 from auction_spreadsheet import AuctionSpreadsheet
 from auction import Auction
 from controllers.synth_controller import SynthController
@@ -21,9 +20,8 @@ class Command:
     @staticmethod
     def prompt_command():
         command = input("1. Print synth table\n" +
-                        "2. Print product table\n" +
-                        "3. Print recipe by ID\n" +
-                        "4. Simulate synth\n" +
+                        "2. Print recipe by ID\n" +
+                        "3. Simulate synth\n" +
                         "Q. Quit\n")
         return command
 
@@ -52,31 +50,6 @@ class Command:
         table = SynthTable(crafters, synth_profit_threshold,
                            storage_profit_threshold, sort_column,
                            reverse_sort, cls.auction)
-        table.print()
-
-    @classmethod
-    def print_product_table(cls):
-        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
-        melonsoda_key_items = Config.get_key_items("Melonsoda")
-
-        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
-        rootbeer_key_items = Config.get_key_items("Rootbeer")
-
-        milktea_skill_set = Config.get_skill_set("Milktea")
-        milktea_key_items = Config.get_key_items("Milktea")
-
-        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
-        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
-        milktea = Crafter(milktea_skill_set, milktea_key_items)
-
-        crafters = [melonsoda, rootbeer, milktea]
-
-        profit_threshold = Config.get_profit_per_product()
-        sort_column = Config.get_product_sort_column()
-        reverse_sort = Config.get_reverse_sort()
-
-        table = ProductTable(crafters, profit_threshold, sort_column,
-                             reverse_sort, cls.auction)
         table.print()
 
     @staticmethod
