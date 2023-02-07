@@ -2,15 +2,15 @@ import random
 from collections import defaultdict
 from ingredient import Ingredient
 from config import Config
-from auction_stats import AuctionStats
 from controllers.item_controller import ItemController
 from helpers import clamp
 
 
 class Synth:
-    def __init__(self, recipe, crafter) -> None:
+    def __init__(self, recipe, crafter, auction) -> None:
         self.recipe = recipe
         self.crafter = crafter
+        self.auction = auction
 
         self.difficulty = self.get_difficulty()
         self.can_craft = self.can_craft()
@@ -258,7 +258,7 @@ class Synth:
 
         cost = 0
         for item_id in ingredient_ids:
-            ingredient = Ingredient(item_id)
+            ingredient = Ingredient(item_id, self.auction)
 
             if ingredient.price is None:
                 return None
@@ -284,7 +284,7 @@ class Synth:
         # Subtract the price of remaining ingredients from the cost
         saved_cost = 0
         for ingredient_id, amount in retained_ingredients.items():
-            ingredient = Ingredient(ingredient_id)
+            ingredient = Ingredient(ingredient_id, self.auction)
             saved_cost += ingredient.price * amount
 
         simulation_cost -= saved_cost
@@ -296,15 +296,15 @@ class Synth:
             item = ItemController.get_item(item_id)
 
             total_inventory_space += quantity / item.stack_size
-            auction_stats = AuctionStats(item.name)
+            auction_item = self.auction.get_auction_item(item.name)
 
-            if auction_stats.no_sales:
+            if auction_item.no_sales:
                 continue
 
-            if auction_stats.stack_price is not None:
-                single_price = auction_stats.stack_price / item.stack_size
+            if auction_item.stack_price is not None:
+                single_price = auction_item.stack_price / item.stack_size
             else:
-                single_price = auction_stats.single_price
+                single_price = auction_item.single_price
 
             if single_price is None:
                 single_price = 0

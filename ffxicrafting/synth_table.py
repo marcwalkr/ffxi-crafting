@@ -5,8 +5,8 @@ from table import Table
 class SynthTable(CraftingTable):
     def __init__(self, crafters, synth_profit_threshold,
                  inventory_profit_threshold, sort_column,
-                 reverse_sort) -> None:
-        super().__init__(crafters, sort_column, reverse_sort)
+                 reverse_sort, auction) -> None:
+        super().__init__(crafters, sort_column, reverse_sort, auction)
         self.synth_profit_threshold = synth_profit_threshold
         self.inventory_profit_threshold = inventory_profit_threshold
 

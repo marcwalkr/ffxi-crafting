@@ -1,13 +1,13 @@
 from controllers.item_controller import ItemController
 from controllers.vendor_controller import VendorController
 from controllers.guild_controller import GuildController
-from auction_stats import AuctionStats
 from config import Config
 
 
 class Ingredient:
-    def __init__(self, item_id) -> None:
+    def __init__(self, item_id, auction) -> None:
         self.item_id = item_id
+        self.auction = auction
         self.price = self.get_cheapest_price()
 
     def get_cheapest_price(self):
@@ -35,14 +35,14 @@ class Ingredient:
 
     def get_auction_price(self):
         item = ItemController.get_item(self.item_id)
-        auction_stats = AuctionStats(item.name)
+        auction_item = self.auction.get_auction_item(item.name)
 
         prices = []
-        if auction_stats.single_price is not None:
-            prices.append(auction_stats.single_price)
+        if auction_item.single_price is not None:
+            prices.append(auction_item.single_price)
 
-        if auction_stats.stack_price is not None:
-            single_price_from_stack = (auction_stats.stack_price /
+        if auction_item.stack_price is not None:
+            single_price_from_stack = (auction_item.stack_price /
                                        item.stack_size)
             prices.append(single_price_from_stack)
 
