@@ -124,11 +124,9 @@ class Command:
     def simulate_synth(cls):
         character = input("Enter character name: ")
         recipe_id = input("Enter recipe ID: ")
-        num_times = input("Enter the number of synths: ")
 
         character = character.capitalize()
         recipe_id = int(recipe_id)
-        num_times = int(num_times)
 
         skill_set = Config.get_skill_set(character)
         key_items = Config.get_key_items(character)
@@ -136,18 +134,27 @@ class Command:
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter, cls.auction)
 
-        cost = round(synth.calculate_cost() * num_times, 2)
-        results, _ = synth.simulate(num_times)
+        stop = False
+        while True:
+            num_times = input("Enter the number of synths: ")
+            num_times = int(num_times)
+            cost = round(synth.calculate_cost() * num_times, 2)
+            results, _ = synth.simulate(num_times)
 
-        print()
-        print("Cost: {}".format(cost))
-        for item_id, amount in results.items():
-            item = ItemController.get_item(item_id)
+            print()
+            print("Cost: {}".format(cost))
+            for item_id, amount in results.items():
+                item = ItemController.get_item(item_id)
 
-            if item.stack_size > 1:
-                num_stacks = round(amount / item.stack_size, 2)
-                print("{}: {} ({} stacks)".format(item.sort_name, amount,
-                                                  num_stacks))
-            else:
-                print("{}: {}".format(item.sort_name, amount))
-        print()
+                if item.stack_size > 1:
+                    num_stacks = round(amount / item.stack_size, 2)
+                    print("{}: {} ({} stacks)".format(item.sort_name, amount,
+                                                      num_stacks))
+                else:
+                    print("{}: {}".format(item.sort_name, amount))
+            print()
+
+            do_again = input("Simulate again? (y/n) ")
+            if not do_again == "y":
+                stop == True
+                break
