@@ -11,10 +11,4 @@ class GuildController:
     @classmethod
     def get_guild_shops(cls, item_id):
         guild_shop_tuples = cls.db.get_guild_shops(item_id)
-
-        guild_shops = []
-        for guild_shop_tuple in guild_shop_tuples:
-            guild_shop = GuildShop(*guild_shop_tuple)
-            guild_shops.append(guild_shop)
-
-        return guild_shops
+        return [GuildShop(*g) for g in guild_shop_tuples]
