@@ -2,6 +2,7 @@ from table import Table
 from config import Config
 from crafter import Crafter
 from synth import Synth
+from collections import defaultdict
 from synth_table import SynthTable
 from auction_spreadsheet import AuctionSpreadsheet
 from controllers.synth_controller import SynthController
@@ -17,7 +18,8 @@ class Command:
         command = input("1. Print synth table\n" +
                         "2. Print recipe by ID\n" +
                         "3. Simulate synth\n" +
-                        "4. Update auction database\n"
+                        "4. Get ingredient amounts\n"
+                        "5. Update auction database\n"
                         "Q. Quit\n")
         return command
 
@@ -91,6 +93,7 @@ class Command:
 
     @classmethod
     def simulate_synth(cls):
+        print()
         character = input("Enter character name: ")
         recipe_id = input("Enter recipe ID: ")
 
@@ -107,7 +110,7 @@ class Command:
         while True:
             num_times = input("Enter the number of synths: ")
             num_times = int(num_times)
-            cost = round(synth.calculate_cost() * num_times, 2)
+            cost = round(synth.calculate_cost() * num_times)
             results, _ = synth.simulate(num_times)
 
             print()
@@ -127,6 +130,77 @@ class Command:
             if not do_again == "y":
                 stop == True
                 break
+
+    @classmethod
+    def get_ingredient_amounts(cls):
+        print()
+        character = input("Enter character name: ")
+        recipe_id = input("Enter recipe ID: ")
+
+        character = character.capitalize()
+        recipe_id = int(recipe_id)
+
+        skill_set = Config.get_skill_set(character)
+        key_items = Config.get_key_items(character)
+        crafter = Crafter(skill_set, key_items)
+        recipe = SynthController.get_recipe(recipe_id)
+        synth = Synth(recipe, crafter)
+
+        result_ids = [recipe.result, recipe.result_hq1, recipe.result_hq2,
+                      recipe.result_hq3]
+        unique_result_ids = list(dict.fromkeys(result_ids))
+        items = [ItemController.get_item(i) for i in unique_result_ids]
+
+        goal_amounts = {}
+
+        for item in items:
+            item_name = item.sort_name.replace("_", " ").title()
+            goal_amount = input("Goal amount for {}: ".format(item_name))
+            goal_amounts[item.item_id] = int(goal_amount)
+
+        num_trials = Config.get_simulation_trials()
+        total_num_synths = 0
+
+        for _ in range(num_trials):
+            goal_complete = False
+            num_synths = 0
+            current_amounts = defaultdict(lambda: 0)
+
+            while not goal_complete:
+                results, _ = synth.simulate(1)
+                num_synths += 1
+                for item_id, amount in results.items():
+                    current_amounts[item_id] += amount
+
+                goal_complete = True
+                for item_id, amount in current_amounts.items():
+                    if amount < goal_amounts[item_id]:
+                        goal_complete = False
+
+            total_num_synths += num_synths
+
+        average_num_synths = round(total_num_synths / num_trials, 2)
+        cost = round(synth.calculate_cost() * average_num_synths)
+        print("\nAverage number of synths: {}".format(average_num_synths))
+        print("Cost: {}\n".format(cost))
+
+        ingredients = [recipe.crystal, recipe.ingredient1, recipe.ingredient2,
+                       recipe.ingredient3, recipe.ingredient4,
+                       recipe.ingredient5, recipe.ingredient6,
+                       recipe.ingredient7, recipe.ingredient8]
+        non_empty_ingredients = [i for i in ingredients if i > 0]
+
+        ingredient_amounts = defaultdict(lambda: 0)
+        for i in non_empty_ingredients:
+            ingredient_amounts[i] += average_num_synths
+
+        for item_id, amount in ingredient_amounts.items():
+            item = ItemController.get_item(item_id)
+            item_name = item.sort_name.replace("_", " ").title()
+            rounded_amount = round(amount) + 1
+            print("{}: {}".format(item_name, rounded_amount))
+
+        print()
 
     @staticmethod
     def update_auction_database():

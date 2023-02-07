@@ -11,6 +11,8 @@ if __name__ == "__main__":
         elif command == "3":
             Command.simulate_synth()
         elif command == "4":
+            Command.get_ingredient_amounts()
+        elif command == "5":
             Command.update_auction_database()
         elif command == "q" or command == "Q":
             break
