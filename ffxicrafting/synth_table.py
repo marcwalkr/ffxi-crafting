@@ -4,16 +4,16 @@ from table import Table
 
 class SynthTable(CraftingTable):
     def __init__(self, crafters, synth_profit_threshold,
-                 inventory_profit_threshold, sort_column,
+                 storage_profit_threshold, sort_column,
                  reverse_sort, auction) -> None:
         super().__init__(crafters, sort_column, reverse_sort, auction)
         self.synth_profit_threshold = synth_profit_threshold
-        self.inventory_profit_threshold = inventory_profit_threshold
+        self.storage_profit_threshold = storage_profit_threshold
 
     def print(self):
         column_labels = ["Recipe ID", "NQ", "NQ Qty", "HQ1", "HQ1 Qty", "HQ2",
                          "HQ2 Qty", "HQ3", "HQ3 Qty", "Cost",
-                         "Profit Per Synth", "Profit Per Inventory"]
+                         "Profit Per Synth", "Profit Per Storage"]
 
         rows = []
 
@@ -30,13 +30,13 @@ class SynthTable(CraftingTable):
             if synth.cost is None:
                 continue
 
-            synth.profit_per_synth, synth.profit_per_inventory\
+            synth.profit_per_synth, synth.profit_per_storage\
                 = synth.calculate_stats()
 
             meets_synth_profit = (synth.profit_per_synth >=
                                   self.synth_profit_threshold)
-            meets_inventory_profit = (synth.profit_per_inventory >=
-                                      self.inventory_profit_threshold)
+            meets_inventory_profit = (synth.profit_per_storage >=
+                                      self.storage_profit_threshold)
 
             if (not meets_synth_profit or not meets_inventory_profit):
                 continue
@@ -46,7 +46,7 @@ class SynthTable(CraftingTable):
 
             row = [synth.recipe.id, nq_name, nq_qty, hq1_name, hq1_qty,
                    hq2_name, hq2_qty, hq3_name, hq3_qty, synth.cost,
-                   synth.profit_per_synth, synth.profit_per_inventory]
+                   synth.profit_per_synth, synth.profit_per_storage]
 
             # A row already exists in the list with the same synth results
             duplicate = [r for r in rows if r[1] == row[1] and

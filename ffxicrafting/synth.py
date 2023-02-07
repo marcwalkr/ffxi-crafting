@@ -19,7 +19,7 @@ class Synth:
 
         self.cost = None
         self.profit_per_synth = None
-        self.profit_per_inventory = None
+        self.profit_per_storage = None
         self.sell_frequency = None
 
     def get_result_names(self):
@@ -289,13 +289,12 @@ class Synth:
 
         simulation_cost -= saved_cost
 
-        total_inventory_space = 0
+        total_storage = 0
         total_gil = 0
 
         for item_id, quantity in results.items():
             item = ItemController.get_item(item_id)
 
-            total_inventory_space += quantity / item.stack_size
             auction_item = self.auction.get_auction_item(item.name)
 
             if auction_item.no_sales:
@@ -309,12 +308,22 @@ class Synth:
             if single_price is None:
                 single_price = 0
 
+            # Add to the storage only if the price meets the threshold
+            # Items that are too cheap get sold to a vendor, not stored
+            store_item_threshold = Config.get_store_item()
+            if single_price * item.stack_size > store_item_threshold:
+                total_storage += quantity / item.stack_size
+
             gil = single_price * quantity
 
             total_gil += gil
 
         total_profit = total_gil - simulation_cost
         profit_per_synth = total_profit / self.num_trials
-        profit_per_inventory = total_profit / total_inventory_space
 
-        return round(profit_per_synth, 2), round(profit_per_inventory, 2)
+        if total_storage > 0:
+            profit_per_storage = total_profit / total_storage
+        else:
+            profit_per_storage = 0
+
+        return round(profit_per_synth, 2), round(profit_per_storage, 2)

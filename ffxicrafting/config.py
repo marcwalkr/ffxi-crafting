@@ -21,14 +21,19 @@ class Config:
         return int(profit)
 
     @classmethod
-    def get_profit_per_inventory(cls):
-        profit = cls.config.get("thresholds", "profit_per_inventory")
+    def get_profit_per_storage(cls):
+        profit = cls.config.get("thresholds", "profit_per_storage")
         return int(profit)
 
     @classmethod
     def get_profit_per_product(cls):
         profit = cls.config.get("thresholds", "profit_per_product")
         return int(profit)
+
+    @classmethod
+    def get_store_item(cls):
+        store_item = cls.config.get("thresholds", "store_item")
+        return int(store_item)
 
     @classmethod
     def get_ignore_guilds(cls):

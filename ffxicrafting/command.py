@@ -45,12 +45,12 @@ class Command:
         crafters = [melonsoda, rootbeer, milktea]
 
         synth_profit_threshold = Config.get_profit_per_synth()
-        inventory_profit_threshold = Config.get_profit_per_inventory()
+        storage_profit_threshold = Config.get_profit_per_storage()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
         table = SynthTable(crafters, synth_profit_threshold,
-                           inventory_profit_threshold, sort_column,
+                           storage_profit_threshold, sort_column,
                            reverse_sort, cls.auction)
         table.print()
 
