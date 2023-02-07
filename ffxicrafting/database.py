@@ -14,11 +14,6 @@ class Database:
     def __del__(self):
         self.connection.close()
 
-    def get_bundle(self, unbundled_id):
-        self.cursor.execute("SELECT * FROM bundles WHERE unbundled_id=%s",
-                            (unbundled_id,))
-        return self.cursor.fetchone()
-
     def get_guild_shops(self, item_id):
         self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s",
                             (item_id,))
