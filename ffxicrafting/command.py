@@ -4,16 +4,11 @@ from crafter import Crafter
 from synth import Synth
 from synth_table import SynthTable
 from auction_spreadsheet import AuctionSpreadsheet
-from auction import Auction
 from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 
 
 class Command:
-    auction_spreadsheet = AuctionSpreadsheet()
-    auction_items = auction_spreadsheet.get_auction_items()
-    auction = Auction(auction_items)
-
     def __init__(self) -> None:
         pass
 
@@ -22,6 +17,7 @@ class Command:
         command = input("1. Print synth table\n" +
                         "2. Print recipe by ID\n" +
                         "3. Simulate synth\n" +
+                        "4. Update auction database\n"
                         "Q. Quit\n")
         return command
 
@@ -49,7 +45,7 @@ class Command:
 
         table = SynthTable(crafters, synth_profit_threshold,
                            storage_profit_threshold, sort_column,
-                           reverse_sort, cls.auction)
+                           reverse_sort)
         table.print()
 
     @staticmethod
@@ -105,7 +101,7 @@ class Command:
         key_items = Config.get_key_items(character)
         crafter = Crafter(skill_set, key_items)
         recipe = SynthController.get_recipe(recipe_id)
-        synth = Synth(recipe, crafter, cls.auction)
+        synth = Synth(recipe, crafter)
 
         stop = False
         while True:
@@ -131,3 +127,9 @@ class Command:
             if not do_again == "y":
                 stop == True
                 break
+
+    @staticmethod
+    def update_auction_database():
+        auction_spreadsheet = AuctionSpreadsheet()
+        auction_spreadsheet.update_auction_database()
+        print("Auction database updated\n")
