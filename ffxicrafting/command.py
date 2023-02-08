@@ -173,8 +173,8 @@ class Command:
                     current_amounts[item_id] += amount
 
                 goal_complete = True
-                for item_id, amount in current_amounts.items():
-                    if amount < goal_amounts[item_id]:
+                for item_id, amount in goal_amounts.items():
+                    if current_amounts[item_id] < amount:
                         goal_complete = False
 
             total_num_synths += num_synths
