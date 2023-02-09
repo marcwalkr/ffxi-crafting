@@ -25,20 +25,16 @@ class Command:
 
     @classmethod
     def print_synth_table(cls):
-        melonsoda_skill_set = Config.get_skill_set("Melonsoda")
-        melonsoda_key_items = Config.get_key_items("Melonsoda")
+        characters = input("Enter character names separated by commas: ")
+        characters = characters.split(", ")
+        characters = [c.capitalize() for c in characters]
 
-        rootbeer_skill_set = Config.get_skill_set("Rootbeer")
-        rootbeer_key_items = Config.get_key_items("Rootbeer")
-
-        milktea_skill_set = Config.get_skill_set("Milktea")
-        milktea_key_items = Config.get_key_items("Milktea")
-
-        melonsoda = Crafter(melonsoda_skill_set, melonsoda_key_items)
-        rootbeer = Crafter(rootbeer_skill_set, rootbeer_key_items)
-        milktea = Crafter(milktea_skill_set, milktea_key_items)
-
-        crafters = [melonsoda, rootbeer, milktea]
+        crafters = []
+        for c in characters:
+            skill_set = Config.get_skill_set(c)
+            key_items = Config.get_key_items(c)
+            crafter = Crafter(skill_set, key_items)
+            crafters.append(crafter)
 
         synth_profit_threshold = Config.get_profit_per_synth()
         storage_profit_threshold = Config.get_profit_per_storage()
