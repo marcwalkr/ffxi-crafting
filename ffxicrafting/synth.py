@@ -2,6 +2,7 @@ import random
 from collections import defaultdict
 from ingredient import Ingredient
 from config import Config
+from table import Table
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 from helpers import clamp
@@ -266,6 +267,42 @@ class Synth:
             cost += ingredient.price
 
         return round(cost, 2)
+
+    def print_ingredient_costs(self):
+        """Prints the name of each ingredient with the cost"""
+        ingredient_ids = [self.recipe.crystal, self.recipe.ingredient1,
+                          self.recipe.ingredient2, self.recipe.ingredient3,
+                          self.recipe.ingredient4, self.recipe.ingredient5,
+                          self.recipe.ingredient6, self.recipe.ingredient7,
+                          self.recipe.ingredient8]
+
+        # Remove zeros (empty ingredient slots)
+        ingredient_ids = [i for i in ingredient_ids if i > 0]
+
+        # Remove duplicates
+        ingredient_ids = list(dict.fromkeys(ingredient_ids))
+
+        column_labels = ["Ingredient", "Single", "Stack"]
+        rows = []
+
+        for id in ingredient_ids:
+            ingredient = Ingredient(id)
+
+            if ingredient.price is None:
+                continue
+
+            item = ItemController.get_item(id)
+            item_name = item.sort_name.replace("_", " ").title()
+
+            single_price = round(ingredient.price, 2)
+            if item.stack_size > 1:
+                stack_price = round(ingredient.price * item.stack_size)
+                rows.append([item_name, single_price, stack_price])
+            else:
+                rows.append([item_name, single_price, ""])
+
+        table = Table(column_labels, rows)
+        table.print()
 
     def calculate_stats(self):
         """Returns the average profit per synth, profit per inventory space,

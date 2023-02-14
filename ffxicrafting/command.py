@@ -1,3 +1,4 @@
+import math
 from table import Table
 from config import Config
 from crafter import Crafter
@@ -175,10 +176,16 @@ class Command:
 
             total_num_synths += num_synths
 
+        print("\nIngredient Costs\n")
+        synth.print_ingredient_costs()
+
         average_num_synths = round(total_num_synths / num_trials, 2)
         cost = round(synth.calculate_cost() * average_num_synths)
-        print("\nAverage number of synths: {}".format(average_num_synths))
-        print("Cost: {}\n".format(cost))
+
+        print("\nIngredient Amounts\n")
+
+        column_labels = ["Ingredient", "Amount", "Stacks + Singles"]
+        rows = []
 
         ingredients = [recipe.crystal, recipe.ingredient1, recipe.ingredient2,
                        recipe.ingredient3, recipe.ingredient4,
@@ -194,9 +201,20 @@ class Command:
             item = ItemController.get_item(item_id)
             item_name = item.sort_name.replace("_", " ").title()
             rounded_amount = round(amount) + 1
-            print("{}: {}".format(item_name, rounded_amount))
 
-        print()
+            if item.stack_size > 1:
+                num_stacks = math.floor(rounded_amount / item.stack_size)
+                singles = rounded_amount - num_stacks * item.stack_size
+                stack_singles = "{} stack(s) + {}".format(num_stacks, singles)
+                rows.append([item_name, rounded_amount, stack_singles])
+            else:
+                rows.append([item_name, rounded_amount, ""])
+
+        table = Table(column_labels, rows)
+        table.print()
+
+        print("\nAverage number of synths: {}".format(average_num_synths))
+        print("Total Cost: {}\n".format(cost))
 
     @staticmethod
     def update_auction_database():
