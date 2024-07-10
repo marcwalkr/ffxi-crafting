@@ -19,9 +19,21 @@ class Database:
                             (item_id,))
         return self.cursor.fetchone()
 
-    def add_auction_item(self, item_id, single_price, stack_price):
-        self.cursor.execute("INSERT INTO auction_items VALUES (%s, %s, %s)",
-                            (item_id, single_price, stack_price,))
+    def add_auction_item(self, item_id, avg_single_price, avg_stack_price, sales_frequency):
+        query = """
+                INSERT INTO auction_items (itemid, avg_single_price, avg_stack_price, sales_frequency)
+                VALUES (%s, %s, %s, %s)
+                """
+        self.cursor.execute(query, (item_id, avg_single_price, avg_stack_price, sales_frequency))
+        self.commit()
+
+    def update_auction_item(self, item_id, avg_single_price, avg_stack_price, sales_frequency):
+        query = """
+                UPDATE auction_items
+                SET avg_single_price = %s, avg_stack_price = %s, sales_frequency = %s
+                WHERE itemid = %s
+                """
+        self.cursor.execute(query, (avg_single_price, avg_stack_price, sales_frequency, item_id,))
         self.commit()
 
     def delete_auction_items(self):
