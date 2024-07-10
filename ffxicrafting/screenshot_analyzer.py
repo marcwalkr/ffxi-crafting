@@ -10,7 +10,7 @@ class ScreenshotAnalyzer:
     def __init__(self, item_name) -> None:
         self.item_name = item_name
 
-    def get_price_and_frequency(self, stack):
+    def get_avg_price_and_frequency(self, stack):
         if stack:
             path = "auction_screenshots/{}_stack.png".format(self.item_name)
         else:
@@ -21,6 +21,10 @@ class ScreenshotAnalyzer:
             return None, None
 
         timestamp_strings, prices = self.extract_data(path)
+
+        # No timestamps or prices were found in the screenshot, return None for both
+        if not timestamp_strings or not prices:
+            return None, None
 
         avg_price = statistics.fmean(prices)
         sales_frequency = self.calculate_sales_frequency(timestamp_strings)
@@ -79,3 +83,8 @@ class ScreenshotAnalyzer:
         # Convert average time differences to frequency (sales per day)
         avg_time_diff_seconds = avg_time_diff.total_seconds()
         return 86400 / avg_time_diff_seconds if avg_time_diff_seconds != 0 else None
+
+
+analyzer = ScreenshotAnalyzer("red_hot_cracker")
+data = analyzer.get_price_and_frequency(stack=False)
+print(data)
