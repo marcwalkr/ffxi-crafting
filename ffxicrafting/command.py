@@ -26,24 +26,14 @@ class Command:
 
     @classmethod
     def print_synth_table(cls):
-        characters = input("Enter character names separated by commas: ")
-        characters = characters.split(", ")
-        characters = [c.capitalize() for c in characters]
-
-        crafters = []
-        for c in characters:
-            skill_set = Config.get_skill_set(c)
-            crafter = Crafter(skill_set)
-            crafters.append(crafter)
-
+        skill_set = Config.get_skill_set()
+        crafter = Crafter(skill_set)
         synth_profit_threshold = Config.get_profit_per_synth()
         storage_profit_threshold = Config.get_profit_per_storage()
         sort_column = Config.get_synth_sort_column()
         reverse_sort = Config.get_reverse_sort()
 
-        table = SynthTable(crafters, synth_profit_threshold,
-                           storage_profit_threshold, sort_column,
-                           reverse_sort)
+        table = SynthTable(crafter, synth_profit_threshold, storage_profit_threshold, sort_column, reverse_sort)
         table.print()
 
     @staticmethod
@@ -90,13 +80,10 @@ class Command:
     @classmethod
     def simulate_synth(cls):
         print()
-        character = input("Enter character name: ")
         recipe_id = input("Enter recipe ID: ")
-
-        character = character.capitalize()
         recipe_id = int(recipe_id)
 
-        skill_set = Config.get_skill_set(character)
+        skill_set = Config.get_skill_set()
         crafter = Crafter(skill_set)
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)
@@ -129,13 +116,10 @@ class Command:
     @classmethod
     def get_ingredient_amounts(cls):
         print()
-        character = input("Enter character name: ")
         recipe_id = input("Enter recipe ID: ")
-
-        character = character.capitalize()
         recipe_id = int(recipe_id)
 
-        skill_set = Config.get_skill_set(character)
+        skill_set = Config.get_skill_set()
         crafter = Crafter(skill_set)
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)

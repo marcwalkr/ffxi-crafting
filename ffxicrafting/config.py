@@ -117,15 +117,15 @@ class Config:
         return cls.config.getboolean("settings", "reverse_sort")
 
     @classmethod
-    def get_skill_set(cls, character):
-        wood = cls.config.get(character, "wood")
-        smith = cls.config.get(character, "smith")
-        gold = cls.config.get(character, "gold")
-        cloth = cls.config.get(character, "cloth")
-        leather = cls.config.get(character, "leather")
-        bone = cls.config.get(character, "bone")
-        alchemy = cls.config.get(character, "alchemy")
-        cook = cls.config.get(character, "cook")
+    def get_skill_set(cls):
+        wood = cls.config.get("skills", "wood")
+        smith = cls.config.get("skills", "smith")
+        gold = cls.config.get("skills", "gold")
+        cloth = cls.config.get("skills", "cloth")
+        leather = cls.config.get("skills", "leather")
+        bone = cls.config.get("skills", "bone")
+        alchemy = cls.config.get("skills", "alchemy")
+        cook = cls.config.get("skills", "cook")
 
         wood = int(wood)
         smith = int(smith)
