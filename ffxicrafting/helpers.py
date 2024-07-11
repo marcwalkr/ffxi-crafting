@@ -1,6 +1,8 @@
 import os
 import re
+import requests
 from datetime import datetime, timezone
+from bs4 import BeautifulSoup
 from controllers.npc_controller import NpcController
 
 
@@ -40,7 +42,7 @@ def generate_vendor_inserts():
             for line in stripped_lines:
                 # The line has 2 numbers separated by a comma and a comment
                 # e.g. 13327, 1250, -- Silver Earring
-                if not re.search("\d+,\s*\d+.*--.+", line):
+                if not re.search(r"\d+,\s*\d+.*--.+", line):
                     continue
 
                 # The item_id and price are the first 2 numbers on the line
@@ -67,3 +69,36 @@ def generate_vendor_inserts():
     with open("vendor_inserts.txt", "w") as writer:
         for line in file_lines:
             writer.write(line + "\n")
+
+
+def is_item_in_era(item_id):
+    r = requests.get(f"http://www.ffxidb.com/items/{item_id}")
+    soup = BeautifulSoup(r.content, "html.parser")
+
+    url = ""
+    links = soup.find_all("a")
+    for link in links:
+        href = link.get("href")
+        if href and "bluegartr" in href:
+            item_name = href.split("/")[-1]
+            url = f"https://www.bg-wiki.com/index.php?title={item_name}&action=history"
+
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, "html.parser")
+
+    revision_dates = soup.find_all("a", class_="mw-changeslist-date")
+
+    earliest_revision_date_string = revision_dates[-1].text
+    level_cap_increase_date_string = "22 June 2010"
+
+    bgwiki_date_format = "%H:%M, %d %B %Y"
+
+    earliest_revision_date = datetime.strptime(earliest_revision_date_string, bgwiki_date_format)
+    level_cap_increase_date = datetime.strptime(level_cap_increase_date_string, "%d %B %Y")
+
+    if earliest_revision_date < level_cap_increase_date:
+        print(f"{item_id} in era")
+        return True
+    else:
+        print(f"{item_id} out of era")
+        return False
