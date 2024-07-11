@@ -1,139 +1,73 @@
 import os
-from pathlib import Path
-from configparser import ConfigParser
+from dotenv import load_dotenv
 from skill_set import SkillSet
 
 
 class Config:
-    path = Path(__file__)
-    ROOT_DIR = path.parent.absolute()
-    config_path = os.path.join(ROOT_DIR, "../config.ini")
-
-    config = ConfigParser()
-    config.read(config_path)
-
-    def __init__(self) -> None:
-        pass
+    load_dotenv("config.env")  # Load environment variables from .env file
 
     @classmethod
     def get_profit_per_synth(cls):
-        profit = cls.config.get("thresholds", "profit_per_synth")
-        return int(profit)
+        return int(os.getenv("PROFIT_PER_SYNTH"))
 
     @classmethod
     def get_profit_per_storage(cls):
-        profit = cls.config.get("thresholds", "profit_per_storage")
-        return int(profit)
+        return int(os.getenv("PROFIT_PER_STORAGE"))
 
     @classmethod
     def get_store_item(cls):
-        store_item = cls.config.get("thresholds", "store_item")
-        return int(store_item)
+        return int(os.getenv("STORE_ITEM"))
 
     @classmethod
     def get_ignore_guilds(cls):
-        return cls.config.getboolean("settings", "ignore_guilds")
+        return os.getenv("IGNORE_GUILDS").lower() == "true"
 
     @classmethod
     def get_ignored_regions(cls):
+        regions = [
+            "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands",
+            "Fauregandi", "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor",
+            "Movalpolos", "Norvallen", "Qufim", "Ronfaure", "Sarutabaruta",
+            "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
+        ]
         ignored_regions = []
 
-        if cls.config.getboolean("settings", "ignore_aragoneu"):
-            ignored_regions.append("Aragoneu")
-
-        if cls.config.getboolean("settings", "ignore_derfland"):
-            ignored_regions.append("Derfland")
-
-        if cls.config.getboolean("settings", "ignore_elshimo_lowlands"):
-            ignored_regions.append("Elshimo Lowlands")
-
-        if cls.config.getboolean("settings", "ignore_elshimo_uplands"):
-            ignored_regions.append("Elshimo Uplands")
-
-        if cls.config.getboolean("settings", "ignore_fauregandi"):
-            ignored_regions.append("Fauregandi")
-
-        if cls.config.getboolean("settings", "ignore_gustaberg"):
-            ignored_regions.append("Gustaberg")
-
-        if cls.config.getboolean("settings", "ignore_kolshushu"):
-            ignored_regions.append("Kolshushu")
-
-        if cls.config.getboolean("settings", "ignore_kuzotz"):
-            ignored_regions.append("Kuzotz")
-
-        if cls.config.getboolean("settings", "ignore_li_telor"):
-            ignored_regions.append("Li'Telor")
-
-        if cls.config.getboolean("settings", "ignore_movalpolos"):
-            ignored_regions.append("Movalpolos")
-
-        if cls.config.getboolean("settings", "ignore_norvallen"):
-            ignored_regions.append("Norvallen")
-
-        if cls.config.getboolean("settings", "ignore_qufim"):
-            ignored_regions.append("Qufim")
-
-        if cls.config.getboolean("settings", "ignore_ronfaure"):
-            ignored_regions.append("Ronfaure")
-
-        if cls.config.getboolean("settings", "ignore_sarutabaruta"):
-            ignored_regions.append("Sarutabaruta")
-
-        if cls.config.getboolean("settings", "ignore_tavnazian_archipelago"):
-            ignored_regions.append("Tavnazian Archipelago")
-
-        if cls.config.getboolean("settings", "ignore_valdeaunia"):
-            ignored_regions.append("Valeaunia")
-
-        if cls.config.getboolean("settings", "ignore_vollbow"):
-            ignored_regions.append("Vollbow")
-
-        if cls.config.getboolean("settings", "ignore_zulkheim"):
-            ignored_regions.append("Zulkheim")
+        for region in regions:
+            env_var_name = f"IGNORE_{region.upper().replace(" ", "_").replace("'", "_")}"
+            if os.getenv(env_var_name).lower() == "true":
+                ignored_regions.append(region)
 
         return ignored_regions
 
     @classmethod
     def get_spreadsheet_id(cls):
-        return cls.config.get("secrets", "spreadsheet_id")
+        return os.getenv("SPREADSHEET_ID")
 
     @classmethod
     def get_skill_look_ahead(cls):
-        skill_look_ahead = cls.config.get("settings", "skill_look_ahead")
-        return int(skill_look_ahead)
+        return int(os.getenv("SKILL_LOOK_AHEAD"))
 
     @classmethod
     def get_simulation_trials(cls):
-        trials = cls.config.get("settings", "simulation_trials")
-        return int(trials)
+        return int(os.getenv("SIMULATION_TRIALS"))
 
     @classmethod
     def get_synth_sort_column(cls):
-        return cls.config.get("settings", "synth_sort_column")
+        return os.getenv("SYNTH_SORT_COLUMN")
 
     @classmethod
     def get_reverse_sort(cls):
-        return cls.config.getboolean("settings", "reverse_sort")
+        return os.getenv("REVERSE_SORT").lower() == "true"
 
     @classmethod
     def get_skill_set(cls):
-        wood = cls.config.get("skills", "wood")
-        smith = cls.config.get("skills", "smith")
-        gold = cls.config.get("skills", "gold")
-        cloth = cls.config.get("skills", "cloth")
-        leather = cls.config.get("skills", "leather")
-        bone = cls.config.get("skills", "bone")
-        alchemy = cls.config.get("skills", "alchemy")
-        cook = cls.config.get("skills", "cook")
-
-        wood = int(wood)
-        smith = int(smith)
-        gold = int(gold)
-        cloth = int(cloth)
-        leather = int(leather)
-        bone = int(bone)
-        alchemy = int(alchemy)
-        cook = int(cook)
+        wood = int(os.getenv("WOOD"))
+        smith = int(os.getenv("SMITH"))
+        gold = int(os.getenv("GOLD"))
+        cloth = int(os.getenv("CLOTH"))
+        leather = int(os.getenv("LEATHER"))
+        bone = int(os.getenv("BONE"))
+        alchemy = int(os.getenv("ALCHEMY"))
+        cook = int(os.getenv("COOK"))
 
         return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)

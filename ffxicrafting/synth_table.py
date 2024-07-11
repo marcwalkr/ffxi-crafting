@@ -1,4 +1,3 @@
-from operator import attrgetter
 from controllers.synth_controller import SynthController
 from synth import Synth
 from table import Table

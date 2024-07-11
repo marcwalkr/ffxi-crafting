@@ -9,15 +9,6 @@ class NpcController:
         pass
 
     @classmethod
-    def get_npc(cls, npc_id):
-        npc_tuple = cls.db.get_npc(npc_id)
-
-        if npc_tuple is not None:
-            return Npc(*npc_tuple)
-        else:
-            return None
-
-    @classmethod
     def get_npc_by_name(cls, name):
         npc_tuple = cls.db.get_npc_by_name(name)
 

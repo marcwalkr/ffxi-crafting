@@ -1,7 +1,6 @@
 import os
 from config import Config
 from controllers.auction_controller import AuctionController
-from models.auction_item import AuctionItem
 from controllers.item_controller import ItemController
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
