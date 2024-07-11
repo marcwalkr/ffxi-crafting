@@ -1,18 +1,6 @@
 import os
 import re
-from datetime import datetime, timezone
 from controllers.npc_controller import NpcController
-
-
-def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-
-def get_utc_timestamp():
-    dt = datetime.now(timezone.utc)
-    utc_time = dt.replace(tzinfo=timezone.utc)
-
-    return utc_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def clamp(n, minn, maxn):

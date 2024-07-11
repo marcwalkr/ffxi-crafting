@@ -43,10 +43,6 @@ class Database:
                             (item_name,))
         return self.cursor.fetchone()
 
-    def get_npc(self, npc_id):
-        self.cursor.execute("SELECT * FROM npc_list WHERE npcid=%s", (npc_id,))
-        return self.cursor.fetchone()
-
     def get_npc_by_name(self, name):
         self.cursor.execute("SELECT * FROM npc_list WHERE polutils_name=%s",
                             (name,))
