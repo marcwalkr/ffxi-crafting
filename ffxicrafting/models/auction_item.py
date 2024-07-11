@@ -1,6 +1,5 @@
 class AuctionItem:
-    def __init__(self, item_id, avg_single_price, avg_stack_price, sales_frequency) -> None:
+    def __init__(self, item_id, single_price, stack_price) -> None:
         self.item_id = item_id
-        self.avg_single_price = avg_single_price
-        self.avg_stack_price = avg_stack_price
-        self.sales_frequency = sales_frequency
+        self.single_price = single_price
+        self.stack_price = stack_price

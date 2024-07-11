@@ -18,8 +18,8 @@ class AuctionController:
             return None
 
     @classmethod
-    def add_auction_item(cls, item_id, avg_single_price, avg_stack_price, sales_frequency):
-        cls.db.add_auction_item(item_id, avg_single_price, avg_stack_price, sales_frequency)
+    def add_auction_item(cls, item_id, single_price, stack_price):
+        cls.db.add_auction_item(item_id, single_price, stack_price)
 
     @classmethod
     def delete_auction_items(cls):
