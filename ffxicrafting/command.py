@@ -33,8 +33,7 @@ class Command:
         crafters = []
         for c in characters:
             skill_set = Config.get_skill_set(c)
-            key_items = Config.get_key_items(c)
-            crafter = Crafter(skill_set, key_items)
+            crafter = Crafter(skill_set)
             crafters.append(crafter)
 
         synth_profit_threshold = Config.get_profit_per_synth()
@@ -98,8 +97,7 @@ class Command:
         recipe_id = int(recipe_id)
 
         skill_set = Config.get_skill_set(character)
-        key_items = Config.get_key_items(character)
-        crafter = Crafter(skill_set, key_items)
+        crafter = Crafter(skill_set)
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)
 
@@ -138,8 +136,7 @@ class Command:
         recipe_id = int(recipe_id)
 
         skill_set = Config.get_skill_set(character)
-        key_items = Config.get_key_items(character)
-        crafter = Crafter(skill_set, key_items)
+        crafter = Crafter(skill_set)
         recipe = SynthController.get_recipe(recipe_id)
         synth = Synth(recipe, crafter)
 

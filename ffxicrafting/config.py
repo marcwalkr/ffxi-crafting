@@ -137,13 +137,3 @@ class Config:
         cook = int(cook)
 
         return SkillSet(wood, smith, gold, cloth, leather, bone, alchemy, cook)
-
-    @classmethod
-    def get_key_items(cls, character):
-        key_items = cls.config.get(character, "key_items")
-        key_items = key_items.split(",")
-
-        try:
-            return [int(i) for i in key_items]
-        except ValueError:
-            return []

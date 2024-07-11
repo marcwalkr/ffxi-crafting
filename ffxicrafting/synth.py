@@ -104,11 +104,7 @@ class Synth:
         skill_look_ahead = Config.get_skill_look_ahead()
         enough_skill = self.difficulty - skill_look_ahead <= 0
 
-        has_key_item = True
-        if self.recipe.key_item > 0:
-            has_key_item = self.recipe.key_item in self.crafter.key_items
-
-        return enough_skill and has_key_item
+        return enough_skill
 
     def attempt_success(self):
         """Used in a synth simulation, returns True if the synth was a
