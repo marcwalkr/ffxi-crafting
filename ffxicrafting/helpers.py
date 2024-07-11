@@ -40,7 +40,7 @@ def generate_vendor_inserts():
             for line in stripped_lines:
                 # The line has 2 numbers separated by a comma and a comment
                 # e.g. 13327, 1250, -- Silver Earring
-                if not re.search("\d+,\s*\d+.*--.+", line):
+                if not re.search(r"\d+,\s*\d+.*--.+", line):
                     continue
 
                 # The item_id and price are the first 2 numbers on the line
