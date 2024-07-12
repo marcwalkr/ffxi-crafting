@@ -4,7 +4,7 @@ from skill_set import SkillSet
 
 
 class Config:
-    load_dotenv("config.env")  # Load environment variables from .env file
+    load_dotenv(".env")  # Load environment variables from .env file
 
     @classmethod
     def get_profit_per_synth(cls):
