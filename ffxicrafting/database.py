@@ -57,6 +57,10 @@ class Database:
         self.cursor.execute("SELECT * FROM synth_recipes")
         return self.cursor.fetchall()
 
+    def search_recipe(self, search_term):
+        self.cursor.execute("SELECT * FROM synth_recipes WHERE ResultName LIKE %s", ("%" + search_term + "%",))
+        return self.cursor.fetchall()
+
     def get_vendor_items(self, item_id):
         self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s",
                             (item_id,))

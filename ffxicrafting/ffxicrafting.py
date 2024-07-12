@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+from controllers.synth_controller import SynthController
+from controllers.item_controller import ItemController
+from helpers import summarize_list
 
 
 class App(tk.Tk):
@@ -39,9 +42,12 @@ class App(tk.Tk):
                                    command=lambda: self.search_recipes(search_var.get()))
         search_button.pack()
 
-        self.listbox = tk.Listbox(self.search_page, font=("Helvetica", 14))
-        self.listbox.pack(expand=True, fill="both")
-        self.listbox.bind("<<ListboxSelect>>", self.show_recipe_details)
+        self.tree = ttk.Treeview(self.search_page, columns=("item", "levels", "ingredients"), show="headings")
+        self.tree.heading("item", text="Item")
+        self.tree.heading("levels", text="Craft Levels")
+        self.tree.heading("ingredients", text="Ingredients")
+        self.tree.pack(expand=True, fill="both")
+        self.tree.bind("<Double-1>", self.show_recipe_details)
 
     def create_profit_page(self):
         self.profit_page = ttk.Frame(self.notebook)
@@ -56,28 +62,55 @@ class App(tk.Tk):
         self.notebook.add(self.settings_page, text="Settings")
 
     def search_recipes(self, search_term):
-        # Clear the listbox and perform the search
-        self.listbox.delete(0, tk.END)
-        # Example search results (replace with actual database query)
-        results = [("1: Potion of Healing (Level 10)",), ("2: Elixir of Strength (Level 15)",)]
+        # Clear the treeview and perform the search
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+
+        results = SynthController.search_recipe(search_term)
+
         for result in results:
-            self.listbox.insert(tk.END, result[0])
+            # Create a string representing the required crafting levels
+            skills = {
+                "Wood": result.wood,
+                "Smith": result.smith,
+                "Gold": result.gold,
+                "Cloth": result.cloth,
+                "Leather": result.leather,
+                "Bone": result.bone,
+                "Alchemy": result.alchemy,
+                "Cook": result.cook
+            }
+
+            levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
+            levels_string = ", ".join(levels)
+
+            ingredient_ids = [result.crystal, result.ingredient1, result.ingredient2, result.ingredient3,
+                              result.ingredient4, result.ingredient5, result.ingredient6, result.ingredient7,
+                              result.ingredient8]
+
+            # Get ingredient names from non-zero ingredient ids
+            ingredient_names = [ItemController.get_item(id).sort_name.replace("_", " ").title()
+                                for id in ingredient_ids if id > 0]
+
+            # Summarize ingredients in a string e.g. [apple, orange, orange] -> "apple, orange x2"
+            ingredient_names_summarized = summarize_list(ingredient_names)
+
+            tree_values = [result.result_name, levels_string, ingredient_names_summarized]
+
+            self.tree.insert("", "end", values=tree_values)
 
     def show_recipe_details(self, event):
-        selection = event.widget.curselection()
-        if selection:
-            index = selection[0]
-            item = event.widget.get(index)
-            recipe_id = int(item.split(":")[0])
-            # Create a detail page dynamically
-            detail_page = self.create_detail_page(recipe_id)
-            self.notebook.add(detail_page, text=f"Recipe {recipe_id} Details")
-            self.notebook.select(detail_page)
+        item = self.tree.selection()[0]
+        recipe_item = self.tree.item(item, "values")[0]
+        # Create a detail page dynamically
+        detail_page = self.create_detail_page(recipe_item)
+        self.notebook.add(detail_page, text=f"Recipe {recipe_item} Details")
+        self.notebook.select(detail_page)
 
-    def create_detail_page(self, recipe_id):
+    def create_detail_page(self, recipe_item):
         detail_page = ttk.Frame(self.notebook)
 
-        detail_label = ttk.Label(detail_page, text=f"Details for Recipe {recipe_id}")
+        detail_label = ttk.Label(detail_page, text=f"Details for Recipe {recipe_item}")
         detail_label.pack(pady=20)
 
         # Close button to remove the detail tab

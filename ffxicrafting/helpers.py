@@ -7,6 +7,37 @@ def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
 
+def summarize_list(items):
+    if not items:
+        return ""
+
+    summarized = []
+    current_item = items[0]
+    count = 1
+
+    for i in range(1, len(items)):
+        if items[i] == current_item:
+            count += 1
+        else:
+            if count > 1:
+                summarized.append(f"{current_item} x{count},")
+            else:
+                summarized.append(f"{current_item},")
+            current_item = items[i]
+            count = 1
+
+    # Append the last item after loop termination
+    if count > 1:
+        summarized.append(f"{current_item} x{count},")
+    else:
+        summarized.append(f"{current_item},")
+
+    # Join the summarized list with spaces and remove the trailing comma
+    summary = " ".join(summarized).rstrip(",")
+
+    return summary
+
+
 def generate_vendor_inserts():
     file_lines = []
 
@@ -32,7 +63,7 @@ def generate_vendor_inserts():
                     continue
 
                 # The item_id and price are the first 2 numbers on the line
-                numbers = re.findall('[0-9]+', line)
+                numbers = re.findall("[0-9]+", line)
                 item_id, price = numbers[0:2]
 
                 comment_start = line.index("--")

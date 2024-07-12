@@ -21,3 +21,8 @@ class SynthController:
     def get_all_recipes(cls):
         recipe_tuples = cls.db.get_all_recipes()
         return [SynthRecipe(*r) for r in recipe_tuples]
+
+    @classmethod
+    def search_recipe(cls, search_term):
+        recipe_tuples = cls.db.search_recipe(search_term)
+        return [SynthRecipe(*r) for r in recipe_tuples]
