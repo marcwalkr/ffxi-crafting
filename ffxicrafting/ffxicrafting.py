@@ -14,7 +14,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("FFXI Crafting Tool")
-        self.geometry("800x700")
+        self.geometry("1000x700")
 
         # Configure styles
         self.style = ttk.Style(self)
@@ -49,8 +49,8 @@ class App(tk.Tk):
                                    command=lambda: self.search_recipes(search_var.get()))
         search_button.pack(pady=(0, 10))
 
-        self.recipe_tree = ttk.Treeview(self.search_page, columns=(
-            "nq", "hq", "levels", "ingredients"), show="headings")
+        self.recipe_tree = ttk.Treeview(self.search_page, columns=("nq", "hq", "levels", "ingredients"),
+                                        show="headings")
         self.recipe_tree.heading("nq", text="NQ")
         self.recipe_tree.heading("hq", text="HQ")
         self.recipe_tree.heading("levels", text="Craft Levels")
@@ -126,6 +126,10 @@ class App(tk.Tk):
             self.recipe_tree.insert("", "end", iid=recipe.id, values=tree_values)
 
     def show_recipe_details(self, event):
+        # Handle if nothing was selected
+        if not self.recipe_tree.selection():
+            return
+
         # The tree iid was set to the recipe id
         recipe_id = self.recipe_tree.selection()[0]
 
@@ -149,8 +153,8 @@ class App(tk.Tk):
 
         # Create columns for ingredients tree
         ingredient_columns = ("Ingredient", "Quantity", "Single Price", "Stack Price", "Vendor Price")
-        self.ingredients_tree = ttk.Treeview(
-            ingredients_frame, columns=ingredient_columns, show="headings", selectmode="browse")
+        self.ingredients_tree = ttk.Treeview(ingredients_frame, columns=ingredient_columns, show="headings",
+                                             selectmode="browse")
 
         # Set column headings and center content
         for col in ingredient_columns:
@@ -216,7 +220,8 @@ class App(tk.Tk):
 
         # Create columns for results tree
         result_columns = ("Result", "Single Price", "Stack Price")
-        self.results_tree = ttk.Treeview(results_frame, columns=result_columns, show="headings", selectmode="browse")
+        self.results_tree = ttk.Treeview(results_frame, columns=result_columns,
+                                         show="headings", selectmode="browse")
 
         # Set column headings and center content
         for col in result_columns:
@@ -307,11 +312,19 @@ class App(tk.Tk):
         popup.grid_columnconfigure(1, weight=1)
 
     def edit_ingredient_price(self, event):
+        # Handle if nothing was selected
+        if not self.ingredients_tree.selection():
+            return
+
         item_id = self.ingredients_tree.selection()[0]
         recipe_id = self.ingredients_tree.item(item_id, "values")[5]
         self.edit_and_save_prices(self.ingredients_tree, item_id, [2, 3], "Edit Ingredient Prices", recipe_id)
 
     def edit_result_price(self, event):
+        # Handle if nothing was selected
+        if not self.results_tree.selection():
+            return
+
         item_id = self.results_tree.selection()[0]
         recipe_id = self.results_tree.item(item_id, "values")[3]
         self.edit_and_save_prices(self.results_tree, item_id, [1, 2], "Edit Result Prices", recipe_id)
