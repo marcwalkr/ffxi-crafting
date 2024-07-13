@@ -56,7 +56,12 @@ class App(tk.Tk):
         self.recipe_tree.heading("levels", text="Craft Levels")
         self.recipe_tree.heading("ingredients", text="Ingredients")
         self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
+
+        # Bind double-click to show recipe details
         self.recipe_tree.bind("<Double-1>", self.show_recipe_details)
+
+        # Bind single-click to remove selection
+        self.recipe_tree.bind("<Button-1>", self.on_treeview_click)
 
     def create_profit_page(self):
         self.profit_page = ttk.Frame(self.notebook)
@@ -200,6 +205,9 @@ class App(tk.Tk):
         # Bind double-click to edit prices
         self.ingredients_tree.bind("<Double-1>", self.edit_ingredient_price)
 
+        # Bind single-click to remove selection
+        self.ingredients_tree.bind("<Button-1>", self.on_treeview_click)
+
         # Cost Per Synth frame
         cost_per_synth_frame = ttk.Frame(detail_page)
         cost_per_synth_frame.pack()
@@ -255,6 +263,9 @@ class App(tk.Tk):
 
         # Bind double-click to edit prices
         self.results_tree.bind("<Double-1>", self.edit_result_price)
+
+        # Bind single-click to remove selection
+        self.results_tree.bind("<Button-1>", self.on_treeview_click)
 
         # Close button to remove the detail tab
         close_button = ttk.Button(detail_page, text="Close", command=lambda: self.close_detail_page(detail_page))
@@ -378,6 +389,12 @@ class App(tk.Tk):
     def close_detail_page(self, detail_page):
         tab_id = self.notebook.index(detail_page)
         self.notebook.forget(tab_id)
+
+    def on_treeview_click(self, event):
+        tree = event.widget
+        region = tree.identify("region", event.x, event.y)
+        if region in ("nothing", "heading"):
+            tree.selection_remove(tree.selection())
 
 
 class TreeviewWithSort(ttk.Treeview):
