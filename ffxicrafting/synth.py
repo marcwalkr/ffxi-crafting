@@ -18,11 +18,6 @@ class Synth:
         self.tier = self.get_tier()
         self.num_trials = Config.get_simulation_trials()
 
-        self.cost = None
-        self.profit_per_synth = None
-        self.profit_per_storage = None
-        self.sell_frequency = None
-
     def get_result_names(self):
         nq_item = ItemController.get_item(self.recipe.result)
         nq_name = nq_item.sort_name.replace("_", " ").title()
