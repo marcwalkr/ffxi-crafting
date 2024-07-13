@@ -49,8 +49,8 @@ class App(tk.Tk):
                                    command=lambda: self.search_recipes(search_var.get()))
         search_button.pack(pady=(0, 10))
 
-        self.recipe_tree = ttk.Treeview(self.search_page, columns=("nq", "hq", "levels", "ingredients"),
-                                        show="headings")
+        self.recipe_tree = TreeviewWithSort(self.search_page, columns=("nq", "hq", "levels", "ingredients"),
+                                            show="headings")
         self.recipe_tree.heading("nq", text="NQ")
         self.recipe_tree.heading("hq", text="HQ")
         self.recipe_tree.heading("levels", text="Craft Levels")
@@ -153,8 +153,8 @@ class App(tk.Tk):
 
         # Create columns for ingredients tree
         ingredient_columns = ("Ingredient", "Quantity", "Single Price", "Stack Price", "Vendor Price")
-        self.ingredients_tree = ttk.Treeview(ingredients_frame, columns=ingredient_columns, show="headings",
-                                             selectmode="browse")
+        self.ingredients_tree = TreeviewWithSort(ingredients_frame, columns=ingredient_columns, show="headings",
+                                                 selectmode="browse")
 
         # Set column headings and center content
         for col in ingredient_columns:
@@ -220,8 +220,8 @@ class App(tk.Tk):
 
         # Create columns for results tree
         result_columns = ("Result", "Single Price", "Stack Price")
-        self.results_tree = ttk.Treeview(results_frame, columns=result_columns,
-                                         show="headings", selectmode="browse")
+        self.results_tree = TreeviewWithSort(results_frame, columns=result_columns,
+                                             show="headings", selectmode="browse")
 
         # Set column headings and center content
         for col in result_columns:
@@ -378,6 +378,25 @@ class App(tk.Tk):
     def close_detail_page(self, detail_page):
         tab_id = self.notebook.index(detail_page)
         self.notebook.forget(tab_id)
+
+
+class TreeviewWithSort(ttk.Treeview):
+    def __init__(self, master=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self._init_sorting()
+
+    def _init_sorting(self):
+        for col in self["columns"]:
+            self.heading(col, text=col, command=lambda c=col: self._sort_by(c, False))
+
+    def _sort_by(self, col, descending):
+        data = [(self.set(child, col), child) for child in self.get_children('')]
+        data.sort(reverse=descending)
+
+        for idx, (val, child) in enumerate(data):
+            self.move(child, "", idx)
+
+        self.heading(col, command=lambda: self._sort_by(col, not descending))
 
 
 # Start the main application
