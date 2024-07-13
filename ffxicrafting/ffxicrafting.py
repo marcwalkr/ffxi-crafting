@@ -255,6 +255,22 @@ class App(tk.Tk):
         popup = tk.Toplevel(self)
         popup.title(popup_title)
 
+        # Calculate position relative to main window
+        parent_x = self.winfo_rootx()
+        parent_y = self.winfo_rooty()
+        parent_width = self.winfo_width()
+        parent_height = self.winfo_height()
+
+        popup_width = 300
+        popup_height = 250
+
+        # Calculate center position
+        x = parent_x + (parent_width - popup_width) // 2
+        y = parent_y + (parent_height - popup_height) // 2
+
+        # Set geometry of the popup window
+        popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
+
         # Label for item name
         ttk.Label(popup, text=item_values[0]).grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
