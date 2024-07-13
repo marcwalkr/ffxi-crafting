@@ -93,7 +93,7 @@ class App(tk.Tk):
             hq3_string = hq3_name if recipe.result_hq3_qty == 1 else f"{hq3_name} x{recipe.result_hq3_qty}"
 
             # Join each unique string separated by commas
-            hq_string = ", ".join(unique_preserve_order(hq1_string, hq2_string, hq3_string))
+            hq_string = ", ".join(unique_preserve_order([hq1_string, hq2_string, hq3_string]))
 
             # Create a string for the required crafting levels
             skills = {
