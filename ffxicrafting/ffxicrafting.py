@@ -53,7 +53,7 @@ class App(tk.Tk):
         self.recipe_tree.heading("item", text="Item")
         self.recipe_tree.heading("levels", text="Craft Levels")
         self.recipe_tree.heading("ingredients", text="Ingredients")
-        self.recipe_tree.pack(padx=5, pady=(0, 5), expand=True, fill="both")
+        self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
         self.recipe_tree.bind("<Double-1>", self.show_recipe_details)
 
     def create_profit_page(self):
@@ -167,21 +167,17 @@ class App(tk.Tk):
             else:
                 cheapest_vendor_price = ""
 
-            # Insert data into the treeview, set the iid to the ingredient_id for easy access
+            # Insert data into the treeview
+            # Set the iid to the ingredient_id for retrieval in detail view
+            # Pass recipe id for updating Cost Per Synth
             self.ingredients_tree.insert("", "end", iid=ingredient_id, values=(
-                ingredient_name, quantity, single_price, stack_price, cheapest_vendor_price))
+                ingredient_name, quantity, single_price, stack_price, cheapest_vendor_price, recipe.id))
 
         # Add ingredients tree to the frame
         self.ingredients_tree.pack(padx=10, pady=5, expand=True, fill="both")
 
         # Bind double-click to edit prices
         self.ingredients_tree.bind("<Double-1>", self.edit_ingredient_price)
-
-        # Create a synth object and calculate the cost per synth
-        skill_set = Config.get_skill_set()
-        crafter = Crafter(skill_set)
-        synth = Synth(recipe, crafter)
-        cost_per_synth = synth.calculate_cost()
 
         # Cost Per Synth frame
         cost_per_synth_frame = ttk.Frame(detail_page)
@@ -191,11 +187,11 @@ class App(tk.Tk):
         cost_per_synth_label = ttk.Label(cost_per_synth_frame, text="Cost Per Synth:")
         cost_per_synth_label.pack(side=tk.LEFT)
 
-        # Set Cost Per Synth Label to N/A if cost couldn't be calculated
-        value_text = f"{cost_per_synth:.2f} gil" if cost_per_synth is not None else "N/A"
+        self.cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
+        self.cost_per_synth_value_label.pack(side=tk.LEFT)
 
-        cost_per_synth_value_label = ttk.Label(cost_per_synth_frame, text=value_text)
-        cost_per_synth_value_label.pack(side=tk.LEFT)
+        # Set the cost per synth value in the label
+        self.update_cost_per_synth(recipe)
 
         # Create frame for results tree
         results_frame = ttk.Frame(detail_page)
@@ -230,7 +226,8 @@ class App(tk.Tk):
                 stack_price = "" if auction_item.stack_price == 0 else auction_item.stack_price
 
             # Insert data into treeview, set the iid to the result_id for easy access
-            self.results_tree.insert("", "end", iid=result_id, values=(result_name, single_price, stack_price))
+            self.results_tree.insert("", "end", iid=result_id, values=(
+                result_name, single_price, stack_price, recipe.id))
 
         # Add results tree to the frame
         self.results_tree.pack(padx=10, pady=10, expand=True, fill="both")
@@ -240,12 +237,12 @@ class App(tk.Tk):
 
         # Close button to remove the detail tab
         close_button = ttk.Button(detail_page, text="Close", command=lambda: self.close_detail_page(detail_page))
-        close_button.pack(pady=5)
+        close_button.pack(pady=(5, 10))
 
         # Add more details and widgets for the recipe here
         return detail_page
 
-    def edit_and_save_prices(self, tree, item_id, price_indices, popup_title):
+    def edit_and_save_prices(self, tree, item_id, price_indices, popup_title, recipe_id):
         # Get values from the selected item
         item_values = tree.item(item_id, "values")
 
@@ -286,18 +283,20 @@ class App(tk.Tk):
 
         # Save button
         save_button = ttk.Button(popup, text="Save", command=lambda: self.save_prices(
-            popup, item_id, single_price_entry, stack_price_entry, tree, price_indices))
+            popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id))
         save_button.grid(row=4, column=0, columnspan=2, pady=10)
 
     def edit_ingredient_price(self, event):
         item_id = self.ingredients_tree.selection()[0]
-        self.edit_and_save_prices(self.ingredients_tree, item_id, [2, 3], "Edit Ingredient Prices")
+        recipe_id = self.ingredients_tree.item(item_id, "values")[5]
+        self.edit_and_save_prices(self.ingredients_tree, item_id, [2, 3], "Edit Ingredient Prices", recipe_id)
 
     def edit_result_price(self, event):
         item_id = self.results_tree.selection()[0]
-        self.edit_and_save_prices(self.results_tree, item_id, [1, 2], "Edit Result Prices")
+        recipe_id = self.results_tree.item(item_id, "values")[3]
+        self.edit_and_save_prices(self.results_tree, item_id, [1, 2], "Edit Result Prices", recipe_id)
 
-    def save_prices(self, popup, item_id, single_price_entry, stack_price_entry, tree, price_indices):
+    def save_prices(self, popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id):
         # Get updated prices from the entry boxes
         single_price = single_price_entry.get()
         stack_price = stack_price_entry.get()
@@ -322,8 +321,26 @@ class App(tk.Tk):
             # Insert new item
             AuctionController.add_auction_item(item_id, single_price, stack_price)
 
+        # Get recipe from the recipe_id passed in and update Cost Per Synth
+        recipe = SynthController.get_recipe(recipe_id)
+        self.update_cost_per_synth(recipe)
+
         # Close the popup window
         popup.destroy()
+
+    def update_cost_per_synth(self, recipe):
+        # Create a synth object and calculate the cost per synth
+        skill_set = Config.get_skill_set()
+        crafter = Crafter(skill_set)
+        synth = Synth(recipe, crafter)
+        cost_per_synth = synth.calculate_cost()
+
+        # Set Cost Per Synth Label to N/A if cost couldn't be calculated
+        value_text = f"{cost_per_synth:.2f} gil" if cost_per_synth is not None else "N/A"
+        self.cost_per_synth_value_label.config(text=value_text)
+
+        # Force the UI to update
+        self.update()
 
     def close_detail_page(self, detail_page):
         tab_id = self.notebook.index(detail_page)
