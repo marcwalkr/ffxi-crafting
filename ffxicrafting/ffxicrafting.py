@@ -16,7 +16,12 @@ class App(tk.Tk):
         self.title("FFXI Crafting Tool")
         self.geometry("1000x700")
 
-        # Configure styles
+        self.configure_styles()
+        self.create_main_frame()
+        self.create_notebook()
+        self.create_pages()
+
+    def configure_styles(self):
         self.style = ttk.Style(self)
         self.style.configure("TButton", font=("Helvetica", 14), padding=10)
         self.style.configure("TLabel", font=("Helvetica", 14), padding=5)
@@ -24,15 +29,15 @@ class App(tk.Tk):
         self.style.configure("Treeview", font=("Helvetica", 12))
         self.style.configure("Treeview.Heading", font=("Helvetica", 12, "bold"))
 
-        # Create the main frame
+    def create_main_frame(self):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(expand=True, fill="both")
 
-        # Create the notebook
+    def create_notebook(self):
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.pack(expand=True, fill="both")
 
-        # Create different pages
+    def create_pages(self):
         self.create_search_page()
         self.create_profit_page()
         self.create_simulate_page()
@@ -51,17 +56,17 @@ class App(tk.Tk):
 
         self.recipe_tree = TreeviewWithSort(self.search_page, columns=("nq", "hq", "levels", "ingredients"),
                                             show="headings")
-        self.recipe_tree.heading("nq", text="NQ")
-        self.recipe_tree.heading("hq", text="HQ")
-        self.recipe_tree.heading("levels", text="Craft Levels")
-        self.recipe_tree.heading("ingredients", text="Ingredients")
+        self.configure_treeview(self.recipe_tree)
         self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
-        # Bind double-click to show recipe details
         self.recipe_tree.bind("<Double-1>", self.show_recipe_details)
-
-        # Bind single-click to remove selection
         self.recipe_tree.bind("<Button-1>", self.on_treeview_click)
+
+    def configure_treeview(self, treeview):
+        treeview.heading("nq", text="NQ")
+        treeview.heading("hq", text="HQ")
+        treeview.heading("levels", text="Craft Levels")
+        treeview.heading("ingredients", text="Ingredients")
 
     def create_profit_page(self):
         self.profit_page = ttk.Frame(self.notebook)
@@ -76,213 +81,198 @@ class App(tk.Tk):
         self.notebook.add(self.settings_page, text="Settings")
 
     def search_recipes(self, search_term):
-        # Clear the treeview and perform the search
-        for i in self.recipe_tree.get_children():
-            self.recipe_tree.delete(i)
-
+        self.clear_treeview(self.recipe_tree)
         results = SynthController.search_recipe(search_term)
 
         for recipe in results:
-            # Create string for the NQ result and quantity
-            nq_name = ItemController.get_formatted_item_name(recipe.result)
-            nq_string = nq_name if recipe.result_qty == 1 else f"{nq_name} x{recipe.result_qty}"
-
-            # Create string for the HQ results and quantities
-            hq1_name = ItemController.get_formatted_item_name(recipe.result_hq1)
-            hq1_string = hq1_name if recipe.result_hq1_qty == 1 else f"{hq1_name} x{recipe.result_hq1_qty}"
-
-            hq2_name = ItemController.get_formatted_item_name(recipe.result_hq2)
-            hq2_string = hq2_name if recipe.result_hq2_qty == 1 else f"{hq2_name} x{recipe.result_hq2_qty}"
-
-            hq3_name = ItemController.get_formatted_item_name(recipe.result_hq3)
-            hq3_string = hq3_name if recipe.result_hq3_qty == 1 else f"{hq3_name} x{recipe.result_hq3_qty}"
-
-            # Join each unique string separated by commas
-            hq_string = ", ".join(unique_preserve_order([hq1_string, hq2_string, hq3_string]))
-
-            # Create a string for the required crafting levels
-            skills = {
-                "Wood": recipe.wood,
-                "Smith": recipe.smith,
-                "Gold": recipe.gold,
-                "Cloth": recipe.cloth,
-                "Leather": recipe.leather,
-                "Bone": recipe.bone,
-                "Alchemy": recipe.alchemy,
-                "Cook": recipe.cook
-            }
-
-            levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
-            levels_string = ", ".join(levels)
-
-            ingredient_ids = [recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
-                              recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
-                              recipe.ingredient8]
-
-            # Get ingredient names from non-zero ingredient ids
-            ingredient_names = [ItemController.get_formatted_item_name(id) for id in ingredient_ids if id > 0]
-
-            # Summarize ingredients in a string e.g. [apple, orange, orange] -> "apple, orange x2"
-            ingredient_names_summarized = summarize_list(ingredient_names)
-
+            nq_string, hq_string, levels_string, ingredient_names_summarized = self.format_recipe_data(recipe)
             tree_values = [nq_string, hq_string, levels_string, ingredient_names_summarized]
-
-            # Set the iid to the recipe id to retrieve in the detail page
             self.recipe_tree.insert("", "end", iid=recipe.id, values=tree_values)
 
+    def clear_treeview(self, treeview):
+        for i in treeview.get_children():
+            treeview.delete(i)
+
+    def format_recipe_data(self, recipe):
+        nq_string = self.format_item_string(recipe.result, recipe.result_qty)
+        hq_string = self.format_hq_string(recipe)
+        levels_string = self.format_levels_string(recipe)
+        ingredient_names_summarized = self.format_ingredient_names(recipe)
+        return nq_string, hq_string, levels_string, ingredient_names_summarized
+
+    def format_item_string(self, item_id, quantity):
+        item_name = ItemController.get_formatted_item_name(item_id)
+        return item_name if quantity == 1 else f"{item_name} x{quantity}"
+
+    def format_hq_string(self, recipe):
+        hq_strings = [
+            self.format_item_string(recipe.result_hq1, recipe.result_hq1_qty),
+            self.format_item_string(recipe.result_hq2, recipe.result_hq2_qty),
+            self.format_item_string(recipe.result_hq3, recipe.result_hq3_qty)
+        ]
+        return ", ".join(unique_preserve_order(hq_strings))
+
+    def format_levels_string(self, recipe):
+        skills = {
+            "Wood": recipe.wood,
+            "Smith": recipe.smith,
+            "Gold": recipe.gold,
+            "Cloth": recipe.cloth,
+            "Leather": recipe.leather,
+            "Bone": recipe.bone,
+            "Alchemy": recipe.alchemy,
+            "Cook": recipe.cook
+        }
+        levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
+        return ", ".join(levels)
+
+    def format_ingredient_names(self, recipe):
+        ingredient_ids = [
+            recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
+            recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
+            recipe.ingredient8
+        ]
+        ingredient_names = [ItemController.get_formatted_item_name(id) for id in ingredient_ids if id > 0]
+        return summarize_list(ingredient_names)
+
     def show_recipe_details(self, event):
-        # Handle if nothing was selected
         if not self.recipe_tree.selection():
             return
 
-        # The tree iid was set to the recipe id
         recipe_id = self.recipe_tree.selection()[0]
-
-        # Get the recipe object
         recipe = SynthController.get_recipe(recipe_id)
-
-        # Create a detail page dynamically
         detail_page = self.create_detail_page(recipe)
         self.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.notebook.select(detail_page)
 
     def create_detail_page(self, recipe):
         detail_page = ttk.Frame(self.notebook)
+        self.add_recipe_label(detail_page, recipe.result_name)
+        self.add_ingredients_tree(detail_page, recipe)
+        self.add_cost_per_synth_frame(detail_page, recipe)
+        self.add_results_tree(detail_page, recipe)
+        self.add_close_button(detail_page)
+        return detail_page
 
-        recipe_label = ttk.Label(detail_page, text=recipe.result_name)
+    def add_recipe_label(self, frame, text):
+        recipe_label = ttk.Label(frame, text=text)
         recipe_label.pack(pady=10)
 
-        # Create frame for ingredients tree
-        ingredients_frame = ttk.Frame(detail_page)
+    def add_ingredients_tree(self, frame, recipe):
+        ingredients_frame = ttk.Frame(frame)
         ingredients_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Create columns for ingredients tree
         ingredient_columns = ("Ingredient", "Quantity", "Single Price", "Stack Price", "Vendor Price")
         self.ingredients_tree = TreeviewWithSort(ingredients_frame, columns=ingredient_columns, show="headings",
                                                  selectmode="browse")
+        self.configure_treeview_columns(self.ingredients_tree, ingredient_columns)
+        self.populate_ingredients_tree(recipe)
+        self.ingredients_tree.pack(padx=10, pady=5, expand=True, fill="both")
 
-        # Set column headings and center content
-        for col in ingredient_columns:
-            self.ingredients_tree.heading(col, text=col)
-            self.ingredients_tree.column(col, width=100, anchor=tk.CENTER, stretch=True)
+        self.ingredients_tree.bind("<Double-1>", self.edit_ingredient_price)
+        self.ingredients_tree.bind("<Button-1>", self.on_treeview_click)
 
-        # Create list of recipe ingredient item ids
-        ingredient_ids = [recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
-                          recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
-                          recipe.ingredient8]
+    def configure_treeview_columns(self, treeview, columns):
+        for col in columns:
+            treeview.heading(col, text=col)
+            treeview.column(col, width=100, anchor=tk.CENTER, stretch=True)
 
-        # Get dictionary containing the id and quantity of each non-zero ingredient id
-        ingredient_counts = count_items([i for i in ingredient_ids if i > 0])
-
+    def populate_ingredients_tree(self, recipe):
+        ingredient_counts = count_items([i for i in self.get_ingredient_ids(recipe) if i > 0])
         for ingredient_id, quantity in ingredient_counts.items():
             ingredient_name = ItemController.get_formatted_item_name(ingredient_id)
-
-            # Get single and stack auction house prices, set to empty string if 0 or auction_item is None
-            auction_item = AuctionController.get_auction_item(ingredient_id)
-            if auction_item is None:
-                single_price = ""
-                stack_price = ""
-            else:
-                single_price = "" if auction_item.single_price == 0 else auction_item.single_price
-                stack_price = "" if auction_item.stack_price == 0 else auction_item.stack_price
-
-            # Get the cheapest vendor price, set to empty string if none found
-            vendor_items = VendorController.get_vendor_items(ingredient_id)
-            if vendor_items:
-                cheapest_vendor_price = min([vendor_item.price for vendor_item in vendor_items])
-            else:
-                cheapest_vendor_price = ""
-
-            # Insert data into the treeview
-            # Set the iid to the ingredient_id for retrieval in detail view
-            # Pass recipe id for updating Cost Per Synth
+            single_price, stack_price = self.get_auction_prices(ingredient_id)
+            cheapest_vendor_price = self.get_cheapest_vendor_price(ingredient_id)
             self.ingredients_tree.insert("", "end", iid=ingredient_id, values=(
                 ingredient_name, quantity, single_price, stack_price, cheapest_vendor_price, recipe.id))
 
-        # Add ingredients tree to the frame
-        self.ingredients_tree.pack(padx=10, pady=5, expand=True, fill="both")
+    def get_ingredient_ids(self, recipe):
+        return [
+            recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
+            recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
+            recipe.ingredient8
+        ]
 
-        # Bind double-click to edit prices
-        self.ingredients_tree.bind("<Double-1>", self.edit_ingredient_price)
+    def get_auction_prices(self, item_id):
+        auction_item = AuctionController.get_auction_item(item_id)
+        if auction_item is None:
+            return "", ""
+        single_price = "" if auction_item.single_price == 0 else auction_item.single_price
+        stack_price = "" if auction_item.stack_price == 0 else auction_item.stack_price
+        return single_price, stack_price
 
-        # Bind single-click to remove selection
-        self.ingredients_tree.bind("<Button-1>", self.on_treeview_click)
+    def get_cheapest_vendor_price(self, item_id):
+        vendor_items = VendorController.get_vendor_items(item_id)
+        if vendor_items:
+            return min([vendor_item.price for vendor_item in vendor_items])
+        return ""
 
-        # Cost Per Synth frame
-        cost_per_synth_frame = ttk.Frame(detail_page)
+    def add_cost_per_synth_frame(self, frame, recipe):
+        cost_per_synth_frame = ttk.Frame(frame)
         cost_per_synth_frame.pack()
 
-        # Cost Per Synth labels
         cost_per_synth_label = ttk.Label(cost_per_synth_frame, text="Cost Per Synth:")
         cost_per_synth_label.pack(side=tk.LEFT)
 
         self.cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
         self.cost_per_synth_value_label.pack(side=tk.LEFT)
 
-        # Set the cost per synth value in the label
         self.update_cost_per_synth(recipe)
 
-        # Create frame for results tree
-        results_frame = ttk.Frame(detail_page)
+    def add_results_tree(self, frame, recipe):
+        results_frame = ttk.Frame(frame)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Create columns for results tree
         result_columns = ("Result", "Single Price", "Stack Price")
         self.results_tree = TreeviewWithSort(results_frame, columns=result_columns,
                                              show="headings", selectmode="browse")
+        self.configure_treeview_columns(self.results_tree, result_columns)
+        self.populate_results_tree(recipe)
+        self.results_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
-        # Set column headings and center content
-        for col in result_columns:
-            self.results_tree.heading(col, text=col)
-            self.results_tree.column(col, width=100, anchor=tk.CENTER, stretch=True)
+        self.results_tree.bind("<Double-1>", self.edit_result_price)
+        self.results_tree.bind("<Button-1>", self.on_treeview_click)
 
-        # Create list of possible result item ids for a successful synth
-        result_ids = [recipe.result, recipe.result_hq1, recipe.result_hq2, recipe.result_hq3]
-
-        # Remove duplicates
-        unique_result_ids = unique_preserve_order(result_ids)
-
+    def populate_results_tree(self, recipe):
+        unique_result_ids = unique_preserve_order(
+            [recipe.result, recipe.result_hq1, recipe.result_hq2, recipe.result_hq3])
         for result_id in unique_result_ids:
             result_name = ItemController.get_formatted_item_name(result_id)
-
-            # Get single and stack auction house prices, set to empty string if 0 or auction_item is None
-            auction_item = AuctionController.get_auction_item(result_id)
-            if auction_item is None:
-                single_price = ""
-                stack_price = ""
-            else:
-                single_price = "" if auction_item.single_price == 0 else auction_item.single_price
-                stack_price = "" if auction_item.stack_price == 0 else auction_item.stack_price
-
-            # Insert data into treeview, set the iid to the result_id for easy access
+            single_price, stack_price = self.get_auction_prices(result_id)
             self.results_tree.insert("", "end", iid=result_id, values=(
                 result_name, single_price, stack_price, recipe.id))
 
-        # Add results tree to the frame
-        self.results_tree.pack(padx=10, pady=10, expand=True, fill="both")
-
-        # Bind double-click to edit prices
-        self.results_tree.bind("<Double-1>", self.edit_result_price)
-
-        # Bind single-click to remove selection
-        self.results_tree.bind("<Button-1>", self.on_treeview_click)
-
-        # Close button to remove the detail tab
-        close_button = ttk.Button(detail_page, text="Close", command=lambda: self.close_detail_page(detail_page))
+    def add_close_button(self, frame):
+        close_button = ttk.Button(frame, text="Close", command=lambda: self.close_detail_page(frame))
         close_button.pack(pady=(5, 10))
 
-        # Add more details and widgets for the recipe here
-        return detail_page
-
     def edit_and_save_prices(self, tree, item_id, price_indices, popup_title, recipe_id):
-        # Get values from the selected item
         item_values = tree.item(item_id, "values")
+        popup = self.create_popup(popup_title, item_values[0])
 
-        # Create a popup window for editing prices
+        single_price_entry = self.create_price_entry(popup, "Single Price:", item_values[price_indices[0]], 2)
+        stack_price_entry = self.create_price_entry(popup, "Stack Price:", item_values[price_indices[1]], 3)
+
+        save_button = ttk.Button(popup, text="Save", command=lambda: self.save_prices(
+            popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id))
+        save_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="ew", padx=20)
+
+        self.center_popup(popup)
+
+    def create_popup(self, title, item_name):
         popup = tk.Toplevel(self)
-        popup.title(popup_title)
+        popup.title(title)
+        ttk.Label(popup, text=item_name).grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+        return popup
 
-        # Calculate position relative to main window
+    def create_price_entry(self, popup, label_text, initial_value, row):
+        ttk.Label(popup, text=label_text).grid(row=row, column=0, padx=10, pady=5, sticky='e')
+        price_entry = ttk.Entry(popup, width=15)
+        price_entry.insert(0, initial_value)
+        price_entry.grid(row=row, column=1, padx=10, pady=5)
+        return price_entry
+
+    def center_popup(self, popup):
         parent_x = self.winfo_rootx()
         parent_y = self.winfo_rooty()
         parent_width = self.winfo_width()
@@ -291,39 +281,14 @@ class App(tk.Tk):
         popup_width = 300
         popup_height = 240
 
-        # Calculate center position
         x = parent_x + (parent_width - popup_width) // 2
         y = parent_y + (parent_height - popup_height) // 2
 
-        # Set geometry of the popup window
         popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
-
-        # Label for item name
-        ttk.Label(popup, text=item_values[0]).grid(row=0, column=0, columnspan=2, padx=10, pady=10)
-
-        # Single price entry
-        ttk.Label(popup, text="Single Price:").grid(row=2, column=0, padx=10, pady=5, sticky='e')
-        single_price_entry = ttk.Entry(popup, width=15)
-        single_price_entry.insert(0, item_values[price_indices[0]])
-        single_price_entry.grid(row=2, column=1, padx=10, pady=5)
-
-        # Stack price entry
-        ttk.Label(popup, text="Stack Price:").grid(row=3, column=0, padx=10, pady=5, sticky='e')
-        stack_price_entry = ttk.Entry(popup, width=15)
-        stack_price_entry.insert(0, item_values[price_indices[1]])
-        stack_price_entry.grid(row=3, column=1, padx=10, pady=5)
-
-        # Save button
-        save_button = ttk.Button(popup, text="Save", command=lambda: self.save_prices(
-            popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id))
-        save_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="ew", padx=20)
-
-        # Center the save button by configuring the columns
         popup.grid_columnconfigure(0, weight=1)
         popup.grid_columnconfigure(1, weight=1)
 
     def edit_ingredient_price(self, event):
-        # Handle if nothing was selected
         if not self.ingredients_tree.selection():
             return
 
@@ -332,7 +297,6 @@ class App(tk.Tk):
         self.edit_and_save_prices(self.ingredients_tree, item_id, [2, 3], "Edit Ingredient Prices", recipe_id)
 
     def edit_result_price(self, event):
-        # Handle if nothing was selected
         if not self.results_tree.selection():
             return
 
@@ -341,49 +305,34 @@ class App(tk.Tk):
         self.edit_and_save_prices(self.results_tree, item_id, [1, 2], "Edit Result Prices", recipe_id)
 
     def save_prices(self, popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id):
-        # Get updated prices from the entry boxes
         single_price = single_price_entry.get()
         stack_price = stack_price_entry.get()
 
-        # Update values in the treeview item
         values = list(tree.item(item_id, "values"))
         values[price_indices[0]] = single_price
         values[price_indices[1]] = stack_price
         tree.item(item_id, values=values)
 
-        # Convert empty strings to 0
-        if single_price == "":
-            single_price = 0
-        if stack_price == "":
-            stack_price = 0
+        single_price = 0 if single_price == "" else single_price
+        stack_price = 0 if stack_price == "" else stack_price
 
-        # Check if item exists in the database
         if AuctionController.auction_item_exists(item_id):
-            # Update existing item
             AuctionController.update_auction_item(item_id, single_price, stack_price)
         else:
-            # Insert new item
             AuctionController.add_auction_item(item_id, single_price, stack_price)
 
-        # Get recipe from the recipe_id passed in and update Cost Per Synth
         recipe = SynthController.get_recipe(recipe_id)
         self.update_cost_per_synth(recipe)
-
-        # Close the popup window
         popup.destroy()
 
     def update_cost_per_synth(self, recipe):
-        # Create a synth object and calculate the cost per synth
         skill_set = Config.get_skill_set()
         crafter = Crafter(skill_set)
         synth = Synth(recipe, crafter)
         cost_per_synth = synth.calculate_cost()
 
-        # Set Cost Per Synth Label to N/A if cost couldn't be calculated
         value_text = f"{cost_per_synth:.2f} gil" if cost_per_synth is not None else "N/A"
         self.cost_per_synth_value_label.config(text=value_text)
-
-        # Force the UI to update
         self.update()
 
     def close_detail_page(self, detail_page):
@@ -416,7 +365,6 @@ class TreeviewWithSort(ttk.Treeview):
         self.heading(col, command=lambda: self._sort_by(col, not descending))
 
 
-# Start the main application
 if __name__ == "__main__":
     app = App()
     app.mainloop()
