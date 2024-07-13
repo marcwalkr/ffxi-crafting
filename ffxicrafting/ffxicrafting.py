@@ -7,7 +7,7 @@ from controllers.auction_controller import AuctionController
 from config import Config
 from crafter import Crafter
 from synth import Synth
-from helpers import summarize_list, count_items
+from utils import summarize_list, count_items, unique_preserve_order
 
 
 class App(tk.Tk):
@@ -78,17 +78,22 @@ class App(tk.Tk):
         results = SynthController.search_recipe(search_term)
 
         for recipe in results:
-            # Get the item ids for the HQ items the recipe can produce
-            hq_item_ids = [recipe.result_hq1, recipe.result_hq2, recipe.result_hq3]
+            # Create string for the NQ result and quantity
+            nq_name = ItemController.get_formatted_item_name(recipe.result)
+            nq_string = nq_name if recipe.result_qty == 1 else f"{nq_name} x{recipe.result_qty}"
 
-            # Remove duplicate ids
-            hq_item_ids = list(set(hq_item_ids))
+            # Create string for the HQ results and quantities
+            hq1_name = ItemController.get_formatted_item_name(recipe.result_hq1)
+            hq1_string = hq1_name if recipe.result_hq1_qty == 1 else f"{hq1_name} x{recipe.result_hq1_qty}"
 
-            # Get presentable item names
-            hq_item_names = [ItemController.get_item(id).sort_name.replace("_", " ").title() for id in hq_item_ids]
+            hq2_name = ItemController.get_formatted_item_name(recipe.result_hq2)
+            hq2_string = hq2_name if recipe.result_hq2_qty == 1 else f"{hq2_name} x{recipe.result_hq2_qty}"
 
-            # Create string for HQ items
-            hq_items_string = ", ".join(hq_item_names)
+            hq3_name = ItemController.get_formatted_item_name(recipe.result_hq3)
+            hq3_string = hq3_name if recipe.result_hq3_qty == 1 else f"{hq3_name} x{recipe.result_hq3_qty}"
+
+            # Join each unique string separated by commas
+            hq_string = ", ".join(unique_preserve_order(hq1_string, hq2_string, hq3_string))
 
             # Create a string for the required crafting levels
             skills = {
@@ -110,13 +115,12 @@ class App(tk.Tk):
                               recipe.ingredient8]
 
             # Get ingredient names from non-zero ingredient ids
-            ingredient_names = [ItemController.get_item(id).sort_name.replace("_", " ").title()
-                                for id in ingredient_ids if id > 0]
+            ingredient_names = [ItemController.get_formatted_item_name(id) for id in ingredient_ids if id > 0]
 
             # Summarize ingredients in a string e.g. [apple, orange, orange] -> "apple, orange x2"
             ingredient_names_summarized = summarize_list(ingredient_names)
 
-            tree_values = [recipe.result_name, hq_items_string, levels_string, ingredient_names_summarized]
+            tree_values = [nq_string, hq_string, levels_string, ingredient_names_summarized]
 
             # Set the iid to the recipe id to retrieve in the detail page
             self.recipe_tree.insert("", "end", iid=recipe.id, values=tree_values)
@@ -162,8 +166,7 @@ class App(tk.Tk):
         ingredient_counts = count_items([i for i in ingredient_ids if i > 0])
 
         for ingredient_id, quantity in ingredient_counts.items():
-            # Get the ingredient name, replace underscores with spaces and capitalize
-            ingredient_name = ItemController.get_item(ingredient_id).sort_name.replace("_", " ").title()
+            ingredient_name = ItemController.get_formatted_item_name(ingredient_id)
 
             # Get single and stack auction house prices, set to empty string if 0 or auction_item is None
             auction_item = AuctionController.get_auction_item(ingredient_id)
@@ -224,11 +227,10 @@ class App(tk.Tk):
         result_ids = [recipe.result, recipe.result_hq1, recipe.result_hq2, recipe.result_hq3]
 
         # Remove duplicates
-        unique_result_ids = list(set(result_ids))
+        unique_result_ids = unique_preserve_order(result_ids)
 
         for result_id in unique_result_ids:
-            # Get the result item name, replace underscores with spaces and capitalize
-            result_name = ItemController.get_item(result_id).sort_name.replace("_", " ").title()
+            result_name = ItemController.get_formatted_item_name(result_id)
 
             # Get single and stack auction house prices, set to empty string if 0 or auction_item is None
             auction_item = AuctionController.get_auction_item(result_id)

@@ -5,7 +5,7 @@ from config import Config
 from table import Table
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
-from helpers import clamp
+from utils import clamp
 
 
 class Synth:
