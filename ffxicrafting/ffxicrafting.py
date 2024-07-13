@@ -38,8 +38,6 @@ class App(tk.Tk):
         self.create_simulate_page()
         self.create_settings_page()
 
-        self.recipe_data = {}
-
     def create_search_page(self):
         self.search_page = ttk.Frame(self.notebook)
         self.notebook.add(self.search_page, text="Search Recipes")
@@ -105,16 +103,16 @@ class App(tk.Tk):
             ingredient_names_summarized = summarize_list(ingredient_names)
 
             tree_values = [result.result_name, levels_string, ingredient_names_summarized]
-            item_id = self.recipe_tree.insert("", "end", values=tree_values)
 
-            # Store the recipe data in the dictionary with the treeview item id as the key
-            self.recipe_data[item_id] = result
+            # Set the iid to the recipe id to retrieve in the detail page
+            self.recipe_tree.insert("", "end", iid=result.id, values=tree_values)
 
     def show_recipe_details(self, event):
-        item = self.recipe_tree.selection()[0]
+        # The tree iid was set to the recipe id
+        recipe_id = self.recipe_tree.selection()[0]
 
-        # Retrieve the recipe data from the dictionary using the treeview item id
-        recipe = self.recipe_data[item]
+        # Get the recipe object
+        recipe = SynthController.get_recipe(recipe_id)
 
         # Create a detail page dynamically
         detail_page = self.create_detail_page(recipe)
