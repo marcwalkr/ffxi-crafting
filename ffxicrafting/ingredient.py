@@ -49,6 +49,9 @@ class Ingredient:
                                        item.stack_size)
             prices.append(single_price_from_stack)
 
+        if not prices:
+            return None
+
         return min(prices)
 
     def get_vendor_price(self):

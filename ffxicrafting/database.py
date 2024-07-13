@@ -24,6 +24,11 @@ class Database:
                             (item_id, single_price, stack_price,))
         self.commit()
 
+    def update_auction_item(self, item_id, single_price, stack_price):
+        self.cursor.execute("UPDATE auction_items SET single_price = %s, stack_price = %s WHERE itemid = %s",
+                            (single_price, stack_price, item_id))
+        self.commit()
+
     def delete_auction_items(self):
         self.cursor.execute("DELETE FROM auction_items")
         self.commit()

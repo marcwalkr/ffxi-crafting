@@ -38,6 +38,16 @@ def summarize_list(items):
     return summary
 
 
+def count_items(strings):
+    count_dict = {}
+    for string in strings:
+        if string in count_dict:
+            count_dict[string] += 1
+        else:
+            count_dict[string] = 1
+    return count_dict
+
+
 def generate_vendor_inserts():
     file_lines = []
 
