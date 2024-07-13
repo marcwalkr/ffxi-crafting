@@ -1,8 +1,3 @@
-import os
-import re
-from controllers.npc_controller import NpcController
-
-
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
@@ -46,3 +41,7 @@ def count_items(strings):
         else:
             count_dict[string] = 1
     return count_dict
+
+
+def format_item_name(item):
+    return item.sort_name.replace("_", " ").title()
