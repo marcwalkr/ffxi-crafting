@@ -49,8 +49,10 @@ class App(tk.Tk):
                                    command=lambda: self.search_recipes(search_var.get()))
         search_button.pack(pady=(0, 10))
 
-        self.recipe_tree = ttk.Treeview(self.search_page, columns=("item", "levels", "ingredients"), show="headings")
-        self.recipe_tree.heading("item", text="Item")
+        self.recipe_tree = ttk.Treeview(self.search_page, columns=(
+            "nq", "hq", "levels", "ingredients"), show="headings")
+        self.recipe_tree.heading("nq", text="NQ")
+        self.recipe_tree.heading("hq", text="HQ")
         self.recipe_tree.heading("levels", text="Craft Levels")
         self.recipe_tree.heading("ingredients", text="Ingredients")
         self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
@@ -75,25 +77,37 @@ class App(tk.Tk):
 
         results = SynthController.search_recipe(search_term)
 
-        for result in results:
-            # Create a string representing the required crafting levels
+        for recipe in results:
+            # Get the item ids for the HQ items the recipe can produce
+            hq_item_ids = [recipe.result_hq1, recipe.result_hq2, recipe.result_hq3]
+
+            # Remove duplicate ids
+            hq_item_ids = list(set(hq_item_ids))
+
+            # Get presentable item names
+            hq_item_names = [ItemController.get_item(id).sort_name.replace("_", " ").title() for id in hq_item_ids]
+
+            # Create string for HQ items
+            hq_items_string = ", ".join(hq_item_names)
+
+            # Create a string for the required crafting levels
             skills = {
-                "Wood": result.wood,
-                "Smith": result.smith,
-                "Gold": result.gold,
-                "Cloth": result.cloth,
-                "Leather": result.leather,
-                "Bone": result.bone,
-                "Alchemy": result.alchemy,
-                "Cook": result.cook
+                "Wood": recipe.wood,
+                "Smith": recipe.smith,
+                "Gold": recipe.gold,
+                "Cloth": recipe.cloth,
+                "Leather": recipe.leather,
+                "Bone": recipe.bone,
+                "Alchemy": recipe.alchemy,
+                "Cook": recipe.cook
             }
 
             levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
             levels_string = ", ".join(levels)
 
-            ingredient_ids = [result.crystal, result.ingredient1, result.ingredient2, result.ingredient3,
-                              result.ingredient4, result.ingredient5, result.ingredient6, result.ingredient7,
-                              result.ingredient8]
+            ingredient_ids = [recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
+                              recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
+                              recipe.ingredient8]
 
             # Get ingredient names from non-zero ingredient ids
             ingredient_names = [ItemController.get_item(id).sort_name.replace("_", " ").title()
@@ -102,10 +116,10 @@ class App(tk.Tk):
             # Summarize ingredients in a string e.g. [apple, orange, orange] -> "apple, orange x2"
             ingredient_names_summarized = summarize_list(ingredient_names)
 
-            tree_values = [result.result_name, levels_string, ingredient_names_summarized]
+            tree_values = [recipe.result_name, hq_items_string, levels_string, ingredient_names_summarized]
 
             # Set the iid to the recipe id to retrieve in the detail page
-            self.recipe_tree.insert("", "end", iid=result.id, values=tree_values)
+            self.recipe_tree.insert("", "end", iid=recipe.id, values=tree_values)
 
     def show_recipe_details(self, event):
         # The tree iid was set to the recipe id
