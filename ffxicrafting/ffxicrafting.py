@@ -271,7 +271,7 @@ class App(tk.Tk):
         parent_height = self.winfo_height()
 
         popup_width = 300
-        popup_height = 250
+        popup_height = 240
 
         # Calculate center position
         x = parent_x + (parent_width - popup_width) // 2
@@ -298,7 +298,11 @@ class App(tk.Tk):
         # Save button
         save_button = ttk.Button(popup, text="Save", command=lambda: self.save_prices(
             popup, item_id, single_price_entry, stack_price_entry, tree, price_indices, recipe_id))
-        save_button.grid(row=4, column=0, columnspan=2, pady=10)
+        save_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="ew", padx=20)
+
+        # Center the save button by configuring the columns
+        popup.grid_columnconfigure(0, weight=1)
+        popup.grid_columnconfigure(1, weight=1)
 
     def edit_ingredient_price(self, event):
         item_id = self.ingredients_tree.selection()[0]
