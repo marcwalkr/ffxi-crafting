@@ -6,73 +6,23 @@ from controllers.synth_controller import SynthController
 from controllers.item_controller import ItemController
 from controllers.vendor_controller import VendorController
 from controllers.auction_controller import AuctionController
-from config import Config
 from crafter import Crafter
 from synth import Synth
 from utils import summarize_list, count_items, unique_preserve_order
+from settings_manager import SettingsManager
 
 
 class App(tk.Tk):
-    SETTINGS_FILE = "settings.json"
-    DEFAULT_SETTINGS = {
-        "profit_table": {
-            "profit_per_synth": 0,
-            "profit_per_storage": 0,
-            "min_sell_price": 0
-        },
-        "synth": {
-            "skill_look_ahead": 0,
-            "simulation_trials": 1000
-        },
-        "skill_levels": {
-            "wood": 0,
-            "smith": 0,
-            "gold": 0,
-            "cloth": 0,
-            "leather": 0,
-            "bone": 0,
-            "alchemy": 0,
-            "cook": 0
-        },
-        "merchants": {
-            "guilds": True,
-            "aragoneu": True,
-            "derfland": True,
-            "elshimo_lowlands": True,
-            "elshimo_uplands": True,
-            "fauregandi": True,
-            "gustaberg": True,
-            "kolshushu": True,
-            "kuzotz": True,
-            "li'telor": True,
-            "movalpolos": True,
-            "norvallen": True,
-            "qufim": True,
-            "ronfaure": True,
-            "sarutabaruta": True,
-            "tavnazian_archipelago": True,
-            "valdeaunia": True,
-            "vollbow": True,
-            "zulkheim": True
-        }
-    }
-
     def __init__(self):
         super().__init__()
         self.title("FFXI Crafting Tool")
         self.geometry("1280x800")
 
-        self.settings = self.load_settings()
+        self.settings = SettingsManager.load_settings()
         self.configure_styles()
         self.create_main_frame()
         self.create_notebook()
         self.create_pages()
-
-    def load_settings(self):
-        if os.path.exists(self.SETTINGS_FILE):
-            with open(self.SETTINGS_FILE, "r") as file:
-                return json.load(file)
-        return self.DEFAULT_SETTINGS
 
     def save_settings(self):
         settings = {
@@ -81,8 +31,7 @@ class App(tk.Tk):
             "skill_levels": self.get_vertical_number_settings(self.skill_levels_settings),
             "merchants": self.get_boolean_settings(self.merchants_settings)
         }
-        with open(self.SETTINGS_FILE, "w") as file:
-            json.dump(settings, file)
+        SettingsManager.save_settings(settings)
 
     def get_number_settings(self, frame):
         settings = {}
@@ -186,9 +135,7 @@ class App(tk.Tk):
         treeview.heading("profit_per_storage", text="Profit / Storage")
 
     def generate_profit_table(self):
-        # Placeholder for generating the profit table
-        # This function will be implemented later to populate the Treeview with recipe data
-        pass
+        self.clear_treeview(self.profit_tree)
 
     def create_simulate_page(self):
         self.simulate_page = ttk.Frame(self.notebook)
@@ -535,7 +482,7 @@ class App(tk.Tk):
         popup.destroy()
 
     def update_cost_per_synth(self, recipe):
-        skill_set = Config.get_skill_set()
+        skill_set = SettingsManager.get_skill_set()
         crafter = Crafter(skill_set)
         synth = Synth(recipe, crafter)
         cost_per_synth = synth.calculate_cost()

@@ -2,7 +2,7 @@ from controllers.item_controller import ItemController
 from controllers.vendor_controller import VendorController
 from controllers.guild_controller import GuildController
 from controllers.auction_controller import AuctionController
-from config import Config
+from settings_manager import SettingsManager
 
 
 class Ingredient:
@@ -15,7 +15,7 @@ class Ingredient:
         vendor_price = self.get_vendor_price()
         guild_price = self.get_guild_price()
 
-        ignore_guilds = Config.get_ignore_guilds()
+        enabled_guilds = SettingsManager.get_enabled_guilds()
 
         prices = []
 
@@ -25,7 +25,7 @@ class Ingredient:
         if vendor_price is not None:
             prices.append(vendor_price)
 
-        if not ignore_guilds and guild_price is not None:
+        if enabled_guilds and guild_price is not None:
             prices.append(guild_price)
 
         if len(prices) > 0:

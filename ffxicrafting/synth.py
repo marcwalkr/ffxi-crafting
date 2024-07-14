@@ -1,11 +1,11 @@
 import random
 from collections import defaultdict
 from ingredient import Ingredient
-from config import Config
 from table import Table
 from controllers.item_controller import ItemController
 from controllers.auction_controller import AuctionController
 from utils import clamp
+from settings_manager import SettingsManager
 
 
 class Synth:
@@ -24,7 +24,7 @@ class Synth:
         self.difficulty = self.get_difficulty()
         self.can_craft = self.check_can_craft()
         self.tier = self.get_tier()
-        self.num_trials = Config.get_simulation_trials()
+        self.num_trials = SettingsManager.get_simulation_trials()
 
     def get_result_names(self):
         return [ItemController.get_formatted_item_name(self.recipe.result),
@@ -69,7 +69,7 @@ class Synth:
             return -1
 
     def check_can_craft(self):
-        skill_look_ahead = Config.get_skill_look_ahead()
+        skill_look_ahead = SettingsManager.get_skill_look_ahead()
         return self.difficulty - skill_look_ahead <= 0
 
     def attempt_success(self):
@@ -176,7 +176,7 @@ class Synth:
         table.print()
 
     def calculate_stats(self):
-        num_trials = Config.get_simulation_trials()
+        num_trials = SettingsManager.get_simulation_trials()
         results, retained_ingredients = self.simulate(num_trials)
 
         simulation_cost = self.cost * self.num_trials
@@ -195,7 +195,7 @@ class Synth:
                 continue
 
             single_price = auction_item.stack_price / item.stack_size if auction_item.stack_price > 0 else auction_item.single_price
-            store_item_threshold = Config.get_store_item()
+            store_item_threshold = SettingsManager.get_min_sell_price()
 
             if single_price * item.stack_size > store_item_threshold:
                 total_storage += quantity / item.stack_size

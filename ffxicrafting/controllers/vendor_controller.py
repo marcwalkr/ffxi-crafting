@@ -1,7 +1,7 @@
 from database import Database
 from models.vendor_item import VendorItem
 from models.regional_vendor import RegionalVendor
-from config import Config
+from settings_manager import SettingsManager
 
 
 class VendorController:
@@ -12,12 +12,12 @@ class VendorController:
 
     @classmethod
     def get_vendor_items(cls, item_id):
-        ignored_regions = Config.get_ignored_regions()
+        enabled_merchants = SettingsManager.get_enabled_merchants()
         regional_vendors = cls.get_regional_vendors()
 
         ignored_npc_ids = []
         for vendor in regional_vendors:
-            if vendor.region in ignored_regions:
+            if vendor.region not in enabled_merchants:
                 ignored_npc_ids.append(vendor.npc_id)
 
         vendor_item_tuples = cls.db.get_vendor_items(item_id)
