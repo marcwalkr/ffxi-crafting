@@ -14,7 +14,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("FFXI Crafting Tool")
-        self.geometry("1000x700")
+        self.geometry("1280x800")
 
         self.configure_styles()
         self.create_main_frame()
@@ -71,6 +71,30 @@ class App(tk.Tk):
     def create_profit_page(self):
         self.profit_page = ttk.Frame(self.notebook)
         self.notebook.add(self.profit_page, text="Profit Table")
+
+        generate_button = ttk.Button(self.profit_page, text="Generate Table", command=self.generate_profit_table)
+        generate_button.pack(pady=10)
+
+        self.profit_tree = TreeviewWithSort(self.profit_page, columns=(
+            "nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage"), show="headings")
+        self.configure_profit_treeview(self.profit_tree)
+        self.profit_tree.pack(padx=10, pady=10, expand=True, fill="both")
+
+        self.profit_tree.bind("<Double-1>", self.show_recipe_details)
+        self.profit_tree.bind("<Button-1>", self.on_treeview_click)
+
+    def configure_profit_treeview(self, treeview):
+        treeview.heading("nq", text="NQ")
+        treeview.heading("hq", text="HQ")
+        treeview.heading("tier", text="Tier")
+        treeview.heading("cost_per_synth", text="Cost / Synth")
+        treeview.heading("profit_per_synth", text="Profit / Synth")
+        treeview.heading("profit_per_storage", text="Profit / Storage")
+
+    def generate_profit_table(self):
+        # Placeholder for generating the profit table
+        # This function will be implemented later to populate the Treeview with recipe data
+        pass
 
     def create_simulate_page(self):
         self.simulate_page = ttk.Frame(self.notebook)
