@@ -28,6 +28,7 @@ class App(tk.Tk):
         self.style.configure("TNotebook.Tab", font=("Helvetica", 10), padding=4)
         self.style.configure("Treeview", font=("Helvetica", 12))
         self.style.configure("Treeview.Heading", font=("Helvetica", 12, "bold"))
+        self.style.configure("Custom.TCheckbutton", font=("Helvetica", 14))
 
     def create_main_frame(self):
         self.main_frame = ttk.Frame(self)
@@ -103,6 +104,94 @@ class App(tk.Tk):
     def create_settings_page(self):
         self.settings_page = ttk.Frame(self.notebook)
         self.notebook.add(self.settings_page, text="Settings")
+
+        self.create_settings_categories()
+
+    def create_settings_categories(self):
+        categories = [
+            ("Profit Table", self.create_profit_table_settings),
+            ("Synth", self.create_synth_settings),
+            ("Skill Levels and Merchants", self.create_skill_levels_and_merchants_settings)
+        ]
+
+        for category_name, create_method in categories:
+            frame = ttk.LabelFrame(self.settings_page, text=category_name)
+            frame.pack(fill="x", padx=10, pady=5)
+            create_method(frame)
+
+        save_button = ttk.Button(self.settings_page, text="Save", command=self.save_settings)
+        save_button.pack(pady=10)
+
+    def create_profit_table_settings(self, frame):
+        settings = [
+            ("Profit / Synth", 0),
+            ("Profit / Storage", 0),
+            ("Min Sell Price", 0)
+        ]
+        self.create_number_settings(frame, settings)
+
+    def create_synth_settings(self, frame):
+        settings = [
+            ("Skill Look Ahead", 0),
+            ("Simulation Trials", 1000)
+        ]
+        self.create_number_settings(frame, settings)
+
+    def create_skill_levels_and_merchants_settings(self, frame):
+        skill_levels_frame = ttk.Frame(frame)
+        skill_levels_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.create_vertical_number_settings(skill_levels_frame, [
+            ("Wood", 0),
+            ("Smith", 0),
+            ("Gold", 0),
+            ("Cloth", 0),
+            ("Leather", 0),
+            ("Bone", 0),
+            ("Alchemy", 0),
+            ("Cook", 0)
+        ])
+
+        merchants_frame = ttk.Frame(frame)
+        merchants_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.create_two_column_boolean_settings(merchants_frame, [
+            "Guilds", "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
+            "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor", "Movalpolos", "Norvallen", "Qufim",
+            "Ronfaure", "Saurtabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
+        ])
+
+    def create_number_settings(self, frame, settings):
+        for setting, default in settings:
+            label = ttk.Label(frame, text=setting)
+            label.pack(side="left", padx=5, pady=5)
+            entry = ttk.Entry(frame, width=10)
+            entry.insert(0, default)
+            entry.pack(side="left", padx=5, pady=5)
+
+    def create_vertical_number_settings(self, frame, settings):
+        for setting, default in settings:
+            row_frame = ttk.Frame(frame)
+            row_frame.pack(fill="x", padx=5, pady=2)
+            label = ttk.Label(row_frame, text=setting)
+            label.pack(side="left", padx=5, pady=5)
+            entry = ttk.Entry(row_frame, width=10)
+            entry.insert(0, default)
+            entry.pack(side="right", padx=5, pady=5)
+
+    def create_two_column_boolean_settings(self, frame, settings):
+        left_frame = ttk.Frame(frame)
+        left_frame.pack(side="left", fill="y", padx=5, pady=5)
+        right_frame = ttk.Frame(frame)
+        right_frame.pack(side="left", fill="y", padx=5, pady=5)
+
+        for i, setting in enumerate(settings):
+            target_frame = left_frame if i % 2 == 0 else right_frame
+            checkbutton = ttk.Checkbutton(target_frame, text=setting, variable=tk.BooleanVar(
+                value=True), style="Custom.TCheckbutton")
+            checkbutton.pack(anchor="w", padx=5, pady=2)
+
+    def save_settings(self):
+        # Placeholder for saving settings
+        pass
 
     def search_recipes(self, search_term):
         self.clear_treeview(self.recipe_tree)
