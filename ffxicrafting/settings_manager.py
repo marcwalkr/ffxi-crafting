@@ -7,8 +7,8 @@ class SettingsManager:
     SETTINGS_FILE = "settings.json"
     DEFAULT_SETTINGS = {
         "profit_table": {
-            "profit_per_synth": 0,
-            "profit_per_storage": 0,
+            "profit_/_synth": 0,
+            "profit_/_storage": 0,
             "min_sell_price": 0
         },
         "synth": {
@@ -61,46 +61,58 @@ class SettingsManager:
             json.dump(settings, file)
 
     @classmethod
-    def get_enabled_merchants(cls):
+    def get_profit_per_synth(cls):
+        settings = cls.load_settings()
+        return int(settings["profit_table"].get("profit_/_synth", 0))
+
+    @classmethod
+    def get_profit_per_storage(cls):
+        settings = cls.load_settings()
+        return int(settings["profit_table"].get("profit_/_storage", 0))
+
+    @classmethod
+    def get_min_sell_price(cls):
+        settings = cls.load_settings()
+        return int(settings["profit_table"].get("min_sell_price", 0))
+
+    @classmethod
+    def get_skill_look_ahead(cls):
+        settings = cls.load_settings()
+        return int(settings["synth"].get("skill_look_ahead", 0))
+
+    @classmethod
+    def get_simulation_trials(cls):
+        settings = cls.load_settings()
+        return int(settings["synth"].get("simulation_trials", 1000))
+
+    @classmethod
+    def get_skill_set(cls):
+        settings = cls.load_settings()
+        skills = settings.get("skill_levels", {})
+        return SkillSet(
+            wood=int(skills.get("wood", 0)),
+            smith=int(skills.get("smith", 0)),
+            gold=int(skills.get("gold", 0)),
+            cloth=int(skills.get("cloth", 0)),
+            leather=int(skills.get("leather", 0)),
+            bone=int(skills.get("bone", 0)),
+            alchemy=int(skills.get("alchemy", 0)),
+            cook=int(skills.get("cook", 0))
+        )
+
+    @classmethod
+    def get_enabled_regional_merchants(cls):
         def format_merchant_name(name):
             if name == "li'telor":
                 return "Li'Telor"
             return name.replace('_', ' ').title()
 
         settings = cls.load_settings()
-        return [format_merchant_name(merchant) for merchant, enabled in settings["merchants"].items() if enabled]
+        merchants = settings["merchants"].items()
+        enabled_merchants = [merchant for merchant, enabled in merchants if enabled and merchant != "guilds"]
+        return [format_merchant_name(merchant) for merchant in enabled_merchants]
 
     @classmethod
     def get_enabled_guilds(cls):
         settings = cls.load_settings()
         return settings["merchants"].get("guilds", False)
-
-    @classmethod
-    def get_skill_look_ahead(cls):
-        settings = cls.load_settings()
-        return settings["synth"].get("skill_look_ahead", 0)
-
-    @classmethod
-    def get_simulation_trials(cls):
-        settings = cls.load_settings()
-        return settings["synth"].get("simulation_trials", 1000)
-
-    @classmethod
-    def get_min_sell_price(cls):
-        settings = cls.load_settings()
-        return settings["profit_table"].get("min_sell_price", 0)
-
-    @classmethod
-    def get_skill_set(cls):
-        settings = cls.load_settings()
-        skills = settings.get("skills", {})
-        return SkillSet(
-            wood=skills.get("wood", 0),
-            smith=skills.get("smith", 0),
-            gold=skills.get("gold", 0),
-            cloth=skills.get("cloth", 0),
-            leather=skills.get("leather", 0),
-            bone=skills.get("bone", 0),
-            alchemy=skills.get("alchemy", 0),
-            cook=skills.get("cook", 0)
-        )

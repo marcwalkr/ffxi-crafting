@@ -25,18 +25,13 @@ class Synth:
         self.can_craft = self.check_can_craft()
         self.tier = self.get_tier()
         self.num_trials = SettingsManager.get_simulation_trials()
+        self.cost = self.calculate_cost()
 
-    def get_result_names(self):
-        return [ItemController.get_formatted_item_name(self.recipe.result),
-                ItemController.get_formatted_item_name(self.recipe.result_hq1),
-                ItemController.get_formatted_item_name(self.recipe.result_hq2),
-                ItemController.get_formatted_item_name(self.recipe.result_hq3)]
-
-    def get_result_quantities(self):
-        return [self.recipe.result_qty,
-                self.recipe.result_hq1_qty,
-                self.recipe.result_hq2_qty,
-                self.recipe.result_hq3_qty]
+        if self.can_craft and self.cost is not None:
+            self.profit_per_synth, self.profit_per_storage = self.calculate_stats()
+        else:
+            self.profit_per_synth = None
+            self.profit_per_storage = None
 
     def get_difficulty(self):
         recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,

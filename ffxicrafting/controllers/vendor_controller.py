@@ -12,7 +12,7 @@ class VendorController:
 
     @classmethod
     def get_vendor_items(cls, item_id):
-        enabled_merchants = SettingsManager.get_enabled_merchants()
+        enabled_merchants = SettingsManager.get_enabled_regional_merchants()
         regional_vendors = cls.get_regional_vendors()
 
         ignored_npc_ids = []

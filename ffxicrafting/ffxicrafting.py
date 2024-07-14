@@ -1,5 +1,3 @@
-import os
-import json
 import tkinter as tk
 from tkinter import ttk
 from controllers.synth_controller import SynthController
@@ -134,8 +132,39 @@ class App(tk.Tk):
         treeview.heading("profit_per_synth", text="Profit / Synth")
         treeview.heading("profit_per_storage", text="Profit / Storage")
 
+        # Center columns
+        treeview.column("tier", anchor=tk.CENTER)
+        treeview.column("cost_per_synth", anchor=tk.CENTER)
+        treeview.column("profit_per_synth", anchor=tk.CENTER)
+        treeview.column("profit_per_storage", anchor=tk.CENTER)
+
     def generate_profit_table(self):
         self.clear_treeview(self.profit_tree)
+
+        skill_set = SettingsManager.get_skill_set()
+        crafter = Crafter(skill_set)
+        recipes = SynthController.get_all_recipes()
+        synth_profit_threshold = SettingsManager.get_profit_per_synth()
+        storage_profit_threshold = SettingsManager.get_profit_per_storage()
+
+        for recipe in recipes:
+            synth = Synth(recipe, crafter)
+            if self.should_include_synth(synth, synth_profit_threshold, storage_profit_threshold):
+                self.profit_tree.insert("", "end", iid=recipe.id, values=self.get_profit_table_row(synth))
+
+    def should_include_synth(self, synth, synth_profit_threshold, storage_profit_threshold):
+        if not synth.can_craft or not synth.cost:
+            return False
+
+        meets_synth_threshold = synth.profit_per_synth >= synth_profit_threshold
+        meets_storage_threshold = synth.profit_per_storage >= storage_profit_threshold
+
+        return meets_synth_threshold and meets_storage_threshold
+
+    def get_profit_table_row(self, synth):
+        nq_string = self.format_item_string(synth.recipe.result, synth.recipe.result_qty)
+        hq_string = self.format_hq_string(synth.recipe)
+        return nq_string, hq_string, synth.tier, synth.cost, synth.profit_per_synth, synth.profit_per_storage
 
     def create_simulate_page(self):
         self.simulate_page = ttk.Frame(self.notebook)
@@ -292,10 +321,11 @@ class App(tk.Tk):
         return summarize_list(ingredient_names)
 
     def show_recipe_details(self, event):
-        if not self.recipe_tree.selection():
+        tree = event.widget
+        if not tree.selection():
             return
 
-        recipe_id = self.recipe_tree.selection()[0]
+        recipe_id = tree.selection()[0]
         recipe = SynthController.get_recipe(recipe_id)
         detail_page = self.create_detail_page(recipe)
         self.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
@@ -485,9 +515,8 @@ class App(tk.Tk):
         skill_set = SettingsManager.get_skill_set()
         crafter = Crafter(skill_set)
         synth = Synth(recipe, crafter)
-        cost_per_synth = synth.calculate_cost()
 
-        value_text = f"{cost_per_synth:.2f} gil" if cost_per_synth is not None else "N/A"
+        value_text = f"{synth.cost:.2f} gil" if synth.cost is not None else "N/A"
         self.cost_per_synth_value_label.config(text=value_text)
         self.update()
 
@@ -512,7 +541,13 @@ class TreeviewWithSort(ttk.Treeview):
             self.heading(col, text=col, command=lambda c=col: self._sort_by(c, False))
 
     def _sort_by(self, col, descending):
-        data = [(self.set(child, col), child) for child in self.get_children('')]
+        def convert(value):
+            try:
+                return float(value)
+            except ValueError:
+                return value
+
+        data = [(convert(self.set(child, col)), child) for child in self.get_children('')]
         data.sort(reverse=descending)
 
         for idx, (val, child) in enumerate(data):
