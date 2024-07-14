@@ -1,3 +1,5 @@
+import os
+import json
 import tkinter as tk
 from tkinter import ttk
 from controllers.synth_controller import SynthController
@@ -11,15 +13,64 @@ from utils import summarize_list, count_items, unique_preserve_order
 
 
 class App(tk.Tk):
+    SETTINGS_FILE = "settings.json"
+
     def __init__(self):
         super().__init__()
         self.title("FFXI Crafting Tool")
         self.geometry("1280x800")
 
+        self.settings = self.load_settings()
         self.configure_styles()
         self.create_main_frame()
         self.create_notebook()
         self.create_pages()
+
+    def load_settings(self):
+        if os.path.exists(self.SETTINGS_FILE):
+            with open(self.SETTINGS_FILE, "r") as file:
+                return json.load(file)
+        return {}
+
+    def save_settings(self):
+        settings = {
+            "profit_table": self.get_number_settings(self.profit_table_settings),
+            "synth": self.get_number_settings(self.synth_settings),
+            "skill_levels": self.get_vertical_number_settings(self.skill_levels_settings),
+            "merchants": self.get_boolean_settings(self.merchants_settings)
+        }
+        with open(self.SETTINGS_FILE, "w") as file:
+            json.dump(settings, file)
+
+    def get_number_settings(self, frame):
+        settings = {}
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Entry):
+                label = child._name.split(".")[-1]
+                settings[label] = child.get()
+            elif isinstance(child, ttk.Frame):
+                settings.update(self.get_number_settings(child))  # Recursively check nested frames
+        return settings
+
+    def get_vertical_number_settings(self, frame):
+        settings = {}
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Entry):
+                label = child._name.split(".")[-1]
+                settings[label] = child.get()
+            elif isinstance(child, ttk.Frame):
+                settings.update(self.get_vertical_number_settings(child))  # Recursively check nested frames
+        return settings
+
+    def get_boolean_settings(self, frame):
+        settings = {}
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Checkbutton):
+                label = child.cget("text").lower().replace(" ", "_")
+                settings[label] = child.instate(['selected'])
+            elif isinstance(child, ttk.Frame):
+                settings.update(self.get_boolean_settings(child))  # Recursively check nested frames
+        return settings
 
     def configure_styles(self):
         self.style = ttk.Style(self)
@@ -57,13 +108,13 @@ class App(tk.Tk):
 
         self.recipe_tree = TreeviewWithSort(self.search_page, columns=("nq", "hq", "levels", "ingredients"),
                                             show="headings")
-        self.configure_treeview(self.recipe_tree)
+        self.configure_recipe_treeview(self.recipe_tree)
         self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
         self.recipe_tree.bind("<Double-1>", self.show_recipe_details)
         self.recipe_tree.bind("<Button-1>", self.on_treeview_click)
 
-    def configure_treeview(self, treeview):
+    def configure_recipe_treeview(self, treeview):
         treeview.heading("nq", text="NQ")
         treeview.heading("hq", text="HQ")
         treeview.heading("levels", text="Craft Levels")
@@ -123,23 +174,26 @@ class App(tk.Tk):
         save_button.pack(pady=10)
 
     def create_profit_table_settings(self, frame):
+        self.profit_table_settings = frame
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
             ("Min Sell Price", 0)
         ]
-        self.create_number_settings(frame, settings)
+        self.create_number_settings(frame, settings, self.settings.get("profit_table", {}))
 
     def create_synth_settings(self, frame):
+        self.synth_settings = frame
         settings = [
             ("Skill Look Ahead", 0),
             ("Simulation Trials", 1000)
         ]
-        self.create_number_settings(frame, settings)
+        self.create_number_settings(frame, settings, self.settings.get("synth", {}))
 
     def create_skill_levels_and_merchants_settings(self, frame):
         skill_levels_frame = ttk.Frame(frame)
         skill_levels_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.skill_levels_settings = skill_levels_frame
         self.create_vertical_number_settings(skill_levels_frame, [
             ("Wood", 0),
             ("Smith", 0),
@@ -149,35 +203,38 @@ class App(tk.Tk):
             ("Bone", 0),
             ("Alchemy", 0),
             ("Cook", 0)
-        ])
+        ], self.settings.get("skill_levels", {}))
 
         merchants_frame = ttk.Frame(frame)
         merchants_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.merchants_settings = merchants_frame
         self.create_two_column_boolean_settings(merchants_frame, [
             "Guilds", "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
             "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor", "Movalpolos", "Norvallen", "Qufim",
-            "Ronfaure", "Saurtabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
-        ])
+            "Ronfaure", "Sarutabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
+        ], self.settings.get("merchants", {}))
 
-    def create_number_settings(self, frame, settings):
+    def create_number_settings(self, frame, settings, saved_settings):
         for setting, default in settings:
             label = ttk.Label(frame, text=setting)
             label.pack(side="left", padx=5, pady=5)
-            entry = ttk.Entry(frame, width=10)
-            entry.insert(0, default)
+            entry_name = setting.lower().replace(" ", "_")
+            entry = ttk.Entry(frame, width=10, name=entry_name)
+            entry.insert(0, saved_settings.get(entry_name, default))
             entry.pack(side="left", padx=5, pady=5)
 
-    def create_vertical_number_settings(self, frame, settings):
+    def create_vertical_number_settings(self, frame, settings, saved_settings):
         for setting, default in settings:
             row_frame = ttk.Frame(frame)
             row_frame.pack(fill="x", padx=5, pady=2)
             label = ttk.Label(row_frame, text=setting)
             label.pack(side="left", padx=5, pady=5)
-            entry = ttk.Entry(row_frame, width=10)
-            entry.insert(0, default)
+            entry_name = setting.lower().replace(" ", "_")
+            entry = ttk.Entry(row_frame, width=10, name=entry_name)
+            entry.insert(0, saved_settings.get(entry_name, default))
             entry.pack(side="right", padx=5, pady=5)
 
-    def create_two_column_boolean_settings(self, frame, settings):
+    def create_two_column_boolean_settings(self, frame, settings, saved_settings):
         left_frame = ttk.Frame(frame)
         left_frame.pack(side="left", fill="y", padx=5, pady=5)
         right_frame = ttk.Frame(frame)
@@ -185,13 +242,10 @@ class App(tk.Tk):
 
         for i, setting in enumerate(settings):
             target_frame = left_frame if i % 2 == 0 else right_frame
-            checkbutton = ttk.Checkbutton(target_frame, text=setting, variable=tk.BooleanVar(
-                value=True), style="Custom.TCheckbutton")
+            var = tk.BooleanVar(value=saved_settings.get(setting.lower().replace(" ", "_"), False))
+            checkbutton = ttk.Checkbutton(target_frame, text=setting, variable=var, style="Custom.TCheckbutton")
             checkbutton.pack(anchor="w", padx=5, pady=2)
-
-    def save_settings(self):
-        # Placeholder for saving settings
-        pass
+            checkbutton.var = var
 
     def search_recipes(self, search_term):
         self.clear_treeview(self.recipe_tree)
