@@ -14,6 +14,48 @@ from utils import summarize_list, count_items, unique_preserve_order
 
 class App(tk.Tk):
     SETTINGS_FILE = "settings.json"
+    DEFAULT_SETTINGS = {
+        "profit_table": {
+            "profit_per_synth": 0,
+            "profit_per_storage": 0,
+            "min_sell_price": 0
+        },
+        "synth": {
+            "skill_look_ahead": 0,
+            "simulation_trials": 1000
+        },
+        "skill_levels": {
+            "wood": 0,
+            "smith": 0,
+            "gold": 0,
+            "cloth": 0,
+            "leather": 0,
+            "bone": 0,
+            "alchemy": 0,
+            "cook": 0
+        },
+        "merchants": {
+            "guilds": True,
+            "aragoneu": True,
+            "derfland": True,
+            "elshimo_lowlands": True,
+            "elshimo_uplands": True,
+            "fauregandi": True,
+            "gustaberg": True,
+            "kolshushu": True,
+            "kuzotz": True,
+            "li'telor": True,
+            "movalpolos": True,
+            "norvallen": True,
+            "qufim": True,
+            "ronfaure": True,
+            "sarutabaruta": True,
+            "tavnazian_archipelago": True,
+            "valdeaunia": True,
+            "vollbow": True,
+            "zulkheim": True
+        }
+    }
 
     def __init__(self):
         super().__init__()
@@ -30,7 +72,7 @@ class App(tk.Tk):
         if os.path.exists(self.SETTINGS_FILE):
             with open(self.SETTINGS_FILE, "r") as file:
                 return json.load(file)
-        return {}
+        return self.DEFAULT_SETTINGS
 
     def save_settings(self):
         settings = {
