@@ -1,3 +1,4 @@
+from functools import lru_cache
 from database.database import Database
 from models.npc import Npc
 
@@ -9,6 +10,7 @@ class NpcController:
         pass
 
     @classmethod
+    @lru_cache(maxsize=None)
     def get_npc_by_name(cls, name):
         npc_tuple = cls.db.get_npc_by_name(name)
 

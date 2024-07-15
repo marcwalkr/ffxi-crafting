@@ -1,3 +1,4 @@
+from functools import lru_cache
 from models.recipe_model import RecipeModel
 from controllers.item_controller import ItemController
 from utils.utils import unique_preserve_order
@@ -27,14 +28,17 @@ class Recipe(RecipeModel):
         self.result_hq2 = ItemController.get_item(result_hq2_id)
         self.result_hq3 = ItemController.get_item(result_hq3_id)
 
+    @lru_cache(maxsize=None)
     def get_formatted_ingredient_names(self):
         ingredients = self.get_ingredients()
         counts = self.get_ingredient_counts()
         return ", ".join([f"{ingredient.get_formatted_name()} x{counts[ingredient]}" for ingredient in ingredients])
 
+    @lru_cache(maxsize=None)
     def get_formatted_nq_result(self):
         return self.result.get_formatted_name() + " x" + str(self.result_qty)
 
+    @lru_cache(maxsize=None)
     def get_formatted_hq_results(self):
         hq_strings = [
             self.result_hq1.get_formatted_name() + " x" + str(self.result_hq1_qty),
@@ -43,6 +47,7 @@ class Recipe(RecipeModel):
         ]
         return ", ".join(unique_preserve_order(hq_strings))
 
+    @lru_cache(maxsize=None)
     def get_formatted_levels_string(self):
         skills = {
             "Wood": self.wood,
@@ -57,9 +62,11 @@ class Recipe(RecipeModel):
         levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
         return ", ".join(levels)
 
+    @lru_cache(maxsize=None)
     def get_unique_results(self):
         return unique_preserve_order([self.result, self.result_hq1, self.result_hq2, self.result_hq3])
 
+    @lru_cache(maxsize=None)
     def get_ingredients(self):
         ingredients = [
             self.crystal, self.ingredient1, self.ingredient2, self.ingredient3,
@@ -68,6 +75,7 @@ class Recipe(RecipeModel):
         # Filter out None values
         return [ingredient for ingredient in ingredients if ingredient is not None]
 
+    @lru_cache(maxsize=None)
     def get_ingredient_counts(self):
         ingredients = self.get_ingredients()
         ingredient_counts = {}

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from models.item_model import ItemModel
 from controllers.vendor_controller import VendorController
 from controllers.guild_controller import GuildController
@@ -21,6 +22,7 @@ class Item(ItemModel):
     def __hash__(self) -> int:
         return hash(self.item_id)
 
+    @lru_cache(maxsize=None)
     def get_min_price(self):
         prices = [
             self.get_min_auction_price(),
@@ -30,6 +32,7 @@ class Item(ItemModel):
         prices = [price for price in prices if price is not None]
         return min(prices, default=None)
 
+    @lru_cache(maxsize=None)
     def get_auction_prices(self):
         auction_item = AuctionController.get_auction_item(self.item_id)
         if not auction_item:
@@ -51,6 +54,7 @@ class Item(ItemModel):
 
         return min(prices, default=None)
 
+    @lru_cache(maxsize=None)
     def get_min_vendor_price(self):
         vendor_items = VendorController.get_vendor_items(self.item_id)
         regional_vendors = VendorController.get_regional_vendors()
