@@ -1,6 +1,7 @@
 import re
 import tkinter as tk
 from tkinter import ttk
+from functools import lru_cache
 from controllers.recipe_controller import RecipeController
 from controllers.auction_controller import AuctionController
 from entities.crafter import Crafter
@@ -264,6 +265,7 @@ class App(tk.Tk):
             checkbutton.pack(anchor="w", padx=5, pady=2)
             checkbutton.var = var
 
+    @lru_cache(maxsize=None)
     def search_recipes(self, search_term):
         self.clear_treeview(self.recipe_tree)
         results = RecipeController.search_recipe(search_term)
@@ -280,6 +282,7 @@ class App(tk.Tk):
         for i in treeview.get_children():
             treeview.delete(i)
 
+    @lru_cache(maxsize=None)
     def show_recipe_details(self, event):
         tree = event.widget
         if not tree.selection():

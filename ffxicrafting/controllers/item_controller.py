@@ -1,3 +1,4 @@
+from functools import lru_cache
 from database.database import Database
 from entities.item import Item
 
@@ -9,6 +10,7 @@ class ItemController:
         pass
 
     @classmethod
+    @lru_cache(maxsize=None)
     def get_item(cls, item_id):
         item_tuple = cls.db.get_item(item_id)
 
@@ -18,6 +20,7 @@ class ItemController:
             return None
 
     @classmethod
+    @lru_cache(maxsize=None)
     def get_item_by_name(cls, item_name):
         item_tuple = cls.db.get_item_by_name(item_name)
 
@@ -27,6 +30,7 @@ class ItemController:
             return None
 
     @classmethod
+    @lru_cache(maxsize=None)
     def get_formatted_item_name(cls, item_id):
         item = cls.get_item(item_id)
         if item:

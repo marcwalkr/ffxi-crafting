@@ -1,5 +1,6 @@
 import random
 from collections import defaultdict
+from functools import lru_cache
 from utils.utils import clamp
 
 
@@ -20,6 +21,7 @@ class Synth:
         self.tier = self.get_tier()
         self.cost = None
 
+    @lru_cache(maxsize=None)
     def get_difficulty(self):
         recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
                          self.recipe.cloth, self.recipe.leather,
@@ -38,6 +40,7 @@ class Synth:
         skill_differences = [recipe - crafter for recipe, crafter in zip(recipe_skills, crafter_skills) if recipe > 0]
         return max(skill_differences, default=0)
 
+    @lru_cache(maxsize=None)
     def get_tier(self):
         if self.difficulty < -50:
             return 3
@@ -77,6 +80,7 @@ class Synth:
             return self.recipe.result.item_id, self.recipe.result_qty
         return None, None
 
+    @lru_cache(maxsize=None)
     def get_hq_result(self, hq_tier):
         if hq_tier == 1:
             return self.recipe.result_hq1.item_id, self.recipe.result_hq1_qty
@@ -100,6 +104,7 @@ class Synth:
 
         return retained_ingredients
 
+    @lru_cache(maxsize=None)
     def calculate_cost(self):
         cost = 0
         for ingredient in self.recipe.get_ingredients():
