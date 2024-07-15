@@ -18,13 +18,23 @@ class SettingsPage(ttk.Frame):
         categories = [
             ("Profit Table", self.create_profit_table_settings),
             ("Synth", self.create_synth_settings),
-            ("Skill Levels and Merchants", self.create_skill_levels_and_merchants_settings)
         ]
 
         for category_name, create_method in categories:
             frame = ttk.LabelFrame(self, text=category_name)
             frame.pack(fill="x", padx=10, pady=5)
             create_method(frame)
+
+        skill_and_merchants_frame = ttk.Frame(self)
+        skill_and_merchants_frame.pack(fill="x", padx=10, pady=5)
+
+        skill_levels_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Skill Levels")
+        skill_levels_frame.pack(side="left", fill="x", padx=10, pady=5)
+        self.create_skill_levels_settings(skill_levels_frame)
+
+        merchants_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Merchants")
+        merchants_frame.pack(side="left", fill="x", padx=10, pady=5)
+        self.create_merchants_settings(merchants_frame)
 
         save_button = ttk.Button(self, text="Save", command=self.save_settings)
         save_button.pack(pady=10)
@@ -46,11 +56,9 @@ class SettingsPage(ttk.Frame):
         ]
         self.create_number_settings(frame, settings, self.settings.get("synth", {}))
 
-    def create_skill_levels_and_merchants_settings(self, frame):
-        skill_levels_frame = ttk.Frame(frame)
-        skill_levels_frame.pack(side="left", fill="y", padx=5, pady=5)
-        self.skill_levels_settings = skill_levels_frame
-        self.create_vertical_number_settings(skill_levels_frame, [
+    def create_skill_levels_settings(self, frame):
+        self.skill_levels_settings = frame
+        self.create_vertical_number_settings(frame, [
             ("Wood", 0),
             ("Smith", 0),
             ("Gold", 0),
@@ -61,10 +69,9 @@ class SettingsPage(ttk.Frame):
             ("Cook", 0)
         ], self.settings.get("skill_levels", {}))
 
-        merchants_frame = ttk.Frame(frame)
-        merchants_frame.pack(side="left", fill="y", padx=5, pady=5)
-        self.merchants_settings = merchants_frame
-        self.create_two_column_boolean_settings(merchants_frame, [
+    def create_merchants_settings(self, frame):
+        self.merchants_settings = frame
+        self.create_two_column_boolean_settings(frame, [
             "Guilds", "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
             "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor", "Movalpolos", "Norvallen", "Qufim",
             "Ronfaure", "Sarutabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
