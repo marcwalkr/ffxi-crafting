@@ -1,5 +1,4 @@
 from entities.synth import Synth
-from controllers.item_controller import ItemController
 from config.settings_manager import SettingsManager
 
 
@@ -22,7 +21,11 @@ class Crafter:
         # Calculate the total cost saved from retained ingredients after failures
         simulation_cost = self.synth.cost * num_times
         for ingredient_id, amount in retained_ingredients.items():
-            ingredient = ItemController.get_item(ingredient_id)
+            ingredient = None
+            for item in self.recipe.get_ingredients():
+                if item.item_id == ingredient_id:
+                    ingredient = item
+                    break
             saved_cost = ingredient.min_price * amount
             simulation_cost -= saved_cost
 
@@ -30,7 +33,11 @@ class Crafter:
         total_gil = 0
 
         for item_id, quantity in results.items():
-            result = ItemController.get_item(item_id)
+            result = None
+            for item in self.recipe.get_results():
+                if item.item_id == item_id:
+                    result = item
+                    break
 
             single_price = result.stack_price / result.stack_size if result.stack_price is not None else result.single_price
 

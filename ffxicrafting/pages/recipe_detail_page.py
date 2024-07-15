@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from utils.widgets import TreeviewWithSort
 from controllers.auction_controller import AuctionController
+from controllers.item_controller import ItemController
 from config.settings_manager import SettingsManager
 from entities.crafter import Crafter
 
@@ -77,6 +78,8 @@ class RecipeDetailPage(ttk.Frame):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
         for ingredient, quantity in ingredient_counts.items():
+            # Update prices to reflect any changes to merchant settings
+            ingredient.update_prices()
             single_price = ingredient.single_price if ingredient.single_price is not None else ""
             stack_price = ingredient.stack_price if ingredient.stack_price is not None else ""
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
@@ -162,13 +165,18 @@ class RecipeDetailPage(ttk.Frame):
         single_price = 0 if single_price == "" else single_price
         stack_price = 0 if stack_price == "" else stack_price
 
+        self.update_auction_and_item_prices(item_id, single_price, stack_price)
+        self.update_cost_per_synth()
+        popup.destroy()
+
+    def update_auction_and_item_prices(self, item_id, single_price, stack_price):
         if AuctionController.auction_item_exists(item_id):
             AuctionController.update_auction_item(item_id, single_price, stack_price)
         else:
             AuctionController.add_auction_item(item_id, single_price, stack_price)
 
-        self.update_cost_per_synth()
-        popup.destroy()
+        item = ItemController.get_item(item_id)
+        item.update_prices()
 
     def update_cost_per_synth(self):
         skills = SettingsManager.get_skills()

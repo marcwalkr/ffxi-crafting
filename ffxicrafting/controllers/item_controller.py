@@ -18,21 +18,3 @@ class ItemController:
             return Item(*item_tuple)
         else:
             return None
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_item_by_name(cls, item_name):
-        item_tuple = cls.db.get_item_by_name(item_name)
-
-        if item_tuple is not None:
-            return Item(*item_tuple)
-        else:
-            return None
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_formatted_item_name(cls, item_id):
-        item = cls.get_item(item_id)
-        if item:
-            return item.get_formatted_name()
-        return None

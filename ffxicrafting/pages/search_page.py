@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from utils.widgets import TreeviewWithSort
-from functools import lru_cache
 from controllers.recipe_controller import RecipeController
 from pages.recipe_list_page import RecipeListPage
 
@@ -36,7 +35,6 @@ class SearchPage(RecipeListPage):
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
 
-    @lru_cache(maxsize=None)
     def search_recipes(self, search_term):
         self.clear_treeview(self.recipe_tree)
         results = RecipeController.search_recipe(search_term)
