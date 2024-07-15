@@ -49,7 +49,10 @@ class Ingredient:
                                        item.stack_size)
             prices.append(single_price_from_stack)
 
-        return min(prices)
+        if len(prices) > 0:
+            return min(prices)
+        else:
+            return None
 
     def get_vendor_price(self):
         vendor_items = VendorController.get_vendor_items(self.item_id)
