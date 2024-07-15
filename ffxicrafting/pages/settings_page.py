@@ -32,9 +32,13 @@ class SettingsPage(ttk.Frame):
         skill_levels_frame.pack(side="left", fill="x", padx=10, pady=5)
         self.create_skill_levels_settings(skill_levels_frame)
 
-        merchants_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Merchants")
+        merchants_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Regional Merchants")
         merchants_frame.pack(side="left", fill="x", padx=10, pady=5)
         self.create_merchants_settings(merchants_frame)
+
+        guilds_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Guild Merchants")
+        guilds_frame.pack(side="left", fill="x", padx=10, pady=5)
+        self.create_guilds_settings(guilds_frame)
 
         save_button = ttk.Button(self, text="Save", command=self.save_settings)
         save_button.pack(pady=10)
@@ -72,17 +76,25 @@ class SettingsPage(ttk.Frame):
     def create_merchants_settings(self, frame):
         self.merchants_settings = frame
         self.create_two_column_boolean_settings(frame, [
-            "Guilds", "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
+            "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
             "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor", "Movalpolos", "Norvallen", "Qufim",
             "Ronfaure", "Sarutabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
-        ], self.settings.get("merchants", {}))
+        ], self.settings.get("regional_merchants", {}))
+
+    def create_guilds_settings(self, frame):
+        self.guilds_settings = frame
+        self.create_two_column_boolean_settings(frame, [
+            "Alchemy", "Bonecraft", "Clothcraft", "Cooking", "Fishing", "Goldsmithing",
+            "Leathercraft", "Smithing", "Woodworking", "Tenshodo"
+        ], self.settings.get("guilds", {}))
 
     def save_settings(self):
         settings = {
             "profit_table": self.get_number_settings(self.profit_table_settings),
             "synth": self.get_number_settings(self.synth_settings),
             "skill_levels": self.get_vertical_number_settings(self.skill_levels_settings),
-            "merchants": self.get_boolean_settings(self.merchants_settings)
+            "regional_merchants": self.get_boolean_settings(self.merchants_settings),
+            "guilds": self.get_boolean_settings(self.guilds_settings)
         }
         SettingsManager.save_settings(settings)
 
