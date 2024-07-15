@@ -1,6 +1,5 @@
-from database import Database
-from models.item import Item
-from utils import format_item_name
+from database.database import Database
+from entities.item import Item
 
 
 class ItemController:
@@ -31,5 +30,5 @@ class ItemController:
     def get_formatted_item_name(cls, item_id):
         item = cls.get_item(item_id)
         if item:
-            return format_item_name(item)
+            return item.get_formatted_name()
         return None

@@ -62,6 +62,12 @@ class Database:
         self.cursor.execute("SELECT * FROM synth_recipes")
         return self.cursor.fetchall()
 
+    def get_recipes_by_craft_levels(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
+        query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
+                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s")
+        self.cursor.execute(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook))
+        return self.cursor.fetchall()
+
     def search_recipe(self, search_term):
         self.cursor.execute("SELECT * FROM synth_recipes WHERE ResultName LIKE %s", ("%" + search_term + "%",))
         return self.cursor.fetchall()

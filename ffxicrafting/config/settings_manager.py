@@ -1,6 +1,5 @@
 import os
 import json
-from skill_set import SkillSet
 
 
 class SettingsManager:
@@ -86,19 +85,19 @@ class SettingsManager:
         return int(settings["synth"].get("simulation_trials", 1000))
 
     @classmethod
-    def get_skill_set(cls):
+    def get_skills(cls):
         settings = cls.load_settings()
         skills = settings.get("skill_levels", {})
-        return SkillSet(
-            wood=int(skills.get("wood", 0)),
-            smith=int(skills.get("smith", 0)),
-            gold=int(skills.get("gold", 0)),
-            cloth=int(skills.get("cloth", 0)),
-            leather=int(skills.get("leather", 0)),
-            bone=int(skills.get("bone", 0)),
-            alchemy=int(skills.get("alchemy", 0)),
-            cook=int(skills.get("cook", 0))
-        )
+        return [
+            int(skills.get("wood", 0)),
+            int(skills.get("smith", 0)),
+            int(skills.get("gold", 0)),
+            int(skills.get("cloth", 0)),
+            int(skills.get("leather", 0)),
+            int(skills.get("bone", 0)),
+            int(skills.get("alchemy", 0)),
+            int(skills.get("cook", 0))
+        ]
 
     @classmethod
     def get_enabled_regional_merchants(cls):

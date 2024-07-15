@@ -1,13 +1,10 @@
+import re
 import tkinter as tk
 from tkinter import ttk
-from controllers.synth_controller import SynthController
-from controllers.item_controller import ItemController
-from controllers.vendor_controller import VendorController
+from controllers.recipe_controller import RecipeController
 from controllers.auction_controller import AuctionController
-from crafter import Crafter
-from synth import Synth
-from utils import summarize_list, count_items, unique_preserve_order
-from settings_manager import SettingsManager
+from entities.crafter import Crafter
+from config.settings_manager import SettingsManager
 
 
 class App(tk.Tk):
@@ -109,6 +106,9 @@ class App(tk.Tk):
         treeview.heading("levels", text="Craft Levels")
         treeview.heading("ingredients", text="Ingredients")
 
+        # Center craft levels
+        treeview.column("levels", anchor=tk.CENTER)
+
     def create_profit_page(self):
         self.profit_page = ttk.Frame(self.notebook)
         self.notebook.add(self.profit_page, text="Profit Table")
@@ -141,30 +141,29 @@ class App(tk.Tk):
     def generate_profit_table(self):
         self.clear_treeview(self.profit_tree)
 
-        skill_set = SettingsManager.get_skill_set()
-        crafter = Crafter(skill_set)
-        recipes = SynthController.get_all_recipes()
+        skills = SettingsManager.get_skills()
+        skill_look_ahead = SettingsManager.get_skill_look_ahead()
+        recipes = RecipeController.get_recipes_by_craft_levels(*(skill - skill_look_ahead for skill in skills))
         synth_profit_threshold = SettingsManager.get_profit_per_synth()
         storage_profit_threshold = SettingsManager.get_profit_per_storage()
+        simulation_trials = SettingsManager.get_simulation_trials()
 
         for recipe in recipes:
-            synth = Synth(recipe, crafter)
-            if self.should_include_synth(synth, synth_profit_threshold, storage_profit_threshold):
-                self.profit_tree.insert("", "end", iid=recipe.id, values=self.get_profit_table_row(synth))
+            crafter = Crafter(*skills, recipe)
 
-    def should_include_synth(self, synth, synth_profit_threshold, storage_profit_threshold):
-        if not synth.can_craft or not synth.cost:
-            return False
+            crafter.synth.cost = crafter.synth.calculate_cost()
+            if crafter.synth.cost is None:
+                continue
 
-        meets_synth_threshold = synth.profit_per_synth >= synth_profit_threshold
-        meets_storage_threshold = synth.profit_per_storage >= storage_profit_threshold
+            profit_per_synth, profit_per_storage = crafter.craft(simulation_trials)
+            if profit_per_synth < synth_profit_threshold or profit_per_storage < storage_profit_threshold:
+                continue
 
-        return meets_synth_threshold and meets_storage_threshold
-
-    def get_profit_table_row(self, synth):
-        nq_string = self.format_item_string(synth.recipe.result, synth.recipe.result_qty)
-        hq_string = self.format_hq_string(synth.recipe)
-        return nq_string, hq_string, synth.tier, synth.cost, synth.profit_per_synth, synth.profit_per_storage
+            nq_string = recipe.get_formatted_nq_result()
+            hq_string = recipe.get_formatted_hq_results()
+            row = [nq_string, hq_string, crafter.synth.tier,
+                   crafter.synth.cost, profit_per_synth, profit_per_storage]
+            self.profit_tree.insert("", "end", iid=recipe.id, values=row)
 
     def create_simulate_page(self):
         self.simulate_page = ttk.Frame(self.notebook)
@@ -267,58 +266,19 @@ class App(tk.Tk):
 
     def search_recipes(self, search_term):
         self.clear_treeview(self.recipe_tree)
-        results = SynthController.search_recipe(search_term)
+        results = RecipeController.search_recipe(search_term)
 
         for recipe in results:
-            nq_string, hq_string, levels_string, ingredient_names_summarized = self.format_recipe_data(recipe)
-            tree_values = [nq_string, hq_string, levels_string, ingredient_names_summarized]
-            self.recipe_tree.insert("", "end", iid=recipe.id, values=tree_values)
+            nq_string = recipe.get_formatted_nq_result()
+            hq_string = recipe.get_formatted_hq_results()
+            levels_string = recipe.get_formatted_levels_string()
+            ingredient_names_summarized = recipe.get_formatted_ingredient_names()
+            row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
+            self.recipe_tree.insert("", "end", iid=recipe.id, values=row)
 
     def clear_treeview(self, treeview):
         for i in treeview.get_children():
             treeview.delete(i)
-
-    def format_recipe_data(self, recipe):
-        nq_string = self.format_item_string(recipe.result, recipe.result_qty)
-        hq_string = self.format_hq_string(recipe)
-        levels_string = self.format_levels_string(recipe)
-        ingredient_names_summarized = self.format_ingredient_names(recipe)
-        return nq_string, hq_string, levels_string, ingredient_names_summarized
-
-    def format_item_string(self, item_id, quantity):
-        item_name = ItemController.get_formatted_item_name(item_id)
-        return item_name if quantity == 1 else f"{item_name} x{quantity}"
-
-    def format_hq_string(self, recipe):
-        hq_strings = [
-            self.format_item_string(recipe.result_hq1, recipe.result_hq1_qty),
-            self.format_item_string(recipe.result_hq2, recipe.result_hq2_qty),
-            self.format_item_string(recipe.result_hq3, recipe.result_hq3_qty)
-        ]
-        return ", ".join(unique_preserve_order(hq_strings))
-
-    def format_levels_string(self, recipe):
-        skills = {
-            "Wood": recipe.wood,
-            "Smith": recipe.smith,
-            "Gold": recipe.gold,
-            "Cloth": recipe.cloth,
-            "Leather": recipe.leather,
-            "Bone": recipe.bone,
-            "Alchemy": recipe.alchemy,
-            "Cook": recipe.cook
-        }
-        levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
-        return ", ".join(levels)
-
-    def format_ingredient_names(self, recipe):
-        ingredient_ids = [
-            recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
-            recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
-            recipe.ingredient8
-        ]
-        ingredient_names = [ItemController.get_formatted_item_name(id) for id in ingredient_ids if id > 0]
-        return summarize_list(ingredient_names)
 
     def show_recipe_details(self, event):
         tree = event.widget
@@ -326,7 +286,7 @@ class App(tk.Tk):
             return
 
         recipe_id = tree.selection()[0]
-        recipe = SynthController.get_recipe(recipe_id)
+        recipe = RecipeController.get_recipe(recipe_id)
         detail_page = self.create_detail_page(recipe)
         self.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.notebook.select(detail_page)
@@ -364,34 +324,15 @@ class App(tk.Tk):
             treeview.column(col, width=100, anchor=tk.CENTER, stretch=True)
 
     def populate_ingredients_tree(self, recipe):
-        ingredient_counts = count_items([i for i in self.get_ingredient_ids(recipe) if i > 0])
-        for ingredient_id, quantity in ingredient_counts.items():
-            ingredient_name = ItemController.get_formatted_item_name(ingredient_id)
-            single_price, stack_price = self.get_auction_prices(ingredient_id)
-            cheapest_vendor_price = self.get_cheapest_vendor_price(ingredient_id)
-            self.ingredients_tree.insert("", "end", iid=ingredient_id, values=(
-                ingredient_name, quantity, single_price, stack_price, cheapest_vendor_price, recipe.id))
+        ingredient_counts = recipe.get_ingredient_counts()
 
-    def get_ingredient_ids(self, recipe):
-        return [
-            recipe.crystal, recipe.ingredient1, recipe.ingredient2, recipe.ingredient3,
-            recipe.ingredient4, recipe.ingredient5, recipe.ingredient6, recipe.ingredient7,
-            recipe.ingredient8
-        ]
-
-    def get_auction_prices(self, item_id):
-        auction_item = AuctionController.get_auction_item(item_id)
-        if auction_item is None:
-            return "", ""
-        single_price = "" if auction_item.single_price == 0 else auction_item.single_price
-        stack_price = "" if auction_item.stack_price == 0 else auction_item.stack_price
-        return single_price, stack_price
-
-    def get_cheapest_vendor_price(self, item_id):
-        vendor_items = VendorController.get_vendor_items(item_id)
-        if vendor_items:
-            return min([vendor_item.price for vendor_item in vendor_items])
-        return ""
+        for ingredient, quantity in ingredient_counts.items():
+            single_price = ingredient.single_price if ingredient.single_price is not None else ""
+            stack_price = ingredient.stack_price if ingredient.stack_price is not None else ""
+            vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
+            ingredient_name = ingredient.get_formatted_name()
+            self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
+                ingredient_name, quantity, single_price, stack_price, vendor_price, recipe.id))
 
     def add_cost_per_synth_frame(self, frame, recipe):
         cost_per_synth_frame = ttk.Frame(frame)
@@ -420,13 +361,14 @@ class App(tk.Tk):
         self.results_tree.bind("<Button-1>", self.on_treeview_click)
 
     def populate_results_tree(self, recipe):
-        unique_result_ids = unique_preserve_order(
-            [recipe.result, recipe.result_hq1, recipe.result_hq2, recipe.result_hq3])
-        for result_id in unique_result_ids:
-            result_name = ItemController.get_formatted_item_name(result_id)
-            single_price, stack_price = self.get_auction_prices(result_id)
-            self.results_tree.insert("", "end", iid=result_id, values=(
-                result_name, single_price, stack_price, recipe.id))
+        unique_results = recipe.get_unique_results()
+        for result in unique_results:
+            result_name = result.get_formatted_name()
+            single_price, stack_price = result.get_auction_prices()
+            single_price = "" if single_price is None else single_price
+            stack_price = "" if stack_price is None else stack_price
+            self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
+                                                                            recipe.id))
 
     def add_close_button(self, frame):
         close_button = ttk.Button(frame, text="Close", command=lambda: self.close_detail_page(frame))
@@ -507,16 +449,17 @@ class App(tk.Tk):
         else:
             AuctionController.add_auction_item(item_id, single_price, stack_price)
 
-        recipe = SynthController.get_recipe(recipe_id)
+        recipe = RecipeController.get_recipe(recipe_id)
         self.update_cost_per_synth(recipe)
         popup.destroy()
 
     def update_cost_per_synth(self, recipe):
-        skill_set = SettingsManager.get_skill_set()
-        crafter = Crafter(skill_set)
-        synth = Synth(recipe, crafter)
+        skills = SettingsManager.get_skills()
+        crafter = Crafter(*skills, recipe)
 
-        value_text = f"{synth.cost:.2f} gil" if synth.cost is not None else "N/A"
+        crafter.synth.cost = crafter.synth.calculate_cost()
+
+        value_text = f"{crafter.synth.cost:.2f} gil" if crafter.synth.cost is not None else "N/A"
         self.cost_per_synth_value_label.config(text=value_text)
         self.update()
 
@@ -542,12 +485,17 @@ class TreeviewWithSort(ttk.Treeview):
 
     def _sort_by(self, col, descending):
         def convert(value):
+            if value == "":
+                return float('-inf') if descending else float('inf')
             try:
                 return float(value)
             except ValueError:
                 return value
 
-        data = [(convert(self.set(child, col)), child) for child in self.get_children('')]
+        def natural_keys(text):
+            return [convert(c) if c.isdigit() else c for c in re.split(r'(\d+)', text)]
+
+        data = [(natural_keys(self.set(child, col)), child) for child in self.get_children('')]
         data.sort(reverse=descending)
 
         for idx, (val, child) in enumerate(data):
