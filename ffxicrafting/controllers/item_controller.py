@@ -1,5 +1,5 @@
-from database import Database
-from models.item import Item
+from database.database import Database
+from entities.item import Item
 
 
 class ItemController:
@@ -25,3 +25,10 @@ class ItemController:
             return Item(*item_tuple)
         else:
             return None
+
+    @classmethod
+    def get_formatted_item_name(cls, item_id):
+        item = cls.get_item(item_id)
+        if item:
+            return item.get_formatted_name()
+        return None

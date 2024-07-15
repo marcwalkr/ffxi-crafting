@@ -1,4 +1,4 @@
-class Item:
+class ItemModel:
     def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah,
                  no_sale, base_sell) -> None:
         self.item_id = item_id

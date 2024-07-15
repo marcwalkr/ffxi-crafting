@@ -1,4 +1,4 @@
-from database import Database
+from database.database import Database
 from models.guild_shop import GuildShop
 
 

@@ -1,10 +1,7 @@
 import os
+import sys
 import re
 from controllers.npc_controller import NpcController
-
-
-def clamp(n, minn, maxn):
-    return max(min(maxn, n), minn)
 
 
 def generate_vendor_inserts():
@@ -32,7 +29,7 @@ def generate_vendor_inserts():
                     continue
 
                 # The item_id and price are the first 2 numbers on the line
-                numbers = re.findall('[0-9]+', line)
+                numbers = re.findall("[0-9]+", line)
                 item_id, price = numbers[0:2]
 
                 comment_start = line.index("--")

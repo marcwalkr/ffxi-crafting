@@ -24,6 +24,11 @@ class Database:
                             (item_id, single_price, stack_price,))
         self.commit()
 
+    def update_auction_item(self, item_id, single_price, stack_price):
+        self.cursor.execute("UPDATE auction_items SET single_price = %s, stack_price = %s WHERE itemid = %s",
+                            (single_price, stack_price, item_id))
+        self.commit()
+
     def delete_auction_items(self):
         self.cursor.execute("DELETE FROM auction_items")
         self.commit()
@@ -55,6 +60,16 @@ class Database:
 
     def get_all_recipes(self):
         self.cursor.execute("SELECT * FROM synth_recipes")
+        return self.cursor.fetchall()
+
+    def get_recipes_by_craft_levels(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
+        query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
+                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s")
+        self.cursor.execute(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook))
+        return self.cursor.fetchall()
+
+    def search_recipe(self, search_term):
+        self.cursor.execute("SELECT * FROM synth_recipes WHERE ResultName LIKE %s", ("%" + search_term + "%",))
         return self.cursor.fetchall()
 
     def get_vendor_items(self, item_id):

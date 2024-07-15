@@ -1,4 +1,4 @@
-class SynthRecipe:
+class RecipeModel:
     def __init__(self, id, desynth, key_item, wood, smith, gold, cloth,
                  leather, bone, alchemy, cook, crystal, hq_crystal,
                  ingredient1, ingredient2, ingredient3, ingredient4,

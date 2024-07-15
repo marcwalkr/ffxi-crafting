@@ -1,4 +1,4 @@
-from database import Database
+from database.database import Database
 from models.auction_item import AuctionItem
 
 
@@ -18,8 +18,16 @@ class AuctionController:
             return None
 
     @classmethod
+    def auction_item_exists(cls, item_id):
+        return cls.get_auction_item(item_id) is not None
+
+    @classmethod
     def add_auction_item(cls, item_id, single_price, stack_price):
         cls.db.add_auction_item(item_id, single_price, stack_price)
+
+    @classmethod
+    def update_auction_item(cls, item_id, single_price, stack_price):
+        cls.db.update_auction_item(item_id, single_price, stack_price)
 
     @classmethod
     def delete_auction_items(cls):
