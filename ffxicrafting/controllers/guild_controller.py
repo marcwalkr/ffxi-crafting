@@ -1,5 +1,6 @@
 from functools import lru_cache
 from database.database import Database
+from models.guild import Guild
 from models.guild_shop import GuildShop
 
 
@@ -8,6 +9,14 @@ class GuildController:
 
     def __init__(self) -> None:
         pass
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def get_guild(cls, guild_id):
+        guild_tuple = cls.db.get_guild(guild_id)
+        if guild_tuple:
+            return Guild(*guild_tuple)
+        return None
 
     @classmethod
     @lru_cache(maxsize=None)

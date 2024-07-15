@@ -33,6 +33,10 @@ class Database:
         self.cursor.execute("DELETE FROM auction_items")
         self.commit()
 
+    def get_guild(self, guild_id):
+        self.cursor.execute("SELECT * FROM guilds WHERE id=%s", (guild_id,))
+        return self.cursor.fetchone()
+
     def get_guild_shops(self, item_id):
         self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s",
                             (item_id,))
@@ -41,11 +45,6 @@ class Database:
     def get_item(self, item_id):
         self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s",
                             (item_id,))
-        return self.cursor.fetchone()
-
-    def get_item_by_name(self, item_name):
-        self.cursor.execute("SELECT * FROM item_basic WHERE name=%s",
-                            (item_name,))
         return self.cursor.fetchone()
 
     def get_npc_by_name(self, name):
@@ -57,10 +56,6 @@ class Database:
         self.cursor.execute("SELECT * FROM synth_recipes WHERE id=%s",
                             (recipe_id,))
         return self.cursor.fetchone()
-
-    def get_all_recipes(self):
-        self.cursor.execute("SELECT * FROM synth_recipes")
-        return self.cursor.fetchall()
 
     def get_recipes_by_craft_levels(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
         query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "

@@ -21,12 +21,6 @@ class RecipeController:
 
     @classmethod
     @lru_cache(maxsize=None)
-    def get_all_recipes(cls):
-        recipe_tuples = cls.db.get_all_recipes()
-        return [Recipe(*r) for r in recipe_tuples]
-
-    @classmethod
-    @lru_cache(maxsize=None)
     def get_recipes_by_craft_levels(cls, wood, smith, gold, cloth, leather, bone, alchemy, cook):
         recipe_tuples = cls.db.get_recipes_by_craft_levels(wood, smith, gold, cloth, leather, bone, alchemy, cook)
         return [Recipe(*r) for r in recipe_tuples]

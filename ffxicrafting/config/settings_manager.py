@@ -24,8 +24,7 @@ class SettingsManager:
             "alchemy": 0,
             "cook": 0
         },
-        "merchants": {
-            "guilds": True,
+        "regional_merchants": {
             "aragoneu": True,
             "derfland": True,
             "elshimo_lowlands": True,
@@ -44,6 +43,18 @@ class SettingsManager:
             "valdeaunia": True,
             "vollbow": True,
             "zulkheim": True
+        },
+        "guilds": {
+            "alchemy": True,
+            "bonecraft": True,
+            "clothcraft": True,
+            "cooking": True,
+            "fishing": True,
+            "goldsmithing": True,
+            "leathercraft": True,
+            "smithing": True,
+            "woodworking": True,
+            "tenshodo": True
         }
     }
 
@@ -107,11 +118,13 @@ class SettingsManager:
             return name.replace('_', ' ').title()
 
         settings = cls.load_settings()
-        merchants = settings["merchants"].items()
-        enabled_merchants = [merchant for merchant, enabled in merchants if enabled and merchant != "guilds"]
+        merchants = settings["regional_merchants"].items()
+        enabled_merchants = [merchant for merchant, enabled in merchants if enabled]
         return [format_merchant_name(merchant) for merchant in enabled_merchants]
 
     @classmethod
     def get_enabled_guilds(cls):
         settings = cls.load_settings()
-        return settings["merchants"].get("guilds", False)
+        guilds = settings["guilds"].items()
+        enabled_guilds = [guild for guild, enabled in guilds if enabled]
+        return [guild.capitalize() for guild in enabled_guilds]

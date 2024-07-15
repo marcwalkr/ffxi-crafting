@@ -1,7 +1,3 @@
-from functools import lru_cache
-
-
-@lru_cache(maxsize=None)
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
