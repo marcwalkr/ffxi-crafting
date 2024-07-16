@@ -1,36 +1,33 @@
 import mysql.connector
+from dotenv import load_dotenv
+import os
 
 
 class Database:
     def __init__(self) -> None:
+        load_dotenv()
         self.connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            passwd="root",
-            database="ffxi"
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            passwd=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
         )
         self.cursor = self.connection.cursor(buffered=True)
 
     def __del__(self):
         self.connection.close()
 
-    def get_auction_item(self, item_id):
-        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s",
-                            (item_id,))
+    def get_auction_item(self, item_id, is_stack):
+        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND is_stack=%s AND no_sale=0",
+                            (item_id, is_stack))
         return self.cursor.fetchone()
 
-    def add_auction_item(self, item_id, single_price, stack_price):
-        self.cursor.execute("INSERT INTO auction_items VALUES (%s, %s, %s)",
-                            (item_id, single_price, stack_price,))
-        self.commit()
-
-    def update_auction_item(self, item_id, single_price, stack_price):
-        self.cursor.execute("UPDATE auction_items SET single_price = %s, stack_price = %s WHERE itemid = %s",
-                            (single_price, stack_price, item_id))
-        self.commit()
-
-    def delete_auction_items(self):
-        self.cursor.execute("DELETE FROM auction_items")
+    def update_auction_item(self, item_id, avg_price, num_sales, sell_freq, is_stack):
+        self.cursor.execute(
+            "UPDATE auction_items SET avg_price = %s, num_sales = %s, sell_freq = %s, new_data = 0 "
+            "WHERE itemid = %s AND is_stack = %s",
+            (avg_price, num_sales, sell_freq, item_id, is_stack)
+        )
         self.commit()
 
     def get_guild(self, guild_id):
@@ -52,6 +49,18 @@ class Database:
                             (name,))
         return self.cursor.fetchone()
 
+    def get_regional_vendors(self):
+        self.cursor.execute("SELECT * FROM regional_vendors")
+        return self.cursor.fetchall()
+
+    def get_latest_sales_history(self, item_id, is_stack):
+        self.cursor.execute(
+            "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
+            "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)",
+            (item_id, is_stack, item_id, is_stack)
+        )
+        return self.cursor.fetchall()
+
     def get_recipe(self, recipe_id):
         self.cursor.execute("SELECT * FROM synth_recipes WHERE id=%s",
                             (recipe_id,))
@@ -70,10 +79,6 @@ class Database:
     def get_vendor_items(self, item_id):
         self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s",
                             (item_id,))
-        return self.cursor.fetchall()
-
-    def get_regional_vendors(self):
-        self.cursor.execute("SELECT * FROM regional_vendors")
         return self.cursor.fetchall()
 
     def commit(self):

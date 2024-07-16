@@ -85,6 +85,7 @@ class ProfitPage(RecipeListPage):
         treeview.heading("cost_per_synth", text="Cost / Synth")
         treeview.heading("profit_per_synth", text="Profit / Synth")
         treeview.heading("profit_per_storage", text="Profit / Storage")
+        treeview.heading("sell_freq", text="Sell Freq")
 
         treeview.column("tier", anchor=tk.CENTER)
         treeview.column("cost_per_synth", anchor=tk.CENTER)
