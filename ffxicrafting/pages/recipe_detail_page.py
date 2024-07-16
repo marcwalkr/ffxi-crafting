@@ -9,6 +9,7 @@ from entities.crafter import Crafter
 
 class RecipeDetailPage(ttk.Frame):
     def __init__(self, parent, recipe):
+        self.previous_tab_index = parent.notebook.index("current")  # Store the current tab index
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
@@ -191,6 +192,7 @@ class RecipeDetailPage(ttk.Frame):
     def close_detail_page(self):
         tab_id = self.parent.notebook.index(self)
         self.parent.notebook.forget(tab_id)
+        self.parent.notebook.select(self.previous_tab_index)  # Switch back to the previous tab
 
     def on_treeview_click(self, event):
         tree = event.widget
