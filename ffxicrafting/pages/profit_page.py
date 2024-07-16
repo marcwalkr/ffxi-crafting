@@ -19,12 +19,8 @@ class ProfitPage(RecipeListPage):
         self.generate_button = ttk.Button(self, text="Generate Table", command=self.start_generate_profit_table)
         self.generate_button.pack(pady=10)
 
-        self.progress = ttk.Progressbar(self, mode='indeterminate', length=300)
-        self.progress.pack(pady=10)
-        self.progress.pack_forget()
-
-        self.profit_tree = TreeviewWithSort(self, columns=("nq", "hq", "tier", "cost_per_synth", "profit_per_synth",
-                                                           "profit_per_storage"), show="headings")
+        self.profit_tree = TreeviewWithSort(self, columns=(
+            "nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage", "sell_freq"), show="headings")
         self.configure_profit_treeview(self.profit_tree)
         self.profit_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
@@ -91,3 +87,38 @@ class ProfitPage(RecipeListPage):
         treeview.column("cost_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_storage", anchor=tk.CENTER)
+        treeview.column("sell_freq", anchor=tk.CENTER)
+
+    def generate_profit_table(self):
+        self.clear_treeview(self.profit_tree)
+
+        skills = SettingsManager.get_skills()
+        skill_look_ahead = SettingsManager.get_skill_look_ahead()
+        recipes = RecipeController.get_recipes_by_craft_levels(*(skill - skill_look_ahead for skill in skills))
+        synth_profit_threshold = SettingsManager.get_profit_per_synth()
+        storage_profit_threshold = SettingsManager.get_profit_per_storage()
+        simulation_trials = SettingsManager.get_simulation_trials()
+
+        for recipe in recipes:
+            crafter = Crafter(*skills, recipe)
+
+            crafter.synth.cost = crafter.synth.calculate_cost()
+            if crafter.synth.cost is None:
+                continue
+
+            profit_per_synth, profit_per_storage = crafter.craft(simulation_trials)
+            if profit_per_synth < synth_profit_threshold or profit_per_storage < storage_profit_threshold:
+                continue
+
+            nq_string = recipe.get_formatted_nq_result()
+            hq_string = recipe.get_formatted_hq_results()
+
+            # Get the maximum sell frequency of all results
+            sell_freq = max(
+                max(item.single_sell_freq, item.stack_sell_freq)
+                for item in recipe.get_results()
+            )
+
+            row = [nq_string, hq_string, crafter.synth.tier,
+                   crafter.synth.cost, profit_per_synth, profit_per_storage, sell_freq]
+            self.profit_tree.insert("", "end", iid=recipe.id, values=row)
