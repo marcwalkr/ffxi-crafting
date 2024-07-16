@@ -9,7 +9,7 @@ class Item(ItemModel):
     def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell) -> None:
         super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
         self.id = item_id
-        self.update_prices()
+        self.update_data()
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Item):
@@ -19,10 +19,10 @@ class Item(ItemModel):
     def __hash__(self) -> int:
         return hash(self.item_id)
 
-    def update_prices(self):
+    def update_data(self):
         self.min_price = self.get_min_price()
         self.min_vendor_price = self.get_min_vendor_price()
-        self.single_price, self.stack_price = self.get_auction_prices()
+        self.single_price, self.stack_price, self.single_sell_freq, self.stack_sell_freq = self.get_auction_data()
 
     def get_min_price(self):
         prices = [
@@ -33,18 +33,20 @@ class Item(ItemModel):
         prices = [price for price in prices if price is not None]
         return min(prices, default=None)
 
-    def get_auction_prices(self):
-        auction_item = AuctionController.get_auction_item(self.item_id)
-        if not auction_item:
-            return None, None
+    def get_auction_data(self):
+        def get_price(is_stack):
+            auction_item = AuctionController.get_auction_item(self.item_id, is_stack)
+            if auction_item is None or auction_item.avg_price <= 0:
+                return None, None
+            return auction_item.avg_price, auction_item.sell_freq
 
-        single_price = auction_item.single_price if auction_item.single_price > 0 else None
-        stack_price = auction_item.stack_price if auction_item.stack_price > 0 else None
+        single_price, single_sell_freq = get_price(False)
+        stack_price, stack_sell_freq = get_price(True) if self.stack_size > 1 else (None, None)
 
-        return single_price, stack_price
+        return single_price, stack_price, single_sell_freq, stack_sell_freq
 
     def get_min_auction_price(self):
-        single_price, stack_price = self.get_auction_prices()
+        single_price, stack_price, single_sell_freq, stack_sell_freq = self.get_auction_data()
 
         # Calculate stack price per item if stack price is available
         stack_price_per_item = (stack_price / self.stack_size) if stack_price is not None else None

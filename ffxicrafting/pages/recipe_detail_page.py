@@ -28,7 +28,7 @@ class RecipeDetailPage(ttk.Frame):
         ingredients_frame = ttk.Frame(self)
         ingredients_frame.pack(fill=tk.BOTH, expand=True)
 
-        ingredient_columns = ("Ingredient", "Quantity", "Single Price", "Stack Price", "Vendor Price")
+        ingredient_columns = ("Ingredient", "Quantity", "Avg Single Price", "Avg Stack Price", "Vendor Price")
         self.ingredients_tree = TreeviewWithSort(ingredients_frame, columns=ingredient_columns, show="headings",
                                                  selectmode="browse")
         self.configure_treeview_columns(self.ingredients_tree, ingredient_columns)
@@ -53,7 +53,7 @@ class RecipeDetailPage(ttk.Frame):
         results_frame = ttk.Frame(self)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        result_columns = ("Result", "Single Price", "Stack Price")
+        result_columns = ("Result", "Avg Single Price", "Avg Stack Price")
         self.results_tree = TreeviewWithSort(results_frame, columns=result_columns,
                                              show="headings", selectmode="browse")
         self.configure_treeview_columns(self.results_tree, result_columns)
@@ -76,9 +76,9 @@ class RecipeDetailPage(ttk.Frame):
 
         for ingredient, quantity in ingredient_counts.items():
             # Update prices to reflect any changes to merchant settings
-            ingredient.update_prices()
-            single_price = ingredient.single_price if ingredient.single_price is not None else ""
-            stack_price = ingredient.stack_price if ingredient.stack_price is not None else ""
+            ingredient.update_data()
+            single_price = f"{ingredient.single_price:.2f}" if ingredient.single_price is not None else ""
+            stack_price = f"{ingredient.stack_price:.2f}" if ingredient.stack_price is not None else ""
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
@@ -88,9 +88,9 @@ class RecipeDetailPage(ttk.Frame):
         unique_results = self.recipe.get_unique_results()
         for result in unique_results:
             result_name = result.get_formatted_name()
-            single_price, stack_price = result.get_auction_prices()
-            single_price = "" if single_price is None else single_price
-            stack_price = "" if stack_price is None else stack_price
+            single_price, stack_price, _, _ = result.get_auction_data()
+            single_price = f"{single_price:.2f}" if single_price is not None else ""
+            stack_price = f"{stack_price:.2f}" if stack_price is not None else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                             self.recipe.id))
 
