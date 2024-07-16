@@ -24,7 +24,7 @@ class ProfitPage(RecipeListPage):
         self.progress.pack_forget()
 
         self.profit_tree = TreeviewWithSort(self, columns=("nq", "hq", "tier", "cost_per_synth", "profit_per_synth",
-                                                           "profit_per_storage"), show="headings")
+                                                           "profit_per_storage", "sell_freq"), show="headings")
         self.configure_profit_treeview(self.profit_tree)
         self.profit_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
@@ -61,8 +61,14 @@ class ProfitPage(RecipeListPage):
                 if profit_per_synth >= self.synth_profit_threshold and profit_per_storage >= self.storage_profit_threshold:
                     nq_string = recipe.get_formatted_nq_result()
                     hq_string = recipe.get_formatted_hq_results()
+
+                    # Get the maximum sell frequency of all results
+                    sell_freq = max(
+                        max(item.single_sell_freq, item.stack_sell_freq)
+                        for item in recipe.get_results()
+                    )
                     row = [nq_string, hq_string, crafter.synth.tier,
-                           crafter.synth.cost, profit_per_synth, profit_per_storage]
+                           crafter.synth.cost, profit_per_synth, profit_per_storage, sell_freq]
                     batch.append((recipe.id, row))
 
             if len(batch) >= 10:
@@ -85,8 +91,10 @@ class ProfitPage(RecipeListPage):
         treeview.heading("cost_per_synth", text="Cost / Synth")
         treeview.heading("profit_per_synth", text="Profit / Synth")
         treeview.heading("profit_per_storage", text="Profit / Storage")
+        treeview.heading("sell_freq", text="Sell Freq")
 
         treeview.column("tier", anchor=tk.CENTER)
         treeview.column("cost_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_storage", anchor=tk.CENTER)
+        treeview.column("sell_freq", anchor=tk.CENTER)
