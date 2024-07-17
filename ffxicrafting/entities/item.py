@@ -33,10 +33,10 @@ class Item(ItemModel):
         else:
             single_price_from_stack = None
 
-        self.single_price = int(single_price)
-        self.stack_price = int(stack_price)
-        self.single_sell_freq = float(f"{single_sell_freq:.4f}")
-        self.stack_sell_freq = float(f"{stack_sell_freq:.4f}")
+        self.single_price = int(single_price) if single_price is not None else None
+        self.stack_price = int(stack_price) if stack_price is not None else None
+        self.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
+        self.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
 
         # Determine the minimum auction price
         prices_to_check = [self.single_price, single_price_from_stack]
