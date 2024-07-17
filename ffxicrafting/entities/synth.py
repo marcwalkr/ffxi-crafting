@@ -104,7 +104,7 @@ class Synth:
         def get_min_price(ingredient):
             prices = [
                 ingredient.single_price,
-                (ingredient.stack_price / ingredient.stack_size) if ingredient.stack_price is not None else None,
+                int(ingredient.stack_price / ingredient.stack_size) if ingredient.stack_price is not None else None,
                 ingredient.min_vendor_price
             ]
             valid_prices = [price for price in prices if price is not None]
@@ -117,7 +117,7 @@ class Synth:
                 return None
             total_cost += min_price
 
-        return round(total_cost, 2)
+        return total_cost
 
     def simulate(self, num_times):
         results = defaultdict(lambda: 0)
