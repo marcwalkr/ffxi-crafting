@@ -52,7 +52,7 @@ class ProfitPage(RecipeListPage):
         treeview.column("sell_freq", anchor=tk.CENTER)
 
     def start_generate_profit_table(self):
-        self.generate_button.config(state=tk.DISABLED)
+        self.generate_button.config(text="Cancel", command=self.cancel_generation)
         self.clear_treeview(self.profit_tree)
         self.progress.pack_forget()
         self.progress.pack(pady=10, before=self.profit_tree)
@@ -61,6 +61,18 @@ class ProfitPage(RecipeListPage):
         self.total_recipes = 0
         self.generate_thread = threading.Thread(target=self.query_recipes)
         self.generate_thread.start()
+
+    def cancel_generation(self):
+        self.is_open = False
+        if hasattr(self, "generate_thread") and self.generate_thread.is_alive():
+            self.generate_thread.join(timeout=1)  # Timeout to avoid long blocking
+        self.generation_finished()
+
+    def generation_finished(self):
+        self.progress.stop()
+        self.progress.pack_forget()
+        self.generate_button.config(text="Generate Table", command=self.start_generate_profit_table)
+        self.generate_button.config(state=tk.NORMAL)
 
     def query_recipes(self):
         try:
@@ -126,11 +138,6 @@ class ProfitPage(RecipeListPage):
 
     def finalize_profit_table(self):
         self.generation_finished()
-
-    def generation_finished(self):
-        self.progress.stop()
-        self.progress.pack_forget()
-        self.generate_button.config(state=tk.NORMAL)
 
     def insert_single_into_treeview(self, recipe_id, row):
         self.profit_tree.insert("", "end", iid=recipe_id, values=row)

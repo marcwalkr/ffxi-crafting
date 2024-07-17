@@ -45,15 +45,28 @@ class SearchPage(RecipeListPage):
         treeview.column("levels", anchor=tk.CENTER)
 
     def start_search_recipes(self):
-        self.search_button.config(state=tk.DISABLED)
+        self.search_button.config(text="Cancel", command=self.cancel_search)
         self.clear_treeview(self.recipe_tree)
         self.search_progress.pack_forget()
         self.search_progress.pack(pady=10, before=self.recipe_tree)
         self.search_progress.start()
         self.results = []
         self.total_results = 0
+        self.is_open = True
         self.search_thread = threading.Thread(target=self.query_recipes, args=(self.search_var.get(),))
         self.search_thread.start()
+
+    def cancel_search(self):
+        self.is_open = False
+        if hasattr(self, "search_thread") and self.search_thread.is_alive():
+            self.search_thread.join(timeout=1)  # Timeout to avoid long blocking
+        self.search_finished()
+
+    def search_finished(self):
+        self.search_progress.stop()
+        self.search_progress.pack_forget()
+        self.search_button.config(text="Search", command=self.start_search_recipes)
+        self.search_button.config(state=tk.NORMAL)
 
     def query_recipes(self, search_term):
         try:
@@ -93,11 +106,6 @@ class SearchPage(RecipeListPage):
 
     def finalize_search(self):
         self.search_finished()
-
-    def search_finished(self):
-        self.search_progress.stop()
-        self.search_progress.pack_forget()
-        self.search_button.config(state=tk.NORMAL)
 
     def insert_single_into_treeview(self, recipe_id, row):
         self.recipe_tree.insert("", "end", iid=recipe_id, values=row)
