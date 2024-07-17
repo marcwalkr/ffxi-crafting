@@ -8,7 +8,8 @@ class SettingsManager:
         "profit_table": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
-            "min_sell_price": 0
+            "min_sell_price": 0,
+            "sell_freq": 0.0
         },
         "synth": {
             "skill_look_ahead": 0,
@@ -68,46 +69,51 @@ class SettingsManager:
     @classmethod
     def save_settings(cls, settings):
         with open(cls.SETTINGS_FILE, "w") as file:
-            json.dump(settings, file)
+            json.dump(settings, file, indent=4)
 
     @classmethod
     def get_profit_per_synth(cls):
         settings = cls.load_settings()
-        return int(settings["profit_table"].get("profit_/_synth", 0))
+        return settings["profit_table"].get("profit_/_synth", 0)
 
     @classmethod
     def get_profit_per_storage(cls):
         settings = cls.load_settings()
-        return int(settings["profit_table"].get("profit_/_storage", 0))
+        return settings["profit_table"].get("profit_/_storage", 0)
 
     @classmethod
     def get_min_sell_price(cls):
         settings = cls.load_settings()
-        return int(settings["profit_table"].get("min_sell_price", 0))
+        return settings["profit_table"].get("min_sell_price", 0)
+
+    @classmethod
+    def get_sell_freq(cls):
+        settings = cls.load_settings()
+        return settings["profit_table"].get("sell_freq", 0.0)
 
     @classmethod
     def get_skill_look_ahead(cls):
         settings = cls.load_settings()
-        return int(settings["synth"].get("skill_look_ahead", 0))
+        return settings["synth"].get("skill_look_ahead", 0)
 
     @classmethod
     def get_simulation_trials(cls):
         settings = cls.load_settings()
-        return int(settings["synth"].get("simulation_trials", 1000))
+        return settings["synth"].get("simulation_trials", 1000)
 
     @classmethod
     def get_skills(cls):
         settings = cls.load_settings()
         skills = settings.get("skill_levels", {})
         return [
-            int(skills.get("wood", 0)),
-            int(skills.get("smith", 0)),
-            int(skills.get("gold", 0)),
-            int(skills.get("cloth", 0)),
-            int(skills.get("leather", 0)),
-            int(skills.get("bone", 0)),
-            int(skills.get("alchemy", 0)),
-            int(skills.get("cook", 0))
+            skills.get("wood", 0),
+            skills.get("smith", 0),
+            skills.get("gold", 0),
+            skills.get("cloth", 0),
+            skills.get("leather", 0),
+            skills.get("bone", 0),
+            skills.get("alchemy", 0),
+            skills.get("cook", 0)
         ]
 
     @classmethod

@@ -92,19 +92,29 @@ class ProfitPage(RecipeListPage):
             for item in recipe.get_unique_results():
                 item.set_auction_data()
 
+            sell_freq = max(
+                max(item.single_sell_freq or 0, item.stack_sell_freq or 0)
+                for item in recipe.get_results()
+            )
+
             profit_per_synth, profit_per_storage = crafter.craft(SettingsManager.get_simulation_trials())
-            if profit_per_synth >= SettingsManager.get_profit_per_synth() and profit_per_storage >= SettingsManager.get_profit_per_storage():
+            if self.passes_thresholds(profit_per_synth, profit_per_storage, sell_freq):
                 nq_string = recipe.get_formatted_nq_result()
                 hq_string = recipe.get_formatted_hq_results()
 
-                sell_freq = max(
-                    max(item.single_sell_freq or 0, item.stack_sell_freq or 0)
-                    for item in recipe.get_results()
-                )
                 row = [nq_string, hq_string, crafter.synth.tier,
                        crafter.synth.cost, profit_per_synth, profit_per_storage, sell_freq]
                 self.results.append((recipe.id, row))
                 self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
+
+    def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):
+        per_synth_threshold = SettingsManager.get_profit_per_synth()
+        per_storage_threshold = SettingsManager.get_profit_per_storage()
+        sell_freq_threshold = SettingsManager.get_sell_freq()
+
+        return (profit_per_synth >= per_synth_threshold and
+                profit_per_storage >= per_storage_threshold and
+                sell_freq >= sell_freq_threshold)
 
     def finalize_profit_table(self):
         self.generation_finished()
