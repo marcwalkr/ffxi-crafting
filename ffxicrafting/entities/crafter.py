@@ -56,4 +56,4 @@ class Crafter:
         profit_per_synth = total_profit / num_times
         profit_per_storage = total_profit / total_storage if total_storage > 0 else 0
 
-        return round(profit_per_synth, 2), round(profit_per_storage, 2)
+        return int(profit_per_synth), int(profit_per_storage)

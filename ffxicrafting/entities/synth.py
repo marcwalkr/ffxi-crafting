@@ -107,7 +107,7 @@ class Synth:
                 return None
             total_cost += ingredient.min_price
 
-        return total_cost
+        return int(total_cost)
 
     def simulate(self, num_times):
         results = defaultdict(lambda: 0)

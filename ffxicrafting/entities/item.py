@@ -26,15 +26,20 @@ class Item(ItemModel):
 
     def set_auction_data(self):
         auction_data = self.get_auction_data()
-        self.single_price, self.stack_price, self.single_sell_freq, self.stack_sell_freq = auction_data
+        single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
-        if self.stack_size > 1 and self.stack_price is not None:
-            self.single_price_from_stack = int(self.stack_price / self.stack_size)
+        if self.stack_size > 1 and stack_price is not None:
+            single_price_from_stack = int(stack_price / self.stack_size)
         else:
-            self.single_price_from_stack = None
+            single_price_from_stack = None
+
+        self.single_price = int(single_price)
+        self.stack_price = int(stack_price)
+        self.single_sell_freq = float(f"{single_sell_freq:.4f}")
+        self.stack_sell_freq = float(f"{stack_sell_freq:.4f}")
 
         # Determine the minimum auction price
-        prices_to_check = [self.single_price, self.single_price_from_stack]
+        prices_to_check = [self.single_price, single_price_from_stack]
         min_auction_price = min((price for price in prices_to_check if price is not None), default=None)
 
         # Update min_price if the new min_auction_price is lower
@@ -49,10 +54,6 @@ class Item(ItemModel):
             self.min_price = self.min_vendor_price
 
     def get_auction_data(self):
-        # Test profit table by setting all crystal prices to 100 gil
-        if self.item_id >= 4096 and self.item_id <= 4103:
-            return 100, None, 50, None
-
         def get_price(is_stack):
             auction_item = AuctionController.get_auction_item(self.item_id, is_stack)
             if auction_item is None or auction_item.avg_price <= 0:
