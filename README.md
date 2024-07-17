@@ -1,4 +1,4 @@
-A crafting helper for the FFXI private server HorizonXI. It utilizes recipe and item price data to find profitable recipes.
+A crafting tool for FFXI that utilizes recipe and item price data to find profitable recipes.
 
-Various sql files and lua files were taken from AirSkyBoat:
+Lua files and some SQL files were taken from AirSkyBoat:
 https://github.com/AirSkyBoat/AirSkyBoat
