@@ -66,9 +66,6 @@ class ItemService:
 
     @classmethod
     def get_auction_data(cls, item_id):
-        # Set crystals to 100 gil to test profit table
-        if item_id >= 4096 and item_id <= 4103:
-            return 100, None, 50, None
         auction_item = AuctionController.get_auction_item(item_id, is_stack=False)
         stack_auction_item = AuctionController.get_auction_item(item_id, is_stack=True)
         if auction_item is None or auction_item.avg_price <= 0:
