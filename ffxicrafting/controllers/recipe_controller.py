@@ -7,7 +7,7 @@ class RecipeController:
 
     _cache = {
         'get_recipe': {},
-        'get_recipes_by_craft_levels_generator': {},
+        'get_recipes_by_level_generator': {},
         'search_recipe_generator': {}
     }
 
@@ -25,14 +25,14 @@ class RecipeController:
                 return None
 
     @classmethod
-    def get_recipes_by_craft_levels_generator(cls, *craft_levels):
+    def get_recipes_by_level_generator(cls, *craft_levels):
         cache_key = tuple(craft_levels)
-        if cache_key in cls._cache['get_recipes_by_craft_levels_generator']:
-            for recipe_tuple in cls._cache['get_recipes_by_craft_levels_generator'][cache_key]:
+        if cache_key in cls._cache['get_recipes_by_level_generator']:
+            for recipe_tuple in cls._cache['get_recipes_by_level_generator'][cache_key]:
                 yield Recipe(*recipe_tuple)
         else:
-            results = list(cls.db.get_recipes_by_craft_levels_generator(*craft_levels))
-            cls._cache['get_recipes_by_craft_levels_generator'][cache_key] = results
+            results = list(cls.db.get_recipes_by_level_generator(*craft_levels))
+            cls._cache['get_recipes_by_level_generator'][cache_key] = results
             for recipe_tuple in results:
                 yield Recipe(*recipe_tuple)
 
@@ -51,6 +51,6 @@ class RecipeController:
     def clear_cache(cls):
         cls._cache = {
             'get_recipe': {},
-            'get_recipes_by_craft_levels_generator': {},
+            'get_recipes_by_level_generator': {},
             'search_recipe_generator': {}
         }

@@ -1,16 +1,21 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
+from queue import Queue, Empty
 from controllers.recipe_controller import RecipeController
 from views.recipe_list_page import RecipeListPage
 from utils.widgets import TreeviewWithSort
+from database.database import Database
+import mysql.connector
 
 
 class SearchPage(RecipeListPage):
     def __init__(self, parent):
         super().__init__(parent)
         self.is_open = True
+        self.queue = Queue()
         self.create_search_page()
+        self.check_queue()
 
     def create_search_page(self):
         self.parent.notebook.add(self, text="Search Recipes")
@@ -51,11 +56,15 @@ class SearchPage(RecipeListPage):
         self.search_thread.start()
 
     def query_recipes(self, search_term):
-        for result in RecipeController.search_recipe_generator(search_term):
-            if not self.is_open:
-                return
-            self.process_single_result(result)
-        self.finalize_search()
+        try:
+            for result in RecipeController.search_recipe_generator(search_term):
+                if not self.is_open:
+                    break
+                self.process_single_result(result)
+            self.queue.put(self.finalize_search)
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            self.queue.put(self.search_finished)
 
     def process_single_result(self, recipe):
         nq_string = recipe.get_formatted_nq_result()
@@ -72,10 +81,10 @@ class SearchPage(RecipeListPage):
 
         row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
         self.results.append((recipe.id, row))
-        self.after(0, self.insert_single_into_treeview, recipe.id, row)
+        self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def finalize_search(self):
-        self.after(0, self.search_finished)
+        self.search_finished()
 
     def search_finished(self):
         self.search_progress.stop()
@@ -85,8 +94,19 @@ class SearchPage(RecipeListPage):
     def insert_single_into_treeview(self, recipe_id, row):
         self.recipe_tree.insert("", "end", iid=recipe_id, values=row)
 
+    def check_queue(self):
+        try:
+            while True:
+                task = self.queue.get_nowait()
+                task()
+        except Empty:
+            pass
+        self.after(100, self.check_queue)
+
     def destroy(self):
         self.is_open = False
         if hasattr(self, "search_thread") and self.search_thread.is_alive():
-            self.search_thread.join()
+            self.search_thread.join(timeout=1)  # Timeout to avoid long blocking
+        # Close all active database connections asynchronously
+        threading.Thread(target=Database().close_all_connections).start()
         super().destroy()

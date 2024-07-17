@@ -7,6 +7,7 @@ class Database:
     def __init__(self) -> None:
         load_dotenv()
         self.pool = None
+        self.active_connections = []
 
     def get_pool(self):
         if self.pool is None:
@@ -25,11 +26,21 @@ class Database:
         )
 
     def get_connection(self):
-        return self.get_pool().get_connection()
+        connection = self.get_pool().get_connection()
+        self.active_connections.append(connection)
+        return connection
 
     def close_connection(self, connection):
         if connection.is_connected():
             connection.close()
+        if connection in self.active_connections:
+            self.active_connections.remove(connection)
+
+    def close_all_connections(self):
+        for connection in self.active_connections:
+            if connection.is_connected():
+                connection.close()
+        self.active_connections.clear()
 
     def get_auction_item(self, item_id, is_stack):
         connection = self.get_connection()
@@ -120,7 +131,7 @@ class Database:
         self.close_connection(connection)
         return result
 
-    def get_recipes_by_craft_levels_generator(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
+    def get_recipes_by_level_generator(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
         connection = self.get_connection()
         cursor = connection.cursor(buffered=True)
         query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "

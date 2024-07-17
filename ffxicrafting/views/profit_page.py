@@ -1,18 +1,23 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
+from queue import Queue, Empty
 from config.settings_manager import SettingsManager
 from controllers.recipe_controller import RecipeController
 from entities.crafter import Crafter
 from views.recipe_list_page import RecipeListPage
 from utils.widgets import TreeviewWithSort
+import mysql.connector
+from database.database import Database
 
 
 class ProfitPage(RecipeListPage):
     def __init__(self, parent):
         super().__init__(parent)
         self.is_open = True
+        self.queue = Queue()
         self.create_profit_page()
+        self.check_queue()
 
     def create_profit_page(self):
         self.parent.notebook.add(self, text="Profit Table")
@@ -58,13 +63,20 @@ class ProfitPage(RecipeListPage):
         self.generate_thread.start()
 
     def query_recipes(self):
-        skills = SettingsManager.get_skills()
-        skill_look_ahead = SettingsManager.get_skill_look_ahead()
-        for recipe in RecipeController.get_recipes_by_craft_levels_generator(*(skill - skill_look_ahead for skill in skills)):
-            if not self.is_open:
-                return
-            self.process_single_recipe(recipe)
-        self.finalize_profit_table()
+        try:
+            skills = SettingsManager.get_skills()
+            skill_look_ahead = SettingsManager.get_skill_look_ahead()
+            craftable_recipes = RecipeController.get_recipes_by_level_generator(
+                *(skill - skill_look_ahead for skill in skills)
+            )
+            for recipe in craftable_recipes:
+                if not self.is_open:
+                    break
+                self.process_single_recipe(recipe)
+            self.queue.put(self.finalize_profit_table)
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            self.queue.put(self.generation_finished)
 
     def process_single_recipe(self, recipe):
         # Set price data for ingredients before calculating the cost
@@ -92,10 +104,10 @@ class ProfitPage(RecipeListPage):
                 row = [nq_string, hq_string, crafter.synth.tier,
                        crafter.synth.cost, profit_per_synth, profit_per_storage, sell_freq]
                 self.results.append((recipe.id, row))
-                self.after(0, self.insert_single_into_treeview, recipe.id, row)
+                self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def finalize_profit_table(self):
-        self.after(0, self.generation_finished)
+        self.generation_finished()
 
     def generation_finished(self):
         self.progress.stop()
@@ -105,8 +117,19 @@ class ProfitPage(RecipeListPage):
     def insert_single_into_treeview(self, recipe_id, row):
         self.profit_tree.insert("", "end", iid=recipe_id, values=row)
 
+    def check_queue(self):
+        try:
+            while True:
+                task = self.queue.get_nowait()
+                task()
+        except Empty:
+            pass
+        self.after(100, self.check_queue)
+
     def destroy(self):
         self.is_open = False
         if hasattr(self, "generate_thread") and self.generate_thread.is_alive():
-            self.generate_thread.join()
+            self.generate_thread.join(timeout=1)  # Timeout to avoid long blocking
+        # Close all active database connections asynchronously
+        threading.Thread(target=Database().close_all_connections).start()
         super().destroy()
