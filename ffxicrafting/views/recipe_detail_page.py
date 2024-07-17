@@ -75,8 +75,8 @@ class RecipeDetailPage(ttk.Frame):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
         for ingredient, quantity in ingredient_counts.items():
-            single_price = ingredient.single_price if ingredient.single_price is not None else ""
-            stack_price = ingredient.stack_price if ingredient.stack_price is not None else ""
+            single_price = ingredient.single_price if ingredient.single_price not in (None, 0) else ""
+            stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
 
             # Update vendor prices in case merchant settings changed
             ingredient.set_vendor_data()
@@ -90,8 +90,8 @@ class RecipeDetailPage(ttk.Frame):
         unique_results = self.recipe.get_unique_results()
         for result in unique_results:
             result_name = result.get_formatted_name()
-            single_price = result.single_price if result.single_price is not None else ""
-            stack_price = result.stack_price if result.stack_price is not None else ""
+            single_price = result.single_price if result.single_price not in (None, 0) else ""
+            stack_price = result.stack_price if result.stack_price not in (None, 0) else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                             self.recipe.id))
 

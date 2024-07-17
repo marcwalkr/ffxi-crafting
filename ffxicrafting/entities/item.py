@@ -25,26 +25,27 @@ class Item(ItemModel):
         return hash(self.item_id)
 
     def set_auction_data(self):
-        auction_data = self.get_auction_data()
-        single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
+        if self.single_price is None or self.stack_price is None or self.single_sell_freq is None or self.stack_sell_freq is None:
+            auction_data = self.get_auction_data()
+            single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
-        if self.stack_size > 1 and stack_price is not None:
-            single_price_from_stack = int(stack_price / self.stack_size)
-        else:
-            single_price_from_stack = None
+            if self.stack_size > 1 and stack_price is not None:
+                single_price_from_stack = int(stack_price / self.stack_size)
+            else:
+                single_price_from_stack = None
 
-        self.single_price = int(single_price) if single_price is not None else None
-        self.stack_price = int(stack_price) if stack_price is not None else None
-        self.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
-        self.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
+            self.single_price = int(single_price) if single_price is not None else 0
+            self.stack_price = int(stack_price) if stack_price is not None else 0
+            self.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else 0
+            self.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else 0
 
-        # Determine the minimum auction price
-        prices_to_check = [self.single_price, single_price_from_stack]
-        min_auction_price = min((price for price in prices_to_check if price is not None), default=None)
+            # Determine the minimum auction price, ignoring 0 values
+            prices_to_check = [self.single_price, single_price_from_stack]
+            min_auction_price = min((price for price in prices_to_check if price not in (None, 0)), default=None)
 
-        # Update min_price if the new min_auction_price is lower
-        if min_auction_price is not None and (self.min_price is None or min_auction_price < self.min_price):
-            self.min_price = min_auction_price
+            # Update min_price if the new min_auction_price is lower
+            if min_auction_price is not None and (self.min_price is None or min_auction_price < self.min_price):
+                self.min_price = min_auction_price
 
     def set_vendor_data(self):
         self.min_vendor_price = self.get_vendor_data()

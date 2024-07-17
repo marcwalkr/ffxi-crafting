@@ -81,7 +81,12 @@ class ProfitPage(RecipeListPage):
     def process_single_recipe(self, recipe):
         # Set price data for ingredients before calculating the cost
         for item in recipe.get_unique_ingredients():
-            item.set_auction_data()
+            # None = the price has never been updated
+            if (item.single_price is None or item.stack_price is None or
+                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                item.set_auction_data()
+
+            # Always set vendor data in case merchant settings changed
             item.set_vendor_data()
 
         crafter = Crafter(*SettingsManager.get_skills(), recipe)
@@ -90,7 +95,10 @@ class ProfitPage(RecipeListPage):
 
             # Set price data for results before calculating profit
             for item in recipe.get_unique_results():
-                item.set_auction_data()
+                # None = the price has never been updated
+                if (item.single_price is None or item.stack_price is None or
+                        item.single_sell_freq is None or item.stack_sell_freq is None):
+                    item.set_auction_data()
 
             sell_freq = max(
                 max(item.single_sell_freq or 0, item.stack_sell_freq or 0)

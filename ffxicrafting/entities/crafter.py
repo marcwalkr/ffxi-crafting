@@ -39,9 +39,11 @@ class Crafter:
                     result = item
                     break
 
-            single_price = result.stack_price / result.stack_size if result.stack_price is not None else result.single_price
+            single_price = (result.stack_price / result.stack_size
+                            if result.stack_price not in (None, 0)
+                            else result.single_price)
 
-            if single_price is None:
+            if single_price in (None, 0):
                 continue
 
             store_item_threshold = SettingsManager.get_min_sell_price()

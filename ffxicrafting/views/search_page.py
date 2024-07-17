@@ -73,11 +73,19 @@ class SearchPage(RecipeListPage):
         ingredient_names_summarized = recipe.get_formatted_ingredient_names()
 
         for item in recipe.get_unique_ingredients():
-            item.set_auction_data()
+            # None = the price has never been updated
+            if (item.single_price is None or item.stack_price is None or
+                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                item.set_auction_data()
+
+            # Always set vendor data in case merchant settings changed
             item.set_vendor_data()
 
         for item in recipe.get_unique_results():
-            item.set_auction_data()
+            # None = the price has never been updated
+            if (item.single_price is None or item.stack_price is None or
+                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                item.set_auction_data()
 
         row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
         self.results.append((recipe.id, row))
