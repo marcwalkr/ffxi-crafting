@@ -1,7 +1,6 @@
 from functools import lru_cache
-from database.database import Database
-from models.vendor_item import VendorItem
-from models.regional_vendor import RegionalVendor
+from database import Database
+from models import VendorItem, RegionalVendor
 
 
 class VendorController:

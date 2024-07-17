@@ -1,6 +1,5 @@
-from database.database import Database
-from models.auction_item import AuctionItem
-from models.sales_history import SalesHistory
+from database import Database
+from models import AuctionItem, SalesHistory
 
 
 class AuctionController:

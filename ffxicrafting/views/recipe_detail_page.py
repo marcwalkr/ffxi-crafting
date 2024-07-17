@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from config.settings_manager import SettingsManager
-from entities.crafter import Crafter
-from utils.widgets import TreeviewWithSort
+from entities import Crafter
+from config import SettingsManager
+from utils import TreeviewWithSort
+from controllers import ItemController
 
 
 class RecipeDetailPage(ttk.Frame):
@@ -79,7 +80,7 @@ class RecipeDetailPage(ttk.Frame):
             stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
 
             # Update vendor prices in case merchant settings changed
-            ingredient.set_vendor_data()
+            ItemController.update_vendor_data(ingredient.item_id)
 
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()

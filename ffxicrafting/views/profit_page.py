@@ -2,13 +2,13 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from queue import Queue, Empty
-from config.settings_manager import SettingsManager
-from controllers.recipe_controller import RecipeController
-from entities.crafter import Crafter
-from views.recipe_list_page import RecipeListPage
-from utils.widgets import TreeviewWithSort
+from config import SettingsManager
+from entities import Crafter
+from controllers import RecipeController, ItemController
+from views import RecipeListPage
+from utils import TreeviewWithSort
 import mysql.connector
-from database.database import Database
+from database import Database
 
 
 class ProfitPage(RecipeListPage):
@@ -96,10 +96,10 @@ class ProfitPage(RecipeListPage):
             # None = the price has never been updated
             if (item.single_price is None or item.stack_price is None or
                     item.single_sell_freq is None or item.stack_sell_freq is None):
-                item.set_auction_data()
+                ItemController.update_auction_data(item.item_id)
 
             # Always set vendor data in case merchant settings changed
-            item.set_vendor_data()
+            ItemController.update_vendor_data(item.item_id)
 
         crafter = Crafter(*SettingsManager.get_skills(), recipe)
         crafter.synth.cost = crafter.synth.calculate_cost()
@@ -110,7 +110,7 @@ class ProfitPage(RecipeListPage):
                 # None = the price has never been updated
                 if (item.single_price is None or item.stack_price is None or
                         item.single_sell_freq is None or item.stack_sell_freq is None):
-                    item.set_auction_data()
+                    ItemController.update_auction_data(item.item_id)
 
             sell_freq = max(
                 max(item.single_sell_freq or 0, item.stack_sell_freq or 0)

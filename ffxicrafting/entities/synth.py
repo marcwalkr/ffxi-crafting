@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from utils.utils import clamp
+from utils import clamp
 
 
 class Synth:

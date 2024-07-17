@@ -1,31 +1,32 @@
-from models.recipe_model import RecipeModel
-from controllers.item_controller import ItemController
-from utils.utils import unique_preserve_order
+from models import RecipeModel
+from utils import unique_preserve_order
 
 
 class Recipe(RecipeModel):
     def __init__(self, id, desynth, key_item, wood, smith, gold, cloth, leather, bone, alchemy, cook, crystal_id,
                  hq_crystal, ingredient1_id, ingredient2_id, ingredient3_id, ingredient4_id, ingredient5_id,
                  ingredient6_id, ingredient7_id, ingredient8_id, result_id, result_hq1_id, result_hq2_id,
-                 result_hq3_id, result_qty, result_hq1_qty, result_hq2_qty, result_hq3_qty, result_name) -> None:
+                 result_hq3_id, result_qty, result_hq1_qty, result_hq2_qty, result_hq3_qty, result_name, crystal,
+                 ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6, ingredient7,
+                 ingredient8, result, result_hq1, result_hq2, result_hq3) -> None:
         super().__init__(id, desynth, key_item, wood, smith, gold, cloth, leather, bone, alchemy, cook, crystal_id,
                          hq_crystal, ingredient1_id, ingredient2_id, ingredient3_id, ingredient4_id, ingredient5_id,
                          ingredient6_id, ingredient7_id, ingredient8_id, result_id, result_hq1_id, result_hq2_id,
                          result_hq3_id, result_qty, result_hq1_qty, result_hq2_qty, result_hq3_qty, result_name)
 
-        self.crystal = ItemController.get_item(crystal_id)
-        self.ingredient1 = ItemController.get_item(ingredient1_id)
-        self.ingredient2 = ItemController.get_item(ingredient2_id)
-        self.ingredient3 = ItemController.get_item(ingredient3_id)
-        self.ingredient4 = ItemController.get_item(ingredient4_id)
-        self.ingredient5 = ItemController.get_item(ingredient5_id)
-        self.ingredient6 = ItemController.get_item(ingredient6_id)
-        self.ingredient7 = ItemController.get_item(ingredient7_id)
-        self.ingredient8 = ItemController.get_item(ingredient8_id)
-        self.result = ItemController.get_item(result_id)
-        self.result_hq1 = ItemController.get_item(result_hq1_id)
-        self.result_hq2 = ItemController.get_item(result_hq2_id)
-        self.result_hq3 = ItemController.get_item(result_hq3_id)
+        self.crystal = crystal
+        self.ingredient1 = ingredient1
+        self.ingredient2 = ingredient2
+        self.ingredient3 = ingredient3
+        self.ingredient4 = ingredient4
+        self.ingredient5 = ingredient5
+        self.ingredient6 = ingredient6
+        self.ingredient7 = ingredient7
+        self.ingredient8 = ingredient8
+        self.result = result
+        self.result_hq1 = result_hq1
+        self.result_hq2 = result_hq2
+        self.result_hq3 = result_hq3
 
     def get_formatted_ingredient_names(self):
         ingredients = self.get_ingredients()

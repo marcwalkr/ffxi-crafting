@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from views.search_page import SearchPage
-from views.profit_page import ProfitPage
-from views.simulate_page import SimulatePage
-from views.settings_page import SettingsPage
+from views import SearchPage, ProfitPage, SimulatePage, SettingsPage
 
 
 class App(tk.Tk):

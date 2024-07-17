@@ -104,6 +104,16 @@ class Database:
         self.close_connection(connection)
         return result
 
+    def get_items(self, item_ids):
+        connection = self.get_connection()
+        cursor = connection.cursor(buffered=True)
+        format_strings = ','.join(['%s'] * len(item_ids))
+        cursor.execute(f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})", tuple(item_ids))
+        result = cursor.fetchall()
+        cursor.close()
+        self.close_connection(connection)
+        return result
+
     def get_npc_by_name(self, name):
         connection = self.get_connection()
         cursor = connection.cursor(buffered=True)

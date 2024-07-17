@@ -1,12 +1,12 @@
 import threading
 import tkinter as tk
+import mysql.connector
 from tkinter import ttk
 from queue import Queue, Empty
-from controllers.recipe_controller import RecipeController
-from views.recipe_list_page import RecipeListPage
-from utils.widgets import TreeviewWithSort
-from database.database import Database
-import mysql.connector
+from controllers import RecipeController, ItemController
+from database import Database
+from utils import TreeviewWithSort
+from views import RecipeListPage
 
 
 class SearchPage(RecipeListPage):
@@ -89,16 +89,16 @@ class SearchPage(RecipeListPage):
             # None = the price has never been updated
             if (item.single_price is None or item.stack_price is None or
                     item.single_sell_freq is None or item.stack_sell_freq is None):
-                item.set_auction_data()
+                ItemController.update_auction_data(item.item_id)
 
             # Always set vendor data in case merchant settings changed
-            item.set_vendor_data()
+            ItemController.update_vendor_data(item.item_id)
 
         for item in recipe.get_unique_results():
             # None = the price has never been updated
             if (item.single_price is None or item.stack_price is None or
                     item.single_sell_freq is None or item.stack_sell_freq is None):
-                item.set_auction_data()
+                ItemController.update_auction_data(item.item_id)
 
         row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
         self.results.append((recipe.id, row))
