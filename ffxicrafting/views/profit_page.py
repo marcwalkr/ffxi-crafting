@@ -67,23 +67,26 @@ class ProfitPage(RecipeListPage):
         self.finalize_profit_table()
 
     def process_single_recipe(self, recipe):
+        # Set price data for ingredients before calculating the cost
+        for item in recipe.get_unique_ingredients():
+            item.set_auction_data()
+            item.set_vendor_data()
+
         crafter = Crafter(*SettingsManager.get_skills(), recipe)
         crafter.synth.cost = crafter.synth.calculate_cost()
         if crafter.synth.cost is not None:
+
+            # Set price data for results before calculating profit
+            for item in recipe.get_unique_results():
+                item.set_auction_data()
+
             profit_per_synth, profit_per_storage = crafter.craft(SettingsManager.get_simulation_trials())
             if profit_per_synth >= SettingsManager.get_profit_per_synth() and profit_per_storage >= SettingsManager.get_profit_per_storage():
                 nq_string = recipe.get_formatted_nq_result()
                 hq_string = recipe.get_formatted_hq_results()
 
-                for item in recipe.get_unique_ingredients():
-                    item.set_auction_data()
-                    item.set_vendor_data()
-
-                for item in recipe.get_unique_results():
-                    item.set_auction_data()
-
                 sell_freq = max(
-                    max(item.single_sell_freq, item.stack_sell_freq)
+                    max(item.single_sell_freq or 0, item.stack_sell_freq or 0)
                     for item in recipe.get_results()
                 )
                 row = [nq_string, hq_string, crafter.synth.tier,
