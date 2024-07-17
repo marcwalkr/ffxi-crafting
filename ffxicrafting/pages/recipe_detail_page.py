@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.widgets import TreeviewWithSort
 from config.settings_manager import SettingsManager
 from entities.crafter import Crafter
+from utils.widgets import TreeviewWithSort
 
 
 class RecipeDetailPage(ttk.Frame):
     def __init__(self, parent, recipe):
-        self.previous_tab_index = parent.notebook.index("current")  # Store the current tab index
+        self.previous_tab_index = parent.notebook.index("current")
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
@@ -75,10 +75,12 @@ class RecipeDetailPage(ttk.Frame):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
         for ingredient, quantity in ingredient_counts.items():
-            # Update prices to reflect any changes to merchant settings
-            ingredient.update_data()
             single_price = f"{ingredient.single_price:.2f}" if ingredient.single_price is not None else ""
             stack_price = f"{ingredient.stack_price:.2f}" if ingredient.stack_price is not None else ""
+
+            # Update vendor prices in case merchant settings changed
+            ingredient.set_vendor_data()
+
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
@@ -88,9 +90,8 @@ class RecipeDetailPage(ttk.Frame):
         unique_results = self.recipe.get_unique_results()
         for result in unique_results:
             result_name = result.get_formatted_name()
-            single_price, stack_price, _, _ = result.get_auction_data()
-            single_price = f"{single_price:.2f}" if single_price is not None else ""
-            stack_price = f"{stack_price:.2f}" if stack_price is not None else ""
+            single_price = f"{result.single_price:.2f}" if result.single_price is not None else ""
+            stack_price = f"{result.stack_price:.2f}" if result.stack_price is not None else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                             self.recipe.id))
 
@@ -107,7 +108,7 @@ class RecipeDetailPage(ttk.Frame):
     def close_detail_page(self):
         tab_id = self.parent.notebook.index(self)
         self.parent.notebook.forget(tab_id)
-        self.parent.notebook.select(self.previous_tab_index)  # Switch back to the previous tab
+        self.parent.notebook.select(self.previous_tab_index)
 
     def on_treeview_click(self, event):
         tree = event.widget

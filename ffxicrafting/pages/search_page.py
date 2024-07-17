@@ -1,14 +1,15 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
-import threading
-from utils.widgets import TreeviewWithSort
 from controllers.recipe_controller import RecipeController
 from pages.recipe_list_page import RecipeListPage
+from utils.widgets import TreeviewWithSort
 
 
 class SearchPage(RecipeListPage):
     def __init__(self, parent):
         super().__init__(parent)
+        self.is_open = True
         self.create_search_page()
 
     def create_search_page(self):
@@ -17,16 +18,14 @@ class SearchPage(RecipeListPage):
         self.search_var = tk.StringVar()
         self.search_entry = ttk.Entry(self, textvariable=self.search_var, font=("Helvetica", 14))
         self.search_entry.pack(pady=10)
-        self.search_button = ttk.Button(self, text="Search",
-                                        command=self.start_search_recipes)
+        self.search_button = ttk.Button(self, text="Search", command=self.start_search_recipes)
         self.search_button.pack(pady=(0, 10))
 
         self.search_progress = ttk.Progressbar(self, mode='indeterminate', length=300)
         self.search_progress.pack(pady=10)
         self.search_progress.pack_forget()
 
-        self.recipe_tree = TreeviewWithSort(self, columns=("nq", "hq", "levels", "ingredients"),
-                                            show="headings")
+        self.recipe_tree = TreeviewWithSort(self, columns=("nq", "hq", "levels", "ingredients"), show="headings")
         self.configure_recipe_treeview(self.recipe_tree)
         self.recipe_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
@@ -46,33 +45,48 @@ class SearchPage(RecipeListPage):
         self.search_progress.pack_forget()
         self.search_progress.pack(pady=10, before=self.recipe_tree)
         self.search_progress.start()
-        threading.Thread(target=self.query_recipes, args=(self.search_var.get(),)).start()
+        self.results = []
+        self.total_results = 0
+        self.search_thread = threading.Thread(target=self.query_recipes, args=(self.search_var.get(),))
+        self.search_thread.start()
 
     def query_recipes(self, search_term):
-        results = RecipeController.search_recipe(search_term)
-        self.total_results = len(results)
-        self.results = results
-        self.after(10, self.update_search_progress, 0, [])
+        for result in RecipeController.search_recipe_generator(search_term):
+            if not self.is_open:
+                return
+            self.process_single_result(result)
+        self.finalize_search()
 
-    def update_search_progress(self, index, batch):
-        if index < self.total_results:
-            recipe = self.results[index]
-            nq_string = recipe.get_formatted_nq_result()
-            hq_string = recipe.get_formatted_hq_results()
-            levels_string = recipe.get_formatted_levels_string()
-            ingredient_names_summarized = recipe.get_formatted_ingredient_names()
-            row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
-            batch.append((recipe.id, row))
+    def process_single_result(self, recipe):
+        nq_string = recipe.get_formatted_nq_result()
+        hq_string = recipe.get_formatted_hq_results()
+        levels_string = recipe.get_formatted_levels_string()
+        ingredient_names_summarized = recipe.get_formatted_ingredient_names()
 
-            if len(batch) >= 10:
-                for item in batch:
-                    self.recipe_tree.insert("", "end", iid=item[0], values=item[1])
-                batch.clear()
+        for item in recipe.get_unique_ingredients():
+            item.set_auction_data()
+            item.set_vendor_data()
 
-            self.after(10, self.update_search_progress, index + 1, batch)
-        else:
-            for item in batch:
-                self.recipe_tree.insert("", "end", iid=item[0], values=item[1])
-            self.search_progress.stop()
-            self.search_progress.pack_forget()
-            self.search_button.config(state=tk.NORMAL)
+        for item in recipe.get_unique_results():
+            item.set_auction_data()
+
+        row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
+        self.results.append((recipe.id, row))
+        self.after(0, self.insert_single_into_treeview, recipe.id, row)
+
+    def finalize_search(self):
+        self.after(0, self.search_finished)
+
+    def search_finished(self):
+        self.search_progress.stop()
+        self.search_progress.pack_forget()
+        self.search_button.config(state=tk.NORMAL)
+
+    def insert_single_into_treeview(self, recipe_id, row):
+        self.recipe_tree.insert("", "end", iid=recipe_id, values=row)
+
+    def destroy(self):
+        self.is_open = False
+        if hasattr(self, "search_thread") and self.search_thread.is_alive():
+            self.search_thread.join()
+        super().destroy()

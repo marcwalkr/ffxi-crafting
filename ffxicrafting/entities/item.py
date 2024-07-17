@@ -9,7 +9,11 @@ class Item(ItemModel):
     def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell) -> None:
         super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
         self.id = item_id
-        self.update_data()
+        self.single_price = None
+        self.stack_price = None
+        self.single_sell_freq = None
+        self.stack_sell_freq = None
+        self.min_vendor_price = None
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Item):
@@ -19,19 +23,12 @@ class Item(ItemModel):
     def __hash__(self) -> int:
         return hash(self.item_id)
 
-    def update_data(self):
-        self.min_price = self.get_min_price()
-        self.min_vendor_price = self.get_min_vendor_price()
-        self.single_price, self.stack_price, self.single_sell_freq, self.stack_sell_freq = self.get_auction_data()
+    def set_auction_data(self):
+        auction_data = self.get_auction_data()
+        self.single_price, self.stack_price, self.single_sell_freq, self.stack_sell_freq = auction_data
 
-    def get_min_price(self):
-        prices = [
-            self.get_min_auction_price(),
-            self.get_min_vendor_price(),
-            self.get_guild_price()
-        ]
-        prices = [price for price in prices if price is not None]
-        return min(prices, default=None)
+    def set_vendor_data(self):
+        self.min_vendor_price = self.get_vendor_data()
 
     def get_auction_data(self):
         def get_price(is_stack):
@@ -45,24 +42,11 @@ class Item(ItemModel):
 
         return single_price, stack_price, single_sell_freq, stack_sell_freq
 
-    def get_min_auction_price(self):
-        single_price, stack_price, single_sell_freq, stack_sell_freq = self.get_auction_data()
-
-        # Calculate stack price per item if stack price is available
-        stack_price_per_item = (stack_price / self.stack_size) if stack_price is not None else None
-
-        # Filter out None values and find the minimum price
-        prices = [price for price in [single_price, stack_price_per_item] if price is not None]
-
-        return min(prices, default=None)
-
-    def get_min_vendor_price(self):
+    def get_vendor_data(self):
         vendor_items = VendorController.get_vendor_items(self.item_id)
         regional_vendors = VendorController.get_regional_vendors()
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
-        # Create a list of vendor items including items from non-regional vendors
-        # and items from regional vendors if the vendor is included in enabled regional merchants
         filtered_vendor_items = []
         regional_vendor_ids = {vendor.npc_id: vendor.region for vendor in regional_vendors}
 

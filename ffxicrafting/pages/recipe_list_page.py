@@ -1,6 +1,6 @@
+from functools import lru_cache
 from tkinter import ttk
 from controllers.recipe_controller import RecipeController
-from functools import lru_cache
 from pages.recipe_detail_page import RecipeDetailPage
 
 
@@ -16,6 +16,7 @@ class RecipeListPage(ttk.Frame):
             return
 
         recipe_id = tree.selection()[0]
+
         recipe = RecipeController.get_recipe(recipe_id)
         detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")

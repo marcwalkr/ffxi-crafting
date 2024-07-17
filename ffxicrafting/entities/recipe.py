@@ -57,8 +57,11 @@ class Recipe(RecipeModel):
         levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
         return ", ".join(levels)
 
+    def get_results(self):
+        return [self.result, self.result_hq1, self.result_hq2, self.result_hq3]
+
     def get_unique_results(self):
-        return unique_preserve_order([self.result, self.result_hq1, self.result_hq2, self.result_hq3])
+        return unique_preserve_order(self.get_results())
 
     def get_ingredients(self):
         ingredients = [
@@ -68,8 +71,8 @@ class Recipe(RecipeModel):
         # Filter out None values
         return [ingredient for ingredient in ingredients if ingredient is not None]
 
-    def get_results(self):
-        return [self.result, self.result_hq1, self.result_hq2, self.result_hq3]
+    def get_unique_ingredients(self):
+        return unique_preserve_order(self.get_ingredients())
 
     def get_ingredient_counts(self):
         ingredients = self.get_ingredients()
