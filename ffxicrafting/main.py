@@ -10,7 +10,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("FFXI Crafting Tool")
-        self.geometry("1280x800")
+        self.geometry("1660x900")
 
         self.configure_styles()
         self.create_main_frame()
