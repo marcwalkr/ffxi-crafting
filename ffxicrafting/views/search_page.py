@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from controllers.recipe_controller import RecipeController
-from pages.recipe_list_page import RecipeListPage
+from views.recipe_list_page import RecipeListPage
 from utils.widgets import TreeviewWithSort
 
 

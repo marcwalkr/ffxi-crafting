@@ -1,7 +1,7 @@
 from functools import lru_cache
 from tkinter import ttk
 from controllers.recipe_controller import RecipeController
-from pages.recipe_detail_page import RecipeDetailPage
+from views.recipe_detail_page import RecipeDetailPage
 
 
 class RecipeListPage(ttk.Frame):

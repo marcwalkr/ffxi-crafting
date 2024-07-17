@@ -4,7 +4,7 @@ from tkinter import ttk
 from config.settings_manager import SettingsManager
 from controllers.recipe_controller import RecipeController
 from entities.crafter import Crafter
-from pages.recipe_list_page import RecipeListPage
+from views.recipe_list_page import RecipeListPage
 from utils.widgets import TreeviewWithSort
 
 
