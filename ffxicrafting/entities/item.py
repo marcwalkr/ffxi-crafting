@@ -9,7 +9,12 @@ class Item(ItemModel):
     def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell) -> None:
         super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
         self.id = item_id
-        self.update_prices()
+        self.single_price = None
+        self.stack_price = None
+        self.single_sell_freq = None
+        self.stack_sell_freq = None
+        self.min_vendor_price = None
+        self.min_price = None
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Item):
@@ -19,48 +24,53 @@ class Item(ItemModel):
     def __hash__(self) -> int:
         return hash(self.item_id)
 
-    def update_prices(self):
-        self.min_price = self.get_min_price()
-        self.min_vendor_price = self.get_min_vendor_price()
-        self.single_price, self.stack_price = self.get_auction_prices()
+    def set_auction_data(self):
+        if self.single_price is None or self.stack_price is None or self.single_sell_freq is None or self.stack_sell_freq is None:
+            auction_data = self.get_auction_data()
+            single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
-    def get_min_price(self):
-        prices = [
-            self.get_min_auction_price(),
-            self.get_min_vendor_price(),
-            self.get_guild_price()
-        ]
-        prices = [price for price in prices if price is not None]
-        return min(prices, default=None)
+            if self.stack_size > 1 and stack_price is not None:
+                single_price_from_stack = int(stack_price / self.stack_size)
+            else:
+                single_price_from_stack = None
 
-    def get_auction_prices(self):
-        auction_item = AuctionController.get_auction_item(self.item_id)
-        if not auction_item:
-            return None, None
+            self.single_price = int(single_price) if single_price is not None else 0
+            self.stack_price = int(stack_price) if stack_price is not None else 0
+            self.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else 0
+            self.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else 0
 
-        single_price = auction_item.single_price if auction_item.single_price > 0 else None
-        stack_price = auction_item.stack_price if auction_item.stack_price > 0 else None
+            # Determine the minimum auction price, ignoring 0 values
+            prices_to_check = [self.single_price, single_price_from_stack]
+            min_auction_price = min((price for price in prices_to_check if price not in (None, 0)), default=None)
 
-        return single_price, stack_price
+            # Update min_price if the new min_auction_price is lower
+            if min_auction_price is not None and (self.min_price is None or min_auction_price < self.min_price):
+                self.min_price = min_auction_price
 
-    def get_min_auction_price(self):
-        single_price, stack_price = self.get_auction_prices()
+    def set_vendor_data(self):
+        self.min_vendor_price = self.get_vendor_data()
 
-        # Calculate stack price per item if stack price is available
-        stack_price_per_item = (stack_price / self.stack_size) if stack_price is not None else None
+        # Update min_price if the min_vendor_price is lower
+        if self.min_vendor_price is not None and (self.min_price is None or self.min_vendor_price < self.min_price):
+            self.min_price = self.min_vendor_price
 
-        # Filter out None values and find the minimum price
-        prices = [price for price in [single_price, stack_price_per_item] if price is not None]
+    def get_auction_data(self):
+        def get_price(is_stack):
+            auction_item = AuctionController.get_auction_item(self.item_id, is_stack)
+            if auction_item is None or auction_item.avg_price <= 0:
+                return None, None
+            return auction_item.avg_price, auction_item.sell_freq
 
-        return min(prices, default=None)
+        single_price, single_sell_freq = get_price(False)
+        stack_price, stack_sell_freq = get_price(True) if self.stack_size > 1 else (None, None)
 
-    def get_min_vendor_price(self):
+        return single_price, stack_price, single_sell_freq, stack_sell_freq
+
+    def get_vendor_data(self):
         vendor_items = VendorController.get_vendor_items(self.item_id)
         regional_vendors = VendorController.get_regional_vendors()
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
-        # Create a list of vendor items including items from non-regional vendors
-        # and items from regional vendors if the vendor is included in enabled regional merchants
         filtered_vendor_items = []
         regional_vendor_ids = {vendor.npc_id: vendor.region for vendor in regional_vendors}
 

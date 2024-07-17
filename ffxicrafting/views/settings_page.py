@@ -48,7 +48,8 @@ class SettingsPage(ttk.Frame):
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
-            ("Min Sell Price", 0)
+            ("Min Sell Price", 0),
+            ("Sell Frequency", 0)
         ]
         self.create_number_settings(frame, settings, self.settings.get("profit_table", {}))
 
@@ -103,7 +104,8 @@ class SettingsPage(ttk.Frame):
         for child in frame.winfo_children():
             if isinstance(child, ttk.Entry):
                 label = child._name.split(".")[-1]
-                settings[label] = child.get()
+                value = child.get()
+                settings[label] = self.convert_to_number(value)
             elif isinstance(child, ttk.Frame):
                 settings.update(self.get_number_settings(child))  # Recursively check nested frames
         return settings
@@ -113,7 +115,8 @@ class SettingsPage(ttk.Frame):
         for child in frame.winfo_children():
             if isinstance(child, ttk.Entry):
                 label = child._name.split(".")[-1]
-                settings[label] = child.get()
+                value = child.get()
+                settings[label] = self.convert_to_number(value)
             elif isinstance(child, ttk.Frame):
                 settings.update(self.get_vertical_number_settings(child))  # Recursively check nested frames
         return settings
@@ -127,6 +130,15 @@ class SettingsPage(ttk.Frame):
             elif isinstance(child, ttk.Frame):
                 settings.update(self.get_boolean_settings(child))  # Recursively check nested frames
         return settings
+
+    def convert_to_number(self, value):
+        try:
+            if '.' in value:
+                return float(value)
+            else:
+                return int(value)
+        except ValueError:
+            return value  # Return as is if conversion fails
 
     def create_number_settings(self, frame, settings, saved_settings):
         for setting, default in settings:

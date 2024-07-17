@@ -101,13 +101,13 @@ class Synth:
         return retained_ingredients
 
     def calculate_cost(self):
-        cost = 0
+        total_cost = 0
         for ingredient in self.recipe.get_ingredients():
             if ingredient.min_price is None:
                 return None
-            cost += ingredient.min_price
+            total_cost += ingredient.min_price
 
-        return round(cost, 2)
+        return int(total_cost)
 
     def simulate(self, num_times):
         results = defaultdict(lambda: 0)

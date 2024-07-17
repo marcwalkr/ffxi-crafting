@@ -39,9 +39,11 @@ class Crafter:
                     result = item
                     break
 
-            single_price = result.stack_price / result.stack_size if result.stack_price is not None else result.single_price
+            single_price = (result.stack_price / result.stack_size
+                            if result.stack_price not in (None, 0)
+                            else result.single_price)
 
-            if single_price is None:
+            if single_price in (None, 0):
                 continue
 
             store_item_threshold = SettingsManager.get_min_sell_price()
@@ -56,4 +58,4 @@ class Crafter:
         profit_per_synth = total_profit / num_times
         profit_per_storage = total_profit / total_storage if total_storage > 0 else 0
 
-        return round(profit_per_synth, 2), round(profit_per_storage, 2)
+        return int(profit_per_synth), int(profit_per_storage)
