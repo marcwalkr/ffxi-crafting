@@ -1,6 +1,6 @@
-from database import Database
-from entities import Recipe
-from services import ItemService
+from ..database import Database
+from ..entities import Recipe
+from ..services import ItemService
 
 
 class RecipeService:

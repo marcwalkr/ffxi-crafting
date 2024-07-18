@@ -1,6 +1,6 @@
 from functools import lru_cache
-from database import Database
-from models import Guild, GuildShop
+from ..database import Database
+from ..models import Guild, GuildShop
 
 
 class GuildController:

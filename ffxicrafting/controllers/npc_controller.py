@@ -1,6 +1,6 @@
 from functools import lru_cache
-from database import Database
-from models import Npc
+from ..database import Database
+from ..models import Npc
 
 
 class NpcController:

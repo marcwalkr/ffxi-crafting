@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from entities import Crafter
-from config import SettingsManager
-from utils import TreeviewWithSort
-from controllers import ItemController
+from ..entities import Crafter
+from ..config import SettingsManager
+from ..utils import TreeviewWithSort
+from ..controllers import ItemController
 
 
 class RecipeDetailPage(ttk.Frame):

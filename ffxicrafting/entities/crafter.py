@@ -1,5 +1,5 @@
-from config import SettingsManager
-from entities import Synth
+from ..config import SettingsManager
+from .synth import Synth
 
 
 class Crafter:

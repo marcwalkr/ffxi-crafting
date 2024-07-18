@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from config import SettingsManager
+from ..config import SettingsManager
 
 
 class SettingsPage(ttk.Frame):

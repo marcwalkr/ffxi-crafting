@@ -1,5 +1,5 @@
-from database import Database
-from models import AuctionItem, SalesHistory
+from ..database import Database
+from ..models import AuctionItem, SalesHistory
 
 
 class AuctionController:
