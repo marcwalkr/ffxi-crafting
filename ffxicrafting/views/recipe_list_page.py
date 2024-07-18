@@ -17,7 +17,7 @@ class RecipeListPage(ttk.Frame):
 
         recipe_id = tree.selection()[0]
 
-        recipe = RecipeController.get_recipe(recipe_id)
+        recipe = RecipeController.get_recipe(int(recipe_id))
         detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)

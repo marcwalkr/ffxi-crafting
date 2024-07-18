@@ -6,29 +6,31 @@ from controllers import AuctionController, VendorController, GuildController
 
 class ItemService:
     db = Database()
-    item_cache = {}
-
-    @classmethod
-    def get_item(cls, item_id):
-        if item_id in cls.item_cache:
-            return cls.item_cache[item_id]
-
-        item_tuple = cls.db.get_item(item_id)
-        if item_tuple is not None:
-            item = Item(*item_tuple)
-            cls.item_cache[item_id] = item
-            return item
-        else:
-            return None
+    _cache = {}
 
     @classmethod
     def get_items(cls, item_ids):
-        items = []
-        for item_id in item_ids:
-            item = cls.get_item(item_id)
-            if item is not None:
-                items.append(item)
+        # Identify the missing item_ids (those not in the cache)
+        missing_item_ids = [item_id for item_id in item_ids if item_id not in cls._cache]
+
+        # Query the database only for the missing items
+        if missing_item_ids:
+            item_tuples = cls.db.get_items(missing_item_ids)
+            if item_tuples:
+                for item_tuple in item_tuples:
+                    item = Item(*item_tuple)
+                    cls._cache[item.id] = item
+
+        # Retrieve all items from the cache
+        items = [cls._cache[item_id] for item_id in item_ids if item_id in cls._cache]
         return items
+
+    @classmethod
+    def get_item(cls, item_id):
+        if item_id in cls._cache:
+            return cls._cache[item_id]
+        else:
+            raise ValueError(f"Item with id {item_id} not found in cache.")
 
     @classmethod
     def update_auction_data(cls, item_id):
@@ -119,3 +121,7 @@ class ItemService:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)
+
+    @classmethod
+    def clear_cache(cls):
+        cls._cache = {}

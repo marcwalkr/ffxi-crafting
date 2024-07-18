@@ -4,7 +4,6 @@ import mysql.connector
 from tkinter import ttk
 from queue import Queue, Empty
 from controllers import RecipeController, ItemController
-from database import Database
 from utils import TreeviewWithSort
 from views import RecipeListPage
 
@@ -14,6 +13,7 @@ class SearchPage(RecipeListPage):
         super().__init__(parent)
         self.is_open = True
         self.queue = Queue()
+        self.batch_size = 50
         self.create_search_page()
         self.check_queue()
 
@@ -70,10 +70,21 @@ class SearchPage(RecipeListPage):
 
     def query_recipes(self, search_term):
         try:
-            for result in RecipeController.search_recipe_generator(search_term):
-                if not self.is_open:
-                    break
-                self.process_single_result(result)
+            offset = 0
+            search_finished = False
+            while self.is_open and not search_finished:
+                results = RecipeController.search_recipe(search_term, self.batch_size, offset)
+
+                if len(results) < self.batch_size:
+                    search_finished = True
+
+                for result in results:
+                    if not self.is_open:
+                        break
+                    self.process_single_result(result)
+
+                offset += self.batch_size
+
             self.queue.put(self.finalize_search)
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -123,6 +134,4 @@ class SearchPage(RecipeListPage):
         self.is_open = False
         if hasattr(self, "search_thread") and self.search_thread.is_alive():
             self.search_thread.join(timeout=1)  # Timeout to avoid long blocking
-        # Close all active database connections asynchronously
-        threading.Thread(target=Database().close_all_connections).start()
         super().destroy()

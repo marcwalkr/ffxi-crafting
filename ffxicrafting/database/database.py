@@ -1,174 +1,112 @@
-from mysql.connector import pooling
+import mysql.connector
 from config.settings_manager import SettingsManager
 
 
 class Database:
     def __init__(self) -> None:
-        self.pool = None
-        self.active_connections = []
+        self.connection = None
+        self.cursor = None
 
-    def get_pool(self):
-        if self.pool is None:
-            self.pool = self.create_pool()
-        return self.pool
+    def _connect(self):
+        if self.connection is None:
+            self.connection = mysql.connector.connect(
+                host=SettingsManager.get_database_host(),
+                user=SettingsManager.get_database_user(),
+                password=SettingsManager.get_database_password(),
+                database=SettingsManager.get_database_name()
+            )
+            self.cursor = self.connection.cursor(buffered=True)
 
-    def create_pool(self):
-        return pooling.MySQLConnectionPool(
-            pool_name="pool",
-            pool_size=10,
-            pool_reset_session=True,
-            host=SettingsManager.get_database_host(),
-            user=SettingsManager.get_database_user(),
-            password=SettingsManager.get_database_password(),
-            database=SettingsManager.get_database_name()
-        )
-
-    def get_connection(self):
-        connection = self.get_pool().get_connection()
-        self.active_connections.append(connection)
-        return connection
-
-    def close_connection(self, connection):
-        if connection.is_connected():
-            connection.close()
-        if connection in self.active_connections:
-            self.active_connections.remove(connection)
-
-    def close_all_connections(self):
-        for connection in self.active_connections:
-            if connection.is_connected():
-                connection.close()
-        self.active_connections.clear()
+    def __del__(self):
+        if self.connection:
+            self.connection.close()
 
     def get_auction_item(self, item_id, is_stack):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND is_stack=%s AND no_sale=0",
-                       (item_id, is_stack))
-        result = cursor.fetchone()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND is_stack=%s AND no_sale=0",
+                            (item_id, is_stack))
+        return self.cursor.fetchone()
 
     def update_auction_item(self, item_id, avg_price, num_sales, sell_freq, is_stack):
-        connection = self.get_connection()
-        cursor = connection.cursor()
-        cursor.execute(
+        self._connect()
+        self.cursor.execute(
             "UPDATE auction_items SET avg_price = %s, num_sales = %s, sell_freq = %s, new_data = 0 "
             "WHERE itemid = %s AND is_stack = %s",
             (avg_price, num_sales, sell_freq, item_id, is_stack)
         )
-        connection.commit()
-        cursor.close()
-        self.close_connection(connection)
+        self.commit()
 
     def get_latest_sales_history(self, item_id, is_stack):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute(
+        self._connect()
+        self.cursor.execute(
             "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
             "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)",
             (item_id, is_stack, item_id, is_stack)
         )
-        result = cursor.fetchall()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        return self.cursor.fetchall()
 
     def get_guild(self, guild_id):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM guilds WHERE id=%s", (guild_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM guilds WHERE id=%s", (guild_id,))
+        return self.cursor.fetchone()
 
     def get_guild_shops(self, item_id):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s", (item_id,))
-        result = cursor.fetchall()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s", (item_id,))
+        return self.cursor.fetchall()
 
     def get_item(self, item_id):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM item_basic WHERE itemid=%s", (item_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s", (item_id,))
+        return self.cursor.fetchone()
 
     def get_items(self, item_ids):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
+        self._connect()
         format_strings = ','.join(['%s'] * len(item_ids))
-        cursor.execute(f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})", tuple(item_ids))
-        result = cursor.fetchall()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self.cursor.execute(f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})", tuple(item_ids))
+        return self.cursor.fetchall()
 
     def get_npc_by_name(self, name):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM npc_list WHERE polutils_name=%s", (name,))
-        result = cursor.fetchone()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM npc_list WHERE polutils_name=%s", (name,))
+        return self.cursor.fetchone()
 
     def get_regional_vendors(self):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM regional_vendors")
-        result = cursor.fetchall()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM regional_vendors")
+        return self.cursor.fetchall()
 
     def get_recipe(self, recipe_id):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM synth_recipes WHERE id=%s", (recipe_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM synth_recipes WHERE id=%s", (recipe_id,))
+        return self.cursor.fetchone()
 
-    def get_recipes_by_level_generator(self, wood, smith, gold, cloth, leather, bone, alchemy, cook):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
+    def get_recipes_by_level(self, wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset):
+        self._connect()
         query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
-                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s")
-        cursor.execute(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook))
-        for row in cursor:
-            yield row
-        cursor.close()
-        self.close_connection(connection)
+                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
+        self.cursor.execute(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset))
+        return self.cursor.fetchall()
 
-    def search_recipe_generator(self, search_term):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM synth_recipes WHERE ResultName LIKE %s", ("%" + search_term + "%",))
-        for row in cursor:
-            yield row
-        cursor.close()
-        self.close_connection(connection)
+    def search_recipe(self, search_term, batch_size, offset):
+        self._connect()
+        query = """
+        SELECT * FROM (
+            SELECT *, MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) AS relevance
+            FROM synth_recipes
+        ) AS ranked
+        WHERE ranked.relevance > 0
+        ORDER BY relevance DESC, ID ASC
+        LIMIT %s OFFSET %s;
+        """
+        self.cursor.execute(query, (search_term, batch_size, offset))
+        return self.cursor.fetchall()
 
     def get_vendor_items(self, item_id):
-        connection = self.get_connection()
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s", (item_id,))
-        result = cursor.fetchall()
-        cursor.close()
-        self.close_connection(connection)
-        return result
+        self._connect()
+        self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s", (item_id,))
+        return self.cursor.fetchall()
 
     def commit(self):
-        connection = self.get_connection()
-        connection.commit()
-        self.close_connection(connection)
+        self._connect()
+        self.connection.commit()

@@ -8,7 +8,6 @@ from controllers import RecipeController, ItemController
 from views import RecipeListPage
 from utils import TreeviewWithSort
 import mysql.connector
-from database import Database
 
 
 class ProfitPage(RecipeListPage):
@@ -16,6 +15,7 @@ class ProfitPage(RecipeListPage):
         super().__init__(parent)
         self.is_open = True
         self.queue = Queue()
+        self.batch_size = 50
         self.create_profit_page()
         self.check_queue()
 
@@ -79,13 +79,24 @@ class ProfitPage(RecipeListPage):
         try:
             skills = SettingsManager.get_skills()
             skill_look_ahead = SettingsManager.get_skill_look_ahead()
-            craftable_recipes = RecipeController.get_recipes_by_level_generator(
-                *(skill - skill_look_ahead for skill in skills)
-            )
-            for recipe in craftable_recipes:
-                if not self.is_open:
-                    break
-                self.process_single_recipe(recipe)
+
+            offset = 0
+            search_finished = False
+            while self.is_open and not search_finished:
+                craftable_recipes = RecipeController.get_recipes_by_level(
+                    *(skill - skill_look_ahead for skill in skills), batch_size=self.batch_size, offset=offset
+                )
+
+                if len(craftable_recipes) < self.batch_size:
+                    search_finished = True
+
+                for recipe in craftable_recipes:
+                    if not self.is_open:
+                        break
+                    self.process_single_recipe(recipe)
+
+                offset += self.batch_size
+
             self.queue.put(self.finalize_profit_table)
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -156,6 +167,4 @@ class ProfitPage(RecipeListPage):
         self.is_open = False
         if hasattr(self, "generate_thread") and self.generate_thread.is_alive():
             self.generate_thread.join(timeout=1)  # Timeout to avoid long blocking
-        # Close all active database connections asynchronously
-        threading.Thread(target=Database().close_all_connections).start()
         super().destroy()
