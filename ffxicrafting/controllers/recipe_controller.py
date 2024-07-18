@@ -1,4 +1,4 @@
-from ..services import RecipeService
+from services import RecipeService
 
 
 class RecipeController:

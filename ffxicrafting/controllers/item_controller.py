@@ -1,4 +1,4 @@
-from ..services import ItemService
+from services import ItemService
 
 
 class ItemController:

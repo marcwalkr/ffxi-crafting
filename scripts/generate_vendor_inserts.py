@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from controllers.npc_controller import NpcController
+from controllers import NpcController
 
 
 def generate_vendor_inserts():

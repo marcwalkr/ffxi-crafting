@@ -3,10 +3,10 @@ import tkinter as tk
 import mysql.connector
 from tkinter import ttk
 from queue import Queue, Empty
-from ..controllers import RecipeController, ItemController
-from ..database import Database
-from ..utils import TreeviewWithSort
-from .recipe_list_page import RecipeListPage
+from controllers import RecipeController, ItemController
+from database import Database
+from utils import TreeviewWithSort
+from views import RecipeListPage
 
 
 class SearchPage(RecipeListPage):

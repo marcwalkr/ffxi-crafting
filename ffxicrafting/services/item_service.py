@@ -1,7 +1,7 @@
-from ..entities import Item
-from ..database import Database
-from ..config import SettingsManager
-from ..controllers import AuctionController, VendorController, GuildController
+from entities import Item
+from database import Database
+from config import SettingsManager
+from controllers import AuctionController, VendorController, GuildController
 
 
 class ItemService:

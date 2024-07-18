@@ -1,4 +1,4 @@
-from ..models import ItemModel
+from models import ItemModel
 
 
 class Item(ItemModel):

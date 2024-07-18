@@ -2,13 +2,13 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from queue import Queue, Empty
-from ..config import SettingsManager
-from ..entities import Crafter
-from ..controllers import RecipeController, ItemController
-from .recipe_list_page import RecipeListPage
-from ..utils import TreeviewWithSort
+from config import SettingsManager
+from entities import Crafter
+from controllers import RecipeController, ItemController
+from views import RecipeListPage
+from utils import TreeviewWithSort
 import mysql.connector
-from ..database import Database
+from database import Database
 
 
 class ProfitPage(RecipeListPage):

@@ -1,5 +1,5 @@
-from ..models import RecipeModel
-from ..utils import unique_preserve_order
+from models import RecipeModel
+from utils import unique_preserve_order
 
 
 class Recipe(RecipeModel):
