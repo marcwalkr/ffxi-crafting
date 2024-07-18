@@ -34,14 +34,26 @@ class Recipe(RecipeModel):
         return ", ".join([f"{ingredient.get_formatted_name()} x{counts[ingredient]}" for ingredient in ingredients])
 
     def get_formatted_nq_result(self):
-        return self.result.get_formatted_name() + " x" + str(self.result_qty)
+        if self.result_qty > 1:
+            return self.result.get_formatted_name() + " x" + str(self.result_qty)
+        else:
+            return self.result.get_formatted_name()
 
     def get_formatted_hq_results(self):
-        hq_strings = [
-            self.result_hq1.get_formatted_name() + " x" + str(self.result_hq1_qty),
-            self.result_hq2.get_formatted_name() + " x" + str(self.result_hq2_qty),
-            self.result_hq3.get_formatted_name() + " x" + str(self.result_hq3_qty)
-        ]
+        hq_strings = []
+        if self.result_hq1_qty > 1:
+            hq_strings.append(self.result_hq1.get_formatted_name() + " x" + str(self.result_hq1_qty))
+        else:
+            hq_strings.append(self.result_hq1.get_formatted_name())
+        if self.result_hq2_qty > 1:
+            hq_strings.append(self.result_hq2.get_formatted_name() + " x" + str(self.result_hq2_qty))
+        else:
+            hq_strings.append(self.result_hq2.get_formatted_name())
+        if self.result_hq3_qty > 1:
+            hq_strings.append(self.result_hq3.get_formatted_name() + " x" + str(self.result_hq3_qty))
+        else:
+            hq_strings.append(self.result_hq3.get_formatted_name())
+
         return ", ".join(unique_preserve_order(hq_strings))
 
     def get_formatted_levels_string(self):
