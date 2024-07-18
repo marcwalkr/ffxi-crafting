@@ -1,3 +1,4 @@
+import statistics
 from database import Database
 from models import AuctionItem, SalesHistory
 
@@ -16,20 +17,29 @@ class AuctionController:
             if auction_item.new_data:
                 sales_history = cls.get_latest_sales_history(item_id, is_stack)
                 unix_timestamps = [sale.sell_date for sale in sales_history]
-                # Ensure the timestamps are sorted
-                unix_timestamps.sort()
 
-                # Calculate the differences between consecutive timestamps
-                time_diffs = [unix_timestamps[i] - unix_timestamps[i-1] for i in range(1, len(unix_timestamps))]
-
-                if len(time_diffs) <= 1:
+                if len(unix_timestamps) < 15:
+                    # Less than 15 have ever been sold
                     sales_per_day = 0
                 else:
-                    # Calculate the average time between sales
-                    avg_interval_seconds = sum(time_diffs) / len(time_diffs)
+                    # Ensure the timestamps are sorted
+                    unix_timestamps.sort()
 
-                    # Estimate sales per day
-                    sales_per_day = (24 * 60 * 60) / avg_interval_seconds
+                    # Calculate the differences between consecutive timestamps
+                    time_diffs = [unix_timestamps[i] - unix_timestamps[i-1] for i in range(1, len(unix_timestamps))]
+
+                    # Filter out differences less than 30 seconds
+                    time_diffs = [diff for diff in time_diffs if diff > 30]
+
+                    if len(time_diffs) == 0:
+                        # Every item sold fast, set to 9999 as maximum
+                        sales_per_day = 9999
+                    else:
+                        # Calculate the median time between sales
+                        median_interval_seconds = statistics.median(time_diffs)
+
+                        # Estimate sales per day
+                        sales_per_day = (24 * 60 * 60) / median_interval_seconds
 
                 prices = [sale.price for sale in sales_history]
                 avg_price = sum(prices) / len(prices)
