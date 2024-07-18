@@ -59,6 +59,7 @@ class ProfitPage(RecipeListPage):
         self.progress.start()
         self.results = []
         self.total_recipes = 0
+        self.is_open = True
         self.generate_thread = threading.Thread(target=self.query_recipes)
         self.generate_thread.start()
 
