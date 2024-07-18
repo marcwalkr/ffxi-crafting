@@ -29,16 +29,20 @@ class SettingsPage(ttk.Frame):
         skill_and_merchants_frame.pack(fill="x", padx=10, pady=5)
 
         skill_levels_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Skill Levels")
-        skill_levels_frame.pack(side="left", fill="x", padx=10, pady=5)
+        skill_levels_frame.pack(side="left", fill="x", padx=(10, 20), pady=5)
         self.create_skill_levels_settings(skill_levels_frame)
 
         merchants_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Regional Merchants")
-        merchants_frame.pack(side="left", fill="x", padx=10, pady=5)
+        merchants_frame.pack(side="left", fill="x", padx=(10, 20), pady=5)
         self.create_merchants_settings(merchants_frame)
 
         guilds_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Guild Merchants")
-        guilds_frame.pack(side="left", fill="x", padx=10, pady=5)
+        guilds_frame.pack(side="left", fill="x", padx=(10, 20), pady=5)
         self.create_guilds_settings(guilds_frame)
+
+        database_frame = ttk.LabelFrame(skill_and_merchants_frame, text="Database")
+        database_frame.pack(side="left", fill="x", padx=(10, 20), pady=5)
+        self.create_database_settings(database_frame)
 
         save_button = ttk.Button(self, text="Save", command=self.save_settings)
         save_button.pack(pady=10)
@@ -89,13 +93,24 @@ class SettingsPage(ttk.Frame):
             "Leathercraft", "Smithing", "Woodworking", "Tenshodo"
         ], self.settings.get("guilds", {}))
 
+    def create_database_settings(self, frame):
+        self.database_settings = frame
+        settings = [
+            ("Host", ""),
+            ("User", ""),
+            ("Password", ""),
+            ("Database", "")
+        ]
+        self.create_string_settings(frame, settings, self.settings.get("database", {}))
+
     def save_settings(self):
         settings = {
             "profit_table": self.get_number_settings(self.profit_table_settings),
             "synth": self.get_number_settings(self.synth_settings),
             "skill_levels": self.get_vertical_number_settings(self.skill_levels_settings),
             "regional_merchants": self.get_boolean_settings(self.merchants_settings),
-            "guilds": self.get_boolean_settings(self.guilds_settings)
+            "guilds": self.get_boolean_settings(self.guilds_settings),
+            "database": self.get_string_settings(self.database_settings)
         }
         SettingsManager.save_settings(settings)
 
@@ -129,6 +144,17 @@ class SettingsPage(ttk.Frame):
                 settings[label] = child.instate(['selected'])
             elif isinstance(child, ttk.Frame):
                 settings.update(self.get_boolean_settings(child))  # Recursively check nested frames
+        return settings
+
+    def get_string_settings(self, frame):
+        settings = {}
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Entry):
+                label = child._name.split(".")[-1]
+                value = child.get()
+                settings[label] = value  # Store as string
+            elif isinstance(child, ttk.Frame):
+                settings.update(self.get_string_settings(child))  # Recursively check nested frames
         return settings
 
     def convert_to_number(self, value):
@@ -172,3 +198,14 @@ class SettingsPage(ttk.Frame):
             checkbutton = ttk.Checkbutton(target_frame, text=setting, variable=var, style="Custom.TCheckbutton")
             checkbutton.pack(anchor="w", padx=5, pady=2)
             checkbutton.var = var
+
+    def create_string_settings(self, frame, settings, saved_settings):
+        for setting, default in settings:
+            row_frame = ttk.Frame(frame)
+            row_frame.pack(fill="x", padx=5, pady=2)
+            label = ttk.Label(row_frame, text=setting)
+            label.pack(side="left", padx=5, pady=5)
+            entry_name = setting.lower().replace(" ", "_")
+            entry = ttk.Entry(row_frame, width=20, name=entry_name)  # Wider entry box
+            entry.insert(0, saved_settings.get(entry_name, default))
+            entry.pack(side="right", padx=5, pady=5)

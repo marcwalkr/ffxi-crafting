@@ -1,11 +1,9 @@
 from mysql.connector import pooling
-from dotenv import load_dotenv
-import os
+from config.settings_manager import SettingsManager
 
 
 class Database:
     def __init__(self) -> None:
-        load_dotenv()
         self.pool = None
         self.active_connections = []
 
@@ -19,10 +17,10 @@ class Database:
             pool_name="pool",
             pool_size=10,
             pool_reset_session=True,
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME")
+            host=SettingsManager.get_database_host(),
+            user=SettingsManager.get_database_user(),
+            password=SettingsManager.get_database_password(),
+            database=SettingsManager.get_database_name()
         )
 
     def get_connection(self):

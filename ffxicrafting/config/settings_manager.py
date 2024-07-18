@@ -56,6 +56,12 @@ class SettingsManager:
             "smithing": True,
             "woodworking": True,
             "tenshodo": True
+        },
+        "database": {
+            "host": "",
+            "user": "",
+            "password": "",
+            "database": ""
         }
     }
 
@@ -134,3 +140,23 @@ class SettingsManager:
         guilds = settings["guilds"].items()
         enabled_guilds = [guild for guild, enabled in guilds if enabled]
         return [guild.capitalize() for guild in enabled_guilds]
+
+    @classmethod
+    def get_database_host(cls):
+        settings = cls.load_settings()
+        return settings["database"].get("host", "")
+
+    @classmethod
+    def get_database_user(cls):
+        settings = cls.load_settings()
+        return settings["database"].get("user", "")
+
+    @classmethod
+    def get_database_password(cls):
+        settings = cls.load_settings()
+        return settings["database"].get("password", "")
+
+    @classmethod
+    def get_database_name(cls):
+        settings = cls.load_settings()
+        return settings["database"].get("database", "")
