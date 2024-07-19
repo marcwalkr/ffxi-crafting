@@ -1,22 +1,34 @@
-from functools import lru_cache
 from database import Database
 from models import VendorItem, RegionalVendor
 
 
 class VendorController:
-    db = Database()
+    _cache = {
+        "get_vendor_items": {},
+        "get_regional_vendors": []
+    }
 
     def __init__(self) -> None:
-        pass
+        self.db = Database()
 
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_vendor_items(cls, item_id):
-        vendor_item_tuples = cls.db.get_vendor_items(item_id)
-        return [VendorItem(*v) for v in vendor_item_tuples]
+    def get_vendor_items(self, item_id):
+        if item_id in self._cache["get_vendor_items"]:
+            return self._cache["get_vendor_items"][item_id]
+        else:
+            vendor_item_tuples = self.db.get_vendor_items(item_id)
+            if vendor_item_tuples:
+                self._cache["get_vendor_items"][item_id] = [VendorItem(*v) for v in vendor_item_tuples]
+                return self._cache["get_vendor_items"][item_id]
 
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_regional_vendors(cls):
-        regional_vendor_tuples = cls.db.get_regional_vendors()
-        return [RegionalVendor(*r) for r in regional_vendor_tuples]
+            self._cache["get_vendor_items"][item_id] = []
+            return []
+
+    def get_regional_vendors(self):
+        if self._cache["get_regional_vendors"]:
+            return self._cache["get_regional_vendors"]
+        else:
+            regional_vendor_tuples = self.db.get_regional_vendors()
+            if regional_vendor_tuples:
+                self._cache["get_regional_vendors"] = [RegionalVendor(*r) for r in regional_vendor_tuples]
+                return self._cache["get_regional_vendors"]
+            return []

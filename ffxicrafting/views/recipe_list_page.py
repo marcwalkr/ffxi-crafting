@@ -8,6 +8,7 @@ class RecipeListPage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
+        self.recipe_controller = RecipeController()
 
     @lru_cache(maxsize=None)
     def show_recipe_details(self, event):
@@ -17,7 +18,7 @@ class RecipeListPage(ttk.Frame):
 
         recipe_id = tree.selection()[0]
 
-        recipe = RecipeController.get_recipe(int(recipe_id))
+        recipe = self.recipe_controller.get_recipe(int(recipe_id))
         detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)

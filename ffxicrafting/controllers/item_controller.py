@@ -2,10 +2,11 @@ from services import ItemService
 
 
 class ItemController:
-    @classmethod
-    def update_auction_data(cls, item_id):
-        ItemService.update_auction_data(item_id)
+    def __init__(self) -> None:
+        self.item_service = ItemService()
 
-    @classmethod
-    def update_vendor_data(cls, item_id):
-        ItemService.update_vendor_data(item_id)
+    def update_auction_data(self, item_id):
+        self.item_service.update_auction_data(item_id)
+
+    def update_vendor_data(self, item_id):
+        self.item_service.update_vendor_data(item_id)

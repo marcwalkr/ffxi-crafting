@@ -1,31 +1,50 @@
-import mysql.connector
+import threading
+from mysql.connector import pooling
 from config.settings_manager import SettingsManager
 
 
 class Database:
+    _pool = None
+    _pool_lock = threading.Lock()
+    connections_used = 0
+
+    @classmethod
+    def initialize_pool(cls):
+        if cls._pool is None:
+            with cls._pool_lock:
+                if cls._pool is None:  # Double-checked locking
+                    cls._pool = pooling.MySQLConnectionPool(
+                        pool_name="mypool",
+                        pool_size=20,
+                        host=SettingsManager.get_database_host(),
+                        user=SettingsManager.get_database_user(),
+                        password=SettingsManager.get_database_password(),
+                        database=SettingsManager.get_database_name()
+                    )
+
     def __init__(self) -> None:
         self.connection = None
         self.cursor = None
 
     def _connect(self):
         if self.connection is None:
-            self.connection = mysql.connector.connect(
-                host=SettingsManager.get_database_host(),
-                user=SettingsManager.get_database_user(),
-                password=SettingsManager.get_database_password(),
-                database=SettingsManager.get_database_name()
-            )
+            if self._pool is None:
+                self.initialize_pool()
+            self.connection = self._pool.get_connection()
+            Database.connections_used += 1
+            print(f"Connections used: {Database.connections_used}")
             self.cursor = self.connection.cursor(buffered=True)
 
     def __del__(self):
         if self.connection:
             self.connection.close()
+            Database.connections_used -= 1
+            print(f"Connection closed. Connections used: {Database.connections_used}")
 
-    def get_auction_item(self, item_id, is_stack):
+    def get_auction_items(self, item_id):
         self._connect()
-        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND is_stack=%s AND no_sale=0",
-                            (item_id, is_stack))
-        return self.cursor.fetchone()
+        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0", (item_id,))
+        return self.cursor.fetchall()
 
     def update_auction_item(self, item_id, avg_price, sell_freq, is_stack):
         self._connect()
@@ -108,5 +127,4 @@ class Database:
         return self.cursor.fetchall()
 
     def commit(self):
-        self._connect()
         self.connection.commit()

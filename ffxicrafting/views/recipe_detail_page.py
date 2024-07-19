@@ -12,6 +12,7 @@ class RecipeDetailPage(ttk.Frame):
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
+        self.item_controller = ItemController()
         self.create_detail_page()
 
     def create_detail_page(self):
@@ -80,7 +81,7 @@ class RecipeDetailPage(ttk.Frame):
             stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
 
             # Update vendor prices in case merchant settings changed
-            ItemController.update_vendor_data(ingredient.item_id)
+            self.item_controller.update_vendor_data(ingredient.item_id)
 
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()

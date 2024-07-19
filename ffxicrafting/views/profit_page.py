@@ -16,6 +16,8 @@ class ProfitPage(RecipeListPage):
         self.is_open = True
         self.queue = Queue()
         self.batch_size = 50
+        self.recipe_controller = RecipeController()
+        self.item_controller = ItemController()
         self.create_profit_page()
         self.check_queue()
 
@@ -83,7 +85,7 @@ class ProfitPage(RecipeListPage):
             offset = 0
             search_finished = False
             while self.is_open and not search_finished:
-                craftable_recipes = RecipeController.get_recipes_by_level(
+                craftable_recipes = self.recipe_controller.get_recipes_by_level(
                     *(skill - skill_look_ahead for skill in skills), batch_size=self.batch_size, offset=offset
                 )
 
@@ -108,10 +110,10 @@ class ProfitPage(RecipeListPage):
             # None = the price has never been updated
             if (item.single_price is None or item.stack_price is None or
                     item.single_sell_freq is None or item.stack_sell_freq is None):
-                ItemController.update_auction_data(item.item_id)
+                self.item_controller.update_auction_data(item.item_id)
 
             # Always set vendor data in case merchant settings changed
-            ItemController.update_vendor_data(item.item_id)
+            self.item_controller.update_vendor_data(item.item_id)
 
         crafter = Crafter(*SettingsManager.get_skills(), recipe)
         crafter.synth.cost = crafter.synth.calculate_cost()
@@ -122,7 +124,7 @@ class ProfitPage(RecipeListPage):
                 # None = the price has never been updated
                 if (item.single_price is None or item.stack_price is None or
                         item.single_sell_freq is None or item.stack_sell_freq is None):
-                    ItemController.update_auction_data(item.item_id)
+                    self.item_controller.update_auction_data(item.item_id)
 
             sell_freq = max(
                 max(item.single_sell_freq or 0, item.stack_sell_freq or 0)

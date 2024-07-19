@@ -2,14 +2,14 @@ from services import RecipeService
 
 
 class RecipeController:
-    @classmethod
-    def get_recipe(cls, recipe_id):
-        return RecipeService.get_recipe(recipe_id)
+    def __init__(self) -> None:
+        self.recipe_service = RecipeService()
 
-    @classmethod
-    def get_recipes_by_level(cls, *craft_levels, batch_size, offset):
-        return RecipeService.get_recipes_by_level(*craft_levels, batch_size=batch_size, offset=offset)
+    def get_recipe(self, recipe_id):
+        return self.recipe_service.get_recipe(recipe_id)
 
-    @classmethod
-    def search_recipe(cls, search_term, batch_size, offset):
-        return RecipeService.search_recipe(search_term, batch_size, offset)
+    def get_recipes_by_level(self, *craft_levels, batch_size, offset):
+        return self.recipe_service.get_recipes_by_level(*craft_levels, batch_size=batch_size, offset=offset)
+
+    def search_recipe(self, search_term, batch_size, offset):
+        return self.recipe_service.search_recipe(search_term, batch_size, offset)

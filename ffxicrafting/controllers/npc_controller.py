@@ -1,20 +1,20 @@
-from functools import lru_cache
 from database import Database
 from models import Npc
 
 
 class NpcController:
-    db = Database()
+    _cache = {}
 
     def __init__(self) -> None:
-        pass
+        self.db = Database()
 
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_npc_by_name(cls, name):
-        npc_tuple = cls.db.get_npc_by_name(name)
-
-        if npc_tuple is not None:
-            return Npc(*npc_tuple)
+    def get_npc_by_name(self, name):
+        if name in self._cache:
+            return self._cache[name]
         else:
-            return None
+            npc_tuple = self.db.get_npc_by_name(name)
+            if npc_tuple is not None:
+                self._cache[name] = Npc(*npc_tuple)
+                return self._cache[name]
+            else:
+                return None

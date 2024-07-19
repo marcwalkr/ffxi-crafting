@@ -1,58 +1,56 @@
-from database import Database
 from entities import Recipe
 from services import ItemService
+from database import Database
 from utils import unique_preserve_order
 
 
 class RecipeService:
-    db = Database()
-
     _cache = {
         "get_recipes_by_level": {},
         "search_recipe": {}
     }
 
-    @classmethod
-    def get_recipe(cls, recipe_id):
-        for cache_name in cls._cache:
-            for recipes in cls._cache[cache_name].values():
+    def __init__(self) -> None:
+        self.db = Database()
+        self.item_service = ItemService()
+
+    def get_recipe(self, recipe_id):
+        for cache_name in self._cache:
+            for recipes in self._cache[cache_name].values():
                 for recipe in recipes:
                     if recipe.id == recipe_id:
                         return recipe
         raise ValueError(f"Recipe with id {recipe_id} not found in cache.")
 
-    @classmethod
-    def get_recipes_by_level(cls, *craft_levels, batch_size, offset):
+    def get_recipes_by_level(self, *craft_levels, batch_size, offset):
         cache_key = (craft_levels, offset)
-        if cache_key in cls._cache["get_recipes_by_level"]:
-            return cls._cache["get_recipes_by_level"][cache_key]
+        if cache_key in self._cache["get_recipes_by_level"]:
+            return self._cache["get_recipes_by_level"][cache_key]
         else:
-            results = list(cls.db.get_recipes_by_level(*craft_levels, batch_size, offset))
+            results = list(self.db.get_recipes_by_level(*craft_levels, batch_size, offset))
             if results:
-                recipe_items = cls._get_recipe_items(results)
-                recipes = cls._create_recipe_objects(results, recipe_items)
-                cls._cache["get_recipes_by_level"][cache_key] = recipes
+                recipe_items = self._get_recipe_items(results)
+                recipes = self._create_recipe_objects(results, recipe_items)
+                self._cache["get_recipes_by_level"][cache_key] = recipes
                 return recipes
             else:
                 return []
 
-    @classmethod
-    def search_recipe(cls, search_term, batch_size, offset):
+    def search_recipe(self, search_term, batch_size, offset):
         cache_key = (search_term, offset)
-        if cache_key in cls._cache["search_recipe"]:
-            return cls._cache["search_recipe"][cache_key]
+        if cache_key in self._cache["search_recipe"]:
+            return self._cache["search_recipe"][cache_key]
         else:
-            results = cls.db.search_recipe(search_term, batch_size, offset)
+            results = self.db.search_recipe(search_term, batch_size, offset)
             if results:
-                recipe_items = cls._get_recipe_items(results)
-                recipes = cls._create_recipe_objects(results, recipe_items)
-                cls._cache["search_recipe"][cache_key] = recipes
+                recipe_items = self._get_recipe_items(results)
+                recipes = self._create_recipe_objects(results, recipe_items)
+                self._cache["search_recipe"][cache_key] = recipes
                 return recipes
             else:
                 return []
 
-    @classmethod
-    def _get_recipe_items(cls, recipe_tuples):
+    def _get_recipe_items(self, recipe_tuples):
         all_crystal_ids = []
         all_ingredient_ids = []
         all_result_ids = []
@@ -62,10 +60,9 @@ class RecipeService:
             all_result_ids.extend(recipe_tuple[21:25])
 
         unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
-        return ItemService.get_items(unique_item_ids)
+        return self.item_service.get_items(unique_item_ids)
 
-    @classmethod
-    def _create_recipe_objects(cls, recipe_tuples, unique_items):
+    def _create_recipe_objects(self, recipe_tuples, unique_items):
         recipes = []
         for recipe_tuple in recipe_tuples:
             crystal_id = recipe_tuple[11]

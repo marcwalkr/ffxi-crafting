@@ -1,42 +1,42 @@
-import statistics
 from database import Database
 from models import AuctionItem, SalesHistory
 
 
 class AuctionController:
-    db = Database()
+    _cache = {}
 
     def __init__(self) -> None:
-        pass
+        self.db = Database()
 
-    @classmethod
-    def get_auction_item(cls, item_id, is_stack):
-        auction_item_tuple = cls.db.get_auction_item(item_id, is_stack)
-        if auction_item_tuple is not None:
-            auction_item = AuctionItem(*auction_item_tuple)
-            if auction_item.new_data:
-                sales_history = cls.get_latest_sales_history(item_id, is_stack)
-
-                prices = [sale.price for sale in sales_history]
-                avg_price = sum(prices) / len(prices)
-
-                # Update attributes of the auction_item object
-                auction_item.avg_price = avg_price
-                auction_item.sell_freq = auction_item.num_sales / 15
-
-                cls.update_auction_item(item_id, avg_price, auction_item.sell_freq, is_stack)
-
-            return auction_item
+    def get_auction_items(self, item_id):
+        if item_id in self._cache:
+            return self._cache[item_id]
         else:
-            return None
+            auction_item_tuples = self.db.get_auction_items(item_id)
+            if auction_item_tuples is not None:
+                auction_items = [AuctionItem(*auction_item_tuple) for auction_item_tuple in auction_item_tuples]
+                for auction_item in auction_items:
+                    if auction_item.new_data:
+                        sales_history = self.get_latest_sales_history(item_id, auction_item.is_stack)
 
-    @classmethod
-    def update_auction_item(cls, item_id, avg_price, sell_freq, is_stack):
-        cls.db.update_auction_item(item_id, avg_price, sell_freq, is_stack)
+                        prices = [sale.price for sale in sales_history]
+                        avg_price = sum(prices) / len(prices)
+                        auction_item.avg_price = avg_price
+                        auction_item.sell_freq = auction_item.num_sales / 15
 
-    @classmethod
-    def get_latest_sales_history(cls, item_id, is_stack):
-        sales_history_tuples = cls.db.get_latest_sales_history(item_id, is_stack)
+                        # self.update_auction_item(item_id, avg_price, auction_item.sell_freq, auction_item.is_stack)
+
+                self._cache[item_id] = auction_items
+                return auction_items
+            else:
+                self._cache[item_id] = []
+                return []
+
+    def update_auction_item(self, item_id, avg_price, sell_freq, is_stack):
+        self.db.update_auction_item(item_id, avg_price, sell_freq, is_stack)
+
+    def get_latest_sales_history(self, item_id, is_stack):
+        sales_history_tuples = self.db.get_latest_sales_history(item_id, is_stack)
         if sales_history_tuples:
             sales_history_list = [SalesHistory(*sales_history_tuple) for sales_history_tuple in sales_history_tuples]
             return sales_history_list

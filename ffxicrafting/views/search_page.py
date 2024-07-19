@@ -14,6 +14,8 @@ class SearchPage(RecipeListPage):
         self.is_open = True
         self.queue = Queue()
         self.batch_size = 50
+        self.recipe_controller = RecipeController()
+        self.item_controller = ItemController()
         self.create_search_page()
         self.check_queue()
 
@@ -73,7 +75,7 @@ class SearchPage(RecipeListPage):
             offset = 0
             search_finished = False
             while self.is_open and not search_finished:
-                results = RecipeController.search_recipe(search_term, self.batch_size, offset)
+                results = self.recipe_controller.search_recipe(search_term, self.batch_size, offset)
 
                 if len(results) < self.batch_size:
                     search_finished = True
@@ -97,19 +99,11 @@ class SearchPage(RecipeListPage):
         ingredient_names_summarized = recipe.get_formatted_ingredient_names()
 
         for item in recipe.get_unique_ingredients():
-            # None = the price has never been updated
-            if (item.single_price is None or item.stack_price is None or
-                    item.single_sell_freq is None or item.stack_sell_freq is None):
-                ItemController.update_auction_data(item.item_id)
-
-            # Always set vendor data in case merchant settings changed
-            ItemController.update_vendor_data(item.item_id)
+            self.item_controller.update_auction_data(item.item_id)
+            self.item_controller.update_vendor_data(item.item_id)
 
         for item in recipe.get_unique_results():
-            # None = the price has never been updated
-            if (item.single_price is None or item.stack_price is None or
-                    item.single_sell_freq is None or item.stack_sell_freq is None):
-                ItemController.update_auction_data(item.item_id)
+            self.item_controller.update_auction_data(item.item_id)
 
         row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
         self.results.append((recipe.id, row))
