@@ -16,48 +16,23 @@ class AuctionController:
             auction_item = AuctionItem(*auction_item_tuple)
             if auction_item.new_data:
                 sales_history = cls.get_latest_sales_history(item_id, is_stack)
-                unix_timestamps = [sale.sell_date for sale in sales_history]
-
-                if len(unix_timestamps) < 15:
-                    # Less than 15 have ever been sold
-                    sales_per_day = 0
-                else:
-                    # Ensure the timestamps are sorted
-                    unix_timestamps.sort()
-
-                    # Calculate the differences between consecutive timestamps
-                    time_diffs = [unix_timestamps[i] - unix_timestamps[i-1] for i in range(1, len(unix_timestamps))]
-
-                    # Filter out differences less than 30 seconds
-                    time_diffs = [diff for diff in time_diffs if diff > 30]
-
-                    if len(time_diffs) == 0:
-                        # Every item sold fast, set to 9999 as maximum
-                        sales_per_day = 9999
-                    else:
-                        # Calculate the median time between sales
-                        median_interval_seconds = statistics.median(time_diffs)
-
-                        # Estimate sales per day
-                        sales_per_day = (24 * 60 * 60) / median_interval_seconds
 
                 prices = [sale.price for sale in sales_history]
                 avg_price = sum(prices) / len(prices)
 
-                # Update the attributes of the auction_item object
+                # Update attributes of the auction_item object
                 auction_item.avg_price = avg_price
-                auction_item.num_sales = len(sales_history)
-                auction_item.sell_freq = sales_per_day
+                auction_item.sell_freq = auction_item.num_sales / 15
 
-                cls.update_auction_item(item_id, avg_price, len(sales_history), sales_per_day, is_stack)
+                cls.update_auction_item(item_id, avg_price, auction_item.sell_freq, is_stack)
 
             return auction_item
         else:
             return None
 
     @classmethod
-    def update_auction_item(cls, item_id, avg_price, num_sales, sell_freq, is_stack):
-        cls.db.update_auction_item(item_id, avg_price, num_sales, sell_freq, is_stack)
+    def update_auction_item(cls, item_id, avg_price, sell_freq, is_stack):
+        cls.db.update_auction_item(item_id, avg_price, sell_freq, is_stack)
 
     @classmethod
     def get_latest_sales_history(cls, item_id, is_stack):

@@ -27,12 +27,12 @@ class Database:
                             (item_id, is_stack))
         return self.cursor.fetchone()
 
-    def update_auction_item(self, item_id, avg_price, num_sales, sell_freq, is_stack):
+    def update_auction_item(self, item_id, avg_price, sell_freq, is_stack):
         self._connect()
         self.cursor.execute(
-            "UPDATE auction_items SET avg_price = %s, num_sales = %s, sell_freq = %s, new_data = 0 "
+            "UPDATE auction_items SET avg_price = %s, sell_freq = %s, new_data = 0 "
             "WHERE itemid = %s AND is_stack = %s",
-            (avg_price, num_sales, sell_freq, item_id, is_stack)
+            (avg_price, sell_freq, item_id, is_stack)
         )
         self.commit()
 
