@@ -1,4 +1,5 @@
 import threading
+import warnings
 from mysql.connector import pooling
 from config.settings_manager import SettingsManager
 
@@ -9,6 +10,14 @@ class Database:
 
     @classmethod
     def initialize_pool(cls):
+        host = SettingsManager.get_database_host()
+        user = SettingsManager.get_database_user()
+        password = SettingsManager.get_database_password()
+        database = SettingsManager.get_database_name()
+
+        if host == "" or user == "" or password == "" or database == "":
+            warnings.warn("Database configuration is incomplete")
+
         if cls._pool is None:
             with cls._pool_lock:
                 if cls._pool is None:  # Double-checked locking
