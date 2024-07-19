@@ -1,6 +1,5 @@
 from entities import Recipe
 from services import ItemService
-from database import Database
 from utils import unique_preserve_order
 
 
@@ -10,9 +9,9 @@ class RecipeService:
         "search_recipe": {}
     }
 
-    def __init__(self) -> None:
-        self.db = Database()
-        self.item_service = ItemService()
+    def __init__(self, db) -> None:
+        self.db = db
+        self.item_service = ItemService(self.db)
 
     def get_recipe(self, recipe_id):
         for cache_name in self._cache:

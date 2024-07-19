@@ -1,4 +1,3 @@
-from database import Database
 from models import VendorItem, RegionalVendor
 
 
@@ -8,8 +7,8 @@ class VendorController:
         "get_regional_vendors": []
     }
 
-    def __init__(self) -> None:
-        self.db = Database()
+    def __init__(self, db) -> None:
+        self.db = db
 
     def get_vendor_items(self, item_id):
         if item_id in self._cache["get_vendor_items"]:

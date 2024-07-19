@@ -1,12 +1,14 @@
-import threading
 import tkinter as tk
 from tkinter import ttk
-from queue import Queue, Empty
 from config import SettingsManager
 from entities import Crafter
 from controllers import RecipeController, ItemController
 from views import RecipeListPage
 from utils import TreeviewWithSort
+from database import Database
+from queue import Queue, Empty
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 import mysql.connector
 
 
@@ -15,9 +17,7 @@ class ProfitPage(RecipeListPage):
         super().__init__(parent)
         self.is_open = True
         self.queue = Queue()
-        self.batch_size = 50
-        self.recipe_controller = RecipeController()
-        self.item_controller = ItemController()
+        self.executor = ThreadPoolExecutor(max_workers=10)
         self.create_profit_page()
         self.check_queue()
 
@@ -82,38 +82,57 @@ class ProfitPage(RecipeListPage):
             skills = SettingsManager.get_skills()
             skill_look_ahead = SettingsManager.get_skill_look_ahead()
 
+            batch_size = 100
             offset = 0
             search_finished = False
+            futures = []
+
+            db = Database()  # Borrow a connection from the pool
+            recipe_controller = RecipeController(db)
+
             while self.is_open and not search_finished:
-                craftable_recipes = self.recipe_controller.get_recipes_by_level(
-                    *(skill - skill_look_ahead for skill in skills), batch_size=self.batch_size, offset=offset
+                craftable_recipes = recipe_controller.get_recipes_by_level(
+                    *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
                 )
 
-                if len(craftable_recipes) < self.batch_size:
+                if len(craftable_recipes) < batch_size:
                     search_finished = True
 
-                for recipe in craftable_recipes:
-                    if not self.is_open:
-                        break
-                    self.process_single_recipe(recipe)
+                # Submit a batch processing task to the executor
+                futures.append(self.executor.submit(self.process_batch, craftable_recipes))
 
-                offset += self.batch_size
+                offset += batch_size
+
+            for future in as_completed(futures):
+                if not self.is_open:
+                    break
+                future.result()  # Ensure any exceptions are raised
 
             self.queue.put(self.finalize_profit_table)
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             self.queue.put(self.generation_finished)
+        finally:
+            db.close()  # Return the connection to the pool
 
-    def process_single_recipe(self, recipe):
+    def process_batch(self, craftable_recipes):
+        db = Database()  # Borrow a connection from the pool
+        item_controller = ItemController(db)
+        try:
+            for recipe in craftable_recipes:
+                if not self.is_open:
+                    break
+                self.process_single_recipe(recipe, item_controller)
+        finally:
+            db.close()  # Return the connection to the pool
+
+    def process_single_recipe(self, recipe, item_controller):
         # Set price data for ingredients before calculating the cost
         for item in recipe.get_unique_ingredients():
-            # None = the price has never been updated
-            if (item.single_price is None or item.stack_price is None or
-                    item.single_sell_freq is None or item.stack_sell_freq is None):
-                self.item_controller.update_auction_data(item.item_id)
+            item_controller.update_auction_data(item.item_id)
 
             # Always set vendor data in case merchant settings changed
-            self.item_controller.update_vendor_data(item.item_id)
+            item_controller.update_vendor_data(item.item_id)
 
         crafter = Crafter(*SettingsManager.get_skills(), recipe)
         crafter.synth.cost = crafter.synth.calculate_cost()
@@ -121,10 +140,7 @@ class ProfitPage(RecipeListPage):
 
             # Set price data for results before calculating profit
             for item in recipe.get_unique_results():
-                # None = the price has never been updated
-                if (item.single_price is None or item.stack_price is None or
-                        item.single_sell_freq is None or item.stack_sell_freq is None):
-                    self.item_controller.update_auction_data(item.item_id)
+                item_controller.update_auction_data(item.item_id)
 
             sell_freq = max(
                 max(item.single_sell_freq or 0, item.stack_sell_freq or 0)

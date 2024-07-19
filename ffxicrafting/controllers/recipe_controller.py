@@ -2,8 +2,8 @@ from services import RecipeService
 
 
 class RecipeController:
-    def __init__(self) -> None:
-        self.recipe_service = RecipeService()
+    def __init__(self, db) -> None:
+        self.recipe_service = RecipeService(db)
 
     def get_recipe(self, recipe_id):
         return self.recipe_service.get_recipe(recipe_id)

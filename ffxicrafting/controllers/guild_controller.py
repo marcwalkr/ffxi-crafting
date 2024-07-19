@@ -1,4 +1,3 @@
-from database import Database
 from models import Guild, GuildShop
 
 
@@ -8,8 +7,8 @@ class GuildController:
         "get_guild_shops": {}
     }
 
-    def __init__(self) -> None:
-        self.db = Database()
+    def __init__(self, db) -> None:
+        self.db = db
 
     def get_guild(self, guild_id):
         if guild_id in self._cache["get_guild"]:

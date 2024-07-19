@@ -6,7 +6,6 @@ from config.settings_manager import SettingsManager
 class Database:
     _pool = None
     _pool_lock = threading.Lock()
-    connections_used = 0
 
     @classmethod
     def initialize_pool(cls):
@@ -31,15 +30,12 @@ class Database:
             if self._pool is None:
                 self.initialize_pool()
             self.connection = self._pool.get_connection()
-            Database.connections_used += 1
-            print(f"Connections used: {Database.connections_used}")
             self.cursor = self.connection.cursor(buffered=True)
 
-    def __del__(self):
+    def close(self):
         if self.connection:
+            self.cursor.close()
             self.connection.close()
-            Database.connections_used -= 1
-            print(f"Connection closed. Connections used: {Database.connections_used}")
 
     def get_auction_items(self, item_id):
         self._connect()

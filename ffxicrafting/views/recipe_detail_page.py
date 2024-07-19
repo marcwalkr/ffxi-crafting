@@ -4,6 +4,7 @@ from entities import Crafter
 from config import SettingsManager
 from utils import TreeviewWithSort
 from controllers import ItemController
+from database import Database
 
 
 class RecipeDetailPage(ttk.Frame):
@@ -12,7 +13,6 @@ class RecipeDetailPage(ttk.Frame):
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
-        self.item_controller = ItemController()
         self.create_detail_page()
 
     def create_detail_page(self):
@@ -76,17 +76,24 @@ class RecipeDetailPage(ttk.Frame):
     def populate_ingredients_tree(self):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
+        db = Database() # Borrow a connection from the pool
+        item_controller = ItemController(db)
+
         for ingredient, quantity in ingredient_counts.items():
             single_price = ingredient.single_price if ingredient.single_price not in (None, 0) else ""
             stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
 
+            
+
             # Update vendor prices in case merchant settings changed
-            self.item_controller.update_vendor_data(ingredient.item_id)
+            item_controller.update_vendor_data(ingredient.item_id)
 
             vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
                 ingredient_name, quantity, single_price, stack_price, vendor_price, self.recipe.id))
+
+        db.close() # Return the connection to the pool
 
     def populate_results_tree(self):
         unique_results = self.recipe.get_unique_results()

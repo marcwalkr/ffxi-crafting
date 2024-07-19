@@ -4,6 +4,7 @@ import mysql.connector
 from tkinter import ttk
 from queue import Queue, Empty
 from controllers import RecipeController, ItemController
+from database import Database
 from utils import TreeviewWithSort
 from views import RecipeListPage
 
@@ -13,9 +14,6 @@ class SearchPage(RecipeListPage):
         super().__init__(parent)
         self.is_open = True
         self.queue = Queue()
-        self.batch_size = 50
-        self.recipe_controller = RecipeController()
-        self.item_controller = ItemController()
         self.create_search_page()
         self.check_queue()
 
@@ -72,12 +70,17 @@ class SearchPage(RecipeListPage):
 
     def query_recipes(self, search_term):
         try:
+            batch_size = 50
             offset = 0
             search_finished = False
-            while self.is_open and not search_finished:
-                results = self.recipe_controller.search_recipe(search_term, self.batch_size, offset)
 
-                if len(results) < self.batch_size:
+            db = Database()  # Borrow a connection from the pool
+            recipe_controller = RecipeController(db)
+
+            while self.is_open and not search_finished:
+                results = recipe_controller.search_recipe(search_term, batch_size, offset)
+
+                if len(results) < batch_size:
                     search_finished = True
 
                 for result in results:
@@ -85,12 +88,14 @@ class SearchPage(RecipeListPage):
                         break
                     self.process_single_result(result)
 
-                offset += self.batch_size
+                offset += batch_size
 
             self.queue.put(self.finalize_search)
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             self.queue.put(self.search_finished)
+        finally:
+            db.close()  # Return the connection to the pool
 
     def process_single_result(self, recipe):
         nq_string = recipe.get_formatted_nq_result()
@@ -98,12 +103,17 @@ class SearchPage(RecipeListPage):
         levels_string = recipe.get_formatted_levels_string()
         ingredient_names_summarized = recipe.get_formatted_ingredient_names()
 
+        db = Database()  # Borrow a connection from the pool
+        item_controller = ItemController(db)
+
         for item in recipe.get_unique_ingredients():
-            self.item_controller.update_auction_data(item.item_id)
-            self.item_controller.update_vendor_data(item.item_id)
+            item_controller.update_auction_data(item.item_id)
+            item_controller.update_vendor_data(item.item_id)
 
         for item in recipe.get_unique_results():
-            self.item_controller.update_auction_data(item.item_id)
+            item_controller.update_auction_data(item.item_id)
+
+        db.close()  # Return the connection to the pool
 
         row = [nq_string, hq_string, levels_string, ingredient_names_summarized]
         self.results.append((recipe.id, row))

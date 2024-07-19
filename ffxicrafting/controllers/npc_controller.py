@@ -1,12 +1,11 @@
-from database import Database
 from models import Npc
 
 
 class NpcController:
     _cache = {}
 
-    def __init__(self) -> None:
-        self.db = Database()
+    def __init__(self, db) -> None:
+        self.db = db
 
     def get_npc_by_name(self, name):
         if name in self._cache:

@@ -2,13 +2,13 @@ from functools import lru_cache
 from tkinter import ttk
 from views import RecipeDetailPage
 from controllers import RecipeController
+from database import Database
 
 
 class RecipeListPage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
-        self.recipe_controller = RecipeController()
 
     @lru_cache(maxsize=None)
     def show_recipe_details(self, event):
@@ -18,10 +18,15 @@ class RecipeListPage(ttk.Frame):
 
         recipe_id = tree.selection()[0]
 
-        recipe = self.recipe_controller.get_recipe(int(recipe_id))
+        db = Database() # Borrow a connection from the pool
+        recipe_controller = RecipeController(db)
+
+        recipe = recipe_controller.get_recipe(int(recipe_id))
         detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
+
+        db.close() # Return the connection to the pool
 
     def on_treeview_click(self, event):
         tree = event.widget

@@ -1,5 +1,4 @@
 from entities import Item
-from database import Database
 from config import SettingsManager
 from controllers import AuctionController, VendorController, GuildController
 
@@ -7,11 +6,11 @@ from controllers import AuctionController, VendorController, GuildController
 class ItemService:
     _cache = {}
 
-    def __init__(self) -> None:
-        self.db = Database()
-        self.auction_controller = AuctionController()
-        self.vendor_controller = VendorController()
-        self.guild_controller = GuildController()
+    def __init__(self, db) -> None:
+        self.db = db
+        self.auction_controller = AuctionController(db)
+        self.vendor_controller = VendorController(db)
+        self.guild_controller = GuildController(db)
 
     def get_items(self, item_ids):
         # Identify the missing item_ids (those not in the cache)
@@ -77,6 +76,7 @@ class ItemService:
         )
 
     def get_auction_data(self, item_id):
+        # Set single crystal prices to 100 gil to test profit table
         if item_id >= 4096 and item_id <= 4103:
             return 100, None, 50, None
 

@@ -1,12 +1,11 @@
-from database import Database
 from models import AuctionItem, SalesHistory
 
 
 class AuctionController:
     _cache = {}
 
-    def __init__(self) -> None:
-        self.db = Database()
+    def __init__(self, db) -> None:
+        self.db = db
 
     def get_auction_items(self, item_id):
         if item_id in self._cache:
