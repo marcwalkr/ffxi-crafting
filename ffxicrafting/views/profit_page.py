@@ -109,8 +109,8 @@ class ProfitPage(RecipeListPage):
                 future.result()  # Ensure any exceptions are raised
 
             self.queue.put(self.finalize_profit_table)
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
+        except (mysql.connector.Error, Exception) as e:
+            print(f"Error: {e}")
             self.queue.put(self.generation_finished)
         finally:
             db.close()  # Return the connection to the pool

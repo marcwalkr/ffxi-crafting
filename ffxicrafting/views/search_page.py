@@ -91,8 +91,8 @@ class SearchPage(RecipeListPage):
                 offset += batch_size
 
             self.queue.put(self.finalize_search)
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
+        except (mysql.connector.Error, Exception) as e:
+            print(f"Error: {e}")
             self.queue.put(self.search_finished)
         finally:
             db.close()  # Return the connection to the pool

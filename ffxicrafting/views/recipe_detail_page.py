@@ -76,14 +76,12 @@ class RecipeDetailPage(ttk.Frame):
     def populate_ingredients_tree(self):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
-        db = Database() # Borrow a connection from the pool
+        db = Database()  # Borrow a connection from the pool
         item_controller = ItemController(db)
 
         for ingredient, quantity in ingredient_counts.items():
             single_price = ingredient.single_price if ingredient.single_price not in (None, 0) else ""
             stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
-
-            
 
             # Update vendor prices in case merchant settings changed
             item_controller.update_vendor_data(ingredient.item_id)
@@ -93,7 +91,7 @@ class RecipeDetailPage(ttk.Frame):
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
                 ingredient_name, quantity, single_price, stack_price, vendor_price, self.recipe.id))
 
-        db.close() # Return the connection to the pool
+        db.close()  # Return the connection to the pool
 
     def populate_results_tree(self):
         unique_results = self.recipe.get_unique_results()

@@ -15,8 +15,10 @@ class Database:
         password = SettingsManager.get_database_password()
         database = SettingsManager.get_database_name()
 
-        if host == "" or user == "" or password == "" or database == "":
+        if not all([host, user, password, database]):
             warnings.warn("Database configuration is incomplete")
+            cls._pool = None
+            return
 
         if cls._pool is None:
             with cls._pool_lock:
@@ -24,10 +26,10 @@ class Database:
                     cls._pool = pooling.MySQLConnectionPool(
                         pool_name="mypool",
                         pool_size=20,
-                        host=SettingsManager.get_database_host(),
-                        user=SettingsManager.get_database_user(),
-                        password=SettingsManager.get_database_password(),
-                        database=SettingsManager.get_database_name()
+                        host=host,
+                        user=user,
+                        password=password,
+                        database=database
                     )
 
     def __init__(self) -> None:
@@ -38,82 +40,101 @@ class Database:
         if self.connection is None:
             if self._pool is None:
                 self.initialize_pool()
-            self.connection = self._pool.get_connection()
-            self.cursor = self.connection.cursor(buffered=True)
+            if self._pool:
+                try:
+                    self.connection = self._pool.get_connection()
+                    self.cursor = self.connection.cursor(buffered=True)
+                except Exception as e:
+                    warnings.warn(f"Failed to connect to database: {e}")
+                    self._pool = None
+                    raise Exception("Failed to connect to the database. Please check the configuration and try again.")
+
+    def execute_query(self, query, params, fetch_method="all", commit=False):
+        self._connect()
+        if not self.cursor:
+            raise Exception("Database not connected. Please check the configuration and try again.")
+        self.cursor.execute(query, params)
+        if commit:
+            self.connection.commit()
+        if fetch_method == "one":
+            return self.cursor.fetchone()
+        elif fetch_method == "none":
+            return None
+        else:
+            return self.cursor.fetchall()
+
+    def db_connection_required(func):
+        def wrapper(self, *args, **kwargs):
+            self._connect()
+            return func(self, *args, **kwargs)
+        return wrapper
 
     def close(self):
         if self.connection:
             self.cursor.close()
             self.connection.close()
 
+    @db_connection_required
     def get_auction_items(self, item_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0", (item_id,))
-        return self.cursor.fetchall()
+        query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
+        return self.execute_query(query, (item_id,), fetch_method="all")
 
+    @db_connection_required
     def update_auction_item(self, item_id, avg_price, sell_freq, is_stack):
-        self._connect()
-        self.cursor.execute(
-            "UPDATE auction_items SET avg_price = %s, sell_freq = %s, new_data = 0 "
-            "WHERE itemid = %s AND is_stack = %s",
-            (avg_price, sell_freq, item_id, is_stack)
-        )
-        self.commit()
+        query = "UPDATE auction_items SET avg_price = %s, sell_freq = %s, new_data = 0 "
+        query += "WHERE itemid = %s AND is_stack = %s"
+        return self.execute_query(query, (avg_price, sell_freq, item_id, is_stack), commit=True)
 
+    @db_connection_required
     def get_latest_sales_history(self, item_id, is_stack):
-        self._connect()
-        self.cursor.execute(
-            "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
-            "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)",
-            (item_id, is_stack, item_id, is_stack)
-        )
-        return self.cursor.fetchall()
+        query = "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
+        query += "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)"
+        return self.execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_method="all")
 
+    @db_connection_required
     def get_guild(self, guild_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM guilds WHERE id=%s", (guild_id,))
-        return self.cursor.fetchone()
+        query = "SELECT * FROM guilds WHERE id=%s"
+        return self.execute_query(query, (guild_id,), fetch_method="one")
 
+    @db_connection_required
     def get_guild_shops(self, item_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM guild_shops WHERE itemid=%s", (item_id,))
-        return self.cursor.fetchall()
+        query = "SELECT * FROM guild_shops WHERE itemid=%s"
+        return self.execute_query(query, (item_id,), fetch_method="all")
 
+    @db_connection_required
     def get_item(self, item_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM item_basic WHERE itemid=%s", (item_id,))
-        return self.cursor.fetchone()
+        query = "SELECT * FROM item_basic WHERE itemid=%s"
+        return self.execute_query(query, (item_id,), fetch_method="one")
 
+    @db_connection_required
     def get_items(self, item_ids):
-        self._connect()
         format_strings = ','.join(['%s'] * len(item_ids))
-        self.cursor.execute(f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})", tuple(item_ids))
-        return self.cursor.fetchall()
+        query = f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})"
+        return self.execute_query(query, tuple(item_ids), fetch_method="all")
 
+    @db_connection_required
     def get_npc_by_name(self, name):
-        self._connect()
-        self.cursor.execute("SELECT * FROM npc_list WHERE polutils_name=%s", (name,))
-        return self.cursor.fetchone()
+        query = "SELECT * FROM npc_list WHERE polutils_name=%s"
+        return self.execute_query(query, (name,), fetch_method="one")
 
+    @db_connection_required
     def get_regional_vendors(self):
-        self._connect()
-        self.cursor.execute("SELECT * FROM regional_vendors")
-        return self.cursor.fetchall()
+        query = "SELECT * FROM regional_vendors"
+        return self.execute_query(query, (), fetch_method="all")
 
+    @db_connection_required
     def get_recipe(self, recipe_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM synth_recipes WHERE id=%s", (recipe_id,))
-        return self.cursor.fetchone()
+        query = "SELECT * FROM synth_recipes WHERE id=%s"
+        return self.execute_query(query, (recipe_id,), fetch_method="one")
 
+    @db_connection_required
     def get_recipes_by_level(self, wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset):
-        self._connect()
         query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
                  "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
-        self.cursor.execute(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset))
-        return self.cursor.fetchall()
+        return self.execute_query(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset), fetch_method="all")
 
+    @db_connection_required
     def search_recipe(self, search_term, batch_size, offset):
-        self._connect()
         query = """
         SELECT * FROM (
             SELECT *, MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) AS relevance
@@ -123,13 +144,9 @@ class Database:
         ORDER BY relevance DESC, ID ASC
         LIMIT %s OFFSET %s;
         """
-        self.cursor.execute(query, (search_term, batch_size, offset))
-        return self.cursor.fetchall()
+        return self.execute_query(query, (search_term, batch_size, offset), fetch_method="all")
 
+    @db_connection_required
     def get_vendor_items(self, item_id):
-        self._connect()
-        self.cursor.execute("SELECT * FROM vendor_items WHERE itemid=%s", (item_id,))
-        return self.cursor.fetchall()
-
-    def commit(self):
-        self.connection.commit()
+        query = "SELECT * FROM vendor_items WHERE itemid=%s"
+        return self.execute_query(query, (item_id,), fetch_method="all")
