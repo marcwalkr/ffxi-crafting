@@ -5,7 +5,7 @@ from entities import Crafter
 from controllers import RecipeController, ItemController
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from database import Database
+from database import Database, DatabaseException
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
@@ -109,7 +109,7 @@ class ProfitPage(RecipeListPage):
                 future.result()  # Ensure any exceptions are raised
 
             self.queue.put(self.finalize_profit_table)
-        except (mysql.connector.Error, Exception) as e:
+        except (mysql.connector.Error, DatabaseException) as e:
             print(f"Error: {e}")
             self.queue.put(self.generation_finished)
         finally:
@@ -147,10 +147,16 @@ class ProfitPage(RecipeListPage):
                 for item in recipe.get_results()
             )
 
-            profit_per_synth, profit_per_storage = crafter.craft(SettingsManager.get_simulation_trials())
+            num_trials = SettingsManager.get_simulation_trials()
+            single_profits, stack_profits, profit_per_synth, profit_per_storage = crafter.craft(num_trials)
             if self.passes_thresholds(profit_per_synth, profit_per_storage, sell_freq):
                 nq_string = recipe.get_formatted_nq_result()
                 hq_string = recipe.get_formatted_hq_results()
+
+                recipe_results = recipe.get_results()
+                for result in recipe_results:
+                    result.single_profit = single_profits[result]
+                    result.stack_profit = stack_profits[result]
 
                 row = [nq_string, hq_string, crafter.synth.tier,
                        crafter.synth.cost, profit_per_synth, profit_per_storage, sell_freq]

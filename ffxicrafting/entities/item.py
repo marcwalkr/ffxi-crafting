@@ -9,6 +9,8 @@ class Item(ItemModel):
         self.stack_price = None
         self.single_sell_freq = None
         self.stack_sell_freq = None
+        self.single_profit = None
+        self.stack_profit = None
         self.min_vendor_price = None
         self.min_price = None
 

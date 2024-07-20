@@ -47,12 +47,12 @@ class Database:
                 except Exception as e:
                     warnings.warn(f"Failed to connect to database: {e}")
                     self._pool = None
-                    raise Exception("Failed to connect to the database. Please check the configuration and try again.")
+                    raise DatabaseException("Failed to connect to the database. Please check the configuration and try again.")
 
     def execute_query(self, query, params, fetch_method="all", commit=False):
         self._connect()
         if not self.cursor:
-            raise Exception("Database not connected. Please check the configuration and try again.")
+            raise DatabaseException("Database not connected. Please check the configuration and try again.")
         self.cursor.execute(query, params)
         if commit:
             self.connection.commit()
@@ -150,3 +150,6 @@ class Database:
     def get_vendor_items(self, item_id):
         query = "SELECT * FROM vendor_items WHERE itemid=%s"
         return self.execute_query(query, (item_id,), fetch_method="all")
+    
+class DatabaseException(Exception):
+    pass

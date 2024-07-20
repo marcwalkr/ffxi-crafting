@@ -74,16 +74,16 @@ class Synth:
             if self.attempt_hq():
                 hq_tier = self.get_hq_tier()
                 return self.get_hq_result(hq_tier)
-            return self.recipe.result.item_id, self.recipe.result_qty
+            return self.recipe.result, self.recipe.result_qty
         return None, None
 
     def get_hq_result(self, hq_tier):
         if hq_tier == 1:
-            return self.recipe.result_hq1.item_id, self.recipe.result_hq1_qty
+            return self.recipe.result_hq1, self.recipe.result_hq1_qty
         elif hq_tier == 2:
-            return self.recipe.result_hq2.item_id, self.recipe.result_hq2_qty
+            return self.recipe.result_hq2, self.recipe.result_hq2_qty
         else:
-            return self.recipe.result_hq3.item_id, self.recipe.result_hq3_qty
+            return self.recipe.result_hq3, self.recipe.result_hq3_qty
 
     def do_synth_fail(self):
         loss_probability = clamp(0.15 - (self.difficulty / 20), 0, 1) if self.difficulty > 0 else 0.15
@@ -91,12 +91,11 @@ class Synth:
             loss_probability += 0.35
 
         ingredients = self.recipe.get_ingredients()
-        ingredient_ids = [ingredient.item_id for ingredient in ingredients]
 
         retained_ingredients = defaultdict(lambda: 0)
-        for item_id in ingredient_ids:
+        for ingredient in ingredients:
             if random.random() >= loss_probability:
-                retained_ingredients[item_id] += 1
+                retained_ingredients[ingredient] += 1
 
         return retained_ingredients
 
@@ -114,12 +113,12 @@ class Synth:
         retained_ingredients = defaultdict(lambda: 0)
 
         for _ in range(num_times):
-            item_id, quantity = self.synth()
-            if item_id is not None:
-                results[item_id] += quantity
+            result, quantity = self.synth()
+            if result is not None:
+                results[result] += quantity
             else:
                 retained = self.do_synth_fail()
-                for key, value in retained.items():
-                    retained_ingredients[key] += value
+                for result_retained, quantity_retained in retained.items():
+                    retained_ingredients[result_retained] += quantity_retained
 
         return results, retained_ingredients

@@ -4,7 +4,7 @@ import mysql.connector
 from tkinter import ttk
 from queue import Queue, Empty
 from controllers import RecipeController, ItemController
-from database import Database
+from database import Database, DatabaseException
 from utils import TreeviewWithSort
 from views import RecipeListPage
 
@@ -91,7 +91,7 @@ class SearchPage(RecipeListPage):
                 offset += batch_size
 
             self.queue.put(self.finalize_search)
-        except (mysql.connector.Error, Exception) as e:
+        except (mysql.connector.Error, DatabaseException) as e:
             print(f"Error: {e}")
             self.queue.put(self.search_finished)
         finally:
