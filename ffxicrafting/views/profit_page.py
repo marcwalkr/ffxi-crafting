@@ -147,13 +147,12 @@ class ProfitPage(RecipeListPage):
                 for item in recipe.get_results()
             )
 
-            num_trials = SettingsManager.get_simulation_trials()
-            single_profits, stack_profits, profit_per_synth, profit_per_storage = crafter.craft(num_trials)
+            single_profits, stack_profits, profit_per_synth, profit_per_storage = crafter.craft()
             if self.passes_thresholds(profit_per_synth, profit_per_storage, sell_freq):
                 nq_string = recipe.get_formatted_nq_result()
                 hq_string = recipe.get_formatted_hq_results()
 
-                recipe_results = recipe.get_results()
+                recipe_results = recipe.get_unique_results()
                 for result in recipe_results:
                     result.single_profit = single_profits[result]
                     result.stack_profit = stack_profits[result]

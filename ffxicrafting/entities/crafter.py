@@ -14,12 +14,13 @@ class Crafter:
         self.cook = cook
         self.recipe = recipe
         self.synth = Synth(recipe, self)
+        self.num_times = SettingsManager.get_simulation_trials()
 
-    def craft(self, num_times):
-        results, retained_ingredients = self.synth.simulate(num_times)
+    def craft(self):
+        results, retained_ingredients = self.synth.simulate(self.num_times)
 
         # Calculate the total cost saved from retained ingredients after failures
-        simulation_cost = self.synth.cost * num_times
+        simulation_cost = self.synth.cost * self.num_times
         simulation_cost -= self._get_saved_cost(retained_ingredients)
 
         # Calculate the expected profit for each result, selling them as singles and stacks
@@ -28,7 +29,7 @@ class Crafter:
         stack_profits = self._get_stack_profits(results, simulation_cost)
 
         # Calculate the overall expected profit per synth and per character storage unit
-        profit_per_synth = self._get_profit_per_synth(results, simulation_cost, num_times)
+        profit_per_synth = self._get_profit_per_synth(results, simulation_cost, self.num_times)
         profit_per_storage = self._get_profit_per_storage(results, simulation_cost)
 
         return single_profits, stack_profits, int(profit_per_synth), int(profit_per_storage)

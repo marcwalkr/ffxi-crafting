@@ -50,6 +50,7 @@ class RecipeDetailPage(ttk.Frame):
         self.cost_per_synth_value_label.pack(side=tk.LEFT)
 
         self.update_cost_per_synth()
+        self.update_profits()
 
     def add_results_tree(self):
         results_frame = ttk.Frame(self)
@@ -113,6 +114,19 @@ class RecipeDetailPage(ttk.Frame):
         value_text = f"{crafter.synth.cost} gil" if crafter.synth.cost is not None else "N/A"
         self.cost_per_synth_value_label.config(text=value_text)
         self.update()
+
+    def update_profits(self):
+        skills = SettingsManager.get_skills()
+        crafter = Crafter(*skills, self.recipe)
+
+        crafter.synth.cost = crafter.synth.calculate_cost()
+
+        if crafter.synth.cost is not None:
+            single_profits, stack_profits, _, _ = crafter.craft()
+
+            for result in self.recipe.get_unique_results():
+                result.single_profit = single_profits[result]
+                result.stack_profit = stack_profits[result]
 
     def close_detail_page(self):
         tab_id = self.parent.notebook.index(self)
