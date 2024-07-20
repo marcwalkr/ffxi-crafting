@@ -36,6 +36,7 @@ class SearchPage(RecipeListPage):
 
         self.recipe_tree.bind("<Double-1>", self.show_recipe_details)
         self.recipe_tree.bind("<Button-1>", self.on_treeview_click)
+        self.search_entry.bind("<Return>", lambda event: self.start_search_recipes())
 
     def configure_recipe_treeview(self, treeview):
         treeview.heading("nq", text="NQ")
