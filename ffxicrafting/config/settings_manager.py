@@ -9,7 +9,7 @@ class SettingsManager:
             "profit_/_synth": 0,
             "profit_/_storage": 0,
             "min_sell_price": 0,
-            "sell_freq": 0.0
+            "sell_frequency": 0.0
         },
         "synth": {
             "skill_look_ahead": 0,
@@ -95,7 +95,7 @@ class SettingsManager:
     @classmethod
     def get_sell_freq(cls):
         settings = cls.load_settings()
-        return settings["profit_table"].get("sell_freq", 0.0)
+        return settings["profit_table"].get("sell_frequency", 0.0)
 
     @classmethod
     def get_skill_look_ahead(cls):
