@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from views import SearchPage, ProfitPage, SimulatePage, SettingsPage
-from database import Database
+from database import Database, DatabaseException
 import threading
 import warnings
 
@@ -20,7 +20,7 @@ class App(tk.Tk):
         # Initialize the database connection pool in a separate thread
         try:
             threading.Thread(target=Database.initialize_pool, daemon=True).start()
-        except Exception as e:
+        except DatabaseException as e:
             warnings.warn(f"Failed to initialize database connection pool: {e}")
 
     def configure_styles(self):

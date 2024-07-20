@@ -55,7 +55,7 @@ class RecipeDetailPage(ttk.Frame):
         results_frame = ttk.Frame(self)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        result_columns = ("Result", "Avg Single Price", "Avg Stack Price")
+        result_columns = ("Result", "Avg Single Price", "Avg Stack Price", "Single Profit", "Stack Profit")
         self.results_tree = TreeviewWithSort(results_frame, columns=result_columns,
                                              show="headings", selectmode="browse")
         self.configure_treeview_columns(self.results_tree, result_columns)
@@ -97,10 +97,12 @@ class RecipeDetailPage(ttk.Frame):
         unique_results = self.recipe.get_unique_results()
         for result in unique_results:
             result_name = result.get_formatted_name()
-            single_price = result.single_price if result.single_price not in (None, 0) else ""
-            stack_price = result.stack_price if result.stack_price not in (None, 0) else ""
+            single_price = result.single_price if result.single_price is not None else ""
+            stack_price = result.stack_price if result.stack_price is not None else ""
+            single_profit = result.single_profit if result.single_profit is not None else ""
+            stack_profit = result.stack_profit if result.stack_profit is not None else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
-                                                                            self.recipe.id))
+                                                                            single_profit, stack_profit, self.recipe.id))
 
     def update_cost_per_synth(self):
         skills = SettingsManager.get_skills()

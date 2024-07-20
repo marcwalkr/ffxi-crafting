@@ -18,6 +18,9 @@ class AuctionController:
                     if auction_item.new_data:
                         sales_history = self.get_latest_sales_history(item_id, auction_item.is_stack)
 
+                        if not sales_history:
+                            continue
+
                         prices = [sale.price for sale in sales_history]
                         avg_price = sum(prices) / len(prices)
                         auction_item.avg_price = avg_price
