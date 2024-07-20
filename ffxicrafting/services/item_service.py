@@ -76,10 +76,6 @@ class ItemService:
         )
 
     def get_auction_data(self, item_id):
-        # Set single crystal prices to 100 gil to test profit table
-        if item_id >= 4096 and item_id <= 4103:
-            return 100, None, 50, None
-
         auction_items = self.auction_controller.get_auction_items(item_id)
         single_price = None
         stack_price = None

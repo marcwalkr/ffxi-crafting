@@ -26,7 +26,7 @@ class AuctionController:
                         auction_item.avg_price = avg_price
                         auction_item.sell_freq = auction_item.num_sales / 15
 
-                        # self.update_auction_item(item_id, avg_price, auction_item.sell_freq, auction_item.is_stack)
+                        self.update_auction_item(item_id, avg_price, auction_item.sell_freq, auction_item.is_stack)
 
                 self._cache[item_id] = auction_items
                 return auction_items
