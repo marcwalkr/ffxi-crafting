@@ -47,21 +47,28 @@ class Database:
                 except Exception as e:
                     warnings.warn(f"Failed to connect to database: {e}")
                     self._pool = None
-                    raise DatabaseException("Failed to connect to the database. Please check the configuration and try again.")
+                    raise DatabaseException(
+                        "Failed to connect to the database. Please check the configuration and try again.")
 
     def execute_query(self, query, params, fetch_method="all", commit=False):
         self._connect()
         if not self.cursor:
             raise DatabaseException("Database not connected. Please check the configuration and try again.")
-        self.cursor.execute(query, params)
-        if commit:
-            self.connection.commit()
-        if fetch_method == "one":
-            return self.cursor.fetchone()
-        elif fetch_method == "none":
-            return None
-        else:
-            return self.cursor.fetchall()
+        try:
+            self.cursor.execute(query, params)
+            if commit:
+                self.connection.commit()
+                return
+            if fetch_method == "one":
+                return self.cursor.fetchone()
+            elif fetch_method == "none":
+                return None
+            else:
+                result = self.cursor.fetchall()
+                return result if result is not None else []
+        except Exception as e:
+            self.connection.rollback()
+            raise e
 
     def db_connection_required(func):
         def wrapper(self, *args, **kwargs):
@@ -150,6 +157,7 @@ class Database:
     def get_vendor_items(self, item_id):
         query = "SELECT * FROM vendor_items WHERE itemid=%s"
         return self.execute_query(query, (item_id,), fetch_method="all")
-    
+
+
 class DatabaseException(Exception):
     pass
