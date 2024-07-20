@@ -30,7 +30,7 @@ class RecipeDetailPage(ttk.Frame):
         ingredients_frame = ttk.Frame(self)
         ingredients_frame.pack(fill=tk.BOTH, expand=True)
 
-        ingredient_columns = ("Ingredient", "Quantity", "Avg Single Price", "Avg Stack Price", "Vendor Price")
+        ingredient_columns = ("Ingredient", "Quantity", "AH Single Cost", "AH Stack Cost", "Vendor Cost")
         self.ingredients_tree = TreeviewWithSort(ingredients_frame, columns=ingredient_columns, show="headings",
                                                  selectmode="browse")
         self.configure_treeview_columns(self.ingredients_tree, ingredient_columns)
@@ -81,16 +81,21 @@ class RecipeDetailPage(ttk.Frame):
         item_controller = ItemController(db)
 
         for ingredient, quantity in ingredient_counts.items():
-            single_price = ingredient.single_price if ingredient.single_price not in (None, 0) else ""
-            stack_price = ingredient.stack_price if ingredient.stack_price not in (None, 0) else ""
+            single_cost = int(ingredient.single_price * quantity) if ingredient.single_price else ""
+
+            if ingredient.stack_price:
+                single_cost_from_stack = ingredient.stack_price / ingredient.stack_size
+                stack_cost = int(single_cost_from_stack * quantity)
+            else:
+                stack_cost = ""
 
             # Update vendor prices in case merchant settings changed
             item_controller.update_vendor_data(ingredient.item_id)
 
-            vendor_price = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
+            vendor_cost = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
-                ingredient_name, quantity, single_price, stack_price, vendor_price, self.recipe.id))
+                ingredient_name, quantity, single_cost, stack_cost, vendor_cost, self.recipe.id))
 
         db.close()  # Return the connection to the pool
 
