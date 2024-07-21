@@ -120,8 +120,8 @@ class ItemService:
 
         for shop in guild_shops:
             if shop.initial_quantity > 0:
-                guild = self.guild_controller.get_guild(shop.guild_id)
-                if guild and guild.category in enabled_guilds:
+                guild_vendor = self.guild_controller.get_guild_vendor(shop.guild_id)
+                if guild_vendor and guild_vendor.category in enabled_guilds:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)

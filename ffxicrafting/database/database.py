@@ -99,8 +99,8 @@ class Database:
         return self.execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_method="all")
 
     @db_connection_required
-    def get_guild(self, guild_id):
-        query = "SELECT * FROM guilds WHERE id=%s"
+    def get_guild_vendor(self, guild_id):
+        query = "SELECT * FROM guild_vendors WHERE guildid=%s"
         return self.execute_query(query, (guild_id,), fetch_method="one")
 
     @db_connection_required

@@ -1,23 +1,23 @@
-from models import Guild, GuildShop
+from models import GuildVendor, GuildShop
 
 
 class GuildController:
     _cache = {
-        "get_guild": {},
+        "get_guild_vendor": {},
         "get_guild_shops": {}
     }
 
     def __init__(self, db) -> None:
         self.db = db
 
-    def get_guild(self, guild_id):
-        if guild_id in self._cache["get_guild"]:
-            return self._cache["get_guild"][guild_id]
+    def get_guild_vendor(self, guild_id):
+        if guild_id in self._cache["get_guild_vendor"]:
+            return self._cache["get_guild_vendor"][guild_id]
         else:
-            guild_tuple = self.db.get_guild(guild_id)
+            guild_tuple = self.db.get_guild_vendor(guild_id)
             if guild_tuple:
-                self._cache["get_guild"][guild_id] = Guild(*guild_tuple)
-                return self._cache["get_guild"][guild_id]
+                self._cache["get_guild_vendor"][guild_id] = GuildVendor(*guild_tuple)
+                return self._cache["get_guild_vendor"][guild_id]
             return None
 
     def get_guild_shops(self, item_id):
