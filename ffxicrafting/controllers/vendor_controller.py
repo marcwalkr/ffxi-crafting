@@ -1,10 +1,11 @@
-from models import VendorItem, RegionalVendor
+from models import VendorItem, RegionalVendor, VendorLocation
 
 
 class VendorController:
     _cache = {
         "get_vendor_items": {},
-        "get_regional_vendors": []
+        "get_regional_vendor": {},
+        "get_vendor_location": {}
     }
 
     def __init__(self, db) -> None:
@@ -22,12 +23,22 @@ class VendorController:
             self._cache["get_vendor_items"][item_id] = []
             return []
 
-    def get_regional_vendors(self):
-        if self._cache["get_regional_vendors"]:
-            return self._cache["get_regional_vendors"]
+    def get_regional_vendor(self, npc_id):
+        if npc_id in self._cache["get_regional_vendor"]:
+            return self._cache["get_regional_vendor"][npc_id]
         else:
-            regional_vendor_tuples = self.db.get_regional_vendors()
-            if regional_vendor_tuples:
-                self._cache["get_regional_vendors"] = [RegionalVendor(*r) for r in regional_vendor_tuples]
-                return self._cache["get_regional_vendors"]
-            return []
+            regional_vendor_tuple = self.db.get_regional_vendor(npc_id)
+            if regional_vendor_tuple:
+                self._cache["get_regional_vendor"][npc_id] = RegionalVendor(*regional_vendor_tuple)
+                return self._cache["get_regional_vendor"][npc_id]
+            return None
+
+    def get_vendor_location(self, npc_id):
+        if npc_id in self._cache["get_vendor_location"]:
+            return self._cache["get_vendor_location"][npc_id]
+        else:
+            vendor_location_tuple = self.db.get_vendor_location(npc_id)
+            if vendor_location_tuple:
+                self._cache["get_vendor_location"][npc_id] = VendorLocation(*vendor_location_tuple)
+                return self._cache["get_vendor_location"][npc_id]
+            return None
