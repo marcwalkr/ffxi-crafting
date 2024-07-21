@@ -97,10 +97,11 @@ class ItemService:
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
         # Filter vendor items based on enabled regional merchants
-        filtered_vendor_items = [
-            vendor_item for vendor_item in vendor_items
-            if self.vendor_controller.get_regional_vendor(vendor_item.npc_id).region in enabled_regional_merchants
-        ]
+        filtered_vendor_items = []
+        for vendor_item in vendor_items:
+            regional_vendor = self.vendor_controller.get_regional_vendor(vendor_item.npc_id)
+            if regional_vendor and regional_vendor.region in enabled_regional_merchants:
+                filtered_vendor_items.append(vendor_item)
 
         # Extract prices from filtered vendor items
         prices = [vendor_item.price for vendor_item in filtered_vendor_items]
