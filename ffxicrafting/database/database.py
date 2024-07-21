@@ -120,9 +120,9 @@ class Database:
         return self.execute_query(query, tuple(item_ids), fetch_method="all")
 
     @db_connection_required
-    def get_npc_by_name(self, name):
-        query = "SELECT * FROM npc_list WHERE polutils_name=%s"
-        return self.execute_query(query, (name,), fetch_method="one")
+    def get_npc(self, npc_id):
+        query = "SELECT * FROM npc_list WHERE npcid=%s"
+        return self.execute_query(query, (npc_id,), fetch_method="one")
 
     @db_connection_required
     def get_regional_vendors(self):
