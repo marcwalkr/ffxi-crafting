@@ -86,8 +86,9 @@ class RecipeDetailPage(ttk.Frame):
             if ingredient.stack_price:
                 single_cost_from_stack = ingredient.stack_price / ingredient.stack_size
                 stack_cost = int(single_cost_from_stack * quantity)
+                stack_cost_string = f"{ingredient.stack_price} ({stack_cost})"
             else:
-                stack_cost = ""
+                stack_cost_string = ""
 
             # Update vendor prices in case merchant settings changed
             item_controller.update_vendor_data(ingredient.item_id)
@@ -95,7 +96,7 @@ class RecipeDetailPage(ttk.Frame):
             vendor_cost = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
-                ingredient_name, quantity, single_cost, stack_cost, vendor_cost, self.recipe.id))
+                ingredient_name, quantity, single_cost, stack_cost_string, vendor_cost, self.recipe.id))
 
         db.close()  # Return the connection to the pool
 
