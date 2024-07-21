@@ -94,19 +94,18 @@ class ItemService:
 
     def get_vendor_price(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
-        regional_vendors = self.vendor_controller.get_regional_vendors()
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
-        filtered_vendor_items = []
-        regional_vendor_ids = {vendor.npc_id: vendor.region for vendor in regional_vendors}
+        # Filter vendor items based on enabled regional merchants
+        filtered_vendor_items = [
+            vendor_item for vendor_item in vendor_items
+            if self.vendor_controller.get_regional_vendor(vendor_item.npc_id).region in enabled_regional_merchants
+        ]
 
-        for vendor_item in vendor_items:
-            vendor_region = regional_vendor_ids.get(vendor_item.npc_id)
-            if vendor_region is None or vendor_region in enabled_regional_merchants:
-                filtered_vendor_items.append(vendor_item)
-
+        # Extract prices from filtered vendor items
         prices = [vendor_item.price for vendor_item in filtered_vendor_items]
 
+        # Include guild price if available
         guild_price = self.get_guild_price(item_id)
         if guild_price is not None:
             prices.append(guild_price)
@@ -120,8 +119,8 @@ class ItemService:
 
         for shop in guild_shops:
             if shop.initial_quantity > 0:
-                guild = self.guild_controller.get_guild(shop.guild_id)
-                if guild and guild.category in enabled_guilds:
+                guild_vendor = self.guild_controller.get_guild_vendor(shop.guild_id)
+                if guild_vendor and guild_vendor.category in enabled_guilds:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)

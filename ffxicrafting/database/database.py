@@ -99,14 +99,14 @@ class Database:
         return self.execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_method="all")
 
     @db_connection_required
-    def get_guild(self, guild_id):
-        query = "SELECT * FROM guilds WHERE id=%s"
-        return self.execute_query(query, (guild_id,), fetch_method="one")
-
-    @db_connection_required
     def get_guild_shops(self, item_id):
         query = "SELECT * FROM guild_shops WHERE itemid=%s"
         return self.execute_query(query, (item_id,), fetch_method="all")
+
+    @db_connection_required
+    def get_guild_vendor(self, guild_id):
+        query = "SELECT * FROM guild_vendors WHERE guildid=%s"
+        return self.execute_query(query, (guild_id,), fetch_method="one")
 
     @db_connection_required
     def get_item(self, item_id):
@@ -120,14 +120,9 @@ class Database:
         return self.execute_query(query, tuple(item_ids), fetch_method="all")
 
     @db_connection_required
-    def get_npc_by_name(self, name):
-        query = "SELECT * FROM npc_list WHERE polutils_name=%s"
-        return self.execute_query(query, (name,), fetch_method="one")
-
-    @db_connection_required
-    def get_regional_vendors(self):
-        query = "SELECT * FROM regional_vendors"
-        return self.execute_query(query, (), fetch_method="all")
+    def get_npc(self, npc_id):
+        query = "SELECT * FROM npc_list WHERE npcid=%s"
+        return self.execute_query(query, (npc_id,), fetch_method="one")
 
     @db_connection_required
     def get_recipe(self, recipe_id):
@@ -154,9 +149,19 @@ class Database:
         return self.execute_query(query, (search_term, batch_size, offset), fetch_method="all")
 
     @db_connection_required
+    def get_regional_vendor(self, npc_id):
+        query = "SELECT * FROM regional_vendors WHERE npcid=%s"
+        return self.execute_query(query, (npc_id,), fetch_method="one")
+
+    @db_connection_required
     def get_vendor_items(self, item_id):
         query = "SELECT * FROM vendor_items WHERE itemid=%s"
         return self.execute_query(query, (item_id,), fetch_method="all")
+
+    @db_connection_required
+    def get_vendor_location(self, npc_id):
+        query = "SELECT * FROM vendor_locations WHERE npcid=%s"
+        return self.execute_query(query, (npc_id,), fetch_method="one")
 
 
 class DatabaseException(Exception):
