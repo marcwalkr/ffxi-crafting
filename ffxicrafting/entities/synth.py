@@ -16,11 +16,15 @@ class Synth:
     def __init__(self, recipe, crafter) -> None:
         self.recipe = recipe
         self.crafter = crafter
-        self.difficulty = self.get_difficulty()
-        self.tier = self.get_tier()
-        self.cost = None
+        self.difficulty = self._get_difficulty()
+        self.tier = self._get_tier()
+        self.can_craft = self._check_can_craft()
 
-    def get_difficulty(self):
+    def _check_can_craft(self):
+        skill_look_ahead = SettingsManager.get_skill_look_ahead()
+        return self.difficulty <= skill_look_ahead
+
+    def _get_difficulty(self):
         recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
                          self.recipe.cloth, self.recipe.leather,
                          self.recipe.bone, self.recipe.alchemy,
@@ -35,7 +39,7 @@ class Synth:
                           self.crafter.alchemy,
                           self.crafter.cook]
 
-        skill_differences = [recipe - crafter for recipe, crafter in zip(recipe_skills, crafter_skills) if recipe > 0]
+        skill_differences = [recipe - crafter for recipe, crafter in zip(recipe_skills, crafter_skills)]
         return max(skill_differences, default=0)
 
     def get_tier(self):
