@@ -25,7 +25,7 @@ class Database:
                 if cls._pool is None:  # Double-checked locking
                     cls._pool = pooling.MySQLConnectionPool(
                         pool_name="mypool",
-                        pool_size=20,
+                        pool_size=32,
                         host=host,
                         user=user,
                         password=password,

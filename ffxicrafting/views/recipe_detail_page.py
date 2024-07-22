@@ -8,11 +8,12 @@ from database import Database
 
 
 class RecipeDetailPage(ttk.Frame):
-    def __init__(self, parent, recipe):
+    def __init__(self, parent, recipe, synth_cost):
         self.previous_tab_index = parent.notebook.index("current")
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
+        self.synth_cost = synth_cost
         self.create_detail_page()
 
     def create_detail_page(self):
@@ -49,8 +50,8 @@ class RecipeDetailPage(ttk.Frame):
         self.cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
         self.cost_per_synth_value_label.pack(side=tk.LEFT)
 
-        self.update_cost_per_synth()
-        self.update_profits()
+        value_text = f"{self.synth_cost} gil" if self.synth_cost != "None" else "N/A"
+        self.cost_per_synth_value_label.config(text=value_text)
 
     def add_results_tree(self):
         results_frame = ttk.Frame(self)
@@ -77,9 +78,6 @@ class RecipeDetailPage(ttk.Frame):
     def populate_ingredients_tree(self):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
-        db = Database()  # Borrow a connection from the pool
-        item_controller = ItemController(db)
-
         for ingredient, quantity in ingredient_counts.items():
             single_cost = int(ingredient.single_price * quantity) if ingredient.single_price else ""
 
@@ -90,15 +88,10 @@ class RecipeDetailPage(ttk.Frame):
             else:
                 stack_cost_string = ""
 
-            # Update vendor prices in case merchant settings changed
-            item_controller.update_vendor_data(ingredient.item_id)
-
             vendor_cost = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
             ingredient_name = ingredient.get_formatted_name()
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
                 ingredient_name, quantity, single_cost, stack_cost_string, vendor_cost, self.recipe.id))
-
-        db.close()  # Return the connection to the pool
 
     def populate_results_tree(self):
         unique_results = self.recipe.get_unique_results()
@@ -110,29 +103,6 @@ class RecipeDetailPage(ttk.Frame):
             stack_profit = result.stack_profit if result.stack_profit is not None else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                             single_profit, stack_profit, self.recipe.id))
-
-    def update_cost_per_synth(self):
-        skills = SettingsManager.get_skills()
-        crafter = Crafter(*skills, self.recipe)
-
-        crafter.synth.cost = crafter.synth.calculate_cost()
-
-        value_text = f"{crafter.synth.cost} gil" if crafter.synth.cost is not None else "N/A"
-        self.cost_per_synth_value_label.config(text=value_text)
-        self.update()
-
-    def update_profits(self):
-        skills = SettingsManager.get_skills()
-        crafter = Crafter(*skills, self.recipe)
-
-        crafter.synth.cost = crafter.synth.calculate_cost()
-
-        if crafter.synth.cost is not None:
-            single_profits, stack_profits, _, _ = crafter.craft()
-
-            for result in self.recipe.get_unique_results():
-                result.single_profit = single_profits[result]
-                result.stack_profit = stack_profits[result]
 
     def close_detail_page(self):
         tab_id = self.parent.notebook.index(self)
