@@ -4,13 +4,11 @@ from models import ItemModel
 class Item(ItemModel):
     def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell) -> None:
         super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
-        self.id = item_id
+        self.item_id = item_id
         self.single_price = None
         self.stack_price = None
         self.single_sell_freq = None
         self.stack_sell_freq = None
-        self.single_profit = None
-        self.stack_profit = None
         self.min_vendor_price = None
         self.min_price = None
 

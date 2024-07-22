@@ -75,6 +75,9 @@ class RecipeService:
             ingredients = [item for item in unique_items if item.item_id in ingredient_ids]
             results = [item for item in unique_items if item.item_id in result_ids]
 
+            # Convert result Item objects into Result objects
+            results = [self.item_service.convert_to_result(result) for result in results]
+
             recipe = Recipe(
                 *recipe_tuple[:11],
                 crystal_id,

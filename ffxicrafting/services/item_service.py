@@ -1,4 +1,4 @@
-from entities import Item
+from entities import Item, Result
 from config import SettingsManager
 from controllers import AuctionController, VendorController, GuildController
 
@@ -22,7 +22,7 @@ class ItemService:
             if item_tuples:
                 for item_tuple in item_tuples:
                     item = Item(*item_tuple)
-                    self._cache[item.id] = item
+                    self._cache[item.item_id] = item
 
         # Retrieve all items from the cache
         items = [self._cache[item_id] for item_id in item_ids if item_id in self._cache]
@@ -34,10 +34,15 @@ class ItemService:
         else:
             raise ValueError(f"Item with id {item_id} not found in cache.")
 
+    def convert_to_result(self, item):
+        result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                        item.no_sale, item.base_sell)
+        return result
+
     def update_auction_data(self, item_id):
         item = self.get_item(item_id)
         if item.single_price is None or item.stack_price is None or item.single_sell_freq is None or item.stack_sell_freq is None:
-            auction_data = self.get_auction_data(item_id)
+            auction_data = self._get_auction_data(item_id)
             single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
             item.single_price = int(single_price) if single_price is not None else None
@@ -45,18 +50,20 @@ class ItemService:
             item.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
             item.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
 
-            self.update_min_price(item_id)
+            self._update_min_price(item_id)
+            self._sync_results(item)
 
     def update_vendor_data(self, item_id):
         item = self.get_item(item_id)
-        item.min_vendor_price = self.get_vendor_price(item_id)
-        self.update_min_price(item_id)
+        item.min_vendor_price = self._get_vendor_price(item_id)
+        self._update_min_price(item_id)
+        self._sync_results(item)
 
-    def update_min_price(self, item_id):
+    def _update_min_price(self, item_id):
         item = self.get_item(item_id)
-        min_vendor_price = self.get_vendor_price(item_id)
+        min_vendor_price = self._get_vendor_price(item_id)
 
-        single_price, stack_price, _, _ = self.get_auction_data(item_id)
+        single_price, stack_price, _, _ = self._get_auction_data(item_id)
 
         if item.stack_size > 1 and stack_price is not None:
             single_price_from_stack = int(stack_price / item.stack_size)
@@ -75,7 +82,7 @@ class ItemService:
             default=None
         )
 
-    def get_auction_data(self, item_id):
+    def _get_auction_data(self, item_id):
         auction_items = self.auction_controller.get_auction_items(item_id)
         single_price = None
         stack_price = None
@@ -92,7 +99,7 @@ class ItemService:
 
         return single_price, stack_price, single_sell_freq, stack_sell_freq
 
-    def get_vendor_price(self, item_id):
+    def _get_vendor_price(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
@@ -107,13 +114,13 @@ class ItemService:
         prices = [vendor_item.price for vendor_item in filtered_vendor_items]
 
         # Include guild price if available
-        guild_price = self.get_guild_price(item_id)
+        guild_price = self._get_guild_price(item_id)
         if guild_price is not None:
             prices.append(guild_price)
 
         return min(prices, default=None)
 
-    def get_guild_price(self, item_id):
+    def _get_guild_price(self, item_id):
         enabled_guilds = SettingsManager.get_enabled_guilds()
         guild_shops = self.guild_controller.get_guild_shops(item_id)
         prices = []
@@ -125,3 +132,9 @@ class ItemService:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)
+
+    def _sync_results(self, item):
+        # Sync the changes to any Result object created from this Item
+        for result in Result.instances:
+            if result.item_id == item.item_id:
+                result.update_from_item(item)
