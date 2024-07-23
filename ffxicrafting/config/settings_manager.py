@@ -9,12 +9,12 @@ class SettingsManager:
             "profit_/_synth": 0,
             "profit_/_storage": 0,
             "min_sell_price": 0,
-            "sell_frequency": 0.0,
-            "craft_ingredients": False
+            "sell_frequency": 0.0
         },
         "synth": {
             "skill_look_ahead": 0,
-            "simulation_trials": 1000
+            "simulation_trials": 1000,
+            "craft_ingredients": False
         },
         "skill_levels": {
             "wood": 0,
