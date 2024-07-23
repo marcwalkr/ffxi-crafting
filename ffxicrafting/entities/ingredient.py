@@ -8,6 +8,7 @@ class Ingredient(Item):
         super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
         self.vendor_cost = None
         self.guild_cost = None
+        self.crafted_cost = None
         Ingredient.instances.append(self)
 
     def get_min_cost(self):
