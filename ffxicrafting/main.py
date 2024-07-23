@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from views import SearchPage, ProfitPage, SimulatePage, SettingsPage
+from views import SearchPage, ProfitPage, SettingsPage
 from database import Database, DatabaseException
 import threading
 import warnings
@@ -43,7 +43,6 @@ class App(tk.Tk):
     def create_pages(self):
         SearchPage(self)
         ProfitPage(self)
-        SimulatePage(self)
         SettingsPage(self)
 
 

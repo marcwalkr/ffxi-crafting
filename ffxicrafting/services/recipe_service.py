@@ -75,6 +75,15 @@ class RecipeService:
             ingredients = [item for item in unique_items if item.item_id in ingredient_ids]
             results = [item for item in unique_items if item.item_id in result_ids]
 
+            # Treat the crystal as an ingredient
+            ingredients.insert(0, crystal)
+
+            # Convert ingredient Item objects into Ingredient objects
+            ingredients = [self.item_service.convert_to_ingredient(ingredient) for ingredient in ingredients]
+
+            # Convert result Item objects into Result objects
+            results = [self.item_service.convert_to_result(result) for result in results]
+
             recipe = Recipe(
                 *recipe_tuple[:11],
                 crystal_id,
@@ -83,7 +92,7 @@ class RecipeService:
                 *result_ids,
                 *result_quantities,
                 result_name,
-                crystal,
+                ingredients[0],  # crystal
                 next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[0]), None),
                 next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[1]), None),
                 next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[2]), None),
@@ -97,5 +106,6 @@ class RecipeService:
                 next((result for result in results if result.item_id == result_ids[2]), None),
                 next((result for result in results if result.item_id == result_ids[3]), None)
             )
+
             recipes.append(recipe)
         return recipes

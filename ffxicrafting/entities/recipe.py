@@ -29,9 +29,14 @@ class Recipe(RecipeModel):
         self.result_hq3 = result_hq3
 
     def get_formatted_ingredient_names(self):
-        ingredients = self.get_ingredients()
         counts = self.get_ingredient_counts()
-        return ", ".join([f"{ingredient.get_formatted_name()} x{counts[ingredient]}" for ingredient in ingredients])
+        ingredient_strings = []
+        for ingredient, count in counts.items():
+            if count > 1:
+                ingredient_strings.append(f"{ingredient.get_formatted_name()} x{count}")
+            else:
+                ingredient_strings.append(ingredient.get_formatted_name())
+        return ", ".join(unique_preserve_order(ingredient_strings))
 
     def get_formatted_nq_result(self):
         if self.result_qty > 1:
@@ -81,7 +86,6 @@ class Recipe(RecipeModel):
             self.crystal, self.ingredient1, self.ingredient2, self.ingredient3,
             self.ingredient4, self.ingredient5, self.ingredient6, self.ingredient7, self.ingredient8
         ]
-        # Filter out None values
         return [ingredient for ingredient in ingredients if ingredient is not None]
 
     def get_unique_ingredients(self):
