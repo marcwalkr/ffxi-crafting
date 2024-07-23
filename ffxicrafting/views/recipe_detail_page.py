@@ -1,10 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from entities import Crafter
-from config import SettingsManager
 from utils import TreeviewWithSort
-from controllers import ItemController
-from database import Database
 
 
 class RecipeDetailPage(ttk.Frame):
@@ -31,7 +27,7 @@ class RecipeDetailPage(ttk.Frame):
         ingredients_frame = ttk.Frame(self)
         ingredients_frame.pack(fill=tk.BOTH, expand=True)
 
-        ingredient_columns = ("Ingredient", "Quantity", "AH Single Cost", "AH Stack Cost", "Vendor Cost")
+        ingredient_columns = ("Ingredient", "Quantity", "AH Single Cost", "AH Stack Cost", "Vendor Cost", "Guild Cost")
         self.ingredients_tree = TreeviewWithSort(ingredients_frame, columns=ingredient_columns, show="headings",
                                                  selectmode="browse")
         self.configure_treeview_columns(self.ingredients_tree, ingredient_columns)
@@ -79,6 +75,8 @@ class RecipeDetailPage(ttk.Frame):
         ingredient_counts = self.recipe.get_ingredient_counts()
 
         for ingredient, quantity in ingredient_counts.items():
+            ingredient_name = ingredient.get_formatted_name()
+
             single_cost = int(ingredient.single_price * quantity) if ingredient.single_price else ""
 
             if ingredient.stack_price:
@@ -88,10 +86,11 @@ class RecipeDetailPage(ttk.Frame):
             else:
                 stack_cost_string = ""
 
-            vendor_cost = ingredient.min_vendor_price if ingredient.min_vendor_price is not None else ""
-            ingredient_name = ingredient.get_formatted_name()
+            vendor_cost = ingredient.vendor_cost if ingredient.vendor_cost is not None else ""
+            guild_cost = ingredient.guild_cost if ingredient.guild_cost is not None else ""
+
             self.ingredients_tree.insert("", "end", iid=ingredient.item_id, values=(
-                ingredient_name, quantity, single_cost, stack_cost_string, vendor_cost, self.recipe.id))
+                ingredient_name, quantity, single_cost, stack_cost_string, vendor_cost, guild_cost, self.recipe.id))
 
     def populate_results_tree(self):
         unique_results = self.recipe.get_unique_results()

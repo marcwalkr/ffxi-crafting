@@ -9,8 +9,6 @@ class Item(ItemModel):
         self.stack_price = None
         self.single_sell_freq = None
         self.stack_sell_freq = None
-        self.min_vendor_price = None
-        self.min_price = None
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Item):

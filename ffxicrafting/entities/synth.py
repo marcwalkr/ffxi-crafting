@@ -95,7 +95,7 @@ class Synth:
         if self.recipe.desynth:
             loss_probability += 0.35
 
-        ingredients = self.recipe.get_ingredients()
+        ingredients = self.recipe.get_ingredients()[1:]  # Remove the crystal
 
         retained_ingredients = defaultdict(lambda: 0)
         for ingredient in ingredients:
@@ -107,15 +107,17 @@ class Synth:
     def _calculate_cost(self, item_controller):
         self._set_ingredients_cost(item_controller)
         total_cost = 0
-        for ingredient in self.recipe.get_ingredients():
-            if ingredient.min_price is None:
+        for ingredient in self.recipe.get_unique_ingredients():
+            min_cost = ingredient.get_min_cost()
+            if min_cost is None:
                 return None
-            total_cost += ingredient.min_price
+            total_cost += min_cost
         return int(total_cost)
 
     def _set_ingredients_cost(self, item_controller):
-        for ingredient in self.recipe.get_ingredients():
-            item_controller.update_vendor_data(ingredient.item_id)
+        for ingredient in self.recipe.get_unique_ingredients():
+            item_controller.update_vendor_cost(ingredient.item_id)
+            item_controller.update_guild_cost(ingredient.item_id)
             item_controller.update_auction_data(ingredient.item_id)
 
     def simulate(self, num_trials, item_controller):
@@ -145,7 +147,8 @@ class Synth:
     def _get_saved_cost(self, retained_ingredients):
         total_saved_cost = 0
         for ingredient, amount in retained_ingredients.items():
-            saved_cost = ingredient.min_price * amount
+            min_cost = ingredient.get_min_cost()
+            saved_cost = min_cost * amount
             total_saved_cost += saved_cost
 
         return total_saved_cost
