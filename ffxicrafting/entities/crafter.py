@@ -32,27 +32,32 @@ class Crafter:
         return results.keys(), int(profit_per_synth), int(profit_per_storage)
 
     def _set_results_profit(self, results, simulation_cost, item_controller):
-        for result, quantity in results.items():
+        total_quantity = sum(results.values())
+        for result in results.keys():
             item_controller.update_auction_data(result.item_id)
-            result.single_profit = self._get_single_profit(result, quantity, simulation_cost)
-            result.stack_profit = self._get_stack_profit(result, quantity, simulation_cost)
+            result.single_profit = self._get_single_profit(result, simulation_cost, total_quantity)
+            result.stack_profit = self._get_stack_profit(result, simulation_cost, total_quantity)
 
-    def _get_single_profit(self, result, quantity, simulation_cost):
-        return self._calculate_profit(result, quantity, simulation_cost, "single_price", "stack_size", single=True)
+    def _get_single_profit(self, result, simulation_cost, total_quantity):
+        return self._calculate_profit(result, simulation_cost, total_quantity, single=True)
 
-    def _get_stack_profit(self, result, quantity, simulation_cost):
-        return self._calculate_profit(result, quantity, simulation_cost, "stack_price", "stack_size", single=False)
+    def _get_stack_profit(self, result, simulation_cost, total_quantity):
+        return self._calculate_profit(result, simulation_cost, total_quantity, single=False)
 
-    def _calculate_profit(self, result, quantity, simulation_cost, price_attr, stack_size_attr, single=True):
-        price = getattr(result, price_attr)
-        stack_size = getattr(result, stack_size_attr)
+    def _calculate_profit(self, result, simulation_cost, total_quantity, single=True):
+        price = result.single_price if single else result.stack_price
+        stack_size = result.stack_size
+
         if price is None or (not single and stack_size == 1):
             return None
-        cost_per_item = simulation_cost / quantity
+
+        cost_per_item = simulation_cost / total_quantity
         if single:
             profit = price - cost_per_item
         else:
-            profit = price - cost_per_item * stack_size
+            cost_per_stack = cost_per_item * stack_size
+            profit = price - cost_per_stack
+
         return int(profit)
 
     def _get_profit_per_synth(self, results, simulation_cost, num_trials):
