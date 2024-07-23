@@ -32,30 +32,29 @@ class Crafter:
         return results.keys(), int(profit_per_synth), int(profit_per_storage)
 
     def _set_results_profit(self, results, simulation_cost, item_controller):
-        total_quantity = sum(results.values())
-        for result in results.keys():
+        for result, quantity in results.items():
             item_controller.update_auction_data(result.item_id)
-            result.single_profit = self._get_single_profit(result, simulation_cost, total_quantity)
-            result.stack_profit = self._get_stack_profit(result, simulation_cost, total_quantity)
+            result.crafted_cost = simulation_cost / quantity
+            result.single_profit = self._get_single_profit(result, result.crafted_cost)
+            result.stack_profit = self._get_stack_profit(result, result.crafted_cost)
 
-    def _get_single_profit(self, result, simulation_cost, total_quantity):
-        return self._calculate_profit(result, simulation_cost, total_quantity, single=True)
+    def _get_single_profit(self, result, crafted_cost):
+        return self._calculate_profit(result, crafted_cost, single=True)
 
-    def _get_stack_profit(self, result, simulation_cost, total_quantity):
-        return self._calculate_profit(result, simulation_cost, total_quantity, single=False)
+    def _get_stack_profit(self, result, crafted_cost):
+        return self._calculate_profit(result, crafted_cost, single=False)
 
-    def _calculate_profit(self, result, simulation_cost, total_quantity, single=True):
+    def _calculate_profit(self, result, crafted_cost, single=True):
         price = result.single_price if single else result.stack_price
         stack_size = result.stack_size
 
-        if price is None or (not single and stack_size == 1):
+        if price is None:
             return None
 
-        cost_per_item = simulation_cost / total_quantity
         if single:
-            profit = price - cost_per_item
+            profit = price - crafted_cost
         else:
-            cost_per_stack = cost_per_item * stack_size
+            cost_per_stack = crafted_cost * stack_size
             profit = price - cost_per_stack
 
         return int(profit)
