@@ -57,6 +57,13 @@ class SettingsPage(ttk.Frame):
         ]
         self.create_number_settings(frame, settings, self.settings.get("profit_table", {}))
 
+        craft_ingredients_var = tk.BooleanVar(value=self.settings.get(
+            "profit_table", {}).get("craft_ingredients", False))
+        craft_ingredients_cb = ttk.Checkbutton(frame, text="Craft Ingredients", variable=craft_ingredients_var,
+                                               style="Custom.TCheckbutton")
+        craft_ingredients_cb.pack(side="left", padx=20, pady=5)
+        craft_ingredients_cb.var = craft_ingredients_var
+
     def create_synth_settings(self, frame):
         self.synth_settings = frame
         settings = [
@@ -105,7 +112,7 @@ class SettingsPage(ttk.Frame):
 
     def save_settings(self):
         settings = {
-            "profit_table": self.get_number_settings(self.profit_table_settings),
+            "profit_table": self.get_profit_table_settings(),
             "synth": self.get_number_settings(self.synth_settings),
             "skill_levels": self.get_vertical_number_settings(self.skill_levels_settings),
             "regional_merchants": self.get_boolean_settings(self.merchants_settings),
@@ -113,6 +120,14 @@ class SettingsPage(ttk.Frame):
             "database": self.get_string_settings(self.database_settings)
         }
         SettingsManager.save_settings(settings)
+
+    def get_profit_table_settings(self):
+        settings = self.get_number_settings(self.profit_table_settings)
+        # Add the checkbox value
+        for child in self.profit_table_settings.winfo_children():
+            if isinstance(child, ttk.Checkbutton) and child.cget("text") == "Craft Ingredients":
+                settings["craft_ingredients"] = child.var.get()
+        return settings
 
     def get_number_settings(self, frame):
         settings = {}

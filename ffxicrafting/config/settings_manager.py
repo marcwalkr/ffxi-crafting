@@ -9,7 +9,8 @@ class SettingsManager:
             "profit_/_synth": 0,
             "profit_/_storage": 0,
             "min_sell_price": 0,
-            "sell_frequency": 0.0
+            "sell_frequency": 0.0,
+            "craft_ingredients": False
         },
         "synth": {
             "skill_look_ahead": 0,
@@ -96,6 +97,11 @@ class SettingsManager:
     def get_sell_freq(cls):
         settings = cls.load_settings()
         return settings["profit_table"].get("sell_frequency", 0.0)
+
+    @classmethod
+    def get_craft_ingredients(cls):
+        settings = cls.load_settings()
+        return settings["profit_table"].get("craft_ingredients", False)
 
     @classmethod
     def get_skill_look_ahead(cls):
