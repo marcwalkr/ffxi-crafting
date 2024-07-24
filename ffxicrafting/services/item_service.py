@@ -52,7 +52,7 @@ class ItemService:
     def update_auction_data(self, item_id):
         item = self.get_item(item_id)
         if item.single_price is None or item.stack_price is None or item.single_sell_freq is None or item.stack_sell_freq is None:
-            auction_data = self._get_auction_data(item_id)
+            auction_data = self.get_auction_data(item_id)
             single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
             item.single_price = int(single_price) if single_price is not None else None
@@ -60,24 +60,24 @@ class ItemService:
             item.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
             item.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
 
-        self._sync_results(item)
-        self._sync_ingredients(item)
+        self.sync_results(item)
+        self.sync_ingredients(item)
 
     def update_vendor_cost(self, item_id):
-        ingredient = self._get_ingredient(item_id)
+        ingredient = self.get_ingredient(item_id)
         if ingredient:
-            ingredient.vendor_cost = self._get_vendor_cost(item_id)
+            ingredient.vendor_cost = self.get_vendor_cost(item_id)
         else:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def update_guild_cost(self, item_id):
-        ingredient = self._get_ingredient(item_id)
+        ingredient = self.get_ingredient(item_id)
         if ingredient:
-            ingredient.guild_cost = self._get_guild_cost(item_id)
+            ingredient.guild_cost = self.get_guild_cost(item_id)
         else:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
-    def _get_auction_data(self, item_id):
+    def get_auction_data(self, item_id):
         auction_items = self.auction_controller.get_auction_items(item_id)
         single_price = None
         stack_price = None
@@ -94,7 +94,7 @@ class ItemService:
 
         return single_price, stack_price, single_sell_freq, stack_sell_freq
 
-    def _get_vendor_cost(self, item_id):
+    def get_vendor_cost(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
         enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
 
@@ -114,7 +114,7 @@ class ItemService:
 
         return min(prices, default=None)
 
-    def _get_guild_cost(self, item_id):
+    def get_guild_cost(self, item_id):
         enabled_guilds = SettingsManager.get_enabled_guilds()
         guild_shops = self.guild_controller.get_guild_shops(item_id)
         prices = []
@@ -127,19 +127,19 @@ class ItemService:
 
         return min(prices, default=None)
 
-    def _get_ingredient(self, item_id):
+    def get_ingredient(self, item_id):
         for ingredient in Ingredient.instances:
             if ingredient.item_id == item_id:
                 return ingredient
         return None
 
-    def _sync_results(self, item):
+    def sync_results(self, item):
         # Sync the changes to any Result object created from this Item
         for result in Result.instances:
             if result.item_id == item.item_id:
                 result.update_from_item(item)
 
-    def _sync_ingredients(self, item):
+    def sync_ingredients(self, item):
         # Sync the changes to any Ingredient object created from this Item
         for ingredient in Ingredient.instances:
             if ingredient.item_id == item.item_id:
