@@ -41,7 +41,19 @@ class Synth:
                           self.crafter.cook]
 
         skill_differences = [recipe - crafter for recipe, crafter in zip(recipe_skills, crafter_skills)]
-        return max(skill_differences, default=0)
+        return min(skill_differences, default=0)
+
+    def get_tier(self):
+        if self.difficulty < -50:
+            return 3
+        elif self.difficulty < -30:
+            return 2
+        elif self.difficulty < -10:
+            return 1
+        elif self.difficulty <= 0:
+            return 0
+        else:
+            return -1
 
     def get_tier(self):
         if self.difficulty < -50:
