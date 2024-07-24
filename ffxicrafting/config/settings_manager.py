@@ -47,9 +47,9 @@ class SettingsManager:
             "zulkheim": "San d'Oria"
         },
         "conquest": {
-            "1st": "San d'Oria",
-            "2nd": "Bastok",
-            "3rd": "Windurst"
+            "sandoria": "1st",
+            "bastok": "2nd",
+            "windurst": "3rd"
         },
         "guilds": {
             "alchemy": True,

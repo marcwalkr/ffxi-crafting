@@ -129,17 +129,17 @@ class SettingsPage(ttk.Frame):
 
     def create_conquest_settings(self, frame):
         self.conquest_settings = frame
-        conquest_ranks = ["1st", "2nd", "3rd"]
-        options = ["San d'Oria", "Bastok", "Windurst"]
+        nations = ["San d'Oria", "Bastok", "Windurst"]
+        options = ["1st", "2nd", "3rd"]
 
-        for rank in conquest_ranks:
+        for nation in nations:
             row_frame = ttk.Frame(frame)
             row_frame.pack(fill="x", padx=5, pady=2)
 
-            label = ttk.Label(row_frame, text=rank, width=5)
+            label = ttk.Label(row_frame, text=nation, width=10, anchor="w")
             label.pack(side="left", padx=(5, 2), pady=2)
 
-            var = tk.StringVar(value=self.settings.get("conquest", {}).get(rank.lower(), "San d'Oria"))
+            var = tk.StringVar(value=self.settings.get("conquest", {}).get(nation.lower().replace("'", ""), "1st"))
             option_menu = ttk.OptionMenu(row_frame, var, var.get(), *options)
             option_menu.pack(side="left", padx=(2, 5), pady=2)
             option_menu.var = var
@@ -255,7 +255,7 @@ class SettingsPage(ttk.Frame):
             if isinstance(child, ttk.Frame):
                 for subchild in child.winfo_children():
                     if isinstance(subchild, ttk.OptionMenu):
-                        label = subchild.master.winfo_children()[0].cget("text").lower().replace(" ", "_")
+                        label = subchild.master.winfo_children()[0].cget("text").lower().replace("'", "")
                         settings[label] = subchild.var.get()
         return settings
 
