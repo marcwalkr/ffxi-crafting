@@ -99,11 +99,6 @@ class SettingsManager:
         return settings["profit_table"].get("sell_frequency", 0.0)
 
     @classmethod
-    def get_craft_ingredients(cls):
-        settings = cls.load_settings()
-        return settings["profit_table"].get("craft_ingredients", False)
-
-    @classmethod
     def get_skill_look_ahead(cls):
         settings = cls.load_settings()
         return settings["synth"].get("skill_look_ahead", 0)
@@ -112,6 +107,11 @@ class SettingsManager:
     def get_simulation_trials(cls):
         settings = cls.load_settings()
         return settings["synth"].get("simulation_trials", 1000)
+
+    @classmethod
+    def get_craft_ingredients(cls):
+        settings = cls.load_settings()
+        return settings["synth"].get("craft_ingredients", False)
 
     @classmethod
     def get_skills(cls):
