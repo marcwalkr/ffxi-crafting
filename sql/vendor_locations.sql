@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS vendor_locations;
 CREATE TABLE vendor_locations (
-    npcid int(10) unsigned PRIMARY KEY,
+    npcid int UNSIGNED PRIMARY KEY,
     zone_name varchar(30) NOT NULL,
     coordinates varchar(20) NOT NULL
 );

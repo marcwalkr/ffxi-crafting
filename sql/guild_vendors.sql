@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS guild_vendors;
 CREATE TABLE guild_vendors (
-    guildid smallint(5) UNSIGNED PRIMARY KEY,
-    npcid int(10) unsigned NOT NULL,
+    guildid smallint UNSIGNED PRIMARY KEY,
+    npcid int UNSIGNED NOT NULL,
     category varchar(20) NOT NULL
 );
 

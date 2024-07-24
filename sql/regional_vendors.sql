@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS regional_vendors;
 CREATE TABLE regional_vendors (
-    npcid int(10) UNSIGNED PRIMARY KEY,
-    region char(50) NOT NULL
+    npcid int UNSIGNED PRIMARY KEY,
+    region varchar(30) NOT NULL
 );
 
 INSERT INTO regional_vendors VALUES (17739819,"Aragoneu"); -- Oggodett
