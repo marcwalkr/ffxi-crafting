@@ -9,13 +9,13 @@ from tkinter import ttk
 class TreeviewWithSort(ttk.Treeview):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
-        self._init_sorting()
+        self.init_sorting()
 
-    def _init_sorting(self):
+    def init_sorting(self):
         for col in self["columns"]:
-            self.heading(col, text=col, command=lambda c=col: self._sort_by(c, False))
+            self.heading(col, text=col, command=lambda c=col: self.sort_by(c, False))
 
-    def _sort_by(self, col, descending):
+    def sort_by(self, col, descending):
         def convert(value):
             if value == "":
                 return float('-inf') if descending else float('inf')
@@ -38,4 +38,4 @@ class TreeviewWithSort(ttk.Treeview):
             self.move(child, "", idx)
 
         # Update the heading so it sorts in the opposite order next time
-        self.heading(col, command=lambda: self._sort_by(col, not descending))
+        self.heading(col, command=lambda: self.sort_by(col, not descending))

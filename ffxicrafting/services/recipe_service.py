@@ -28,8 +28,8 @@ class RecipeService:
         else:
             results = list(self.db.get_recipes_by_level(*craft_levels, batch_size, offset))
             if results:
-                recipe_items = self._get_recipe_items(results)
-                recipes = self._create_recipe_objects(results, recipe_items)
+                recipe_items = self.get_recipe_items(results)
+                recipes = self.create_recipe_objects(results, recipe_items)
                 self._cache["get_recipes_by_level"][cache_key] = recipes
                 return recipes
             else:
@@ -42,14 +42,14 @@ class RecipeService:
         else:
             results = self.db.search_recipe(search_term, batch_size, offset)
             if results:
-                recipe_items = self._get_recipe_items(results)
-                recipes = self._create_recipe_objects(results, recipe_items)
+                recipe_items = self.get_recipe_items(results)
+                recipes = self.create_recipe_objects(results, recipe_items)
                 self._cache["search_recipe"][cache_key] = recipes
                 return recipes
             else:
                 return []
 
-    def _get_recipe_items(self, recipe_tuples):
+    def get_recipe_items(self, recipe_tuples):
         all_crystal_ids = []
         all_ingredient_ids = []
         all_result_ids = []
@@ -61,7 +61,7 @@ class RecipeService:
         unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
         return self.item_service.get_items(unique_item_ids)
 
-    def _create_recipe_objects(self, recipe_tuples, unique_items):
+    def create_recipe_objects(self, recipe_tuples, unique_items):
         recipes = []
         for recipe_tuple in recipe_tuples:
             crystal_id = recipe_tuple[11]

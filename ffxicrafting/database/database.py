@@ -5,8 +5,8 @@ from config.settings_manager import SettingsManager
 
 
 class Database:
-    _pool = None
-    _pool_lock = threading.Lock()
+    pool = None
+    pool_lock = threading.Lock()
 
     @classmethod
     def initialize_pool(cls):
@@ -17,13 +17,13 @@ class Database:
 
         if not all([host, user, password, database]):
             warnings.warn("Database configuration is incomplete")
-            cls._pool = None
+            cls.pool = None
             return
 
-        if cls._pool is None:
-            with cls._pool_lock:
-                if cls._pool is None:  # Double-checked locking
-                    cls._pool = pooling.MySQLConnectionPool(
+        if cls.pool is None:
+            with cls.pool_lock:
+                if cls.pool is None:  # Double-checked locking
+                    cls.pool = pooling.MySQLConnectionPool(
                         pool_name="mypool",
                         pool_size=32,
                         host=host,
@@ -36,22 +36,22 @@ class Database:
         self.connection = None
         self.cursor = None
 
-    def _connect(self):
+    def connect(self):
         if self.connection is None:
-            if self._pool is None:
+            if self.pool is None:
                 self.initialize_pool()
-            if self._pool:
+            if self.pool:
                 try:
-                    self.connection = self._pool.get_connection()
+                    self.connection = self.pool.get_connection()
                     self.cursor = self.connection.cursor(buffered=True)
                 except Exception as e:
                     warnings.warn(f"Failed to connect to database: {e}")
-                    self._pool = None
+                    self.pool = None
                     raise DatabaseException(
                         "Failed to connect to the database. Please check the configuration and try again.")
 
     def execute_query(self, query, params, fetch_method="all", commit=False):
-        self._connect()
+        self.connect()
         if not self.cursor:
             raise DatabaseException("Database not connected. Please check the configuration and try again.")
         try:
@@ -72,7 +72,7 @@ class Database:
 
     def db_connection_required(func):
         def wrapper(self, *args, **kwargs):
-            self._connect()
+            self.connect()
             return func(self, *args, **kwargs)
         return wrapper
 

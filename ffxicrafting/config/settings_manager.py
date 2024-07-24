@@ -13,7 +13,8 @@ class SettingsManager:
         },
         "synth": {
             "skill_look_ahead": 0,
-            "simulation_trials": 1000
+            "simulation_trials": 1000,
+            "craft_ingredients": False
         },
         "skill_levels": {
             "wood": 0,
@@ -106,6 +107,11 @@ class SettingsManager:
     def get_simulation_trials(cls):
         settings = cls.load_settings()
         return settings["synth"].get("simulation_trials", 1000)
+
+    @classmethod
+    def get_craft_ingredients(cls):
+        settings = cls.load_settings()
+        return settings["synth"].get("craft_ingredients", False)
 
     @classmethod
     def get_skills(cls):

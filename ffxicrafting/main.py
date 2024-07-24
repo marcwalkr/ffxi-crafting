@@ -17,7 +17,6 @@ class App(tk.Tk):
         self.create_notebook()
         self.create_pages()
 
-        # Initialize the database connection pool in a separate thread
         try:
             threading.Thread(target=Database.initialize_pool, daemon=True).start()
         except DatabaseException as e:
