@@ -862,20 +862,20 @@ INSERT INTO vendor_items VALUES (2869,17801253,9100,0,0,0,0,0,0);	-- Kazham Ways
 INSERT INTO vendor_items VALUES (731,17801253,2877,0,0,0,0,0,0);	-- Aquilaria Log
 
 -- Glyke
-INSERT INTO vendor_items VALUES (4499,17776677,92,0,0,0,0,0,0);	-- Iron Bread
-INSERT INTO vendor_items VALUES (4408,17776677,128,0,0,0,0,0,0);	-- Tortilla
-INSERT INTO vendor_items VALUES (4356,17776677,184,0,0,0,0,0,0);	-- White Bread
-INSERT INTO vendor_items VALUES (4416,17776677,1400,0,0,0,0,0,0);	-- Pea Soup
-INSERT INTO vendor_items VALUES (4456,17776677,2070,0,0,0,0,0,0);	-- Boiled Crab
-INSERT INTO vendor_items VALUES (4437,17776677,662,0,0,0,0,0,0);	-- Roast Mutton
-INSERT INTO vendor_items VALUES (4406,17776677,440,0,0,0,0,0,0);	-- Baked Apple
-INSERT INTO vendor_items VALUES (4555,17776677,1711,0,0,0,0,0,0);	-- Windurst Salad
-INSERT INTO vendor_items VALUES (4559,17776677,4585,0,0,0,0,0,0);	-- Herb Quus
-INSERT INTO vendor_items VALUES (4422,17776677,184,0,0,0,0,0,0);	-- Orange Juice
-INSERT INTO vendor_items VALUES (4423,17776677,276,0,0,0,0,0,0);	-- Apple Juice
-INSERT INTO vendor_items VALUES (4442,17776677,368,0,0,0,0,0,0);	-- Pineapple Juice
-INSERT INTO vendor_items VALUES (4424,17776677,1012,0,0,0,0,0,0);	-- Mellon Juice
-INSERT INTO vendor_items VALUES (4441,17776677,855,0,0,0,0,0,0);	-- Grape Juice
+-- INSERT INTO vendor_items VALUES (4499,17776677,92,0,0,0,0,0,0);	-- Iron Bread
+-- INSERT INTO vendor_items VALUES (4408,17776677,128,0,0,0,0,0,0);	-- Tortilla
+-- INSERT INTO vendor_items VALUES (4356,17776677,184,0,0,0,0,0,0);	-- White Bread
+-- INSERT INTO vendor_items VALUES (4416,17776677,1400,0,0,0,0,0,0);	-- Pea Soup
+-- INSERT INTO vendor_items VALUES (4456,17776677,2070,0,0,0,0,0,0);	-- Boiled Crab
+-- INSERT INTO vendor_items VALUES (4437,17776677,662,0,0,0,0,0,0);	-- Roast Mutton
+-- INSERT INTO vendor_items VALUES (4406,17776677,440,0,0,0,0,0,0);	-- Baked Apple
+-- INSERT INTO vendor_items VALUES (4555,17776677,1711,0,0,0,0,0,0);	-- Windurst Salad
+-- INSERT INTO vendor_items VALUES (4559,17776677,4585,0,0,0,0,0,0);	-- Herb Quus
+-- INSERT INTO vendor_items VALUES (4422,17776677,184,0,0,0,0,0,0);	-- Orange Juice
+-- INSERT INTO vendor_items VALUES (4423,17776677,276,0,0,0,0,0,0);	-- Apple Juice
+-- INSERT INTO vendor_items VALUES (4442,17776677,368,0,0,0,0,0,0);	-- Pineapple Juice
+-- INSERT INTO vendor_items VALUES (4424,17776677,1012,0,0,0,0,0,0);	-- Melon Juice
+-- INSERT INTO vendor_items VALUES (4441,17776677,855,0,0,0,0,0,0);	-- Grape Juice
 
 -- Graine
 INSERT INTO vendor_items VALUES (12440,17797130,457,0,0,0,0,0,0);	-- Leather Bandana
