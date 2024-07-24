@@ -34,9 +34,9 @@ class Crafter:
     def set_results_profit(self, results, simulation_cost, item_controller):
         for result, quantity in results.items():
             item_controller.update_auction_data(result.item_id)
-            crafted_cost = simulation_cost / quantity
-            result.single_profit = self.get_single_profit(result, crafted_cost)
-            result.stack_profit = self.get_stack_profit(result, crafted_cost)
+            result.crafted_cost = simulation_cost / quantity
+            result.single_profit = self.get_single_profit(result, result.crafted_cost)
+            result.stack_profit = self.get_stack_profit(result, result.crafted_cost)
 
     def get_single_profit(self, result, crafted_cost):
         return self.calculate_profit(result, crafted_cost, single=True)
