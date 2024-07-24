@@ -8,7 +8,7 @@ class SettingsManager:
         "profit_table": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
-            "min_sell_price": 0,
+            "min_auction_list_price": 0,
             "sell_frequency": 0.0
         },
         "synth": {
@@ -94,9 +94,9 @@ class SettingsManager:
         return settings["profit_table"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_min_sell_price(cls):
+    def get_min_auction_list_price(cls):
         settings = cls.load_settings()
-        return settings["profit_table"].get("min_sell_price", 0)
+        return settings["profit_table"].get("min_auction_list_price", 0)
 
     @classmethod
     def get_sell_freq(cls):

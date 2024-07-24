@@ -89,7 +89,7 @@ class Crafter:
 
     def calculate_total_storage(self, results):
         total_storage = 0
-        store_item_threshold = SettingsManager.get_min_sell_price()
+        store_item_threshold = SettingsManager.get_min_auction_list_price()
 
         for result, quantity in results.items():
             # If a stack price exists, use it in the calculation because stacks are more commonly sold

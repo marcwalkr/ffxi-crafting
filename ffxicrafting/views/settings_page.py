@@ -66,7 +66,7 @@ class SettingsPage(ttk.Frame):
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
-            ("Min Sell Price", 0),
+            ("Min Auction List Price", 0),
             ("Sell Frequency", 0)
         ]
         self.create_number_settings(frame, settings, self.settings.get("profit_table", {}))
