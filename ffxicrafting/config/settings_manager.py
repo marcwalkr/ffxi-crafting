@@ -8,7 +8,7 @@ class SettingsManager:
         "profit_table": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
-            "min_sell_price": 0,
+            "min_auction_list_price": 0,
             "sell_frequency": 0.0
         },
         "synth": {
@@ -27,24 +27,29 @@ class SettingsManager:
             "cook": 0
         },
         "regional_merchants": {
-            "aragoneu": True,
-            "derfland": True,
-            "elshimo_lowlands": True,
-            "elshimo_uplands": True,
-            "fauregandi": True,
-            "gustaberg": True,
-            "kolshushu": True,
-            "kuzotz": True,
-            "li'telor": True,
-            "movalpolos": True,
-            "norvallen": True,
-            "qufim": True,
-            "ronfaure": True,
-            "sarutabaruta": True,
-            "tavnazian_archipelago": True,
-            "valdeaunia": True,
-            "vollbow": True,
-            "zulkheim": True
+            "aragoneu": "San d'Oria",
+            "derfland": "San d'Oria",
+            "elshimo_lowlands": "San d'Oria",
+            "elshimo_uplands": "San d'Oria",
+            "fauregandi": "San d'Oria",
+            "gustaberg": "San d'Oria",
+            "kolshushu": "San d'Oria",
+            "kuzotz": "San d'Oria",
+            "li'telor": "San d'Oria",
+            "movalpolos": "San d'Oria",
+            "norvallen": "San d'Oria",
+            "qufim": "San d'Oria",
+            "ronfaure": "San d'Oria",
+            "sarutabaruta": "San d'Oria",
+            "tavnazian_archipelago": "San d'Oria",
+            "valdeaunia": "San d'Oria",
+            "vollbow": "San d'Oria",
+            "zulkheim": "San d'Oria"
+        },
+        "conquest": {
+            "sandoria": "1st",
+            "bastok": "2nd",
+            "windurst": "3rd"
         },
         "guilds": {
             "alchemy": True,
@@ -89,9 +94,9 @@ class SettingsManager:
         return settings["profit_table"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_min_sell_price(cls):
+    def get_min_auction_list_price(cls):
         settings = cls.load_settings()
-        return settings["profit_table"].get("min_sell_price", 0)
+        return settings["profit_table"].get("min_auction_list_price", 0)
 
     @classmethod
     def get_sell_freq(cls):
@@ -129,16 +134,14 @@ class SettingsManager:
         ]
 
     @classmethod
-    def get_enabled_regional_merchants(cls):
-        def format_merchant_name(name):
-            if name == "li'telor":
-                return "Li'Telor"
-            return name.replace('_', ' ').title()
-
+    def get_regional_merchants(cls):
         settings = cls.load_settings()
-        merchants = settings["regional_merchants"].items()
-        enabled_merchants = [merchant for merchant, enabled in merchants if enabled]
-        return [format_merchant_name(merchant) for merchant in enabled_merchants]
+        return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
+
+    @classmethod
+    def get_conquest_settings(cls):
+        settings = cls.load_settings()
+        return settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"])
 
     @classmethod
     def get_enabled_guilds(cls):

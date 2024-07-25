@@ -96,9 +96,9 @@ class ItemService:
 
     def get_vendor_cost(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
-        enabled_regional_merchants = SettingsManager.get_enabled_regional_merchants()
+        regional_merchants = SettingsManager.get_regional_merchants()
 
-        # Filter out regional vendors that are not enabled in settings
+        # Filter out regional vendors that are controlled by Beastmen
         filtered_vendor_items = []
         for vendor_item in vendor_items:
             regional_vendor = self.vendor_controller.get_regional_vendor(vendor_item.npc_id)
@@ -106,7 +106,11 @@ class ItemService:
                 # Standard vendor
                 filtered_vendor_items.append(vendor_item)
             else:
-                if regional_vendor.region in enabled_regional_merchants:
+                # Format region name to match database
+                region_name = regional_vendor.region.lower()
+                settings_region = region_name.replace(' ', '_')
+
+                if settings_region in regional_merchants and regional_merchants[settings_region] != "Beastmen":
                     filtered_vendor_items.append(vendor_item)
 
         # Extract prices from filtered vendor items

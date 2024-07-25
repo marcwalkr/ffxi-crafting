@@ -30,6 +30,7 @@ class App(tk.Tk):
         self.style.configure("Treeview", font=("Helvetica", 12))
         self.style.configure("Treeview.Heading", font=("Helvetica", 12, "bold"))
         self.style.configure("Custom.TCheckbutton", font=("Helvetica", 14))
+        self.style.configure("TMenubutton", font=("Helvetica", 12))
 
     def create_main_frame(self):
         self.main_frame = ttk.Frame(self)
