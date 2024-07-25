@@ -141,12 +141,13 @@ class SettingsManager:
     @classmethod
     def get_beastmen_controlled_regions(cls):
         settings = cls.load_settings()
+        regions = []
         regional_merchants = settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
-        for region, nation in regional_merchants.items():
-            if nation == "Beastmen":
+        for region, control in regional_merchants.items():
+            if control == "Beastmen":
                 region_name = region.replace("_", " ")
-                return [region_name]
-        return []
+                regions.append(region_name)
+        return regions
 
     @classmethod
     def get_conquest_settings(cls):
