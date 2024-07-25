@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS calculated_item_costs;
-CREATE TABLE calculated_item_costs (
+DROP TABLE IF EXISTS crafted_item_costs;
+CREATE TABLE crafted_item_costs (
     item_id smallint UNSIGNED NOT NULL,
     recipe_id mediumint UNSIGNED NOT NULL,
     cost_per_unit int UNSIGNED NOT NULL,
