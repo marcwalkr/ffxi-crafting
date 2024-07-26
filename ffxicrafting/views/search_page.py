@@ -87,7 +87,7 @@ class SearchPage(RecipeListPage):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_skills(), recipe)
+        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
         crafter.craft(item_controller)
 
         synth_cost = crafter.synth.cost if crafter.synth.cost else None

@@ -47,7 +47,7 @@ class ProfitPage(RecipeListPage):
 
     def query_recipes(self):
         try:
-            skills = SettingsManager.get_skills()
+            skills = SettingsManager.get_craft_skills()
             skill_look_ahead = SettingsManager.get_skill_look_ahead()
 
             batch_size = 25
@@ -93,7 +93,7 @@ class ProfitPage(RecipeListPage):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_skills(), recipe)
+        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
         results, profit_per_synth, profit_per_storage = crafter.craft(item_controller)
 
         if not results:

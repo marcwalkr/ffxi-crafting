@@ -4,7 +4,7 @@ from utils import unique_preserve_order
 
 
 class RecipeService:
-    _cache = {
+    cache = {
         "get_recipes_by_level": {},
         "search_recipe": {}
     }
@@ -14,8 +14,8 @@ class RecipeService:
         self.item_service = ItemService(self.db)
 
     def get_recipe(self, recipe_id):
-        for cache_name in self._cache:
-            for recipes in self._cache[cache_name].values():
+        for cache_name in self.cache:
+            for recipes in self.cache[cache_name].values():
                 for recipe in recipes:
                     if recipe.id == recipe_id:
                         return recipe
@@ -23,28 +23,28 @@ class RecipeService:
 
     def get_recipes_by_level(self, *craft_levels, batch_size, offset):
         cache_key = (craft_levels, offset)
-        if cache_key in self._cache["get_recipes_by_level"]:
-            return self._cache["get_recipes_by_level"][cache_key]
+        if cache_key in self.cache["get_recipes_by_level"]:
+            return self.cache["get_recipes_by_level"][cache_key]
         else:
             results = list(self.db.get_recipes_by_level(*craft_levels, batch_size, offset))
             if results:
                 recipe_items = self.get_recipe_items(results)
                 recipes = self.create_recipe_objects(results, recipe_items)
-                self._cache["get_recipes_by_level"][cache_key] = recipes
+                self.cache["get_recipes_by_level"][cache_key] = recipes
                 return recipes
             else:
                 return []
 
     def search_recipe(self, search_term, batch_size, offset):
         cache_key = (search_term, offset)
-        if cache_key in self._cache["search_recipe"]:
-            return self._cache["search_recipe"][cache_key]
+        if cache_key in self.cache["search_recipe"]:
+            return self.cache["search_recipe"][cache_key]
         else:
             results = self.db.search_recipe(search_term, batch_size, offset)
             if results:
                 recipe_items = self.get_recipe_items(results)
                 recipes = self.create_recipe_objects(results, recipe_items)
-                self._cache["search_recipe"][cache_key] = recipes
+                self.cache["search_recipe"][cache_key] = recipes
                 return recipes
             else:
                 return []

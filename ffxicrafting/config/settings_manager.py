@@ -119,7 +119,7 @@ class SettingsManager:
         return settings["synth"].get("craft_ingredients", False)
 
     @classmethod
-    def get_skills(cls):
+    def get_craft_skills(cls):
         settings = cls.load_settings()
         skills = settings.get("skill_levels", {})
         return [
