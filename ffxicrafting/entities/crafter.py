@@ -29,7 +29,7 @@ class Crafter:
         profit_per_synth = self.get_profit_per_synth(results, simulation_cost, num_trials)
         profit_per_storage = self.get_profit_per_storage(results, simulation_cost)
 
-        return results.keys(), int(profit_per_synth), int(profit_per_storage)
+        return results.keys(), profit_per_synth, profit_per_storage
 
     def set_results_profit(self, results, simulation_cost, item_controller):
         for result, quantity in results.items():
@@ -57,7 +57,7 @@ class Crafter:
             cost_per_stack = crafted_cost * stack_size
             profit = price - cost_per_stack
 
-        return int(profit)
+        return profit
 
     def get_profit_per_synth(self, results, simulation_cost, num_trials):
         total_profit = self.calculate_total_profit(results, simulation_cost)

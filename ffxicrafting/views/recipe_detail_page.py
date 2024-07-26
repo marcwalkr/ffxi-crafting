@@ -98,8 +98,8 @@ class RecipeDetailPage(ttk.Frame):
             result_name = result.get_formatted_name()
             single_price = result.single_price if result.single_price is not None else ""
             stack_price = result.stack_price if result.stack_price is not None else ""
-            single_profit = result.single_profit if result.single_profit is not None else ""
-            stack_profit = result.stack_profit if result.stack_profit is not None else ""
+            single_profit = int(result.single_profit) if result.single_profit is not None else ""
+            stack_profit = int(result.stack_profit) if result.stack_profit is not None else ""
             self.results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                             single_profit, stack_profit, self.recipe.id))
 

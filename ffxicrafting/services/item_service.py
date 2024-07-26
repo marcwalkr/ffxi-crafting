@@ -55,10 +55,10 @@ class ItemService:
             auction_data = self.get_auction_data(item_id)
             single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
-            item.single_price = int(single_price) if single_price is not None else None
-            item.stack_price = int(stack_price) if stack_price is not None else None
-            item.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
-            item.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
+            item.single_price = single_price if single_price is not None else None
+            item.stack_price = stack_price if stack_price is not None else None
+            item.single_sell_freq = single_sell_freq if single_sell_freq is not None else None
+            item.stack_sell_freq = stack_sell_freq if stack_sell_freq is not None else None
 
         self.sync_results(item)
         self.sync_ingredients(item)
