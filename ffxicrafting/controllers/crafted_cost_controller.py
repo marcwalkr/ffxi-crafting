@@ -23,13 +23,13 @@ class CraftedCostController:
                 self.cache[cache_key] = crafted_cost
             return crafted_cost
 
-    def update_crafted_cost(self, item_id, recipe_id, crafter_tier, cost_per_unit, ingredient_costs):
+    def update_crafted_cost(self, item_id, recipe_id, crafter_tier, synth_cost, cost_per_unit):
         self.db.update_crafted_cost(item_id, recipe_id, crafter_tier, self.beastmen_controlled_regions,
-                                    self.enabled_guilds, cost_per_unit, ingredient_costs)
+                                    self.enabled_guilds, synth_cost, cost_per_unit)
         cache_key = (item_id, recipe_id, crafter_tier, self.beastmen_controlled_regions, self.enabled_guilds)
-        self.cache[cache_key] = CraftedCost(item_id, recipe_id, cost_per_unit, crafter_tier,
-                                            self.beastmen_controlled_regions, self.enabled_guilds, ingredient_costs)
+        self.cache[cache_key] = CraftedCost(item_id, recipe_id, crafter_tier, self.beastmen_controlled_regions,
+                                            self.enabled_guilds, synth_cost, cost_per_unit)
 
-    def store_crafted_cost(self, item_id, recipe_id, cost_per_unit, crafter_tier, ingredient_costs):
-        self.db.store_crafted_cost(item_id, recipe_id, cost_per_unit, crafter_tier,
-                                   self.beastmen_controlled_regions, self.enabled_guilds, ingredient_costs)
+    def store_crafted_cost(self, item_id, recipe_id, crafter_tier, synth_cost, cost_per_unit):
+        self.db.store_crafted_cost(item_id, recipe_id, crafter_tier, self.beastmen_controlled_regions,
+                                   self.enabled_guilds, synth_cost, cost_per_unit)
