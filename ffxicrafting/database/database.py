@@ -99,29 +99,6 @@ class Database:
         return self.execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_method="all")
 
     @db_connection_required
-    def get_crafted_cost(self, item_id, recipe_id, crafter_tier, beastmen_controlled_regions, enabled_guilds):
-        query = ("SELECT * FROM crafted_costs WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
-                 "beastmen_controlled_regions=%s AND enabled_guilds=%s")
-        return self.execute_query(query, (item_id, recipe_id, crafter_tier, beastmen_controlled_regions,
-                                          enabled_guilds), fetch_method="one")
-
-    @db_connection_required
-    def update_crafted_cost(self, item_id, recipe_id, crafter_tier, beastmen_controlled_regions, enabled_guilds,
-                            synth_cost, cost_per_unit):
-        query = ("UPDATE crafted_costs SET synth_cost=%s, cost_per_unit=%s WHERE item_id=%s AND "
-                 "recipe_id=%s AND crafter_tier=%s AND beastmen_controlled_regions=%s AND enabled_guilds=%s")
-        return self.execute_query(query, (synth_cost, cost_per_unit, item_id, recipe_id, crafter_tier,
-                                          beastmen_controlled_regions, enabled_guilds), commit=True)
-
-    @db_connection_required
-    def store_crafted_cost(self, item_id, recipe_id, crafter_tier, beastmen_controlled_regions, enabled_guilds,
-                           synth_cost, cost_per_unit):
-        query = ("INSERT INTO crafted_costs (item_id, recipe_id, crafter_tier, beastmen_controlled_regions, "
-                 "enabled_guilds, synth_cost, cost_per_unit) VALUES (%s, %s, %s, %s, %s, %s, %s)")
-        return self.execute_query(query, (item_id, recipe_id, crafter_tier, beastmen_controlled_regions,
-                                          enabled_guilds, synth_cost, cost_per_unit), commit=True)
-
-    @db_connection_required
     def get_guild_shops(self, item_id):
         query = "SELECT * FROM guild_shops WHERE itemid=%s"
         return self.execute_query(query, (item_id,), fetch_method="all")
