@@ -96,7 +96,7 @@ class ItemService:
 
     def get_vendor_cost(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
-        beastmen_regions = SettingsManager.get_beastmen_controlled_regions()
+        beastmen_regions = SettingsManager.get_beastmen_regions()
 
         # Filter out regional vendors that are controlled by Beastmen
         filtered_vendor_items = []

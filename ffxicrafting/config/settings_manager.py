@@ -139,7 +139,7 @@ class SettingsManager:
         return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
 
     @classmethod
-    def get_beastmen_controlled_regions(cls):
+    def get_beastmen_regions(cls):
         settings = cls.load_settings()
         regions = []
         regional_merchants = settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
