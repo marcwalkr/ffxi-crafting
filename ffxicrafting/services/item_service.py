@@ -1,4 +1,4 @@
-from entities import Item, Result, Ingredient
+from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
 from controllers import AuctionController, VendorController, GuildController
 
@@ -144,3 +144,7 @@ class ItemService:
         for ingredient in Ingredient.instances:
             if ingredient.item_id == item.item_id:
                 ingredient.update_from_item(item)
+
+        for craftable_ingredient in CraftableIngredient.instances:
+            if craftable_ingredient.item_id == item.item_id:
+                craftable_ingredient.update_from_item(item)

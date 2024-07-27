@@ -23,6 +23,12 @@ class Ingredient(Item):
 
 
 class CraftableIngredient(Ingredient, CraftableItem):
+    instances = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        CraftableIngredient.instances.append(self)
+
     def get_min_cost(self):
         costs = super().get_min_cost()
         if self.crafted_cost is not None:
