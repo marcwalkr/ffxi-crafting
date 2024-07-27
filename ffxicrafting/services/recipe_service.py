@@ -1,6 +1,7 @@
 from entities import Recipe
 from services import ItemService
 from utils import unique_preserve_order
+import threading
 
 
 class RecipeService:
@@ -8,6 +9,8 @@ class RecipeService:
         "get_recipes_by_level": {},
         "search_recipe": {}
     }
+    result_item_ids = None
+    result_item_ids_lock = threading.Lock()
 
     def __init__(self, db) -> None:
         self.db = db
@@ -72,17 +75,21 @@ class RecipeService:
             result_name = recipe_tuple[29]
 
             crystal = next(item for item in unique_items if item.item_id == crystal_id)
-            ingredients = [item for item in unique_items if item.item_id in ingredient_ids]
-            results = [item for item in unique_items if item.item_id in result_ids]
+            ingredient_items = [item for item in unique_items if item.item_id in ingredient_ids]
+            result_items = [item for item in unique_items if item.item_id in result_ids]
 
             # Treat the crystal as an ingredient
-            ingredients.insert(0, crystal)
+            ingredient_items.insert(0, crystal)
 
             # Convert ingredient Item objects into Ingredient objects
-            ingredients = [self.item_service.convert_to_ingredient(ingredient) for ingredient in ingredients]
+            ingredients = []
+            for ingredient_item in ingredient_items:
+                craftable = self.is_ingredient_craftable(ingredient_item.item_id)
+                ingredient = self.item_service.convert_to_ingredient(ingredient_item, craftable)
+                ingredients.append(ingredient)
 
             # Convert result Item objects into Result objects
-            results = [self.item_service.convert_to_result(result) for result in results]
+            results = [self.item_service.convert_to_result(result) for result in result_items]
 
             recipe = Recipe(
                 *recipe_tuple[:11],
@@ -109,3 +116,9 @@ class RecipeService:
 
             recipes.append(recipe)
         return recipes
+
+    def is_ingredient_craftable(self, item_id):
+        with self.result_item_ids_lock:
+            if self.result_item_ids is None:
+                self.result_item_ids = self.db.get_all_result_item_ids()
+        return item_id in self.result_item_ids

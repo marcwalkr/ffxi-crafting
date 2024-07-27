@@ -35,12 +35,16 @@ class ItemService:
         else:
             raise ValueError(f"Item with id {item_id} not found in cache.")
 
-    def convert_to_ingredient(self, item):
+    def convert_to_ingredient(self, item, craftable):
         if item.item_id in self.ingredient_cache:
             return self.ingredient_cache[item.item_id]
         else:
-            ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                    item.no_sale, item.base_sell)
+            if craftable:
+                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                                 item.no_sale, item.base_sell)
+            else:
+                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                        item.no_sale, item.base_sell)
             self.ingredient_cache[item.item_id] = ingredient
             return ingredient
 

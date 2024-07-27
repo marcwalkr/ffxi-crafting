@@ -149,6 +149,22 @@ class Database:
         return self.execute_query(query, (search_term, batch_size, offset), fetch_method="all")
 
     @db_connection_required
+    def get_all_result_item_ids(self):
+        query = """
+        SELECT DISTINCT result_id FROM (
+            SELECT result AS result_id FROM synth_recipes WHERE result IS NOT NULL
+            UNION
+            SELECT resulthq1 AS result_id FROM synth_recipes WHERE resulthq1 IS NOT NULL
+            UNION
+            SELECT resulthq2 AS result_id FROM synth_recipes WHERE resulthq2 IS NOT NULL
+            UNION
+            SELECT resulthq3 AS result_id FROM synth_recipes WHERE resulthq3 IS NOT NULL
+        ) AS all_results
+        """
+        results = self.execute_query(query, (), fetch_method="all")
+        return [result[0] for result in results]
+
+    @db_connection_required
     def get_regional_vendor(self, npc_id):
         query = "SELECT * FROM regional_vendors WHERE npcid=%s"
         return self.execute_query(query, (npc_id,), fetch_method="one")
