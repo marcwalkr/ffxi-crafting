@@ -35,11 +35,6 @@ class ItemService:
         else:
             raise ValueError(f"Item with id {item_id} not found in cache.")
 
-    def convert_to_result(self, item):
-        result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                        item.no_sale, item.base_sell)
-        return result
-
     def convert_to_ingredient(self, item):
         if item.item_id in self.ingredient_cache:
             return self.ingredient_cache[item.item_id]
@@ -48,6 +43,11 @@ class ItemService:
                                     item.no_sale, item.base_sell)
             self.ingredient_cache[item.item_id] = ingredient
             return ingredient
+
+    def convert_to_result(self, item):
+        result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                        item.no_sale, item.base_sell)
+        return result
 
     def update_auction_data(self, item_id):
         item = self.get_item(item_id)
@@ -60,8 +60,8 @@ class ItemService:
             item.single_sell_freq = single_sell_freq if single_sell_freq is not None else None
             item.stack_sell_freq = stack_sell_freq if stack_sell_freq is not None else None
 
-        self.sync_results(item)
         self.sync_ingredients(item)
+        self.sync_results(item)
 
     def update_vendor_cost(self, item_id):
         ingredient = self.get_ingredient(item_id)
@@ -133,12 +133,6 @@ class ItemService:
                 return ingredient
         return None
 
-    def sync_results(self, item):
-        # Sync the changes to any Result object created from this Item
-        for result in Result.instances:
-            if result.item_id == item.item_id:
-                result.update_from_item(item)
-
     def sync_ingredients(self, item):
         # Sync the changes to any Ingredient object created from this Item
         for ingredient in Ingredient.instances:
@@ -148,3 +142,9 @@ class ItemService:
         for craftable_ingredient in CraftableIngredient.instances:
             if craftable_ingredient.item_id == item.item_id:
                 craftable_ingredient.update_from_item(item)
+
+    def sync_results(self, item):
+        # Sync the changes to any Result object created from this Item
+        for result in Result.instances:
+            if result.item_id == item.item_id:
+                result.update_from_item(item)
