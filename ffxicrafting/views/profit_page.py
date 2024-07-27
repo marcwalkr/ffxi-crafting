@@ -47,7 +47,7 @@ class ProfitPage(RecipeListPage):
 
     def query_recipes(self):
         try:
-            skills = SettingsManager.get_skills()
+            skills = SettingsManager.get_craft_skills()
             skill_look_ahead = SettingsManager.get_skill_look_ahead()
 
             batch_size = 25
@@ -93,7 +93,7 @@ class ProfitPage(RecipeListPage):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_skills(), recipe)
+        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
         results, profit_per_synth, profit_per_storage = crafter.craft(item_controller)
 
         if not results:
@@ -108,8 +108,13 @@ class ProfitPage(RecipeListPage):
             nq_string = recipe.get_formatted_nq_result()
             hq_string = recipe.get_formatted_hq_results()
 
-            row = [nq_string, hq_string, crafter.synth.tier, crafter.synth.cost, profit_per_synth, profit_per_storage,
-                   sell_freq, crafter.synth.cost]
+            synth_cost = int(crafter.synth.cost)
+            profit_per_synth = int(profit_per_synth)
+            profit_per_storage = int(profit_per_storage)
+            sell_freq = float(f"{sell_freq:.4f}")
+
+            row = [nq_string, hq_string, crafter.synth.tier, synth_cost, profit_per_synth, profit_per_storage,
+                   sell_freq, synth_cost]
             self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):

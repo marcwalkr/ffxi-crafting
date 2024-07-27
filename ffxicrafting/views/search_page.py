@@ -87,10 +87,10 @@ class SearchPage(RecipeListPage):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_skills(), recipe)
+        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
         crafter.craft(item_controller)
 
-        synth_cost = crafter.synth.cost if crafter.synth.cost else None
+        synth_cost = int(crafter.synth.cost) if crafter.synth.cost else None
 
         nq_string = recipe.get_formatted_nq_result()
         hq_string = recipe.get_formatted_hq_results()

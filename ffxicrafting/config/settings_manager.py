@@ -119,7 +119,7 @@ class SettingsManager:
         return settings["synth"].get("craft_ingredients", False)
 
     @classmethod
-    def get_skills(cls):
+    def get_craft_skills(cls):
         settings = cls.load_settings()
         skills = settings.get("skill_levels", {})
         return [
@@ -137,6 +137,17 @@ class SettingsManager:
     def get_regional_merchants(cls):
         settings = cls.load_settings()
         return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
+
+    @classmethod
+    def get_beastmen_regions(cls):
+        settings = cls.load_settings()
+        regions = []
+        regional_merchants = settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
+        for region, control in regional_merchants.items():
+            if control == "Beastmen":
+                region_name = region.replace("_", " ")
+                regions.append(region_name)
+        return regions
 
     @classmethod
     def get_conquest_settings(cls):

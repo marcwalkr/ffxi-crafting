@@ -4,7 +4,8 @@ from .guild_controller import GuildController
 from .item_controller import ItemController
 from .npc_controller import NpcController
 from .recipe_controller import RecipeController
+from .simulation_controller import SimulationController
 
 
 __all__ = ["AuctionController", "VendorController", "GuildController", "ItemController", "NpcController",
-           "RecipeController"]
+           "RecipeController", "SimulationController"]

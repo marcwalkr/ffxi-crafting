@@ -1,4 +1,4 @@
-from entities.item import Item
+from entities import Item, CraftableItem
 
 
 class Ingredient(Item):
@@ -21,8 +21,16 @@ class Ingredient(Item):
 
         return min(costs, default=None)
 
-    def update_from_item(self, item):
-        self.single_price = item.single_price
-        self.stack_price = item.stack_price
-        self.single_sell_freq = item.single_sell_freq
-        self.stack_sell_freq = item.stack_sell_freq
+
+class CraftableIngredient(Ingredient, CraftableItem):
+    instances = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        CraftableIngredient.instances.append(self)
+
+    def get_min_cost(self):
+        costs = super().get_min_cost()
+        if self.crafted_cost is not None:
+            costs = min(costs, self.crafted_cost)
+        return costs

@@ -124,7 +124,7 @@ class Synth:
             if min_cost is None:
                 return None
             total_cost += min_cost
-        return int(total_cost)
+        return total_cost
 
     def set_ingredients_cost(self, item_controller):
         for ingredient in self.recipe.get_unique_ingredients():

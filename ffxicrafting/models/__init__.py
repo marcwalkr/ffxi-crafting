@@ -8,6 +8,7 @@ from .regional_vendor import RegionalVendor
 from .sales_history import SalesHistory
 from .vendor_item import VendorItem
 from .vendor_location import VendorLocation
+from .simulation_result import SimulationResult
 
 __all__ = ["AuctionItem", "GuildShop", "GuildVendor", "ItemModel", "Npc",
-           "RecipeModel", "RegionalVendor", "SalesHistory", "VendorItem", "VendorLocation"]
+           "RecipeModel", "RegionalVendor", "SalesHistory", "VendorItem", "VendorLocation", "SimulationResult"]

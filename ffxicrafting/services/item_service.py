@@ -1,4 +1,4 @@
-from entities import Item, Result, Ingredient
+from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
 from controllers import AuctionController, VendorController, GuildController
 
@@ -35,19 +35,23 @@ class ItemService:
         else:
             raise ValueError(f"Item with id {item_id} not found in cache.")
 
+    def convert_to_ingredient(self, item, craftable):
+        if item.item_id in self.ingredient_cache:
+            return self.ingredient_cache[item.item_id]
+        else:
+            if craftable:
+                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                                 item.no_sale, item.base_sell)
+            else:
+                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                        item.no_sale, item.base_sell)
+            self.ingredient_cache[item.item_id] = ingredient
+            return ingredient
+
     def convert_to_result(self, item):
         result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
                         item.no_sale, item.base_sell)
         return result
-
-    def convert_to_ingredient(self, item):
-        if item.item_id in self.ingredient_cache:
-            return self.ingredient_cache[item.item_id]
-        else:
-            ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                    item.no_sale, item.base_sell)
-            self.ingredient_cache[item.item_id] = ingredient
-            return ingredient
 
     def update_auction_data(self, item_id):
         item = self.get_item(item_id)
@@ -55,13 +59,13 @@ class ItemService:
             auction_data = self.get_auction_data(item_id)
             single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
 
-            item.single_price = int(single_price) if single_price is not None else None
-            item.stack_price = int(stack_price) if stack_price is not None else None
-            item.single_sell_freq = float(f"{single_sell_freq:.4f}") if single_sell_freq is not None else None
-            item.stack_sell_freq = float(f"{stack_sell_freq:.4f}") if stack_sell_freq is not None else None
+            item.single_price = single_price if single_price is not None else None
+            item.stack_price = stack_price if stack_price is not None else None
+            item.single_sell_freq = single_sell_freq if single_sell_freq is not None else None
+            item.stack_sell_freq = stack_sell_freq if stack_sell_freq is not None else None
 
-        self.sync_results(item)
         self.sync_ingredients(item)
+        self.sync_results(item)
 
     def update_vendor_cost(self, item_id):
         ingredient = self.get_ingredient(item_id)
@@ -96,7 +100,7 @@ class ItemService:
 
     def get_vendor_cost(self, item_id):
         vendor_items = self.vendor_controller.get_vendor_items(item_id)
-        regional_merchants = SettingsManager.get_regional_merchants()
+        beastmen_regions = SettingsManager.get_beastmen_regions()
 
         # Filter out regional vendors that are controlled by Beastmen
         filtered_vendor_items = []
@@ -106,14 +110,10 @@ class ItemService:
                 # Standard vendor
                 filtered_vendor_items.append(vendor_item)
             else:
-                # Format region name to match database
-                region_name = regional_vendor.region.lower()
-                settings_region = region_name.replace(' ', '_')
-
-                if settings_region in regional_merchants and regional_merchants[settings_region] != "Beastmen":
+                vendor_region = regional_vendor.region.lower()
+                if vendor_region not in beastmen_regions:
                     filtered_vendor_items.append(vendor_item)
 
-        # Extract prices from filtered vendor items
         prices = [vendor_item.price for vendor_item in filtered_vendor_items]
 
         return min(prices, default=None)
@@ -137,14 +137,18 @@ class ItemService:
                 return ingredient
         return None
 
-    def sync_results(self, item):
-        # Sync the changes to any Result object created from this Item
-        for result in Result.instances:
-            if result.item_id == item.item_id:
-                result.update_from_item(item)
-
     def sync_ingredients(self, item):
         # Sync the changes to any Ingredient object created from this Item
         for ingredient in Ingredient.instances:
             if ingredient.item_id == item.item_id:
                 ingredient.update_from_item(item)
+
+        for craftable_ingredient in CraftableIngredient.instances:
+            if craftable_ingredient.item_id == item.item_id:
+                craftable_ingredient.update_from_item(item)
+
+    def sync_results(self, item):
+        # Sync the changes to any Result object created from this Item
+        for result in Result.instances:
+            if result.item_id == item.item_id:
+                result.update_from_item(item)

@@ -20,3 +20,15 @@ class Item(ItemModel):
 
     def get_formatted_name(self):
         return self.sort_name.replace("_", " ").title()
+
+    def update_from_item(self, item):
+        self.single_price = item.single_price
+        self.stack_price = item.stack_price
+        self.single_sell_freq = item.single_sell_freq
+        self.stack_sell_freq = item.stack_sell_freq
+
+
+class CraftableItem(Item):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.crafted_cost = None
