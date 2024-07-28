@@ -2,12 +2,13 @@ from models import GuildVendor, GuildShop
 
 
 class GuildRepository:
+    cache = {
+        "get_guild_vendor": {},
+        "get_guild_shops": {}
+    }
+
     def __init__(self, db) -> None:
         self.db = db
-        self.cache = {
-            "get_guild_vendor": {},
-            "get_guild_shops": {}
-        }
 
     def get_guild_vendor(self, guild_id):
         if guild_id in self.cache["get_guild_vendor"]:

@@ -1,15 +1,19 @@
 from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
+from repositories import VendorRepository, GuildRepository
+from services import AuctionService
 
 
 class ItemService:
-    def __init__(self, db, auction_service, vendor_repository, guild_repository) -> None:
+    item_cache = {}
+    ingredient_cache = {}
+
+    def __init__(self, db) -> None:
         self.db = db
-        self.item_cache = {}
-        self.ingredient_cache = {}
-        self.auction_service = auction_service
-        self.vendor_repository = vendor_repository
-        self.guild_repository = guild_repository
+
+        self.auction_service = AuctionService(db)
+        self.vendor_repository = VendorRepository(db)
+        self.guild_repository = GuildRepository(db)
 
     def get_items(self, item_ids):
         # Identify the missing item_ids (those not in the cache)

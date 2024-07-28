@@ -1,14 +1,17 @@
 import tkinter as tk
+import traceback
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from database import DatabaseException
+from database import Database, DatabaseException
+from services import RecipeService, CraftingService
 
 
 class SearchPage(RecipeListPage):
-    def __init__(self, parent, recipe_service, crafting_service):
+    def __init__(self, parent):
         self.action_button_text = "Search"
-        super().__init__(parent, recipe_service, crafting_service)
+        self.columns = ["nq_result", "hq_results", "levels", "ingredients", "synth_cost", "recipe_id"]
+        super().__init__(parent)
 
     def create_widgets(self):
         self.parent.notebook.add(self, text="Search Recipes")
@@ -47,8 +50,12 @@ class SearchPage(RecipeListPage):
             offset = 0
             search_finished = False
 
+            db = Database()
+            self.active_db_connections.append(db)
+            recipe_service = RecipeService(db)
+
             while self.is_open and not search_finished:
-                results = self.recipe_service.search_recipe(self.search_var.get(), batch_size, offset)
+                results = recipe_service.search_recipe(self.search_var.get(), batch_size, offset)
 
                 if len(results) < batch_size:
                     search_finished = True
@@ -57,28 +64,42 @@ class SearchPage(RecipeListPage):
 
                 offset += batch_size
 
+            db.close()
+            self.active_db_connections.remove(db)
+
         except (DatabaseException) as e:
             print(f"Error: {e}")
+        except Exception as e:
+            print(traceback.format_exc())
+        finally:
             self.queue.put(self.process_finished)
 
     def process_batch(self, results):
-        for result in results:
-            if not self.is_open:
-                break
-            self.process_single_result(result)
+        db = Database()
+        self.active_db_connections.append(db)
+        crafting_service = CraftingService(db)
 
-    def process_single_result(self, recipe):
+        try:
+            for result in results:
+                if not self.is_open:
+                    break
+                self.process_single_result(result, crafting_service)
+        finally:
+            db.close()
+            self.active_db_connections.remove(db)
+
+    def process_single_result(self, recipe, crafting_service):
         if not self.is_open:
             return
 
-        craft_result = self.crafting_service.simulate_craft(recipe)
+        craft_result = crafting_service.simulate_craft(recipe)
 
         if not craft_result:
             return
 
-        row = self.crafting_service.format_search_table_row(craft_result)
+        row_data = crafting_service.format_search_table_row(craft_result)
 
-        self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
+        self.queue.put(lambda: self.insert_single_into_treeview(row_data))
 
     def finalize_process(self):
         self.process_finished()

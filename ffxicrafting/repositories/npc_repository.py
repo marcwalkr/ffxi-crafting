@@ -2,9 +2,10 @@ from models import Npc
 
 
 class NpcRepository:
+    cache = {}
+
     def __init__(self, db) -> None:
         self.db = db
-        self.cache = {}
 
     def get_npc(self, npc_id):
         if npc_id in self.cache:

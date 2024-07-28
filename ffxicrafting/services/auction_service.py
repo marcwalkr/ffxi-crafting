@@ -1,6 +1,9 @@
+from repositories import AuctionRepository
+
+
 class AuctionService:
-    def __init__(self, auction_repository) -> None:
-        self.auction_repository = auction_repository
+    def __init__(self, db) -> None:
+        self.auction_repository = AuctionRepository(db)
 
     def get_auction_items_with_updates(self, item_id):
         auction_items = self.auction_repository.get_auction_items(item_id)

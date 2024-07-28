@@ -2,9 +2,10 @@ from models import AuctionItem, SalesHistory
 
 
 class AuctionRepository:
+    cache = {}
+
     def __init__(self, db) -> None:
         self.db = db
-        self.cache = {}
 
     def get_auction_items(self, item_id):
         if item_id in self.cache:

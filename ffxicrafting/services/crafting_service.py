@@ -1,10 +1,11 @@
 from entities import Crafter
 from config import SettingsManager
+from services import ItemService
 
 
 class CraftingService:
-    def __init__(self, item_service):
-        self.item_service = item_service
+    def __init__(self, db):
+        self.item_service = ItemService(db)
 
     def simulate_craft(self, recipe):
         skills = SettingsManager.get_craft_skills()
@@ -35,7 +36,7 @@ class CraftingService:
         recipe = crafter.recipe
 
         return {
-            "nq_results": recipe.get_formatted_nq_result(),
+            "nq_result": recipe.get_formatted_nq_result(),
             "hq_results": recipe.get_formatted_hq_results(),
             "levels": recipe.get_formatted_levels_string(),
             "ingredients": recipe.get_formatted_ingredient_names(),
@@ -51,7 +52,7 @@ class CraftingService:
         recipe = crafter.recipe
 
         return {
-            "nq_results": recipe.get_formatted_nq_result(),
+            "nq_result": recipe.get_formatted_nq_result(),
             "hq_results": recipe.get_formatted_hq_results(),
             "tier": crafter.synth.tier,
             "synth_cost": int(crafter.synth.cost),

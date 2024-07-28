@@ -5,14 +5,14 @@ from tkinter import ttk
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from views import RecipeDetailPage
+from database import Database
+from services import RecipeService
 
 
 class RecipeListPage(ttk.Frame):
-    def __init__(self, parent, recipe_service, crafting_service):
+    def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
-        self.recipe_service = recipe_service
-        self.crafting_service = crafting_service
         self.is_open = True
         self.queue = Queue()
         self.init_executor()
@@ -54,10 +54,15 @@ class RecipeListPage(ttk.Frame):
         item = tree.item(recipe_id)
         row_data = dict(zip(self.columns, item["values"]))
 
-        recipe = self.recipe_service.get_recipe(int(recipe_id))
+        db = Database()
+        recipe_service = RecipeService(db)
+
+        recipe = recipe_service.get_recipe(int(recipe_id))
         detail_page = RecipeDetailPage(self.parent, recipe, row_data["synth_cost"])
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
+
+        db.close()
 
     def on_treeview_click(self, event):
         tree = event.widget
