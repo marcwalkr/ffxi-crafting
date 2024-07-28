@@ -1,3 +1,3 @@
-from .database import DatabasePool, Database, DatabaseException
+from .database import Database, DatabaseException
 
-__all__ = ["DatabasePool", "Database", "DatabaseException"]
+__all__ = ["Database", "DatabaseException"]
