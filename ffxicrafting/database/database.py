@@ -4,12 +4,24 @@ from mysql.connector import pooling
 from config.settings_manager import SettingsManager
 
 
-class Database:
-    pool = None
-    pool_lock = threading.Lock()
+class DatabasePool:
+    instance = None
+    lock = threading.Lock()
 
-    @classmethod
-    def initialize_pool(cls):
+    def __new__(cls):
+        if cls.instance is None:
+            with cls.lock:
+                if cls.instance is None:
+                    cls.instance = super().__new__(cls)
+                    cls.instance.initialize()
+        return cls.instance
+
+    def initialize(self):
+        self.pool = None
+        self.pool_lock = threading.Lock()
+        self.initialize_pool()
+
+    def initialize_pool(self):
         host = SettingsManager.get_database_host()
         user = SettingsManager.get_database_user()
         password = SettingsManager.get_database_password()
@@ -17,38 +29,54 @@ class Database:
 
         if not all([host, user, password, database]):
             warnings.warn("Database configuration is incomplete")
-            cls.pool = None
+            self.pool = None
             return
 
-        if cls.pool is None:
-            with cls.pool_lock:
-                if cls.pool is None:  # Double-checked locking
-                    cls.pool = pooling.MySQLConnectionPool(
-                        pool_name="mypool",
-                        pool_size=32,
-                        host=host,
-                        user=user,
-                        password=password,
-                        database=database
-                    )
+        if self.pool is None:
+            with self.pool_lock:
+                if self.pool is None:  # Double-checked locking
+                    try:
+                        self.pool = pooling.MySQLConnectionPool(
+                            pool_name="mypool",
+                            pool_size=32,
+                            host=host,
+                            user=user,
+                            password=password,
+                            database=database
+                        )
+                    except Exception as e:
+                        warnings.warn(f"Failed to initialize database pool: {e}")
+                        self.pool = None
 
+    def get_connection(self):
+        if self.pool is None:
+            self.initialize_pool()
+        if self.pool:
+            try:
+                return self.pool.get_connection()
+            except Exception as e:
+                warnings.warn(f"Failed to get connection from pool: {e}")
+                raise DatabaseException(
+                    "Failed to connect to the database. Please check the configuration and try again.")
+        else:
+            raise DatabaseException("Database pool is not initialized. Please check the configuration and try again.")
+
+
+class Database:
     def __init__(self) -> None:
         self.connection = None
         self.cursor = None
+        self.db_pool = DatabasePool()
 
     def connect(self):
         if self.connection is None:
-            if self.pool is None:
-                self.initialize_pool()
-            if self.pool:
-                try:
-                    self.connection = self.pool.get_connection()
-                    self.cursor = self.connection.cursor(buffered=True)
-                except Exception as e:
-                    warnings.warn(f"Failed to connect to database: {e}")
-                    self.pool = None
-                    raise DatabaseException(
-                        "Failed to connect to the database. Please check the configuration and try again.")
+            try:
+                self.connection = self.db_pool.get_connection()
+                self.cursor = self.connection.cursor(buffered=True)
+            except Exception as e:
+                warnings.warn(f"Failed to connect to database: {e}")
+                raise DatabaseException(
+                    "Failed to connect to the database. Please check the configuration and try again.")
 
     def execute_query(self, query, params, fetch_method="all", commit=False):
         self.connect()
@@ -80,6 +108,8 @@ class Database:
         if self.connection:
             self.cursor.close()
             self.connection.close()
+            self.connection = None
+            self.cursor = None
 
     @db_connection_required
     def get_auction_items(self, item_id):
