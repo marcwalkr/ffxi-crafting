@@ -4,24 +4,12 @@ from mysql.connector import pooling
 from config.settings_manager import SettingsManager
 
 
-class DatabasePool:
-    instance = None
-    lock = threading.Lock()
+class Database:
+    pool = None
+    pool_lock = threading.Lock()
 
-    def __new__(cls):
-        if cls.instance is None:
-            with cls.lock:
-                if cls.instance is None:
-                    cls.instance = super().__new__(cls)
-                    cls.instance.initialize()
-        return cls.instance
-
-    def initialize(self):
-        self.pool = None
-        self.pool_lock = threading.Lock()
-        self.initialize_pool()
-
-    def initialize_pool(self):
+    @classmethod
+    def initialize_pool(cls):
         host = SettingsManager.get_database_host()
         user = SettingsManager.get_database_user()
         password = SettingsManager.get_database_password()
@@ -29,54 +17,38 @@ class DatabasePool:
 
         if not all([host, user, password, database]):
             warnings.warn("Database configuration is incomplete")
-            self.pool = None
+            cls.pool = None
             return
 
-        if self.pool is None:
-            with self.pool_lock:
-                if self.pool is None:  # Double-checked locking
-                    try:
-                        self.pool = pooling.MySQLConnectionPool(
-                            pool_name="mypool",
-                            pool_size=32,
-                            host=host,
-                            user=user,
-                            password=password,
-                            database=database
-                        )
-                    except Exception as e:
-                        warnings.warn(f"Failed to initialize database pool: {e}")
-                        self.pool = None
+        if cls.pool is None:
+            with cls.pool_lock:
+                if cls.pool is None:  # Double-checked locking
+                    cls.pool = pooling.MySQLConnectionPool(
+                        pool_name="mypool",
+                        pool_size=32,
+                        host=host,
+                        user=user,
+                        password=password,
+                        database=database
+                    )
 
-    def get_connection(self):
-        if self.pool is None:
-            self.initialize_pool()
-        if self.pool:
-            try:
-                return self.pool.get_connection()
-            except Exception as e:
-                warnings.warn(f"Failed to get connection from pool: {e}")
-                raise DatabaseException(
-                    "Failed to connect to the database. Please check the configuration and try again.")
-        else:
-            raise DatabaseException("Database pool is not initialized. Please check the configuration and try again.")
-
-
-class Database:
     def __init__(self) -> None:
         self.connection = None
         self.cursor = None
-        self.db_pool = DatabasePool()
 
     def connect(self):
         if self.connection is None:
-            try:
-                self.connection = self.db_pool.get_connection()
-                self.cursor = self.connection.cursor(buffered=True)
-            except Exception as e:
-                warnings.warn(f"Failed to connect to database: {e}")
-                raise DatabaseException(
-                    "Failed to connect to the database. Please check the configuration and try again.")
+            if self.pool is None:
+                self.initialize_pool()
+            if self.pool:
+                try:
+                    self.connection = self.pool.get_connection()
+                    self.cursor = self.connection.cursor(buffered=True)
+                except Exception as e:
+                    warnings.warn(f"Failed to connect to database: {e}")
+                    self.pool = None
+                    raise DatabaseException(
+                        "Failed to connect to the database. Please check the configuration and try again.")
 
     def execute_query(self, query, params, fetch_method="all", commit=False):
         self.connect()
