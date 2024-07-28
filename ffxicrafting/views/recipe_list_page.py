@@ -6,7 +6,7 @@ from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from views import RecipeDetailPage
 from database import Database
-from services import RecipeService
+from services import RecipeService, CraftingService
 
 
 class RecipeListPage(ttk.Frame):
@@ -131,8 +131,19 @@ class RecipeListPage(ttk.Frame):
     def query_recipes(self):
         pass
 
-    def process_batch(self, results):
-        pass
+    def process_batch(self, recipes):
+        db = Database()
+        self.active_db_connections.append(db)
+        crafting_service = CraftingService(db)
+
+        try:
+            for recipe in recipes:
+                if not self.is_open:
+                    break
+                self.process_single_recipe(recipe, crafting_service)
+        finally:
+            db.close()
+            self.active_db_connections.remove(db)
 
     def insert_single_into_treeview(self, row_data):
         values = [row_data[col] for col in self.columns if col != "recipe_id"]

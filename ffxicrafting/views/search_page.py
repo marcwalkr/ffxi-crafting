@@ -1,10 +1,9 @@
 import tkinter as tk
-import traceback
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
 from database import Database, DatabaseException
-from services import RecipeService, CraftingService
+from services import RecipeService
 
 
 class SearchPage(RecipeListPage):
@@ -69,26 +68,9 @@ class SearchPage(RecipeListPage):
 
         except (DatabaseException) as e:
             print(f"Error: {e}")
-        except Exception as e:
-            print(traceback.format_exc())
-        finally:
             self.queue.put(self.process_finished)
 
-    def process_batch(self, results):
-        db = Database()
-        self.active_db_connections.append(db)
-        crafting_service = CraftingService(db)
-
-        try:
-            for result in results:
-                if not self.is_open:
-                    break
-                self.process_single_result(result, crafting_service)
-        finally:
-            db.close()
-            self.active_db_connections.remove(db)
-
-    def process_single_result(self, recipe, crafting_service):
+    def process_single_recipe(self, recipe, crafting_service):
         if not self.is_open:
             return
 
