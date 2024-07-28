@@ -1,7 +1,7 @@
 from repositories import AuctionRepository
 
 
-class AuctionService:
+class AuctionController:
     def __init__(self, db) -> None:
         self.auction_repository = AuctionRepository(db)
 

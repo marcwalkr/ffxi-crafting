@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from database import Database, DatabaseException
-from services import RecipeService
+from database import DatabaseException
+from controllers import CraftingController
 
 
 class SearchPage(RecipeListPage):
@@ -49,12 +49,8 @@ class SearchPage(RecipeListPage):
             offset = 0
             search_finished = False
 
-            db = Database()
-            self.active_db_connections.append(db)
-            recipe_service = RecipeService(db)
-
             while self.is_open and not search_finished:
-                results = recipe_service.search_recipe(self.search_var.get(), batch_size, offset)
+                results = self.recipe_controller.search_recipe(self.search_var.get(), batch_size, offset)
 
                 if len(results) < batch_size:
                     search_finished = True
@@ -63,23 +59,20 @@ class SearchPage(RecipeListPage):
 
                 offset += batch_size
 
-            db.close()
-            self.active_db_connections.remove(db)
-
         except (DatabaseException) as e:
             print(f"Error: {e}")
             self.queue.put(self.process_finished)
 
-    def process_single_recipe(self, recipe, crafting_service):
+    def process_single_recipe(self, recipe, crafting_controller):
         if not self.is_open:
             return
 
-        craft_result = crafting_service.simulate_craft(recipe)
+        craft_result = crafting_controller.simulate_craft(recipe)
 
         if not craft_result:
             return
 
-        row_data = crafting_service.format_search_table_row(craft_result)
+        row_data = CraftingController.format_search_table_row(craft_result)
 
         self.queue.put(lambda: self.insert_single_into_treeview(row_data))
 

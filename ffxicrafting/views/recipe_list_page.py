@@ -6,13 +6,14 @@ from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from views import RecipeDetailPage
 from database import Database
-from services import RecipeService, CraftingService
+from controllers import RecipeController, CraftingController, ItemController
 
 
 class RecipeListPage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
+        self.recipe_controller = RecipeController()
         self.is_open = True
         self.queue = Queue()
         self.init_executor()
@@ -54,15 +55,10 @@ class RecipeListPage(ttk.Frame):
         item = tree.item(recipe_id)
         row_data = dict(zip(self.columns, item["values"]))
 
-        db = Database()
-        recipe_service = RecipeService(db)
-
-        recipe = recipe_service.get_recipe(int(recipe_id))
+        recipe = self.recipe_controller.get_recipe(int(recipe_id))
         detail_page = RecipeDetailPage(self.parent, recipe, row_data["synth_cost"])
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
-
-        db.close()
 
     def on_treeview_click(self, event):
         tree = event.widget
@@ -134,13 +130,15 @@ class RecipeListPage(ttk.Frame):
     def process_batch(self, recipes):
         db = Database()
         self.active_db_connections.append(db)
-        crafting_service = CraftingService(db)
+
+        item_controller = ItemController(db)
+        crafting_controller = CraftingController(item_controller)
 
         try:
             for recipe in recipes:
                 if not self.is_open:
                     break
-                self.process_single_recipe(recipe, crafting_service)
+                self.process_single_recipe(recipe, crafting_controller)
         finally:
             db.close()
             self.active_db_connections.remove(db)

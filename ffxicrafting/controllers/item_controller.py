@@ -1,19 +1,18 @@
 from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
 from repositories import VendorRepository, GuildRepository
-from services import AuctionService
+from controllers import AuctionController
 
 
-class ItemService:
+class ItemController:
     item_cache = {}
     ingredient_cache = {}
 
     def __init__(self, db) -> None:
         self.db = db
-
-        self.auction_service = AuctionService(db)
         self.vendor_repository = VendorRepository(db)
         self.guild_repository = GuildRepository(db)
+        self.auction_controller = AuctionController(db)
 
     def get_items(self, item_ids):
         # Identify the missing item_ids (those not in the cache)
@@ -84,7 +83,7 @@ class ItemService:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def get_auction_data(self, item_id):
-        auction_items = self.auction_service.get_auction_items_with_updates(item_id)
+        auction_items = self.auction_controller.get_auction_items_with_updates(item_id)
         single_price = None
         stack_price = None
         single_sell_freq = None

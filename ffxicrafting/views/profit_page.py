@@ -3,8 +3,8 @@ from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
 from config import SettingsManager
-from services import RecipeService
-from database import Database, DatabaseException
+from database import DatabaseException
+from controllers import CraftingController
 
 
 class ProfitPage(RecipeListPage):
@@ -55,12 +55,8 @@ class ProfitPage(RecipeListPage):
             offset = 0
             search_finished = False
 
-            db = Database()
-            self.active_db_connections.append(db)
-            recipe_service = RecipeService(db)
-
             while self.is_open and not search_finished:
-                craftable_recipes = recipe_service.get_recipes_by_level(
+                craftable_recipes = self.recipe_controller.get_recipes_by_level(
                     *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
                 )
 
@@ -71,17 +67,15 @@ class ProfitPage(RecipeListPage):
 
                 offset += batch_size
 
-            db.close()
-            self.active_db_connections.remove(db)
         except (DatabaseException) as e:
             print(f"Error: {e}")
             self.queue.put(self.process_finished)
 
-    def process_single_recipe(self, recipe, crafting_service):
+    def process_single_recipe(self, recipe, crafting_controller):
         if not self.is_open:
             return
 
-        craft_result = crafting_service.simulate_craft(recipe)
+        craft_result = crafting_controller.simulate_craft(recipe)
 
         if not craft_result:
             return
@@ -89,7 +83,7 @@ class ProfitPage(RecipeListPage):
         if self.passes_thresholds(craft_result["profit_per_synth"],
                                   craft_result["profit_per_storage"],
                                   craft_result["sell_freq"]):
-            row_data = crafting_service.format_profit_table_row(craft_result)
+            row_data = CraftingController.format_profit_table_row(craft_result)
             self.queue.put(lambda: self.insert_single_into_treeview(row_data))
 
     def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):

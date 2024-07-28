@@ -1,16 +1,15 @@
 from entities import Crafter
 from config import SettingsManager
-from services import ItemService
 
 
-class CraftingService:
-    def __init__(self, db):
-        self.item_service = ItemService(db)
+class CraftingController:
+    def __init__(self, item_controller) -> None:
+        self.item_controller = item_controller
 
     def simulate_craft(self, recipe):
         skills = SettingsManager.get_craft_skills()
         crafter = Crafter(*skills, recipe)
-        results, profit_per_synth, profit_per_storage = crafter.craft(self.item_service)
+        results, profit_per_synth, profit_per_storage = crafter.craft(self.item_controller)
 
         if not results:
             return None
@@ -28,7 +27,8 @@ class CraftingService:
             "sell_freq": sell_freq
         }
 
-    def format_search_table_row(self, craft_result):
+    @staticmethod
+    def format_search_table_row(craft_result):
         if not craft_result:
             return None
 
@@ -44,7 +44,8 @@ class CraftingService:
             "recipe_id": recipe.id
         }
 
-    def format_profit_table_row(self, craft_result):
+    @staticmethod
+    def format_profit_table_row(craft_result):
         if not craft_result:
             return None
 

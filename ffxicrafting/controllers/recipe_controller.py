@@ -1,21 +1,19 @@
-import threading
 from entities import Recipe
 from utils import unique_preserve_order
-from services import ItemService
+from database import Database
+from controllers import ItemController
 
 
-class RecipeService:
+class RecipeController:
     cache = {
         "get_recipes_by_level": {},
         "search_recipe": {}
     }
-
     result_item_ids = None
-    result_item_ids_lock = threading.Lock()
 
-    def __init__(self, db) -> None:
-        self.db = db
-        self.item_service = ItemService(db)
+    def __init__(self) -> None:
+        self.db = Database()
+        self.item_controller = ItemController(self.db)
 
     def get_recipe(self, recipe_id):
         for cache_name in self.cache:
@@ -61,9 +59,9 @@ class RecipeService:
             all_crystal_ids.append(recipe_tuple[11])
             all_ingredient_ids.extend(recipe_tuple[13:21])
             all_result_ids.extend(recipe_tuple[21:25])
-
+    
         unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
-        return self.item_service.get_items(unique_item_ids)
+        return self.item_controller.get_items(unique_item_ids)
 
     def create_recipe_objects(self, recipe_tuples, unique_items):
         recipes = []
@@ -86,11 +84,11 @@ class RecipeService:
             ingredients = []
             for ingredient_item in ingredient_items:
                 craftable = self.is_ingredient_craftable(ingredient_item.item_id)
-                ingredient = self.item_service.convert_to_ingredient(ingredient_item, craftable)
+                ingredient = self.item_controller.convert_to_ingredient(ingredient_item, craftable)
                 ingredients.append(ingredient)
 
             # Convert result Item objects into Result objects
-            results = [self.item_service.convert_to_result(result) for result in result_items]
+            results = [self.item_controller.convert_to_result(result) for result in result_items]
 
             recipe = Recipe(
                 *recipe_tuple[:11],
@@ -119,7 +117,6 @@ class RecipeService:
         return recipes
 
     def is_ingredient_craftable(self, item_id):
-        with self.result_item_ids_lock:
-            if self.result_item_ids is None:
-                self.result_item_ids = self.db.get_all_result_item_ids()
+        if self.result_item_ids is None:
+            self.result_item_ids = self.db.get_all_result_item_ids()
         return item_id in self.result_item_ids
