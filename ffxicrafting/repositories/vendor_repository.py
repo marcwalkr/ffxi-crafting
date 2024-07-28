@@ -2,14 +2,13 @@ from models import VendorItem, RegionalVendor, VendorLocation
 
 
 class VendorRepository:
-    cache = {
-        "get_vendor_items": {},
-        "get_regional_vendor": {},
-        "get_vendor_location": {}
-    }
-
     def __init__(self, db) -> None:
         self.db = db
+        self.cache = {
+            "get_vendor_items": {},
+            "get_regional_vendor": {},
+            "get_vendor_location": {}
+        }
 
     def get_vendor_items(self, item_id):
         if item_id in self.cache["get_vendor_items"]:

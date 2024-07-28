@@ -1,20 +1,18 @@
 from entities import Recipe
-from services import ItemService
 from utils import unique_preserve_order
 import threading
 
 
 class RecipeService:
-    cache = {
-        "get_recipes_by_level": {},
-        "search_recipe": {}
-    }
-    result_item_ids = None
-    result_item_ids_lock = threading.Lock()
-
-    def __init__(self, db) -> None:
+    def __init__(self, db, item_service) -> None:
         self.db = db
-        self.item_service = ItemService(self.db)
+        self.cache = {
+            "get_recipes_by_level": {},
+            "search_recipe": {}
+        }
+        self.result_item_ids = None
+        self.result_item_ids_lock = threading.Lock()
+        self.item_service = item_service
 
     def get_recipe(self, recipe_id):
         for cache_name in self.cache:
