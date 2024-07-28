@@ -3,11 +3,11 @@ from config import SettingsManager
 
 
 class ItemService:
-    def __init__(self, db, auction_repository, vendor_repository, guild_repository) -> None:
+    def __init__(self, db, auction_service, vendor_repository, guild_repository) -> None:
         self.db = db
         self.item_cache = {}
         self.ingredient_cache = {}
-        self.auction_repository = auction_repository
+        self.auction_service = auction_service
         self.vendor_repository = vendor_repository
         self.guild_repository = guild_repository
 
@@ -80,7 +80,7 @@ class ItemService:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def get_auction_data(self, item_id):
-        auction_items = self.auction_repository.get_auction_items(item_id)
+        auction_items = self.auction_service.get_auction_items_with_updates(item_id)
         single_price = None
         stack_price = None
         single_sell_freq = None

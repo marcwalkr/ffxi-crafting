@@ -5,14 +5,14 @@ from tkinter import ttk
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from views import RecipeDetailPage
-from controllers import RecipeController
-from database import Database
 
 
 class RecipeListPage(ttk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, recipe_service, crafting_service):
         super().__init__(parent.notebook)
         self.parent = parent
+        self.recipe_service = recipe_service
+        self.crafting_service = crafting_service
         self.is_open = True
         self.queue = Queue()
         self.init_executor()
@@ -51,18 +51,13 @@ class RecipeListPage(ttk.Frame):
             return
 
         recipe_id = tree.selection()[0]
-        values = tree.item(recipe_id, "values")
-        synth_cost = values[-1]
+        item = tree.item(recipe_id)
+        row_data = dict(zip(self.columns, item["values"]))
 
-        db = Database()
-        recipe_controller = RecipeController(db)
-
-        recipe = recipe_controller.get_recipe(int(recipe_id))
-        detail_page = RecipeDetailPage(self.parent, recipe, synth_cost)
+        recipe = self.recipe_service.get_recipe(int(recipe_id))
+        detail_page = RecipeDetailPage(self.parent, recipe, row_data["synth_cost"])
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
-
-        db.close()
 
     def on_treeview_click(self, event):
         tree = event.widget
@@ -134,8 +129,9 @@ class RecipeListPage(ttk.Frame):
     def process_batch(self, results):
         pass
 
-    def insert_single_into_treeview(self, recipe_id, row):
-        self.treeview.insert("", "end", iid=recipe_id, values=row)
+    def insert_single_into_treeview(self, row_data):
+        values = [row_data[col] for col in self.columns if col != "recipe_id"]
+        self.treeview.insert("", "end", row_data["recipe_id"], values=values)
 
     def finalize_process(self):
         pass

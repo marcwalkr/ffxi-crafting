@@ -2,16 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from controllers import RecipeController, ItemController
-from entities import Crafter
 from config import SettingsManager
-from database import Database, DatabaseException
 
 
 class ProfitPage(RecipeListPage):
-    def __init__(self, parent):
+    def __init__(self, parent, recipe_service, crafting_service):
         self.action_button_text = "Generate Table"
-        super().__init__(parent)
+        super().__init__(parent, recipe_service, crafting_service)
 
     def create_widgets(self):
         self.parent.notebook.add(self, text="Profit Table")
@@ -46,75 +43,45 @@ class ProfitPage(RecipeListPage):
         treeview.column("sell_freq", anchor=tk.CENTER)
 
     def query_recipes(self):
-        try:
-            skills = SettingsManager.get_craft_skills()
-            skill_look_ahead = SettingsManager.get_skill_look_ahead()
+        skills = SettingsManager.get_craft_skills()
+        skill_look_ahead = SettingsManager.get_skill_look_ahead()
 
-            batch_size = 25
-            offset = 0
-            search_finished = False
+        batch_size = 25
+        offset = 0
+        search_finished = False
 
-            db = Database()
-            self.active_db_connections.append(db)
-            recipe_controller = RecipeController(db)
+        while self.is_open and not search_finished:
+            craftable_recipes = self.recipe_service.get_recipes_by_level(
+                *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
+            )
 
-            while self.is_open and not search_finished:
-                craftable_recipes = recipe_controller.get_recipes_by_level(
-                    *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
-                )
+        if len(craftable_recipes) < batch_size:
+            search_finished = True
 
-                if len(craftable_recipes) < batch_size:
-                    search_finished = True
+            self.futures.append(self.executor.submit(self.process_batch, craftable_recipes))
 
-                self.futures.append(self.executor.submit(self.process_batch, craftable_recipes))
-
-                offset += batch_size
-
-            db.close()
-            self.active_db_connections.remove(db)
-        except (DatabaseException) as e:
-            print(f"Error: {e}")
-            self.queue.put(self.process_finished)
+        offset += batch_size
 
     def process_batch(self, craftable_recipes):
-        db = Database()
-        self.active_db_connections.append(db)
-        item_controller = ItemController(db)
-        try:
-            for recipe in craftable_recipes:
-                if not self.is_open:
-                    break
-                self.process_single_recipe(recipe, item_controller)
-        finally:
-            db.close()
-            self.active_db_connections.remove(db)
+        for recipe in craftable_recipes:
+            if not self.is_open:
+                break
 
-    def process_single_recipe(self, recipe, item_controller):
+            self.process_single_recipe(recipe)
+
+    def process_single_recipe(self, recipe):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
-        results, profit_per_synth, profit_per_storage = crafter.craft(item_controller)
+        craft_result = self.crafting_service.simulate_craft(recipe)
 
-        if not results:
+        if not craft_result:
             return
 
-        sell_freq = max(
-            max(result.single_sell_freq or 0, result.stack_sell_freq or 0)
-            for result in results
-        )
-
-        if self.passes_thresholds(profit_per_synth, profit_per_storage, sell_freq):
-            nq_string = recipe.get_formatted_nq_result()
-            hq_string = recipe.get_formatted_hq_results()
-
-            synth_cost = int(crafter.synth.cost)
-            profit_per_synth = int(profit_per_synth)
-            profit_per_storage = int(profit_per_storage)
-            sell_freq = float(f"{sell_freq:.4f}")
-
-            row = [nq_string, hq_string, crafter.synth.tier, synth_cost, profit_per_synth, profit_per_storage,
-                   sell_freq, synth_cost]
+        if self.passes_thresholds(craft_result["profit_per_synth"],
+                                  craft_result["profit_per_storage"],
+                                  craft_result["sell_freq"]):
+            row = self.crafting_service.format_craft_result(craft_result)
             self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):

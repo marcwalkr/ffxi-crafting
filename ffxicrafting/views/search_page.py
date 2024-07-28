@@ -2,16 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from controllers import RecipeController, ItemController
-from entities import Crafter
-from config import SettingsManager
-from database import Database, DatabaseException
+from database import DatabaseException
 
 
 class SearchPage(RecipeListPage):
-    def __init__(self, parent):
+    def __init__(self, parent, recipe_service, crafting_service):
         self.action_button_text = "Search"
-        super().__init__(parent)
+        super().__init__(parent, recipe_service, crafting_service)
 
     def create_widgets(self):
         self.parent.notebook.add(self, text="Search Recipes")
@@ -50,12 +47,8 @@ class SearchPage(RecipeListPage):
             offset = 0
             search_finished = False
 
-            db = Database()
-            self.active_db_connections.append(db)
-            recipe_controller = RecipeController(db)
-
             while self.is_open and not search_finished:
-                results = recipe_controller.search_recipe(self.search_var.get(), batch_size, offset)
+                results = self.recipe_service.search_recipe(self.search_var.get(), batch_size, offset)
 
                 if len(results) < batch_size:
                     search_finished = True
@@ -64,40 +57,27 @@ class SearchPage(RecipeListPage):
 
                 offset += batch_size
 
-            db.close()
-            self.active_db_connections.remove(db)
         except (DatabaseException) as e:
             print(f"Error: {e}")
             self.queue.put(self.process_finished)
 
     def process_batch(self, results):
-        db = Database()
-        self.active_db_connections.append(db)
-        item_controller = ItemController(db)
-        try:
-            for result in results:
-                if not self.is_open:
-                    break
-                self.process_single_result(result, item_controller)
-        finally:
-            db.close()
-            self.active_db_connections.remove(db)
+        for result in results:
+            if not self.is_open:
+                break
+            self.process_single_result(result)
 
-    def process_single_result(self, recipe, item_controller):
+    def process_single_result(self, recipe):
         if not self.is_open:
             return
 
-        crafter = Crafter(*SettingsManager.get_craft_skills(), recipe)
-        crafter.craft(item_controller)
+        craft_result = self.crafting_service.simulate_craft(recipe)
 
-        synth_cost = int(crafter.synth.cost) if crafter.synth.cost else None
+        if not craft_result:
+            return
 
-        nq_string = recipe.get_formatted_nq_result()
-        hq_string = recipe.get_formatted_hq_results()
-        levels_string = recipe.get_formatted_levels_string()
-        ingredient_names_summarized = recipe.get_formatted_ingredient_names()
+        row = self.crafting_service.format_search_table_row(craft_result)
 
-        row = [nq_string, hq_string, levels_string, ingredient_names_summarized, synth_cost]
         self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def finalize_process(self):

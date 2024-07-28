@@ -1,14 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
 from views import SearchPage, ProfitPage, SettingsPage
-from database import Database, DatabaseException
-import threading
-import warnings
+from database import Database
+from repositories import AuctionRepository, VendorRepository, GuildRepository
+from services import ItemService, AuctionService, RecipeService, CraftingService
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.db = Database()
+        self.setup_services()
+
         self.title("FFXI Crafting Tool")
         self.geometry("1600x900")
 
@@ -17,10 +20,14 @@ class App(tk.Tk):
         self.create_notebook()
         self.create_pages()
 
-        try:
-            threading.Thread(target=Database.initialize_pool, daemon=True).start()
-        except DatabaseException as e:
-            warnings.warn(f"Failed to initialize database connection pool: {e}")
+    def setup_services(self):
+        auction_repository = AuctionRepository(self.db)
+        vendor_repository = VendorRepository(self.db)
+        guild_repository = GuildRepository(self.db)
+        auction_service = AuctionService(auction_repository)
+        item_service = ItemService(self.db, auction_service, vendor_repository, guild_repository)
+        self.recipe_service = RecipeService(self.db, item_service)
+        self.crafting_service = CraftingService(item_service)
 
     def configure_styles(self):
         self.style = ttk.Style(self)
@@ -41,8 +48,8 @@ class App(tk.Tk):
         self.notebook.pack(expand=True, fill="both")
 
     def create_pages(self):
-        SearchPage(self)
-        ProfitPage(self)
+        SearchPage(self, self.recipe_service, self.crafting_service)
+        ProfitPage(self, self.recipe_service, self.crafting_service)
         SettingsPage(self)
 
 
