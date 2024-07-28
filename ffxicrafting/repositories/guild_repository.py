@@ -1,7 +1,7 @@
 from models import GuildVendor, GuildShop
 
 
-class GuildController:
+class GuildRepository:
     cache = {
         "get_guild_vendor": {},
         "get_guild_shops": {}

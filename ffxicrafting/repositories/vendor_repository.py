@@ -1,7 +1,7 @@
 from models import VendorItem, RegionalVendor, VendorLocation
 
 
-class VendorController:
+class VendorRepository:
     cache = {
         "get_vendor_items": {},
         "get_regional_vendor": {},

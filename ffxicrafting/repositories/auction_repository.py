@@ -1,7 +1,7 @@
 from models import AuctionItem, SalesHistory
 
 
-class AuctionController:
+class AuctionRepository:
     cache = {}
 
     def __init__(self, db) -> None:

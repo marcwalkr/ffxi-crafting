@@ -1,6 +1,6 @@
 from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
-from controllers import AuctionController, VendorController, GuildController
+from repositories import AuctionRepository, VendorRepository, GuildRepository
 
 
 class ItemService:
@@ -9,9 +9,9 @@ class ItemService:
 
     def __init__(self, db) -> None:
         self.db = db
-        self.auction_controller = AuctionController(db)
-        self.vendor_controller = VendorController(db)
-        self.guild_controller = GuildController(db)
+        self.auction_repository = AuctionRepository(db)
+        self.vendor_repository = VendorRepository(db)
+        self.guild_repository = GuildRepository(db)
 
     def get_items(self, item_ids):
         # Identify the missing item_ids (those not in the cache)
@@ -82,7 +82,7 @@ class ItemService:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def get_auction_data(self, item_id):
-        auction_items = self.auction_controller.get_auction_items(item_id)
+        auction_items = self.auction_repository.get_auction_items(item_id)
         single_price = None
         stack_price = None
         single_sell_freq = None
@@ -99,13 +99,13 @@ class ItemService:
         return single_price, stack_price, single_sell_freq, stack_sell_freq
 
     def get_vendor_cost(self, item_id):
-        vendor_items = self.vendor_controller.get_vendor_items(item_id)
+        vendor_items = self.vendor_repository.get_vendor_items(item_id)
         beastmen_regions = SettingsManager.get_beastmen_regions()
 
         # Filter out regional vendors that are controlled by Beastmen
         filtered_vendor_items = []
         for vendor_item in vendor_items:
-            regional_vendor = self.vendor_controller.get_regional_vendor(vendor_item.npc_id)
+            regional_vendor = self.vendor_repository.get_regional_vendor(vendor_item.npc_id)
             if not regional_vendor:
                 # Standard vendor
                 filtered_vendor_items.append(vendor_item)
@@ -120,12 +120,12 @@ class ItemService:
 
     def get_guild_cost(self, item_id):
         enabled_guilds = SettingsManager.get_enabled_guilds()
-        guild_shops = self.guild_controller.get_guild_shops(item_id)
+        guild_shops = self.guild_repository.get_guild_shops(item_id)
         prices = []
 
         for shop in guild_shops:
             if shop.initial_quantity > 0:
-                guild_vendor = self.guild_controller.get_guild_vendor(shop.guild_id)
+                guild_vendor = self.guild_repository.get_guild_vendor(shop.guild_id)
                 if guild_vendor and guild_vendor.category in enabled_guilds:
                     prices.append(shop.min_price)
 
