@@ -36,6 +36,11 @@ class ProfitPage(RecipeListPage):
             *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
         )
 
+    def should_display_recipe(self, craft_result):
+        return self.passes_thresholds(craft_result["profit_per_synth"],
+                                      craft_result["profit_per_storage"],
+                                      craft_result["sell_freq"])
+
     def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):
         per_synth_threshold = SettingsManager.get_profit_per_synth()
         per_storage_threshold = SettingsManager.get_profit_per_storage()
@@ -55,5 +60,5 @@ class ProfitPage(RecipeListPage):
             int(crafter.recipe.cost),
             int(craft_result["profit_per_synth"]),
             int(craft_result["profit_per_storage"]),
-            float(f"{craft_result['sell_freq']}")
+            float(f"{craft_result['sell_freq']:.4f}")
         ]
