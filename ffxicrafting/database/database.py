@@ -1,7 +1,9 @@
 import threading
-import warnings
+import logging
 from mysql.connector import pooling
 from config.settings_manager import SettingsManager
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -18,7 +20,7 @@ class Database:
         }
 
         if not all(config.values()):
-            warnings.warn("Database configuration is incomplete")
+            logger.error("Database configuration is incomplete")
             return
 
         with cls.pool_lock:
@@ -44,7 +46,7 @@ class Database:
     def execute_query(self, query, params=None, fetch_one=False, commit=False):
         self.connect()
         if not self.cursor:
-            warnings.warn("Database not connected. Please check the configuration.")
+            logger.error("Database not connected. Please check the configuration.")
             return None
 
         try:
@@ -58,7 +60,7 @@ class Database:
         except Exception as e:
             if commit:
                 self.connection.rollback()
-            warnings.warn(f"Database query failed: {e}")
+            logger.error(f"Database query failed: {e}")
             return None
 
     def close(self):
