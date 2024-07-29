@@ -1,13 +1,15 @@
 import tkinter as tk
+import logging
 from tkinter import ttk
 from views import SearchPage, ProfitPage, SettingsPage
-from database import Database
-import threading
+
+logger = logging.getLogger(__name__)
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+
         self.title("FFXI Crafting Tool")
         self.geometry("1600x900")
 
@@ -15,8 +17,6 @@ class App(tk.Tk):
         self.create_main_frame()
         self.create_notebook()
         self.create_pages()
-
-        threading.Thread(target=Database.initialize_pool, daemon=True).start()
 
     def configure_styles(self):
         self.style = ttk.Style(self)
