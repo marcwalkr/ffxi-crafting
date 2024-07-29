@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from views import SearchPage, ProfitPage, SettingsPage
-from database import Database, DatabaseException
+from database import Database
 import threading
-import warnings
 
 
 class App(tk.Tk):
@@ -17,10 +16,7 @@ class App(tk.Tk):
         self.create_notebook()
         self.create_pages()
 
-        try:
-            threading.Thread(target=Database.initialize_pool, daemon=True).start()
-        except DatabaseException as e:
-            warnings.warn(f"Failed to initialize database connection pool: {e}")
+        threading.Thread(target=Database.initialize_pool, daemon=True).start()
 
     def configure_styles(self):
         self.style = ttk.Style(self)

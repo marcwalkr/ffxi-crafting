@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from views import RecipeListPage
 from utils import TreeviewWithSort
-from database import DatabaseException
-from controllers import CraftingController
 
 
 class SearchPage(RecipeListPage):
@@ -58,7 +56,7 @@ class SearchPage(RecipeListPage):
 
                 offset += batch_size
 
-        except (DatabaseException) as e:
+        except Exception as e:
             print(f"Error: {e}")
             self.queue.put(self.process_finished)
 
