@@ -1,9 +1,6 @@
 import tkinter as tk
-import logging
 from tkinter import ttk
 from views import SearchPage, ProfitPage, SettingsPage
-
-logger = logging.getLogger(__name__)
 
 
 class App(tk.Tk):
