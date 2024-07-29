@@ -67,24 +67,22 @@ class SearchPage(RecipeListPage):
         if not self.is_open:
             return
 
+        # Simulate the synth to set the necessary data on objects for display
         craft_result = crafting_controller.simulate_craft(recipe)
 
         if not craft_result:
             return
 
-        row = self.format_row(craft_result)
+        row = self.format_row(recipe)
 
         self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
-    def format_row(self, row_data):
-        crafter = row_data["crafter"]
-        recipe = crafter.recipe
-
+    def format_row(self, recipe):
         return [
             recipe.get_formatted_nq_result(),
             recipe.get_formatted_hq_results(),
             recipe.get_formatted_levels_string(),
-            recipe.get_formatted_ingredient_names(),
+            recipe.get_formatted_ingredient_names()
         ]
 
     def finalize_process(self):

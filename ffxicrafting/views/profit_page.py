@@ -96,14 +96,11 @@ class ProfitPage(RecipeListPage):
                 sell_freq >= sell_freq_threshold)
 
     def format_row(self, row_data):
-        crafter = row_data["crafter"]
-        recipe = crafter.recipe
-
         return [
-            recipe.get_formatted_nq_result(),
-            recipe.get_formatted_hq_results(),
-            crafter.synth.tier,
-            int(recipe.cost),
+            row_data["nq_string"],
+            row_data["hq_string"],
+            row_data["tier"],
+            int(row_data["cost"]),
             int(row_data["profit_per_synth"]),
             int(row_data["profit_per_storage"]),
             float(f"{row_data['sell_freq']}")

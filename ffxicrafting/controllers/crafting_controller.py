@@ -20,8 +20,10 @@ class CraftingController:
         )
 
         return {
-            "crafter": crafter,
-            "results": results,
+            "nq_string": crafter.recipe.get_formatted_nq_result(),
+            "hq_string": crafter.recipe.get_formatted_hq_results(),
+            "tier": crafter.synth.tier,
+            "cost": crafter.recipe.cost,
             "profit_per_synth": profit_per_synth,
             "profit_per_storage": profit_per_storage,
             "sell_freq": sell_freq
