@@ -1,15 +1,16 @@
 import threading
 import concurrent.futures
-import traceback
+from concurrent.futures import ThreadPoolExecutor
 from tkinter import ttk
 from queue import Queue, Empty
-from concurrent.futures import ThreadPoolExecutor
+from abc import ABC
+from utils import TreeviewWithSort
 from views import RecipeDetailPage
 from database import Database
 from controllers import RecipeController, CraftingController, ItemController
 
 
-class RecipeListPage(ttk.Frame):
+class RecipeListPage(ttk.Frame, ABC):
     def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
@@ -22,20 +23,85 @@ class RecipeListPage(ttk.Frame):
         self.check_queue()
 
     def create_widgets(self):
-        pass
+        self.parent.notebook.add(self, text=self.get_tab_text())
+        self.create_action_button()
+        self.create_progress_bar()
+        self.create_treeview()
+
+    def get_tab_text(self):
+        raise NotImplementedError("Subclasses must implement get_tab_text()")
+
+    def create_action_button(self):
+        self.action_button = ttk.Button(self, text=self.action_button_text, command=self.start_process)
+        self.action_button.pack(pady=10)
+
+    def create_progress_bar(self):
+        self.progress_bar = ttk.Progressbar(self, mode='indeterminate', length=300)
+        self.progress_bar.pack(pady=10)
+        self.progress_bar.pack_forget()
+
+    def create_treeview(self):
+        self.treeview = TreeviewWithSort(self, columns=self.get_treeview_columns(), show="headings")
+        self.configure_treeview(self.treeview)
+        self.treeview.pack(padx=10, pady=10, expand=True, fill="both")
+        self.treeview.bind("<Double-1>", self.show_recipe_details)
+        self.treeview.bind("<Button-1>", self.on_treeview_click)
+
+    def get_treeview_columns(self):
+        raise NotImplementedError("Subclasses must implement get_treeview_columns()")
+
+    def configure_treeview(self, treeview):
+        raise NotImplementedError("Subclasses must implement configure_treeview()")
+
+    def query_recipes(self):
+        try:
+            batch_size = 25
+            offset = 0
+            search_finished = False
+
+            while self.is_open and not search_finished:
+                results = self.get_recipe_batch(batch_size, offset)
+
+                if len(results) < batch_size:
+                    search_finished = True
+
+                self.futures.append(self.executor.submit(self.process_batch, results))
+
+                offset += batch_size
+
+        except Exception as e:
+            print(f"Error: {e}")
+            self.queue.put(self.process_finished)
+
+    def get_recipe_batch(self, batch_size, offset):
+        raise NotImplementedError("Subclasses must implement get_recipe_batch()")
+
+    def process_single_recipe(self, recipe, crafting_controller):
+        if not self.is_open:
+            return
+
+        craft_result = crafting_controller.simulate_craft(recipe)
+
+        if not craft_result:
+            return
+
+        if self.should_display_recipe(craft_result):
+            row = self.format_row(craft_result)
+            self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
+
+    def should_display_recipe(self, craft_result):
+        return True
+
+    def format_row(self, craft_result):
+        raise NotImplementedError("Subclasses must implement format_row()")
+
+    def finalize_process(self):
+        self.process_finished()
 
     def init_executor(self):
         self.executor = ThreadPoolExecutor(max_workers=15)
         self.futures = []
         self.query_recipes_future = None
-
-    def cleanup_db_connections(self):
-        while self.active_db_connections:
-            db = self.active_db_connections.pop()
-            try:
-                db.close()
-            except Exception as e:
-                print(f"Error closing database connection: {e}")
 
     def check_queue(self):
         try:
@@ -45,28 +111,6 @@ class RecipeListPage(ttk.Frame):
         except Empty:
             pass
         self.after(100, self.check_queue)
-
-    def show_recipe_details(self, event):
-        tree = event.widget
-        if not tree.selection():
-            return
-
-        recipe_id = tree.selection()[0]
-
-        recipe = self.recipe_controller.get_recipe(int(recipe_id))
-        detail_page = RecipeDetailPage(self.parent, recipe)
-        self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
-        self.parent.notebook.select(detail_page)
-
-    def on_treeview_click(self, event):
-        tree = event.widget
-        region = tree.identify("region", event.x, event.y)
-        if region in ("nothing", "heading"):
-            tree.selection_remove(tree.selection())
-
-    def clear_treeview(self, treeview):
-        for item in treeview.get_children():
-            treeview.delete(item)
 
     def start_process(self):
         self.init_executor()
@@ -96,7 +140,6 @@ class RecipeListPage(ttk.Frame):
                 pass
             except Exception as e:
                 print(f"Error during cancellation: {e}")
-                traceback.print_exc()
         self.cleanup_db_connections()
         self.process_finished()
 
@@ -104,26 +147,6 @@ class RecipeListPage(ttk.Frame):
         self.progress_bar.stop()
         self.progress_bar.pack_forget()
         self.action_button.config(text=self.action_button_text, command=self.start_process, state="normal")
-
-    def check_futures(self):
-        incomplete_futures = [f for f in self.futures if not f.done()]
-        if incomplete_futures or (self.query_recipes_future and not self.query_recipes_future.done()):
-            self.after(100, self.check_futures)
-        else:
-            for future in self.futures:
-                try:
-                    future.result()
-                except concurrent.futures.CancelledError:
-                    pass
-                except Exception as e:
-                    print(f"Error in future: {e}")
-                    traceback.print_exc()
-                    self.queue.put(self.process_finished)
-                    return
-            self.queue.put(self.finalize_process)
-
-    def query_recipes(self):
-        pass
 
     def process_batch(self, recipes):
         db = Database()
@@ -141,14 +164,54 @@ class RecipeListPage(ttk.Frame):
             db.close()
             self.active_db_connections.remove(db)
 
+    def check_futures(self):
+        incomplete_futures = [f for f in self.futures if not f.done()]
+        if incomplete_futures or (self.query_recipes_future and not self.query_recipes_future.done()):
+            self.after(100, self.check_futures)
+        else:
+            for future in self.futures:
+                try:
+                    future.result()
+                except concurrent.futures.CancelledError:
+                    pass
+                except Exception as e:
+                    print(f"Error in future: {e}")
+                    self.queue.put(self.process_finished)
+                    return
+            self.queue.put(self.finalize_process)
+
     def insert_single_into_treeview(self, recipe_id, row):
         self.treeview.insert("", "end", iid=recipe_id, values=row)
 
-    def format_row(self, row_data):
-        pass
+    def on_treeview_click(self, event):
+        tree = event.widget
+        region = tree.identify("region", event.x, event.y)
+        if region in ("nothing", "heading"):
+            tree.selection_remove(tree.selection())
 
-    def finalize_process(self):
-        pass
+    def clear_treeview(self, treeview):
+        for item in treeview.get_children():
+            treeview.delete(item)
+
+    def show_recipe_details(self, event):
+        tree = event.widget
+        if not tree.selection():
+            return
+
+        recipe_id = tree.selection()[0]
+
+        recipe = self.recipe_controller.get_recipe(int(recipe_id))
+        detail_page = RecipeDetailPage(self.parent, recipe)
+        self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
+        self.parent.notebook.select(detail_page)
+
+    def cleanup_db_connections(self):
+        while self.active_db_connections:
+            db = self.active_db_connections.pop()
+            try:
+                db.close()
+            except Exception as e:
+                print(f"Error closing database connection: {e}")
 
     def destroy(self):
         self.is_open = False
