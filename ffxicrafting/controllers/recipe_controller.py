@@ -1,7 +1,10 @@
+import logging
 from entities import Recipe
 from utils import unique_preserve_order
 from database import Database
 from controllers import ItemController
+
+logger = logging.getLogger(__name__)
 
 
 class RecipeController:
@@ -27,29 +30,37 @@ class RecipeController:
         cache_key = (craft_levels, offset)
         if cache_key in self.cache["get_recipes_by_level"]:
             return self.cache["get_recipes_by_level"][cache_key]
-        else:
-            results = list(self.db.get_recipes_by_level(*craft_levels, batch_size, offset))
-            if results:
+
+        results = self.db.get_recipes_by_level(*craft_levels, batch_size, offset)
+        if results:
+            try:
                 recipe_items = self.get_recipe_items(results)
                 recipes = self.create_recipe_objects(results, recipe_items)
                 self.cache["get_recipes_by_level"][cache_key] = recipes
                 return recipes
-            else:
+            except Exception as e:
+                logger.error(f"Error processing recipe results: {e}")
                 return []
+        else:
+            return []
 
     def search_recipe(self, search_term, batch_size, offset):
         cache_key = (search_term, offset)
         if cache_key in self.cache["search_recipe"]:
             return self.cache["search_recipe"][cache_key]
-        else:
-            results = self.db.search_recipe(search_term, batch_size, offset)
-            if results:
+
+        results = self.db.search_recipe(search_term, batch_size, offset)
+        if results:
+            try:
                 recipe_items = self.get_recipe_items(results)
                 recipes = self.create_recipe_objects(results, recipe_items)
                 self.cache["search_recipe"][cache_key] = recipes
                 return recipes
-            else:
+            except Exception as e:
+                logger.error(f"Error processing recipe results: {e}")
                 return []
+        else:
+            return []
 
     def get_recipe_items(self, recipe_tuples):
         all_crystal_ids = []
@@ -59,7 +70,7 @@ class RecipeController:
             all_crystal_ids.append(recipe_tuple[11])
             all_ingredient_ids.extend(recipe_tuple[13:21])
             all_result_ids.extend(recipe_tuple[21:25])
-    
+
         unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
         return self.item_controller.get_items(unique_item_ids)
 
