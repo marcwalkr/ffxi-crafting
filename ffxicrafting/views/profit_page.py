@@ -83,8 +83,8 @@ class ProfitPage(RecipeListPage):
         if self.passes_thresholds(craft_result["profit_per_synth"],
                                   craft_result["profit_per_storage"],
                                   craft_result["sell_freq"]):
-            row_data = CraftingController.format_profit_table_row(craft_result)
-            self.queue.put(lambda: self.insert_single_into_treeview(row_data))
+            row = self.format_row(craft_result)
+            self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
 
     def passes_thresholds(self, profit_per_synth, profit_per_storage, sell_freq):
         per_synth_threshold = SettingsManager.get_profit_per_synth()
@@ -94,6 +94,20 @@ class ProfitPage(RecipeListPage):
         return (profit_per_synth >= per_synth_threshold and
                 profit_per_storage >= per_storage_threshold and
                 sell_freq >= sell_freq_threshold)
+
+    def format_row(self, row_data):
+        crafter = row_data["crafter"]
+        recipe = crafter.recipe
+
+        return [
+            recipe.get_formatted_nq_result(),
+            recipe.get_formatted_hq_results(),
+            crafter.synth.tier,
+            int(recipe.cost),
+            int(row_data["profit_per_synth"]),
+            int(row_data["profit_per_storage"]),
+            float(f"{row_data['sell_freq']}")
+        ]
 
     def finalize_process(self):
         self.process_finished()

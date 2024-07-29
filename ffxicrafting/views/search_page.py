@@ -72,9 +72,20 @@ class SearchPage(RecipeListPage):
         if not craft_result:
             return
 
-        row_data = CraftingController.format_search_table_row(craft_result)
+        row = self.format_row(craft_result)
 
-        self.queue.put(lambda: self.insert_single_into_treeview(row_data))
+        self.queue.put(lambda: self.insert_single_into_treeview(recipe.id, row))
+
+    def format_row(self, row_data):
+        crafter = row_data["crafter"]
+        recipe = crafter.recipe
+
+        return [
+            recipe.get_formatted_nq_result(),
+            recipe.get_formatted_hq_results(),
+            recipe.get_formatted_levels_string(),
+            recipe.get_formatted_ingredient_names(),
+        ]
 
     def finalize_process(self):
         self.process_finished()

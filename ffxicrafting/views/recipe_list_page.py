@@ -52,11 +52,9 @@ class RecipeListPage(ttk.Frame):
             return
 
         recipe_id = tree.selection()[0]
-        item = tree.item(recipe_id)
-        row_data = dict(zip(self.columns, item["values"]))
 
         recipe = self.recipe_controller.get_recipe(int(recipe_id))
-        detail_page = RecipeDetailPage(self.parent, recipe, row_data["synth_cost"])
+        detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
 
@@ -143,9 +141,11 @@ class RecipeListPage(ttk.Frame):
             db.close()
             self.active_db_connections.remove(db)
 
-    def insert_single_into_treeview(self, row_data):
-        values = [row_data[col] for col in self.columns if col != "recipe_id"]
-        self.treeview.insert("", "end", row_data["recipe_id"], values=values)
+    def insert_single_into_treeview(self, recipe_id, row):
+        self.treeview.insert("", "end", iid=recipe_id, values=row)
+
+    def format_row(self, row_data):
+        pass
 
     def finalize_process(self):
         pass

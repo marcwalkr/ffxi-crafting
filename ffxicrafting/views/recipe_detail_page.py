@@ -4,12 +4,11 @@ from utils import TreeviewWithSort
 
 
 class RecipeDetailPage(ttk.Frame):
-    def __init__(self, parent, recipe, synth_cost):
+    def __init__(self, parent, recipe):
         self.previous_tab_index = parent.notebook.index("current")
         super().__init__(parent.notebook)
         self.parent = parent
         self.recipe = recipe
-        self.synth_cost = synth_cost
         self.create_detail_page()
 
     def create_detail_page(self):
@@ -46,7 +45,7 @@ class RecipeDetailPage(ttk.Frame):
         self.cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
         self.cost_per_synth_value_label.pack(side=tk.LEFT)
 
-        value_text = f"{self.synth_cost} gil" if self.synth_cost != "None" else "N/A"
+        value_text = f"{int(self.recipe.cost)} gil" if self.recipe.cost else "N/A"
         self.cost_per_synth_value_label.config(text=value_text)
 
     def add_results_tree(self):

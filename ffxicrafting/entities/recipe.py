@@ -100,3 +100,13 @@ class Recipe(RecipeModel):
             else:
                 ingredient_counts[ingredient] = 1
         return ingredient_counts
+
+    def calculate_cost(self):
+        cost = 0
+        for ingredient in self.get_ingredients():
+            min_cost = ingredient.get_min_cost()
+            if min_cost is None:
+                return None
+            cost += min_cost
+        self.cost = cost
+        return cost
