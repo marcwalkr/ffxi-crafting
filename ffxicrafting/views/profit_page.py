@@ -10,8 +10,6 @@ from controllers import CraftingController
 class ProfitPage(RecipeListPage):
     def __init__(self, parent):
         self.action_button_text = "Generate Table"
-        self.columns = ["nq_result", "hq_results", "tier", "synth_cost", "profit_per_synth", "profit_per_storage",
-                        "sell_freq", "recipe_id"]
         super().__init__(parent)
 
     def create_widgets(self):

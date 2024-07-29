@@ -9,7 +9,6 @@ from controllers import CraftingController
 class SearchPage(RecipeListPage):
     def __init__(self, parent):
         self.action_button_text = "Search"
-        self.columns = ["nq_result", "hq_results", "levels", "ingredients", "synth_cost", "recipe_id"]
         super().__init__(parent)
 
     def create_widgets(self):
