@@ -1,6 +1,7 @@
 import threading
 import logging
 from tkinter import ttk
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from abc import ABC, abstractmethod
 from queue import Queue, Empty
 from utils import TreeviewWithSort
@@ -18,8 +19,9 @@ class RecipeListPage(ttk.Frame, ABC):
         self.recipe_db = Database()
         self.recipe_controller = RecipeController(self.recipe_db)
 
-        self.queue = Queue()
-        self.threads = []
+        self.max_threads = 15
+        self.executor = None
+        self.insert_queue = Queue()
         self.cancel_event = threading.Event()
 
         self.create_widgets()
@@ -29,10 +31,6 @@ class RecipeListPage(ttk.Frame, ABC):
         self.create_action_button()
         self.create_progress_bar()
         self.create_treeview()
-
-    @abstractmethod
-    def get_tab_text(self):
-        pass
 
     def create_action_button(self):
         self.action_button = ttk.Button(self, text=self.action_button_text, command=self.toggle_process)
@@ -50,12 +48,30 @@ class RecipeListPage(ttk.Frame, ABC):
         self.treeview.bind("<Button-1>", self.on_treeview_click)
 
     @abstractmethod
+    def get_tab_text(self):
+        pass
+
+    @abstractmethod
     def get_treeview_columns(self):
         pass
 
     @abstractmethod
     def configure_treeview(self, treeview):
         pass
+
+    @abstractmethod
+    def get_recipe_batch(self, batch_size, offset):
+        pass
+
+    @abstractmethod
+    def format_row(self, craft_result):
+        pass
+
+    def toggle_process(self):
+        if self.action_button["text"] == self.action_button_text:
+            self.start_process()
+        else:
+            self.cancel_process()
 
     def show_recipe_details(self, event):
         tree = event.widget
@@ -75,16 +91,6 @@ class RecipeListPage(ttk.Frame, ABC):
         if region in ("nothing", "heading"):
             tree.selection_remove(tree.selection())
 
-    def clear_treeview(self, treeview):
-        for item in treeview.get_children():
-            treeview.delete(item)
-
-    def toggle_process(self):
-        if self.action_button["text"] == self.action_button_text:
-            self.start_process()
-        else:
-            self.cancel_process()
-
     def start_process(self):
         self.cancel_event.clear()
         self.action_button["text"] = "Cancel"
@@ -92,44 +98,60 @@ class RecipeListPage(ttk.Frame, ABC):
         self.progress_bar.start()
         self.clear_treeview(self.treeview)
 
+        self.init_executor()
+        self.clear_insert_queue()
+
         self.query_thread = threading.Thread(target=self.fetch_and_process_batches)
         self.query_thread.start()
 
-        self.after(100, self.check_queue)
+        self.after(100, self.check_insert_queue)
 
     def cancel_process(self):
         self.cancel_event.set()
         self.action_button["text"] = "Canceling..."
         self.action_button["state"] = "disabled"
 
+    def finish_process(self):
+        threading.Thread(target=self.shutdown_executor, daemon=True).start()
+
+    def shutdown_executor(self):
+        if self.executor:
+            self.executor.shutdown(wait=True)
+        self.after(0, self.finish_ui_update)
+
+    def finish_ui_update(self):
+        self.progress_bar.stop()
+        self.progress_bar.pack_forget()
+
+        self.action_button["text"] = self.action_button_text
+        self.action_button["state"] = "normal"
+
     def fetch_and_process_batches(self):
-        batch_size = 100
+        batch_size = 25
         offset = 0
+        futures = []
 
         while not self.cancel_event.is_set():
             recipes = self.get_recipe_batch(batch_size, offset)
+
             if not recipes:
                 break
 
-            thread = threading.Thread(target=self.process_batch, args=(recipes,))
-            thread.start()
-            self.threads.append(thread)
+            future = self.executor.submit(self.process_batch, recipes)
+            futures.append(future)
 
             offset += batch_size
 
-        # Wait for all processing threads to complete
-        for thread in self.threads:
-            thread.join()
+        # Wait for all processing to complete
+        for future in as_completed(futures):
+            if self.cancel_event.is_set():
+                break
 
         # Close the connection used for querying recipes
         self.recipe_db.close_connection()
 
         # Signal that processing is complete
-        self.queue.put(("DONE", None))
-
-    @abstractmethod
-    def get_recipe_batch(self, batch_size, offset):
-        pass
+        self.insert_queue.put(("DONE", None))
 
     def process_batch(self, recipes):
         db = Database()
@@ -155,14 +177,39 @@ class RecipeListPage(ttk.Frame, ABC):
 
         if self.should_display_recipe(craft_result):
             row = self.format_row(craft_result)
-            self.queue.put((recipe.id, row))
+            self.insert_queue.put((recipe.id, row))
 
-    def check_queue(self):
+    def should_display_recipe(self, craft_result):
+        # Default to True, subclasses can override
+        return True
+
+    def clear_treeview(self, treeview):
+        for item in treeview.get_children():
+            treeview.delete(item)
+
+    def insert_single_into_treeview(self, recipe_id, row):
+        self.treeview.insert("", "end", iid=recipe_id, values=row)
+
+    def init_executor(self):
+        if self.executor:
+            self.executor.shutdown(wait=False)
+        self.executor = ThreadPoolExecutor(max_workers=self.max_threads)
+
+    def clear_insert_queue(self):
+        while not self.insert_queue.empty():
+            try:
+                self.insert_queue.get_nowait()
+            except Empty:
+                break
+        self.insert_queue.queue.clear()
+
+    def check_insert_queue(self):
         try:
             while True:
-                recipe_id, row = self.queue.get_nowait()
+                recipe_id, row = self.insert_queue.get_nowait()
 
                 if recipe_id == "DONE":
+                    logger.debug("Recieved DONE signal, finishing process")
                     self.finish_process()
                     return
 
@@ -170,38 +217,9 @@ class RecipeListPage(ttk.Frame, ABC):
         except Empty:
             pass
 
-        self.after(100, self.check_queue)
-
-    def insert_single_into_treeview(self, recipe_id, row):
-        self.treeview.insert("", "end", iid=recipe_id, values=row)
-
-    def clear_queue(self):
-        while not self.queue.empty():
-            try:
-                self.queue.get_nowait()
-            except Empty:
-                break
-        self.queue.queue.clear()
-
-    def finish_process(self):
-        self.clear_queue()
-        self.threads.clear()
-        self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-
-        self.action_button["text"] = self.action_button_text
-        self.action_button["state"] = "normal"
-
-    def should_display_recipe(self, craft_result):
-        # Default to True, subclasses can override
-        return True
-
-    @abstractmethod
-    def format_row(self, craft_result):
-        pass
+        self.after(100, self.check_insert_queue)
 
     def on_close(self):
         self.cancel_event.set()
-        for thread in self.threads:
-            thread.join()
-        self.queue.queue.clear()
+        if self.executor:
+            self.executor.shutdown(wait=False)
