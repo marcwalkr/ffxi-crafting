@@ -2,7 +2,6 @@ import logging
 from entities import Recipe
 from utils import unique_preserve_order
 from controllers import ItemController
-from database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +13,8 @@ class RecipeController:
     }
     result_item_ids = None
 
-    def __init__(self) -> None:
-        self.db = Database()
+    def __init__(self, db) -> None:
+        self.db = db
         self.item_controller = ItemController(self.db)
 
     def get_recipe(self, recipe_id):
@@ -29,6 +28,7 @@ class RecipeController:
     def get_recipes_by_level(self, *craft_levels, batch_size, offset):
         cache_key = (craft_levels, offset)
         if cache_key in self.cache["get_recipes_by_level"]:
+            logger.debug(f"Recipes for {cache_key} found in cache")
             return self.cache["get_recipes_by_level"][cache_key]
 
         results = self.db.get_recipes_by_level(*craft_levels, batch_size, offset)
