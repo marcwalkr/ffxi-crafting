@@ -1,6 +1,9 @@
 import tkinter as tk
+import logging
 from tkinter import ttk
-from views import SearchPage, ProfitPage, SettingsPage
+from views import SearchPage, ProfitPage, SettingsPage, RecipeListPage
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class App(tk.Tk):
@@ -14,6 +17,8 @@ class App(tk.Tk):
         self.create_main_frame()
         self.create_notebook()
         self.create_pages()
+
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def configure_styles(self):
         self.style = ttk.Style(self)
@@ -37,6 +42,12 @@ class App(tk.Tk):
         SearchPage(self)
         ProfitPage(self)
         SettingsPage(self)
+
+    def on_close(self):
+        for page in self.notebook.winfo_children():
+            if isinstance(page, RecipeListPage):
+                page.on_close()
+        self.destroy()
 
 
 def main():

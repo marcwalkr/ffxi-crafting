@@ -2,6 +2,7 @@ import logging
 from entities import Recipe
 from utils import unique_preserve_order
 from controllers import ItemController
+from database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +14,8 @@ class RecipeController:
     }
     result_item_ids = None
 
-    def __init__(self, db) -> None:
-        self.db = db
+    def __init__(self) -> None:
+        self.db = Database()
         self.item_controller = ItemController(self.db)
 
     def get_recipe(self, recipe_id):

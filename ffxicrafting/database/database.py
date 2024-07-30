@@ -9,66 +9,66 @@ logger = logging.getLogger(__name__)
 class Database:
     pool = None
     pool_lock = threading.Lock()
+    local = threading.local()
+    num_connections = 0
 
     @classmethod
     def initialize_pool(cls):
-        config = {
-            "host": SettingsManager.get_database_host(),
-            "user": SettingsManager.get_database_user(),
-            "password": SettingsManager.get_database_password(),
-            "database": SettingsManager.get_database_name()
-        }
-
-        if not all(config.values()):
-            logger.error("Database configuration is incomplete")
-            return
-
         with cls.pool_lock:
             if cls.pool is None:
+                config = {
+                    "host": SettingsManager.get_database_host(),
+                    "user": SettingsManager.get_database_user(),
+                    "password": SettingsManager.get_database_password(),
+                    "database": SettingsManager.get_database_name()
+                }
+
+                if not all(config.values()):
+                    logger.error("Database configuration is incomplete")
+                    return
+
                 cls.pool = pooling.MySQLConnectionPool(
                     pool_name="mypool",
                     pool_size=32,
                     **config
                 )
 
-    def __init__(self) -> None:
-        self.connection = None
-        self.cursor = None
+    @classmethod
+    def get_connection(cls):
+        if not hasattr(cls.local, "connection") or cls.local.connection is None:
+            cls.initialize_pool()
+            cls.local.connection = cls.pool.get_connection()
+            cls.local.cursor = cls.local.connection.cursor(buffered=True)
+            cls.num_connections += 1
+            logger.debug(f"Opened connection. # connections: {cls.num_connections}")
+        return cls.local.connection, cls.local.cursor
 
-    def connect(self):
-        if self.connection is None:
-            if Database.pool is None:
-                Database.initialize_pool()
-            if Database.pool:
-                self.connection = Database.pool.get_connection()
-                self.cursor = self.connection.cursor(buffered=True)
+    @classmethod
+    def close_connection(cls):
+        if hasattr(cls.local, "connection") and cls.local.connection is not None:
+            cls.local.cursor.close()
+            cls.local.connection.close()
+            cls.num_connections -= 1
+            logger.debug(f"Closed connection. # connections: {cls.num_connections}")
+            cls.local.connection = None
+            cls.local.cursor = None
 
     def execute_query(self, query, params=None, fetch_one=False, commit=False):
-        self.connect()
-        if not self.cursor:
-            logger.error("Database not connected. Please check the configuration.")
-            return None
+        connection, cursor = self.get_connection()
 
         try:
-            self.cursor.execute(query, params)
+            cursor.execute(query, params)
             if commit:
-                self.connection.commit()
+                connection.commit()
                 return None
             if fetch_one:
-                return self.cursor.fetchone()
-            return self.cursor.fetchall() or []
+                return cursor.fetchone()
+            return cursor.fetchall() or []
         except Exception as e:
             if commit:
-                self.connection.rollback()
+                connection.rollback()
             logger.error(f"Database query failed: {e}")
             return None
-
-    def close(self):
-        if self.connection:
-            self.cursor.close()
-            self.connection.close()
-            self.connection = None
-            self.cursor = None
 
     def get_auction_items(self, item_id):
         query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
