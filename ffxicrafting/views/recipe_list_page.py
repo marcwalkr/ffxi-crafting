@@ -132,27 +132,33 @@ class RecipeListPage(ttk.Frame, ABC):
         offset = 0
         futures = []
 
-        while not self.cancel_event.is_set():
-            recipes = self.get_recipe_batch(batch_size, offset)
+        try:
+            while not self.cancel_event.is_set():
+                recipes = self.get_recipe_batch(batch_size, offset)
 
-            if not recipes:
-                break
+                if not recipes:
+                    break
 
-            future = self.executor.submit(self.process_batch, recipes)
-            futures.append(future)
+                try:
+                    future = self.executor.submit(self.process_batch, recipes)
+                    futures.append(future)
+                except RuntimeError:
+                    # Executor is shutting down, break the loop
+                    break
 
-            offset += batch_size
+                offset += batch_size
 
-        # Wait for all processing to complete
-        for future in as_completed(futures):
-            if self.cancel_event.is_set():
-                break
+            # Wait for all processing to complete
+            for future in as_completed(futures):
+                if self.cancel_event.is_set():
+                    break
 
-        # Close the connection used for querying recipes
-        self.recipe_db.close_connection()
+        finally:
+            # Close the connection used for querying recipes
+            self.recipe_db.close_connection()
 
-        # Signal that processing is complete
-        self.insert_queue.put(("DONE", None))
+            # Signal that processing is complete
+            self.insert_queue.put(("DONE", None))
 
     def process_batch(self, recipes):
         db = Database()
@@ -219,5 +225,9 @@ class RecipeListPage(ttk.Frame, ABC):
 
         self.after(100, self.check_insert_queue)
 
-    def on_close(self):
+    def cleanup(self):
         self.cancel_event.set()
+        if self.executor:
+            self.executor.shutdown(wait=False)
+        if self.query_thread and self.query_thread.is_alive():
+            self.query_thread.join(timeout=1)

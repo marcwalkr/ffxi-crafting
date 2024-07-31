@@ -9,9 +9,10 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-
         self.title("FFXI Crafting Tool")
         self.geometry("1600x900")
+
+        self.recipe_pages = []
 
         self.configure_styles()
         self.create_main_frame()
@@ -39,15 +40,23 @@ class App(tk.Tk):
         self.notebook.pack(expand=True, fill="both")
 
     def create_pages(self):
-        SearchPage(self)
-        ProfitPage(self)
-        SettingsPage(self)
+        self.pages = [
+            SearchPage(self),
+            ProfitPage(self),
+            SettingsPage(self)
+        ]
+        for page in self.pages:
+            if isinstance(page, RecipeListPage):
+                self.recipe_pages.append(page)
 
     def on_close(self):
-        for page in self.notebook.winfo_children():
-            if isinstance(page, RecipeListPage):
-                page.on_close()
+        self.cleanup_pages()
         self.destroy()
+
+    def cleanup_pages(self):
+        for page in self.recipe_pages:
+            page.cleanup()
+        self.recipe_pages.clear()
 
 
 def main():
