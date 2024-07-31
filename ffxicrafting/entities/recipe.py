@@ -27,6 +27,7 @@ class Recipe(RecipeModel):
         self.result_hq1 = result_hq1
         self.result_hq2 = result_hq2
         self.result_hq3 = result_hq3
+        self.cost = None
 
     def get_formatted_ingredient_names(self):
         counts = self.get_ingredient_counts()

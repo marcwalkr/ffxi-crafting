@@ -1,28 +1,23 @@
 from models import AuctionItem, SalesHistory
+from functools import lru_cache
 
 
 class AuctionRepository:
-    cache = {}
-
     def __init__(self, db) -> None:
         self.db = db
 
+    @lru_cache(maxsize=None)
     def get_auction_items(self, item_id):
-        if item_id in self.cache:
-            return self.cache[item_id]
+        auction_item_tuples = self.db.get_auction_items(item_id)
+        if auction_item_tuples is not None:
+            auction_items = [AuctionItem(*auction_item_tuple) for auction_item_tuple in auction_item_tuples]
+            return auction_items
         else:
-            auction_item_tuples = self.db.get_auction_items(item_id)
-            if auction_item_tuples is not None:
-                auction_items = [AuctionItem(*auction_item_tuple) for auction_item_tuple in auction_item_tuples]
-                self.cache[item_id] = auction_items
-                return auction_items
-            else:
-                self.cache[item_id] = []
-                return []
+            return []
 
     def update_auction_item(self, new_item):
         self.db.update_auction_item(new_item.item_id, new_item.avg_price, new_item.sell_freq, new_item.is_stack)
-        self.cache[new_item.item_id] = new_item
+        self.get_auction_items.cache_clear()
 
     def get_latest_sales_history(self, item_id, is_stack):
         sales_history_tuples = self.db.get_latest_sales_history(item_id, is_stack)

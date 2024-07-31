@@ -1,3 +1,4 @@
+from functools import lru_cache
 from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
 from repositories import VendorRepository, GuildRepository
@@ -5,54 +6,35 @@ from controllers import AuctionController
 
 
 class ItemController:
-    item_cache = {}
-    ingredient_cache = {}
-
     def __init__(self, db) -> None:
         self.db = db
         self.vendor_repository = VendorRepository(db)
         self.guild_repository = GuildRepository(db)
         self.auction_controller = AuctionController(db)
 
-    def get_items(self, item_ids):
-        # Identify the missing item_ids (those not in the cache)
-        missing_item_ids = [item_id for item_id in item_ids if item_id not in self.item_cache]
-
-        # Query the database only for the missing items
-        if missing_item_ids:
-            item_tuples = self.db.get_items(missing_item_ids)
-            if item_tuples:
-                for item_tuple in item_tuples:
-                    item = Item(*item_tuple)
-                    self.item_cache[item.item_id] = item
-
-        # Retrieve all items from the cache
-        items = [self.item_cache[item_id] for item_id in item_ids if item_id in self.item_cache]
-        return items
-
+    @lru_cache(maxsize=None)
     def get_item(self, item_id):
-        if item_id in self.item_cache:
-            return self.item_cache[item_id]
+        item_tuple = self.db.get_item(item_id)
+        if item_tuple:
+            return Item(*item_tuple)
         else:
-            raise ValueError(f"Item with id {item_id} not found in cache.")
+            return None
 
     def convert_to_ingredient(self, item, craftable):
-        if item.item_id in self.ingredient_cache:
-            return self.ingredient_cache[item.item_id]
+        return self.create_ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size,
+                                      item.flags, item.ah, item.no_sale, item.base_sell, craftable)
+
+    @lru_cache(maxsize=None)
+    def create_ingredient(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell,
+                          craftable):
+        if craftable:
+            return CraftableIngredient(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
         else:
-            if craftable:
-                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                                 item.no_sale, item.base_sell)
-            else:
-                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                        item.no_sale, item.base_sell)
-            self.ingredient_cache[item.item_id] = ingredient
-            return ingredient
+            return Ingredient(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
 
     def convert_to_result(self, item):
-        result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                        item.no_sale, item.base_sell)
-        return result
+        return Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                      item.no_sale, item.base_sell)
 
     def update_auction_data(self, item_id):
         item = self.get_item(item_id)

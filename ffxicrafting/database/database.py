@@ -10,7 +10,6 @@ class Database:
     pool = None
     pool_lock = threading.Lock()
     local = threading.local()
-    num_connections = 0
 
     @classmethod
     def initialize_pool(cls):
@@ -39,8 +38,6 @@ class Database:
             cls.initialize_pool()
             cls.local.connection = cls.pool.get_connection()
             cls.local.cursor = cls.local.connection.cursor(buffered=True)
-            cls.num_connections += 1
-            logger.debug(f"Opened connection. # connections: {cls.num_connections}")
         return cls.local.connection, cls.local.cursor
 
     @classmethod
@@ -48,8 +45,6 @@ class Database:
         if hasattr(cls.local, "connection") and cls.local.connection is not None:
             cls.local.cursor.close()
             cls.local.connection.close()
-            cls.num_connections -= 1
-            logger.debug(f"Closed connection. # connections: {cls.num_connections}")
             cls.local.connection = None
             cls.local.cursor = None
 

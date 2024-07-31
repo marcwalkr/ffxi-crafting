@@ -19,6 +19,7 @@ class RecipeListPage(ttk.Frame, ABC):
         self.recipe_db = Database()
         self.recipe_controller = RecipeController(self.recipe_db)
 
+        self.query_thread = None
         self.max_threads = 15
         self.executor = None
         self.insert_queue = Queue()
@@ -209,7 +210,6 @@ class RecipeListPage(ttk.Frame, ABC):
                 recipe_id, row = self.insert_queue.get_nowait()
 
                 if recipe_id == "DONE":
-                    logger.debug("Recieved DONE signal, finishing process")
                     self.finish_process()
                     return
 
@@ -221,5 +221,3 @@ class RecipeListPage(ttk.Frame, ABC):
 
     def on_close(self):
         self.cancel_event.set()
-        if self.executor:
-            self.executor.shutdown(wait=False)

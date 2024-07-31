@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 from entities import Recipe
 from utils import unique_preserve_order
 from controllers import ItemController
@@ -7,74 +8,45 @@ logger = logging.getLogger(__name__)
 
 
 class RecipeController:
-    cache = {
-        "get_recipes_by_level": {},
-        "search_recipe": {}
-    }
-    result_item_ids = None
-
     def __init__(self, db) -> None:
         self.db = db
         self.item_controller = ItemController(self.db)
+        self.recipe_cache = {}
 
     def get_recipe(self, recipe_id):
-        for cache_name in self.cache:
-            for recipes in self.cache[cache_name].values():
-                for recipe in recipes:
-                    if recipe.id == recipe_id:
-                        return recipe
-        raise ValueError(f"Recipe with id {recipe_id} not found in cache.")
+        if recipe_id in self.recipe_cache:
+            return self.recipe_cache[recipe_id]
+        recipe_tuple = self.db.get_recipe(recipe_id)
+        if recipe_tuple:
+            recipe = self._create_recipe_objects([recipe_tuple])[0]
+            self.recipe_cache[recipe_id] = recipe
+            return recipe
+        return None
 
+    @lru_cache(maxsize=1000)
     def get_recipes_by_level(self, *craft_levels, batch_size, offset):
-        cache_key = (craft_levels, offset)
-        if cache_key in self.cache["get_recipes_by_level"]:
-            logger.debug(f"Recipes for {cache_key} found in cache")
-            return self.cache["get_recipes_by_level"][cache_key]
+        recipe_tuples = self.db.get_recipes_by_level(*craft_levels, batch_size, offset)
+        return self.process_and_cache_recipes(recipe_tuples)
 
-        results = self.db.get_recipes_by_level(*craft_levels, batch_size, offset)
-        if results:
-            try:
-                recipe_items = self.get_recipe_items(results)
-                recipes = self.create_recipe_objects(results, recipe_items)
-                self.cache["get_recipes_by_level"][cache_key] = recipes
-                return recipes
-            except Exception as e:
-                logger.error(f"Error processing recipe results: {e}")
-                return []
-        else:
-            return []
-
+    @lru_cache(maxsize=1000)
     def search_recipe(self, search_term, batch_size, offset):
-        cache_key = (search_term, offset)
-        if cache_key in self.cache["search_recipe"]:
-            return self.cache["search_recipe"][cache_key]
+        recipe_tuples = self.db.search_recipe(search_term, batch_size, offset)
+        return self.process_and_cache_recipes(recipe_tuples)
 
-        results = self.db.search_recipe(search_term, batch_size, offset)
-        if results:
-            try:
-                recipe_items = self.get_recipe_items(results)
-                recipes = self.create_recipe_objects(results, recipe_items)
-                self.cache["search_recipe"][cache_key] = recipes
-                return recipes
-            except Exception as e:
-                logger.error(f"Error processing recipe results: {e}")
-                return []
-        else:
-            return []
+    def process_and_cache_recipes(self, recipe_tuples):
+        recipes = self.create_recipe_objects(recipe_tuples)
+        for recipe in recipes:
+            if recipe.id not in self.recipe_cache:
+                self.recipe_cache[recipe.id] = recipe
+            else:
+                # If the recipe is already in cache, use the cached instance
+                index = recipes.index(recipe)
+                recipes[index] = self.recipe_cache[recipe.id]
+        return recipes
 
-    def get_recipe_items(self, recipe_tuples):
-        all_crystal_ids = []
-        all_ingredient_ids = []
-        all_result_ids = []
-        for recipe_tuple in recipe_tuples:
-            all_crystal_ids.append(recipe_tuple[11])
-            all_ingredient_ids.extend(recipe_tuple[13:21])
-            all_result_ids.extend(recipe_tuple[21:25])
+    def create_recipe_objects(self, recipe_tuples):
+        unique_items = self.get_recipe_items(recipe_tuples)
 
-        unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
-        return self.item_controller.get_items(unique_item_ids)
-
-    def create_recipe_objects(self, recipe_tuples, unique_items):
         recipes = []
         for recipe_tuple in recipe_tuples:
             crystal_id = recipe_tuple[11]
@@ -127,7 +99,21 @@ class RecipeController:
             recipes.append(recipe)
         return recipes
 
+    def get_recipe_items(self, recipe_tuples):
+        all_crystal_ids = []
+        all_ingredient_ids = []
+        all_result_ids = []
+        for recipe_tuple in recipe_tuples:
+            all_crystal_ids.append(recipe_tuple[11])
+            all_ingredient_ids.extend(recipe_tuple[13:21])
+            all_result_ids.extend(recipe_tuple[21:25])
+
+        unique_item_ids = unique_preserve_order(all_crystal_ids + all_ingredient_ids + all_result_ids)
+        return [self.item_controller.get_item(item_id) for item_id in unique_item_ids if item_id > 0]
+
+    @lru_cache(maxsize=None)
+    def get_all_result_item_ids(self):
+        return self.db.get_all_result_item_ids()
+
     def is_ingredient_craftable(self, item_id):
-        if self.result_item_ids is None:
-            self.result_item_ids = self.db.get_all_result_item_ids()
-        return item_id in self.result_item_ids
+        return item_id in self.get_all_result_item_ids()
