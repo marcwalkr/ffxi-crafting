@@ -29,9 +29,12 @@ class RecipeController:
             return self.query_cache["get_recipes_by_level"][cache_key]
 
         recipe_tuples = self.db.get_recipes_by_level(*craft_levels, batch_size, offset)
-        recipes = self.process_and_cache_recipes(recipe_tuples)
-        self.query_cache["get_recipes_by_level"][cache_key] = recipes
-        return recipes
+        if recipe_tuples:
+            recipes = self.process_and_cache_recipes(recipe_tuples)
+            self.query_cache["get_recipes_by_level"][cache_key] = recipes
+            return recipes
+        else:
+            return []
 
     def search_recipe(self, search_term, batch_size, offset):
         cache_key = (search_term, batch_size, offset)
@@ -39,9 +42,12 @@ class RecipeController:
             return self.query_cache["search_recipe"][cache_key]
 
         recipe_tuples = self.db.search_recipe(search_term, batch_size, offset)
-        recipes = self.process_and_cache_recipes(recipe_tuples)
-        self.query_cache["search_recipe"][cache_key] = recipes
-        return recipes
+        if recipe_tuples:
+            recipes = self.process_and_cache_recipes(recipe_tuples)
+            self.query_cache["search_recipe"][cache_key] = recipes
+            return recipes
+        else:
+            return []
 
     def process_and_cache_recipes(self, recipe_tuples):
         all_item_ids = set()

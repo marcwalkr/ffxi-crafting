@@ -1,6 +1,7 @@
 import threading
 import logging
-from mysql.connector import pooling
+import time
+from mysql.connector import pooling, errors
 from config.settings_manager import SettingsManager
 
 logger = logging.getLogger(__name__)
@@ -10,6 +11,8 @@ class Database:
     pool = None
     pool_lock = threading.Lock()
     local = threading.local()
+    max_retries = 3
+    retry_delay = 5
 
     @classmethod
     def initialize_pool(cls):
@@ -24,20 +27,35 @@ class Database:
 
                 if not all(config.values()):
                     logger.error("Database configuration is incomplete")
-                    return
+                    raise
 
-                cls.pool = pooling.MySQLConnectionPool(
-                    pool_name="mypool",
-                    pool_size=32,
-                    **config
-                )
+                for attempt in range(cls.max_retries):
+                    try:
+                        cls.pool = pooling.MySQLConnectionPool(
+                            pool_name="mypool",
+                            pool_size=32,
+                            **config
+                        )
+                        return
+                    except errors.DatabaseError as e:
+                        logger.warning(f"Database connection attempt {attempt + 1} failed: {e}")
+                        if attempt < cls.max_retries - 1:
+                            logger.info(f"Retrying in {cls.retry_delay} seconds...")
+                            time.sleep(cls.retry_delay)
+                        else:
+                            logger.error("Failed to initialize database connection pool after maximum retries")
+                            raise
 
     @classmethod
     def get_connection(cls):
         if not hasattr(cls.local, "connection") or cls.local.connection is None:
-            cls.initialize_pool()
-            cls.local.connection = cls.pool.get_connection()
-            cls.local.cursor = cls.local.connection.cursor(buffered=True)
+            try:
+                cls.initialize_pool()
+                cls.local.connection = cls.pool.get_connection()
+                cls.local.cursor = cls.local.connection.cursor(buffered=True)
+            except errors.DatabaseError as e:
+                logger.error(f"Failed to get database connection: {e}")
+                raise
         return cls.local.connection, cls.local.cursor
 
     @classmethod
@@ -49,21 +67,23 @@ class Database:
             cls.local.cursor = None
 
     def execute_query(self, query, params=None, fetch_one=False, commit=False):
-        connection, cursor = self.get_connection()
-
         try:
+            connection, cursor = self.get_connection()
             cursor.execute(query, params)
+            
             if commit:
                 connection.commit()
                 return None
             if fetch_one:
                 return cursor.fetchone()
             return cursor.fetchall() or []
-        except Exception as e:
+        except errors.Error as e:
             if commit:
                 connection.rollback()
             logger.error(f"Database query failed: {e}")
-            return None
+            return None if fetch_one else []
+        finally:
+            self.close_connection()
 
     def get_auction_items(self, item_id):
         query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
