@@ -1,10 +1,11 @@
-import json
 from models import SimulationResult
 from config import SettingsManager
-from functools import lru_cache
+import json
 
 
 class SimulationRepository:
+    cache = {}
+
     def __init__(self, db) -> None:
         self.db = db
         self.beastmen_regions = json.dumps(SettingsManager.get_beastmen_regions())

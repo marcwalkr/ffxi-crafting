@@ -92,7 +92,7 @@ class Database:
         return self.execute_query(query, (item_id,), fetch_one=True)
 
     def get_items(self, item_ids):
-        format_strings = ','.join(['%s'] * len(item_ids))
+        format_strings = ",".join(["%s"] * len(item_ids))
         query = f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})"
         return self.execute_query(query, tuple(item_ids), fetch_one=False)
 
