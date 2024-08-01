@@ -3,7 +3,7 @@ from config import SettingsManager
 import json
 
 
-class SimulationController:
+class SimulationRepository:
     cache = {}
 
     def __init__(self, db) -> None:

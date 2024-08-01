@@ -27,6 +27,7 @@ class Recipe(RecipeModel):
         self.result_hq1 = result_hq1
         self.result_hq2 = result_hq2
         self.result_hq3 = result_hq3
+        self.cost = None
 
     def get_formatted_ingredient_names(self):
         counts = self.get_ingredient_counts()
@@ -100,3 +101,13 @@ class Recipe(RecipeModel):
             else:
                 ingredient_counts[ingredient] = 1
         return ingredient_counts
+
+    def calculate_cost(self):
+        cost = 0
+        for ingredient in self.get_ingredients():
+            min_cost = ingredient.get_min_cost()
+            if min_cost is None:
+                return None
+            cost += min_cost
+        self.cost = cost
+        return cost

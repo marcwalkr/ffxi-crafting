@@ -1,7 +1,7 @@
 from models import Npc
 
 
-class NpcController:
+class NpcRepository:
     cache = {}
 
     def __init__(self, db) -> None:

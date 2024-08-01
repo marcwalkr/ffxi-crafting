@@ -1,15 +1,137 @@
-from services import ItemService
+import threading
+from entities import Result, Ingredient, CraftableIngredient
+from config import SettingsManager
+from repositories import ItemRepository, RecipeRepository, VendorRepository, GuildRepository
+from controllers import AuctionController
 
 
 class ItemController:
+    ingredient_cache = {}
+    cache_lock = threading.Lock()
+
     def __init__(self, db) -> None:
-        self.item_service = ItemService(db)
+        self.item_repository = ItemRepository(db)
+        self.recipe_repository = RecipeRepository(db)
+        self.vendor_repository = VendorRepository(db)
+        self.guild_repository = GuildRepository(db)
+        self.auction_controller = AuctionController(db)
+
+    def get_recipe_items(self, ingredient_ids, result_ids):
+        all_item_ids = ingredient_ids + result_ids
+        all_item_models = self.item_repository.get_items(all_item_ids)
+
+        ingredient_item_models = [item for item in all_item_models if item.item_id in ingredient_ids]
+        result_item_models = [item for item in all_item_models if item.item_id in result_ids]
+
+        ingredients = []
+        with self.cache_lock:
+            for item_model in ingredient_item_models:
+                if item_model.item_id in self.ingredient_cache:
+                    ingredients.append(self.ingredient_cache[item_model.item_id])
+                else:
+                    ingredient = self.convert_to_ingredient(item_model)
+                    self.ingredient_cache[item_model.item_id] = ingredient
+                    ingredients.append(ingredient)
+
+        results = [self.convert_to_result(item) for item in result_item_models]
+
+        return ingredients, results
+
+    def convert_to_ingredient(self, item_model):
+        if self.recipe_repository.is_craftable(item_model.item_id):
+            return CraftableIngredient(item_model.item_id, item_model.sub_id, item_model.name,
+                                       item_model.sort_name, item_model.stack_size, item_model.flags,
+                                       item_model.ah, item_model.no_sale, item_model.base_sell)
+        else:
+            return Ingredient(item_model.item_id, item_model.sub_id, item_model.name,
+                              item_model.sort_name, item_model.stack_size, item_model.flags,
+                              item_model.ah, item_model.no_sale, item_model.base_sell)
+
+    def convert_to_result(self, item_model):
+        result = Result(item_model.item_id, item_model.sub_id, item_model.name, item_model.sort_name,
+                        item_model.stack_size, item_model.flags, item_model.ah, item_model.no_sale,
+                        item_model.base_sell)
+        return result
 
     def update_auction_data(self, item_id):
-        self.item_service.update_auction_data(item_id)
+        item = self.ingredient_cache.get(item_id)
+        if not item:
+            item = Result.get(item_id)
+
+        if item:
+            if (item.single_price is None or item.stack_price is None or
+                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                auction_data = self.get_auction_data(item_id)
+
+                item.single_price = auction_data[0]
+                item.stack_price = auction_data[1]
+                item.single_sell_freq = auction_data[2]
+                item.stack_sell_freq = auction_data[3]
+        else:
+            raise ValueError(f"Item with id {item_id} not found in Ingredient cache or Result instances.")
+
+        Result.sync(item)
 
     def update_vendor_cost(self, item_id):
-        self.item_service.update_vendor_cost(item_id)
+        ingredient = self.ingredient_cache.get(item_id)
+        if ingredient:
+            ingredient.vendor_cost = self.get_vendor_cost(item_id)
+        else:
+            raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def update_guild_cost(self, item_id):
-        self.item_service.update_guild_cost(item_id)
+        ingredient = self.ingredient_cache.get(item_id)
+        if ingredient:
+            ingredient.guild_cost = self.get_guild_cost(item_id)
+        else:
+            raise ValueError(f"Ingredient with id {item_id} not found.")
+
+    def get_auction_data(self, item_id):
+        auction_items = self.auction_controller.get_auction_items_with_updates(item_id)
+        single_price = None
+        stack_price = None
+        single_sell_freq = None
+        stack_sell_freq = None
+
+        for auction_item in auction_items:
+            if not auction_item.is_stack:
+                single_price = auction_item.avg_price if auction_item.avg_price > 0 else None
+                single_sell_freq = auction_item.sell_freq if auction_item.sell_freq > 0 else None
+            else:
+                stack_price = auction_item.avg_price if auction_item.avg_price > 0 else None
+                stack_sell_freq = auction_item.sell_freq if auction_item.sell_freq > 0 else None
+
+        return single_price, stack_price, single_sell_freq, stack_sell_freq
+
+    def get_vendor_cost(self, item_id):
+        vendor_items = self.vendor_repository.get_vendor_items(item_id)
+        beastmen_regions = SettingsManager.get_beastmen_regions()
+
+        # Filter out regional vendors that are controlled by Beastmen
+        filtered_vendor_items = []
+        for vendor_item in vendor_items:
+            regional_vendor = self.vendor_repository.get_regional_vendor(vendor_item.npc_id)
+            if not regional_vendor:
+                # Standard vendor
+                filtered_vendor_items.append(vendor_item)
+            else:
+                vendor_region = regional_vendor.region.lower()
+                if vendor_region not in beastmen_regions:
+                    filtered_vendor_items.append(vendor_item)
+
+        prices = [vendor_item.price for vendor_item in filtered_vendor_items]
+
+        return min(prices, default=None)
+
+    def get_guild_cost(self, item_id):
+        enabled_guilds = SettingsManager.get_enabled_guilds()
+        guild_shops = self.guild_repository.get_guild_shops(item_id)
+        prices = []
+
+        for shop in guild_shops:
+            if shop.initial_quantity > 0:
+                guild_vendor = self.guild_repository.get_guild_vendor(shop.guild_id)
+                if guild_vendor and guild_vendor.category in enabled_guilds:
+                    prices.append(shop.min_price)
+
+        return min(prices, default=None)

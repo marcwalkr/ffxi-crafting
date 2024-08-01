@@ -1,9 +1,9 @@
 import tkinter as tk
+import logging
 from tkinter import ttk
-from views import SearchPage, ProfitPage, SettingsPage
-from database import Database, DatabaseException
-import threading
-import warnings
+from views import SearchPage, ProfitPage, SettingsPage, RecipeListPage
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class App(tk.Tk):
@@ -12,15 +12,14 @@ class App(tk.Tk):
         self.title("FFXI Crafting Tool")
         self.geometry("1600x900")
 
+        self.recipe_pages = []
+
         self.configure_styles()
         self.create_main_frame()
         self.create_notebook()
         self.create_pages()
 
-        try:
-            threading.Thread(target=Database.initialize_pool, daemon=True).start()
-        except DatabaseException as e:
-            warnings.warn(f"Failed to initialize database connection pool: {e}")
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def configure_styles(self):
         self.style = ttk.Style(self)
@@ -41,9 +40,23 @@ class App(tk.Tk):
         self.notebook.pack(expand=True, fill="both")
 
     def create_pages(self):
-        SearchPage(self)
-        ProfitPage(self)
-        SettingsPage(self)
+        self.pages = [
+            SearchPage(self),
+            ProfitPage(self),
+            SettingsPage(self)
+        ]
+        for page in self.pages:
+            if isinstance(page, RecipeListPage):
+                self.recipe_pages.append(page)
+
+    def on_close(self):
+        self.cleanup_pages()
+        self.destroy()
+
+    def cleanup_pages(self):
+        for page in self.recipe_pages:
+            page.cleanup()
+        self.recipe_pages.clear()
 
 
 def main():

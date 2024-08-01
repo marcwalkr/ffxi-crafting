@@ -1,49 +1,78 @@
 import threading
-import concurrent.futures
-import traceback
+import logging
 from tkinter import ttk
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from abc import ABC, abstractmethod
 from queue import Queue, Empty
-from concurrent.futures import ThreadPoolExecutor
+from utils import TreeviewWithSort
 from views import RecipeDetailPage
-from controllers import RecipeController
+from controllers import RecipeController, CraftingController, ItemController
 from database import Database
 
+logger = logging.getLogger(__name__)
 
-class RecipeListPage(ttk.Frame):
+
+class RecipeListPage(ttk.Frame, ABC):
     def __init__(self, parent):
         super().__init__(parent.notebook)
         self.parent = parent
-        self.is_open = True
-        self.queue = Queue()
-        self.init_executor()
-        self.active_db_connections = []
+        self.recipe_db = Database()
+        self.recipe_controller = RecipeController(self.recipe_db)
+
+        self.query_thread = None
+        self.max_threads = 15
+        self.executor = None
+        self.insert_queue = Queue()
+        self.cancel_event = threading.Event()
+
         self.create_widgets()
-        self.check_queue()
 
     def create_widgets(self):
+        self.parent.notebook.add(self, text=self.get_tab_text())
+        self.create_action_button()
+        self.create_progress_bar()
+        self.create_treeview()
+
+    def create_action_button(self):
+        self.action_button = ttk.Button(self, text=self.action_button_text, command=self.toggle_process)
+        self.action_button.pack(pady=10)
+
+    def create_progress_bar(self):
+        self.progress_bar = ttk.Progressbar(self, mode="indeterminate", length=300)
+        self.progress_bar.pack_forget()
+
+    def create_treeview(self):
+        self.treeview = TreeviewWithSort(self, columns=self.get_treeview_columns(), show="headings")
+        self.configure_treeview(self.treeview)
+        self.treeview.pack(padx=10, pady=10, expand=True, fill="both")
+        self.treeview.bind("<Double-1>", self.show_recipe_details)
+        self.treeview.bind("<Button-1>", self.on_treeview_click)
+
+    @abstractmethod
+    def get_tab_text(self):
         pass
 
-    def init_executor(self):
-        self.executor = ThreadPoolExecutor(max_workers=15)
-        self.futures = []
-        self.query_recipes_future = None
+    @abstractmethod
+    def get_treeview_columns(self):
+        pass
 
-    def cleanup_db_connections(self):
-        while self.active_db_connections:
-            db = self.active_db_connections.pop()
-            try:
-                db.close()
-            except Exception as e:
-                print(f"Error closing database connection: {e}")
+    @abstractmethod
+    def configure_treeview(self, treeview):
+        pass
 
-    def check_queue(self):
-        try:
-            while True:
-                task = self.queue.get_nowait()
-                task()
-        except Empty:
-            pass
-        self.after(100, self.check_queue)
+    @abstractmethod
+    def get_recipe_batch(self, batch_size, offset):
+        pass
+
+    @abstractmethod
+    def format_row(self, craft_result):
+        pass
+
+    def toggle_process(self):
+        if self.action_button["text"] == self.action_button_text:
+            self.start_process()
+        else:
+            self.cancel_process()
 
     def show_recipe_details(self, event):
         tree = event.widget
@@ -51,18 +80,11 @@ class RecipeListPage(ttk.Frame):
             return
 
         recipe_id = tree.selection()[0]
-        values = tree.item(recipe_id, "values")
-        synth_cost = values[-1]
+        recipe = self.recipe_controller.get_recipe(int(recipe_id))
 
-        db = Database()
-        recipe_controller = RecipeController(db)
-
-        recipe = recipe_controller.get_recipe(int(recipe_id))
-        detail_page = RecipeDetailPage(self.parent, recipe, synth_cost)
+        detail_page = RecipeDetailPage(self.parent, recipe)
         self.parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self.parent.notebook.select(detail_page)
-
-        db.close()
 
     def on_treeview_click(self, event):
         tree = event.widget
@@ -70,78 +92,139 @@ class RecipeListPage(ttk.Frame):
         if region in ("nothing", "heading"):
             tree.selection_remove(tree.selection())
 
+    def start_process(self):
+        self.cancel_event.clear()
+        self.action_button["text"] = "Cancel"
+        self.progress_bar.pack(pady=10, before=self.treeview)
+        self.progress_bar.start()
+        self.clear_treeview(self.treeview)
+
+        self.init_executor()
+        self.clear_insert_queue()
+
+        self.query_thread = threading.Thread(target=self.fetch_and_process_batches)
+        self.query_thread.start()
+
+        self.after(100, self.check_insert_queue)
+
+    def cancel_process(self):
+        self.cancel_event.set()
+        self.action_button["text"] = "Canceling..."
+        self.action_button["state"] = "disabled"
+
+    def finish_process(self):
+        threading.Thread(target=self.shutdown_executor, daemon=True).start()
+
+    def shutdown_executor(self):
+        if self.executor:
+            self.executor.shutdown(wait=True)
+        self.after(0, self.finish_ui_update)
+
+    def finish_ui_update(self):
+        self.progress_bar.stop()
+        self.progress_bar.pack_forget()
+
+        self.action_button["text"] = self.action_button_text
+        self.action_button["state"] = "normal"
+
+    def fetch_and_process_batches(self):
+        batch_size = 25
+        offset = 0
+        futures = []
+
+        try:
+            while not self.cancel_event.is_set():
+                recipes = self.get_recipe_batch(batch_size, offset)
+
+                if not recipes:
+                    break
+
+                try:
+                    future = self.executor.submit(self.process_batch, recipes)
+                    futures.append(future)
+                except RuntimeError:
+                    # Executor is shutting down, break the loop
+                    break
+
+                offset += batch_size
+
+            # Wait for all processing to complete
+            for future in as_completed(futures):
+                if self.cancel_event.is_set():
+                    break
+
+        finally:
+            # Close the connection used for querying recipes
+            self.recipe_db.close_connection()
+
+            # Signal that processing is complete
+            self.insert_queue.put(("DONE", None))
+
+    def process_batch(self, recipes):
+        with Database() as db:
+            item_controller = ItemController(db)
+            crafting_controller = CraftingController(item_controller)
+
+            for recipe in recipes:
+                if self.cancel_event.is_set():
+                    break
+                self.process_single_recipe(recipe, crafting_controller)
+
+    def process_single_recipe(self, recipe, crafting_controller):
+        if self.cancel_event.is_set():
+            return
+
+        craft_result = crafting_controller.simulate_craft(recipe)
+
+        if not craft_result:
+            return
+
+        if self.should_display_recipe(craft_result):
+            row = self.format_row(craft_result)
+            self.insert_queue.put((recipe.id, row))
+
+    def should_display_recipe(self, craft_result):
+        # Default to True, subclasses can override
+        return True
+
     def clear_treeview(self, treeview):
         for item in treeview.get_children():
             treeview.delete(item)
 
-    def start_process(self):
-        self.init_executor()
-        self.action_button.config(text="Cancel", command=self.cancel_process)
-        self.clear_treeview(self.treeview)
-        self.progress_bar.pack_forget()
-        self.progress_bar.pack(pady=10, before=self.treeview)
-        self.progress_bar.start()
-        self.is_open = True
-
-        self.query_recipes_future = self.executor.submit(self.query_recipes)
-        self.check_futures()
-
-    def cancel_process(self):
-        self.is_open = False
-        self.action_button.config(text="Canceling...", state="disabled")
-        self.executor.shutdown(wait=False)
-        threading.Thread(target=self.wait_for_cancellation).start()
-
-    def wait_for_cancellation(self):
-        for future in self.futures:
-            future.cancel()
-        for future in self.futures:
-            try:
-                future.result()
-            except concurrent.futures.CancelledError:
-                pass
-            except Exception as e:
-                print(f"Error during cancellation: {e}")
-                traceback.print_exc()
-        self.cleanup_db_connections()
-        self.process_finished()
-
-    def process_finished(self):
-        self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-        self.action_button.config(text=self.action_button_text, command=self.start_process, state="normal")
-
-    def check_futures(self):
-        incomplete_futures = [f for f in self.futures if not f.done()]
-        if incomplete_futures or (self.query_recipes_future and not self.query_recipes_future.done()):
-            self.after(100, self.check_futures)
-        else:
-            for future in self.futures:
-                try:
-                    future.result()
-                except concurrent.futures.CancelledError:
-                    pass
-                except Exception as e:
-                    print(f"Error in future: {e}")
-                    traceback.print_exc()
-                    self.queue.put(self.process_finished)
-                    return
-            self.queue.put(self.finalize_process)
-
-    def query_recipes(self):
-        pass
-
-    def process_batch(self, results):
-        pass
-
     def insert_single_into_treeview(self, recipe_id, row):
         self.treeview.insert("", "end", iid=recipe_id, values=row)
 
-    def finalize_process(self):
-        pass
+    def init_executor(self):
+        if self.executor:
+            self.executor.shutdown(wait=False)
+        self.executor = ThreadPoolExecutor(max_workers=self.max_threads)
 
-    def destroy(self):
-        self.is_open = False
-        self.executor.shutdown(wait=False)
-        self.cleanup_db_connections()
-        super().destroy()
+    def clear_insert_queue(self):
+        while not self.insert_queue.empty():
+            try:
+                self.insert_queue.get_nowait()
+            except Empty:
+                break
+        self.insert_queue.queue.clear()
+
+    def check_insert_queue(self):
+        try:
+            while True:
+                recipe_id, row = self.insert_queue.get_nowait()
+
+                if recipe_id == "DONE":
+                    self.finish_process()
+                    return
+
+                self.insert_single_into_treeview(recipe_id, row)
+        except Empty:
+            pass
+
+        self.after(100, self.check_insert_queue)
+
+    def cleanup(self):
+        self.cancel_event.set()
+        if self.executor:
+            self.executor.shutdown(wait=False)
+        if self.query_thread and self.query_thread.is_alive():
+            self.query_thread.join(timeout=1)
