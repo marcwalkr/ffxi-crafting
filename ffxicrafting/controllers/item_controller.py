@@ -5,8 +5,7 @@ from controllers import AuctionController
 
 
 class ItemController:
-    item_cache = {}
-    ingredient_cache = {}
+    cache = {}
 
     def __init__(self, db) -> None:
         self.db = db
@@ -16,7 +15,7 @@ class ItemController:
 
     def get_items(self, item_ids):
         # Identify the missing item_ids (those not in the cache)
-        missing_item_ids = [item_id for item_id in item_ids if item_id not in self.item_cache]
+        missing_item_ids = [item_id for item_id in item_ids if item_id not in self.cache]
 
         # Query the database only for the missing items
         if missing_item_ids:
@@ -24,30 +23,29 @@ class ItemController:
             if item_tuples:
                 for item_tuple in item_tuples:
                     item = Item(*item_tuple)
-                    self.item_cache[item.item_id] = item
+                    self.cache[item.item_id] = item
 
         # Retrieve all items from the cache
-        items = [self.item_cache[item_id] for item_id in item_ids if item_id in self.item_cache]
+        items = [self.cache[item_id] for item_id in item_ids if item_id in self.cache]
         return items
 
     def get_item(self, item_id):
-        if item_id in self.item_cache:
-            return self.item_cache[item_id]
+        if item_id in self.cache:
+            return self.cache[item_id]
         else:
             raise ValueError(f"Item with id {item_id} not found in cache.")
 
     def convert_to_ingredient(self, item, craftable):
-        if item.item_id in self.ingredient_cache:
-            return self.ingredient_cache[item.item_id]
+        # Convert the Item object to CraftableIngredient if it's craftable, otherwise convert to Ingredient
+        if craftable:
+            ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                             item.no_sale, item.base_sell)
         else:
-            if craftable:
-                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                                 item.no_sale, item.base_sell)
-            else:
-                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                        item.no_sale, item.base_sell)
-            self.ingredient_cache[item.item_id] = ingredient
-            return ingredient
+            ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                    item.no_sale, item.base_sell)
+        # Replace the existing Item object in the cache with the new Ingredient object
+        self.cache[item.item_id] = ingredient
+        return ingredient
 
     def convert_to_result(self, item):
         result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
@@ -65,18 +63,17 @@ class ItemController:
             item.single_sell_freq = single_sell_freq if single_sell_freq is not None else None
             item.stack_sell_freq = stack_sell_freq if stack_sell_freq is not None else None
 
-        self.sync_ingredients(item)
         self.sync_results(item)
 
     def update_vendor_cost(self, item_id):
-        ingredient = self.get_ingredient(item_id)
+        ingredient = self.get_item(item_id)
         if ingredient:
             ingredient.vendor_cost = self.get_vendor_cost(item_id)
         else:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def update_guild_cost(self, item_id):
-        ingredient = self.get_ingredient(item_id)
+        ingredient = self.get_item(item_id)
         if ingredient:
             ingredient.guild_cost = self.get_guild_cost(item_id)
         else:
@@ -131,18 +128,6 @@ class ItemController:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)
-
-    def get_ingredient(self, item_id):
-        for ingredient in Ingredient.instances:
-            if ingredient.item_id == item_id:
-                return ingredient
-        return None
-
-    def sync_ingredients(self, item):
-        # Sync the changes to any Ingredient object created from this Item
-        for ingredient in Ingredient.instances:
-            if ingredient.item_id == item.item_id:
-                ingredient.update_from_item(item)
 
     def sync_results(self, item):
         # Sync the changes to any Result object created from this Item

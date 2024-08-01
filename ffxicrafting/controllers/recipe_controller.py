@@ -1,5 +1,5 @@
 import logging
-from entities import Recipe
+from entities import Recipe, Ingredient
 from controllers import ItemController
 
 logger = logging.getLogger(__name__)
@@ -84,12 +84,15 @@ class RecipeController:
         # Treat the crystal as an ingredient
         ingredient_items.insert(0, crystal)
 
-        # Convert ingredient Item objects into Ingredient objects
+        # Convert craftable Item objects into Ingredient objects if they're not already Ingredient objects
         ingredients = []
         for ingredient_item in ingredient_items:
-            craftable = self.is_ingredient_craftable(ingredient_item.item_id)
-            ingredient = self.item_controller.convert_to_ingredient(ingredient_item, craftable)
-            ingredients.append(ingredient)
+            if not isinstance(ingredient_item, Ingredient):
+                craftable = self.is_ingredient_craftable(ingredient_item.item_id)
+                ingredient = self.item_controller.convert_to_ingredient(ingredient_item, craftable)
+                ingredients.append(ingredient)
+            else:
+                ingredients.append(ingredient_item)
 
         # Convert result Item objects into Result objects
         results = [self.item_controller.convert_to_result(result) for result in result_items]
