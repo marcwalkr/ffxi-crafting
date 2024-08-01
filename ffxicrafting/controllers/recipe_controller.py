@@ -1,5 +1,6 @@
 import logging
-from entities import Recipe, Ingredient
+from entities import Recipe
+from repositories import RecipeRepository
 from controllers import ItemController
 
 logger = logging.getLogger(__name__)
@@ -11,11 +12,11 @@ class RecipeController:
         "search_recipe": {}
     }
     recipe_cache = {}
-    all_result_item_ids = None
 
     def __init__(self, db) -> None:
         self.db = db
         self.item_controller = ItemController(self.db)
+        self.recipe_repository = RecipeRepository(self.db)
 
     def get_recipe(self, recipe_id):
         if recipe_id in self.recipe_cache:
@@ -50,13 +51,20 @@ class RecipeController:
             return []
 
     def process_and_cache_recipes(self, recipe_tuples):
-        all_item_ids = set()
-        for recipe_tuple in recipe_tuples:
-            all_item_ids.add(recipe_tuple[11])  # crystal
-            all_item_ids.update(recipe_tuple[13:21])  # ingredients
-            all_item_ids.update(recipe_tuple[21:25])  # results
+        ingredient_item_ids = set()
+        result_item_ids = set()
 
-        all_items = {item.item_id: item for item in self.item_controller.get_items(list(all_item_ids))}
+        for recipe_tuple in recipe_tuples:
+            # Treat the crystal as an ingredient
+            ingredient_item_ids.add(recipe_tuple[11])
+
+            # Gather ingredient ids, excluding empty ingredients represented by 0
+            ingredient_item_ids.update(id for id in recipe_tuple[13:21] if id != 0)
+
+            # Gather result ids
+            result_item_ids.update(recipe_tuple[21:25])
+
+        ingredients, results = self.item_controller.get_recipe_items(list(ingredient_item_ids), list(result_item_ids))
 
         recipes = []
         for recipe_tuple in recipe_tuples:
@@ -64,38 +72,18 @@ class RecipeController:
             if recipe_id in self.recipe_cache:
                 recipes.append(self.recipe_cache[recipe_id])
             else:
-                recipe = self.create_recipe_object(recipe_tuple, all_items)
+                recipe = self.create_recipe_object(recipe_tuple, ingredients, results)
                 self.recipe_cache[recipe_id] = recipe
                 recipes.append(recipe)
         return recipes
 
-    def create_recipe_object(self, recipe_tuple, all_items):
+    def create_recipe_object(self, recipe_tuple, ingredients, results):
         crystal_id = recipe_tuple[11]
         hq_crystal_id = recipe_tuple[12]
         ingredient_ids = recipe_tuple[13:21]
         result_ids = recipe_tuple[21:25]
         result_quantities = recipe_tuple[25:29]
         result_name = recipe_tuple[29]
-
-        crystal = all_items[crystal_id]
-        ingredient_items = [all_items[item_id] for item_id in ingredient_ids if item_id > 0]
-        result_items = [all_items[item_id] for item_id in result_ids if item_id > 0]
-
-        # Treat the crystal as an ingredient
-        ingredient_items.insert(0, crystal)
-
-        # Convert craftable Item objects into Ingredient objects if they're not already Ingredient objects
-        ingredients = []
-        for ingredient_item in ingredient_items:
-            if not isinstance(ingredient_item, Ingredient):
-                craftable = self.is_ingredient_craftable(ingredient_item.item_id)
-                ingredient = self.item_controller.convert_to_ingredient(ingredient_item, craftable)
-                ingredients.append(ingredient)
-            else:
-                ingredients.append(ingredient_item)
-
-        # Convert result Item objects into Result objects
-        results = [self.item_controller.convert_to_result(result) for result in result_items]
 
         recipe = Recipe(
             *recipe_tuple[:11],
@@ -105,7 +93,7 @@ class RecipeController:
             *result_ids,
             *result_quantities,
             result_name,
-            ingredients[0],  # crystal
+            next((ingredient for ingredient in ingredients if ingredient.item_id == crystal_id), None),
             next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[0]), None),
             next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[1]), None),
             next((ingredient for ingredient in ingredients if ingredient.item_id == ingredient_ids[2]), None),
@@ -120,11 +108,3 @@ class RecipeController:
             next((result for result in results if result.item_id == result_ids[3]), None)
         )
         return recipe
-
-    def get_all_result_item_ids(self):
-        if self.all_result_item_ids is None:
-            self.all_result_item_ids = self.db.get_all_result_item_ids()
-        return self.all_result_item_ids
-
-    def is_ingredient_craftable(self, item_id):
-        return item_id in self.get_all_result_item_ids()

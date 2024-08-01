@@ -1,94 +1,86 @@
 import threading
-from entities import Item, Result, Ingredient, CraftableIngredient
+from entities import Result, Ingredient, CraftableIngredient
 from config import SettingsManager
-from repositories import VendorRepository, GuildRepository
+from repositories import ItemRepository, RecipeRepository, VendorRepository, GuildRepository
 from controllers import AuctionController
 
 
 class ItemController:
-    cache = {}
+    ingredient_cache = {}
     cache_lock = threading.Lock()
 
     def __init__(self, db) -> None:
-        self.db = db
+        self.item_repository = ItemRepository(db)
+        self.recipe_repository = RecipeRepository(db)
         self.vendor_repository = VendorRepository(db)
         self.guild_repository = GuildRepository(db)
         self.auction_controller = AuctionController(db)
 
-    def get_items(self, item_ids):
-        items = []
-        missing_item_ids = []
+    def get_recipe_items(self, ingredient_ids, result_ids):
+        all_item_ids = ingredient_ids + result_ids
+        all_item_models = self.item_repository.get_items(all_item_ids)
 
-        # Read from cache and identify missing items
+        ingredient_item_models = [item for item in all_item_models if item.item_id in ingredient_ids]
+        result_item_models = [item for item in all_item_models if item.item_id in result_ids]
+
+        ingredients = []
         with self.cache_lock:
-            for item_id in item_ids:
-                if item_id in self.cache:
-                    items.append(self.cache[item_id])
+            for item_model in ingredient_item_models:
+                if item_model.item_id in self.ingredient_cache:
+                    ingredients.append(self.ingredient_cache[item_model.item_id])
                 else:
-                    missing_item_ids.append(item_id)
+                    ingredient = self.convert_to_ingredient(item_model)
+                    self.ingredient_cache[item_model.item_id] = ingredient
+                    ingredients.append(ingredient)
 
-        # If there are missing items, fetch them from the database
-        if missing_item_ids:
-            item_tuples = self.db.get_items(missing_item_ids)
-            if item_tuples:
-                with self.cache_lock:
-                    for item_tuple in item_tuples:
-                        item = Item(*item_tuple)
-                        if item.item_id not in self.cache:  # Double-check before adding
-                            self.cache[item.item_id] = item
-                        items.append(self.cache[item.item_id])
+        results = [self.convert_to_result(item) for item in result_item_models]
 
-        return items
+        return ingredients, results
 
-    def get_item(self, item_id):
-        if item_id in self.cache:
-            return self.cache[item_id]
+    def convert_to_ingredient(self, item_model):
+        if self.recipe_repository.is_craftable(item_model.item_id):
+            return CraftableIngredient(item_model.item_id, item_model.sub_id, item_model.name,
+                                       item_model.sort_name, item_model.stack_size, item_model.flags,
+                                       item_model.ah, item_model.no_sale, item_model.base_sell)
         else:
-            raise ValueError(f"Item with id {item_id} not found in cache.")
+            return Ingredient(item_model.item_id, item_model.sub_id, item_model.name,
+                              item_model.sort_name, item_model.stack_size, item_model.flags,
+                              item_model.ah, item_model.no_sale, item_model.base_sell)
 
-    def convert_to_ingredient(self, item, craftable):
-        # Convert the Item object to CraftableIngredient if it's craftable, otherwise convert to Ingredient
-        with self.cache_lock:
-            if isinstance(self.cache[item.item_id], Ingredient):
-                return self.cache[item.item_id]
-
-            if craftable:
-                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                                 item.no_sale, item.base_sell)
-            else:
-                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                        item.no_sale, item.base_sell)
-            # Replace the existing Item object in the cache with the new Ingredient object
-            self.cache[item.item_id] = ingredient
-        return ingredient
-
-    def convert_to_result(self, item):
-        result = Result(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                        item.no_sale, item.base_sell)
+    def convert_to_result(self, item_model):
+        result = Result(item_model.item_id, item_model.sub_id, item_model.name, item_model.sort_name,
+                        item_model.stack_size, item_model.flags, item_model.ah, item_model.no_sale,
+                        item_model.base_sell)
         return result
 
     def update_auction_data(self, item_id):
-        item = self.get_item(item_id)
-        if item.single_price is None or item.stack_price is None or item.single_sell_freq is None or item.stack_sell_freq is None:
-            auction_data = self.get_auction_data(item_id)
-            single_price, stack_price, single_sell_freq, stack_sell_freq = auction_data
+        item = self.ingredient_cache.get(item_id)
+        if not item:
+            item = Result.get(item_id)
 
-            item.single_price = single_price if single_price is not None else None
-            item.stack_price = stack_price if stack_price is not None else None
-            item.single_sell_freq = single_sell_freq if single_sell_freq is not None else None
-            item.stack_sell_freq = stack_sell_freq if stack_sell_freq is not None else None
+        if item:
+            if (item.single_price is None or item.stack_price is None or
+                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                auction_data = self.get_auction_data(item_id)
 
-        self.sync_results(item)
+                item.single_price = auction_data[0]
+                item.stack_price = auction_data[1]
+                item.single_sell_freq = auction_data[2]
+                item.stack_sell_freq = auction_data[3]
+        else:
+            raise ValueError(f"Item with id {item_id} not found in Ingredient cache or Result instances.")
+
+        Result.sync(item)
 
     def update_vendor_cost(self, item_id):
-        ingredient = self.get_item(item_id)
+        ingredient = self.ingredient_cache.get(item_id)
         if ingredient:
             ingredient.vendor_cost = self.get_vendor_cost(item_id)
         else:
             raise ValueError(f"Ingredient with id {item_id} not found.")
 
     def update_guild_cost(self, item_id):
-        ingredient = self.get_item(item_id)
+        ingredient = self.ingredient_cache.get(item_id)
         if ingredient:
             ingredient.guild_cost = self.get_guild_cost(item_id)
         else:
@@ -143,9 +135,3 @@ class ItemController:
                     prices.append(shop.min_price)
 
         return min(prices, default=None)
-
-    def sync_results(self, item):
-        # Sync the changes to any Result object created from this Item
-        for result in Result.instances:
-            if result.item_id == item.item_id:
-                result.update_from_item(item)
