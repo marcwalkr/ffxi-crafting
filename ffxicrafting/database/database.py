@@ -70,7 +70,7 @@ class Database:
         try:
             connection, cursor = self.get_connection()
             cursor.execute(query, params)
-            
+
             if commit:
                 connection.commit()
                 return None
@@ -82,8 +82,6 @@ class Database:
                 connection.rollback()
             logger.error(f"Database query failed: {e}")
             return None if fetch_one else []
-        finally:
-            self.close_connection()
 
     def get_auction_items(self, item_id):
         query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
