@@ -66,6 +66,13 @@ class Database:
             cls.local.connection = None
             cls.local.cursor = None
 
+    def __enter__(self):
+        self.get_connection()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close_connection()
+
     def execute_query(self, query, params=None, fetch_one=False, commit=False):
         try:
             connection, cursor = self.get_connection()

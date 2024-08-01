@@ -161,8 +161,7 @@ class RecipeListPage(ttk.Frame, ABC):
             self.insert_queue.put(("DONE", None))
 
     def process_batch(self, recipes):
-        db = Database()
-        try:
+        with Database() as db:
             item_controller = ItemController(db)
             crafting_controller = CraftingController(item_controller)
 
@@ -170,8 +169,6 @@ class RecipeListPage(ttk.Frame, ABC):
                 if self.cancel_event.is_set():
                     break
                 self.process_single_recipe(recipe, crafting_controller)
-        finally:
-            db.close_connection()
 
     def process_single_recipe(self, recipe, crafting_controller):
         if self.cancel_event.is_set():
