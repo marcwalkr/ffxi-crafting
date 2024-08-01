@@ -29,7 +29,7 @@ class RecipeController:
             return []
 
     def search_recipe(self, search_term, batch_size, offset):
-        recipe_models = self.recipe_repository.search_recipe(search_term, batch_size=batch_size, offset=offset)
+        recipe_models = self.recipe_repository.search_recipe(search_term, batch_size, offset)
         if recipe_models:
             recipes = self.process_and_cache_recipes(recipe_models)
             self.recipe_cache.update({recipe.id: recipe for recipe in recipes})

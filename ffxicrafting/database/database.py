@@ -136,15 +136,12 @@ class Database:
 
     def search_recipe(self, search_term, batch_size, offset):
         query = """
-        SELECT * FROM (
-            SELECT *, MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) AS relevance
-            FROM synth_recipes
-        ) AS ranked
-        WHERE ranked.relevance > 0
-        ORDER BY relevance DESC, ID ASC
+        SELECT * FROM synth_recipes
+        WHERE MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE)
+        ORDER BY MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) DESC, ID ASC
         LIMIT %s OFFSET %s;
         """
-        return self.execute_query(query, (search_term, batch_size, offset), fetch_one=False)
+        return self.execute_query(query, (search_term, search_term, batch_size, offset), fetch_one=False)
 
     def get_all_result_item_ids(self):
         query = """
