@@ -1,3 +1,4 @@
+import threading
 from entities import Item, Result, Ingredient, CraftableIngredient
 from config import SettingsManager
 from repositories import VendorRepository, GuildRepository
@@ -6,6 +7,7 @@ from controllers import AuctionController
 
 class ItemController:
     cache = {}
+    cache_lock = threading.Lock()
 
     def __init__(self, db) -> None:
         self.db = db
@@ -14,19 +16,28 @@ class ItemController:
         self.auction_controller = AuctionController(db)
 
     def get_items(self, item_ids):
-        # Identify the missing item_ids (those not in the cache)
-        missing_item_ids = [item_id for item_id in item_ids if item_id not in self.cache]
+        items = []
+        missing_item_ids = []
 
-        # Query the database only for the missing items
+        # Read from cache and identify missing items
+        with self.cache_lock:
+            for item_id in item_ids:
+                if item_id in self.cache:
+                    items.append(self.cache[item_id])
+                else:
+                    missing_item_ids.append(item_id)
+
+        # If there are missing items, fetch them from the database
         if missing_item_ids:
             item_tuples = self.db.get_items(missing_item_ids)
             if item_tuples:
-                for item_tuple in item_tuples:
-                    item = Item(*item_tuple)
-                    self.cache[item.item_id] = item
+                with self.cache_lock:
+                    for item_tuple in item_tuples:
+                        item = Item(*item_tuple)
+                        if item.item_id not in self.cache:  # Double-check before adding
+                            self.cache[item.item_id] = item
+                        items.append(self.cache[item.item_id])
 
-        # Retrieve all items from the cache
-        items = [self.cache[item_id] for item_id in item_ids if item_id in self.cache]
         return items
 
     def get_item(self, item_id):
@@ -37,14 +48,18 @@ class ItemController:
 
     def convert_to_ingredient(self, item, craftable):
         # Convert the Item object to CraftableIngredient if it's craftable, otherwise convert to Ingredient
-        if craftable:
-            ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                             item.no_sale, item.base_sell)
-        else:
-            ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
-                                    item.no_sale, item.base_sell)
-        # Replace the existing Item object in the cache with the new Ingredient object
-        self.cache[item.item_id] = ingredient
+        with self.cache_lock:
+            if isinstance(self.cache[item.item_id], Ingredient):
+                return self.cache[item.item_id]
+
+            if craftable:
+                ingredient = CraftableIngredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                                 item.no_sale, item.base_sell)
+            else:
+                ingredient = Ingredient(item.item_id, item.sub_id, item.name, item.sort_name, item.stack_size, item.flags, item.ah,
+                                        item.no_sale, item.base_sell)
+            # Replace the existing Item object in the cache with the new Ingredient object
+            self.cache[item.item_id] = ingredient
         return ingredient
 
     def convert_to_result(self, item):

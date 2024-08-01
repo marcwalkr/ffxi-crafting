@@ -14,9 +14,9 @@ class Ingredient(Item):
             cost_from_stack = None
 
         costs = [self.vendor_cost, self.guild_cost, self.single_price, cost_from_stack]
-        costs = [cost for cost in costs if cost is not None]
+        valid_costs = [cost for cost in costs if cost is not None]
 
-        return min(costs, default=None)
+        return min(valid_costs, default=None)
 
 
 class CraftableIngredient(Ingredient, CraftableItem):
@@ -24,7 +24,6 @@ class CraftableIngredient(Ingredient, CraftableItem):
         super().__init__(*args, **kwargs)
 
     def get_min_cost(self):
-        costs = super().get_min_cost()
-        if self.crafted_cost is not None:
-            costs = min(costs, self.crafted_cost)
-        return costs
+        costs = [super().get_min_cost(), self.crafted_cost]
+        valid_costs = [cost for cost in costs if cost is not None]
+        return min(valid_costs, default=None)
