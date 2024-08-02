@@ -3,6 +3,14 @@ import json
 
 
 class SettingsManager:
+    """
+    A class for managing application settings.
+
+    This class provides methods to load, save, and retrieve various settings
+    used throughout the FFXI Crafting Tool application. It handles the persistence
+    of settings to a JSON file and provides default values when settings are not found.
+    """
+
     SETTINGS_FILE = "settings.json"
     DEFAULT_SETTINGS = {
         "profit_table": {
@@ -72,54 +80,116 @@ class SettingsManager:
     }
 
     @classmethod
-    def load_settings(cls):
+    def load_settings(cls) -> dict:
+        """
+        Load settings from the settings file.
+
+        Returns:
+            dict: A dictionary containing the loaded settings. If the settings file
+            doesn't exist, returns the default settings.
+        """
         if os.path.exists(cls.SETTINGS_FILE):
             with open(cls.SETTINGS_FILE, "r") as file:
                 return json.load(file)
         return cls.DEFAULT_SETTINGS
 
     @classmethod
-    def save_settings(cls, settings):
+    def save_settings(cls, settings: dict) -> None:
+        """
+        Save settings to the settings file.
+
+        Args:
+            settings (dict): A dictionary containing the settings to be saved.
+        """
         with open(cls.SETTINGS_FILE, "w") as file:
             json.dump(settings, file, indent=4)
 
     @classmethod
-    def get_profit_per_synth(cls):
+    def get_profit_per_synth(cls) -> int:
+        """
+        Get the profit per synthesis setting.
+
+        Returns:
+            int: The profit per synthesis value. Returns 0 if not set.
+        """
         settings = cls.load_settings()
         return settings["profit_table"].get("profit_/_synth", 0)
 
     @classmethod
-    def get_profit_per_storage(cls):
+    def get_profit_per_storage(cls) -> int:
+        """
+        Get the profit per storage setting.
+
+        Returns:
+            int: The profit per storage value. Returns 0 if not set.
+        """
         settings = cls.load_settings()
         return settings["profit_table"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_min_auction_list_price(cls):
+    def get_min_auction_list_price(cls) -> int:
+        """
+        Get the minimum auction list price setting.
+
+        Returns:
+            int: The minimum auction list price value. Returns 0 if not set.
+        """
         settings = cls.load_settings()
         return settings["profit_table"].get("min_auction_list_price", 0)
 
     @classmethod
-    def get_sell_freq(cls):
+    def get_sell_freq(cls) -> float:
+        """
+        Get the sell frequency setting.
+
+        Returns:
+            float: The sell frequency value. Returns 0.0 if not set.
+        """
         settings = cls.load_settings()
         return settings["profit_table"].get("sell_frequency", 0.0)
 
     @classmethod
-    def get_skill_look_ahead(cls):
+    def get_skill_look_ahead(cls) -> int:
+        """
+        Get the skill look ahead setting.
+
+        Returns:
+            int: The skill look ahead value. Returns 0 if not set.
+        """
         settings = cls.load_settings()
         return settings["synth"].get("skill_look_ahead", 0)
 
     @classmethod
-    def get_simulation_trials(cls):
+    def get_simulation_trials(cls) -> int:
+        """
+        Get the number of simulation trials setting.
+
+        Returns:
+            int: The number of simulation trials. Returns 1000 if not set.
+        """
         settings = cls.load_settings()
         return settings["synth"].get("simulation_trials", 1000)
 
     @classmethod
-    def get_craft_ingredients(cls):
+    def get_craft_ingredients(cls) -> bool:
+        """
+        Get the craft ingredients setting.
+
+        Returns:
+            bool: True if craft ingredients is enabled, False otherwise.
+        """
         settings = cls.load_settings()
         return settings["synth"].get("craft_ingredients", False)
 
     @classmethod
-    def get_craft_skills(cls):
+    def get_craft_skills(cls) -> list[int]:
+        """
+        Get the craft skills settings.
+
+        Returns:
+            list[int]: A list of craft skill levels for each crafting discipline.
+            Returns [0, 0, 0, 0, 0, 0, 0, 0] if not set.
+        """
         settings = cls.load_settings()
         skills = settings.get("skill_levels", {})
         return [
@@ -134,12 +204,25 @@ class SettingsManager:
         ]
 
     @classmethod
-    def get_regional_merchants(cls):
+    def get_regional_merchants(cls) -> dict:
+        """
+        Get the regional merchants settings.
+
+        Returns:
+            dict: A dictionary of regions and their controlling nations.
+            Returns the default settings if not set.
+        """
         settings = cls.load_settings()
         return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
 
     @classmethod
-    def get_beastmen_regions(cls):
+    def get_beastmen_regions(cls) -> list[str]:
+        """
+        Get the list of regions controlled by beastmen.
+
+        Returns:
+            list[str]: A list of region names controlled by beastmen.
+        """
         settings = cls.load_settings()
         regions = []
         regional_merchants = settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
@@ -150,33 +233,70 @@ class SettingsManager:
         return regions
 
     @classmethod
-    def get_conquest_settings(cls):
+    def get_conquest_settings(cls) -> dict:
+        """
+        Get the conquest settings.
+
+        Returns:
+            dict: A dictionary of nations and their conquest rankings.
+            Returns the default settings if not set.
+        """
         settings = cls.load_settings()
         return settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"])
 
     @classmethod
-    def get_enabled_guilds(cls):
+    def get_enabled_guilds(cls) -> list[str]:
+        """
+        Get the list of enabled guilds.
+
+        Returns:
+            list[str]: A list of enabled guild names, capitalized.
+        """
         settings = cls.load_settings()
         guilds = settings["guilds"].items()
         enabled_guilds = [guild for guild, enabled in guilds if enabled]
         return [guild.capitalize() for guild in enabled_guilds]
 
     @classmethod
-    def get_database_host(cls):
+    def get_database_host(cls) -> str:
+        """
+        Get the database host setting.
+
+        Returns:
+            str: The database host. Returns an empty string if not set.
+        """
         settings = cls.load_settings()
         return settings["database"].get("host", "")
 
     @classmethod
-    def get_database_user(cls):
+    def get_database_user(cls) -> str:
+        """
+        Get the database user setting.
+
+        Returns:
+            str: The database user. Returns an empty string if not set.
+        """
         settings = cls.load_settings()
         return settings["database"].get("user", "")
 
     @classmethod
-    def get_database_password(cls):
+    def get_database_password(cls) -> str:
+        """
+        Get the database password setting.
+
+        Returns:
+            str: The database password. Returns an empty string if not set.
+        """
         settings = cls.load_settings()
         return settings["database"].get("password", "")
 
     @classmethod
-    def get_database_name(cls):
+    def get_database_name(cls) -> str:
+        """
+        Get the database name setting.
+
+        Returns:
+            str: The database name. Returns an empty string if not set.
+        """
         settings = cls.load_settings()
         return settings["database"].get("database", "")
