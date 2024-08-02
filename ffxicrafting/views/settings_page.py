@@ -13,7 +13,7 @@ class SettingsPage(ttk.Frame):
     guilds, and database connections.
     """
 
-    def __init__(self, parent: tk.Frame) -> None:
+    def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the SettingsPage.
 
@@ -24,8 +24,8 @@ class SettingsPage(ttk.Frame):
         categories of settings.
         """
         super().__init__(parent.notebook)
-        self._parent = parent
-        self._settings = SettingsManager.load_settings()
+        self._parent: tk.Tk = parent
+        self._settings: dict = SettingsManager.load_settings()
 
         self._profit_table_settings: ttk.LabelFrame = None
         self._synth_settings: ttk.LabelFrame = None
@@ -309,7 +309,7 @@ class SettingsPage(ttk.Frame):
             frame (ttk.LabelFrame): The frame containing number settings.
 
         Returns:
-            dict: A dictionary of setting names and their numeric values.
+            dict: A dictionary of setting names and their numeric values (0 if blank).
         """
         settings = {}
         for child in frame.winfo_children():
@@ -329,7 +329,7 @@ class SettingsPage(ttk.Frame):
             frame (ttk.LabelFrame): The frame containing vertically aligned number settings.
 
         Returns:
-            dict: A dictionary of setting names and their numeric values.
+            dict: A dictionary of setting names and their numeric values (0 if blank).
         """
         settings = {}
         for child in frame.winfo_children():
@@ -417,23 +417,25 @@ class SettingsPage(ttk.Frame):
                         settings[label] = subchild.var.get()
         return settings
 
-    def _convert_to_number(self, value: str) -> Union[int, float, str]:
+    def _convert_to_number(self, value: str) -> Union[int, float]:
         """
-        Convert a string value to a number (int or float) if possible.
+        Convert a string value to a number (int or float).
 
         Args:
             value (str): The string value to convert.
 
         Returns:
-            Union[int, float, str]: The converted number or the original string if conversion fails.
+            Union[int, float]: The converted number. Returns 0 if the input is blank or conversion fails.
         """
+        if not value.strip():  # Check if the value is blank or only whitespace
+            return 0
         try:
             if "." in value:
                 return float(value)
             else:
                 return int(value)
         except ValueError:
-            return value  # Return as is if conversion fails
+            return 0  # Return 0 if conversion fails
 
     def _create_number_settings(self, frame: ttk.LabelFrame, settings: list[tuple[str, Union[int, float]]],
                                 saved_settings: dict) -> None:
