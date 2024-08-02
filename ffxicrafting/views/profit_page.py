@@ -17,11 +17,10 @@ class ProfitPage(RecipeListPage):
     def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the ProfitPage.
+        Sets up the action button text and initializes the parent class.
 
         Args:
             parent (tk.Tk): The parent Tkinter application.
-
-        Sets up the action button text and initializes the parent class.
         """
         self.action_button_text: str = "Generate Table"
         super().__init__(parent)
@@ -48,11 +47,10 @@ class ProfitPage(RecipeListPage):
     def configure_treeview(self, treeview: ttk.Treeview) -> None:
         """
         Configure the treeview settings for the profit page.
+        Sets up column headings and alignments for profit-related information.
 
         Args:
             treeview (ttk.Treeview): The treeview to configure.
-
-        Sets up column headings and alignments for profit-related information.
         """
         treeview.heading("nq", text="NQ")
         treeview.heading("hq", text="HQ")
@@ -71,6 +69,8 @@ class ProfitPage(RecipeListPage):
     def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's crafting skills and skill look-ahead.
+        Uses the user's craft skills and skill look-ahead settings to determine
+        which recipes to fetch.
 
         Args:
             batch_size (int): The number of recipes to fetch.
@@ -78,9 +78,6 @@ class ProfitPage(RecipeListPage):
 
         Returns:
             list: A list of Recipe objects fetched from the RecipeController.
-
-        Uses the user's craft skills and skill look-ahead settings to determine
-        which recipes to fetch.
         """
         skills = SettingsManager.get_craft_skills()
         skill_look_ahead = SettingsManager.get_skill_look_ahead()

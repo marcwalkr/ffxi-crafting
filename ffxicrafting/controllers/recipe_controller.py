@@ -7,37 +7,38 @@ logger = logging.getLogger(__name__)
 
 
 class RecipeController:
-    recipe_cache = {}
+    _recipe_cache = {}
 
     def __init__(self, db) -> None:
-        self.item_controller = ItemController(db)
-        self.recipe_repository = RecipeRepository(db)
+        self._item_controller: ItemController = ItemController(db)
+        self._recipe_repository: RecipeRepository = RecipeRepository(db)
 
     def get_recipe(self, recipe_id):
-        if recipe_id in self.recipe_cache:
-            return self.recipe_cache[recipe_id]
+        if recipe_id in self._recipe_cache:
+            return self._recipe_cache[recipe_id]
         else:
             raise ValueError(f"Recipe with id {recipe_id} not found in cache.")
 
     def get_recipes_by_level(self, *craft_levels, batch_size, offset):
-        recipe_models = self.recipe_repository.get_recipes_by_level(*craft_levels, batch_size=batch_size, offset=offset)
+        recipe_models = self._recipe_repository.get_recipes_by_level(
+            *craft_levels, batch_size=batch_size, offset=offset)
         if recipe_models:
-            recipes = self.process_and_cache_recipes(recipe_models)
-            self.recipe_cache.update({recipe.id: recipe for recipe in recipes})
+            recipes = self._process_and_cache_recipes(recipe_models)
+            self._recipe_cache.update({recipe.id: recipe for recipe in recipes})
             return recipes
         else:
             return []
 
     def search_recipe(self, search_term, batch_size, offset):
-        recipe_models = self.recipe_repository.search_recipe(search_term, batch_size, offset)
+        recipe_models = self._recipe_repository.search_recipe(search_term, batch_size, offset)
         if recipe_models:
-            recipes = self.process_and_cache_recipes(recipe_models)
-            self.recipe_cache.update({recipe.id: recipe for recipe in recipes})
+            recipes = self._process_and_cache_recipes(recipe_models)
+            self._recipe_cache.update({recipe.id: recipe for recipe in recipes})
             return recipes
         else:
             return []
 
-    def process_and_cache_recipes(self, recipe_models):
+    def _process_and_cache_recipes(self, recipe_models):
         ingredient_item_ids = set()
         result_item_ids = set()
 
@@ -57,19 +58,19 @@ class RecipeController:
             result_item_ids.update([recipe_model.result, recipe_model.result_hq1, recipe_model.result_hq2,
                                    recipe_model.result_hq3])
 
-        ingredients, results = self.item_controller.get_recipe_items(list(ingredient_item_ids), list(result_item_ids))
+        ingredients, results = self._item_controller.get_recipe_items(list(ingredient_item_ids), list(result_item_ids))
 
         recipes = []
         for recipe_model in recipe_models:
-            if recipe_model.id in self.recipe_cache:
-                recipes.append(self.recipe_cache[recipe_model.id])
+            if recipe_model.id in self._recipe_cache:
+                recipes.append(self._recipe_cache[recipe_model.id])
             else:
-                recipe = self.create_recipe_object(recipe_model, ingredients, results)
-                self.recipe_cache[recipe_model.id] = recipe
+                recipe = self._create_recipe_object(recipe_model, ingredients, results)
+                self._recipe_cache[recipe_model.id] = recipe
                 recipes.append(recipe)
         return recipes
 
-    def create_recipe_object(self, recipe_model, ingredients, results):
+    def _create_recipe_object(self, recipe_model, ingredients, results):
         recipe = Recipe(
             recipe_model.id, recipe_model.desynth, recipe_model.key_item, recipe_model.wood, recipe_model.smith,
             recipe_model.gold, recipe_model.cloth, recipe_model.leather, recipe_model.bone, recipe_model.alchemy,

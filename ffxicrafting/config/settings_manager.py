@@ -233,16 +233,54 @@ class SettingsManager:
         return regions
 
     @classmethod
-    def get_conquest_settings(cls) -> dict:
+    def get_sandoria_rank(cls) -> int:
         """
-        Get the conquest settings.
+        Get the conquest rank for San d'Oria.
 
         Returns:
-            dict: A dictionary of nations and their conquest rankings.
-            Returns the default settings if not set.
+            int: The conquest rank for San d'Oria (1-3). Returns 1 if not set or invalid.
         """
         settings = cls.load_settings()
-        return settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"])
+        rank_str = settings.get("conquest", {}).get("sandoria", "1st")
+        return cls._rank_str_to_int(rank_str)
+
+    @classmethod
+    def get_bastok_rank(cls) -> int:
+        """
+        Get the conquest rank for Bastok.
+
+        Returns:
+            int: The conquest rank for Bastok (1-3). Returns 2 if not set or invalid.
+        """
+        settings = cls.load_settings()
+        rank_str = settings.get("conquest", {}).get("bastok", "2nd")
+        return cls._rank_str_to_int(rank_str)
+
+    @classmethod
+    def get_windurst_rank(cls) -> int:
+        """
+        Get the conquest rank for Windurst.
+
+        Returns:
+            int: The conquest rank for Windurst (1-3). Returns 3 if not set or invalid.
+        """
+        settings = cls.load_settings()
+        rank_str = settings.get("conquest", {}).get("windurst", "3rd")
+        return cls._rank_str_to_int(rank_str)
+
+    @staticmethod
+    def _rank_str_to_int(rank_str: str) -> int:
+        """
+        Convert a rank string to its corresponding integer value.
+
+        Args:
+            rank_str (str): The rank as a string ("1st", "2nd", or "3rd").
+
+        Returns:
+            int: The rank as an integer (1, 2, or 3). Returns 1 if invalid.
+        """
+        rank_map = {"1st": 1, "2nd": 2, "3rd": 3}
+        return rank_map.get(rank_str, 1)
 
     @classmethod
     def get_enabled_guilds(cls) -> list[str]:

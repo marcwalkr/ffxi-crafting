@@ -24,11 +24,10 @@ class RecipeListPage(ttk.Frame, ABC):
     def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the RecipeListPage.
+        Sets up the basic structure, database connections, and threading components.
 
         Args:
             parent (tk.Tk): The parent Tkinter application.
-
-        Sets up the basic structure, database connections, and threading components.
         """
         super().__init__(parent.notebook)
         self._parent = parent
@@ -115,11 +114,10 @@ class RecipeListPage(ttk.Frame, ABC):
     def configure_treeview(self, treeview: ttk.Treeview) -> None:
         """
         Configure the treeview settings.
+        Implement this method to set up column headings, widths, and other treeview properties.
 
         Args:
             treeview (ttk.Treeview): The treeview to configure.
-
-        Implement this method to set up column headings, widths, and other treeview properties.
         """
         pass
 
@@ -127,6 +125,7 @@ class RecipeListPage(ttk.Frame, ABC):
     def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes.
+        Implement this method to retrieve recipes from the database or other source.
 
         Args:
             batch_size (int): The number of recipes to fetch.
@@ -134,8 +133,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Returns:
             list: A list of Recipe objects.
-
-        Implement this method to retrieve recipes from the database or other source.
         """
         pass
 
@@ -143,14 +140,13 @@ class RecipeListPage(ttk.Frame, ABC):
     def format_row(self, craft_result: dict[str, any]) -> list[any]:
         """
         Format a row for the treeview based on the craft result.
+        Implement this method to convert a craft result into a list of values for the treeview.
 
         Args:
             craft_result (dict[str, any]): The craft result to format.
 
         Returns:
             list: A list of values to display in the treeview.
-
-        Implement this method to convert a craft result into a list of values for the treeview.
         """
         pass
 
@@ -168,11 +164,10 @@ class RecipeListPage(ttk.Frame, ABC):
     def _show_recipe_details(self, event: tk.Event) -> None:
         """
         Show the details of the selected recipe in a new tab.
+        Opens a new RecipeDetailPage for the selected recipe.
 
         Args:
             event (tk.Event): The event triggered by double-clicking a recipe.
-
-        Opens a new RecipeDetailPage for the selected recipe.
         """
         tree = event.widget
         if not tree.selection():
@@ -314,12 +309,11 @@ class RecipeListPage(ttk.Frame, ABC):
     def _process_single_recipe(self, recipe: Recipe, crafting_controller: CraftingController) -> None:
         """
         Process a single recipe.
+        Simulates the craft and adds the result to the insert queue if it should be displayed.
 
         Args:
             recipe (Recipe): The Recipe object to process.
             crafting_controller (CraftingController): The CraftingController object to use.
-
-        Simulates the craft and adds the result to the insert queue if it should be displayed.
         """
         if self._cancel_event.is_set():
             return
@@ -336,14 +330,13 @@ class RecipeListPage(ttk.Frame, ABC):
     def should_display_recipe(self, craft_result: dict) -> bool:
         """
         Determine if a recipe should be displayed in the treeview.
+        Default implementation always returns True. Override in subclasses for custom filtering.
 
         Args:
             craft_result (dict): The craft result to check.
 
         Returns:
             bool: True if the recipe should be displayed, False otherwise.
-
-        Default implementation always returns True. Override in subclasses for custom filtering.
         """
         return True
 

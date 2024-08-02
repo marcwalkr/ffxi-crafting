@@ -15,12 +15,11 @@ class RecipeDetailPage(ttk.Frame):
     def __init__(self, parent: tk.Tk, recipe: Recipe) -> None:
         """
         Initialize the RecipeDetailPage.
+        Creates a new tab in the parent's notebook and sets up the detail page.
 
         Args:
             parent (tk.Tk): The parent Tkinter application.
             recipe (Recipe): The recipe object to display details for.
-
-        Creates a new tab in the parent's notebook and sets up the detail page.
         """
         super().__init__(parent.notebook)
         self._parent: tk.Tk = parent
@@ -36,7 +35,7 @@ class RecipeDetailPage(ttk.Frame):
         """
         Create and layout all widgets for the recipe detail page.
 
-        This method sets up the recipe label, ingredients tree, cost per synth frame,
+        Sets up the recipe label, ingredients tree, cost per synth frame,
         results tree, and close button.
         """
         self._add_recipe_label(self._recipe.result_name)
@@ -124,12 +123,11 @@ class RecipeDetailPage(ttk.Frame):
     def _configure_treeview_columns(self, treeview: TreeviewWithSort, columns: list[str]) -> None:
         """
         Configure the columns for a treeview.
+        Sets up the heading and column properties for each column in the treeview.
 
         Args:
             treeview (TreeviewWithSort): The treeview to configure.
             columns (list[str]): List of column names to configure.
-
-        Sets up the heading and column properties for each column in the treeview.
         """
         for col in columns:
             treeview.heading(col, text=col)

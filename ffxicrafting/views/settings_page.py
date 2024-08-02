@@ -16,12 +16,11 @@ class SettingsPage(ttk.Frame):
     def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the SettingsPage.
+        Creates a new tab in the parent's notebook and sets up the settings page with various
+        categories of settings.
 
         Args:
             parent (tk.Tk): The parent Tkinter application.
-
-        Creates a new tab in the parent's notebook and sets up the settings page with various
-        categories of settings.
         """
         super().__init__(parent.notebook)
         self._parent: tk.Tk = parent
@@ -102,12 +101,11 @@ class SettingsPage(ttk.Frame):
     def _create_profit_table_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for the profit table.
+        Sets up input fields for profit per synthesis, profit per storage,
+        minimum auction list price, and sell frequency.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up input fields for profit per synthesis, profit per storage,
-        minimum auction list price, and sell frequency.
         """
         self._profit_table_settings = frame
         settings = [
@@ -121,12 +119,11 @@ class SettingsPage(ttk.Frame):
     def _create_synth_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for synthesis.
+        Sets up input fields for skill look ahead and simulation trials,
+        as well as a checkbox for crafting ingredients.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up input fields for skill look ahead and simulation trials,
-        as well as a checkbox for crafting ingredients.
         """
         self._synth_settings = frame
         settings = [
@@ -145,11 +142,10 @@ class SettingsPage(ttk.Frame):
     def _create_skill_levels_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for crafting skill levels.
+        Sets up input fields for various crafting skills.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up input fields for various crafting skills.
         """
         self._skill_levels_settings = frame
         self._create_vertical_number_settings(frame, [
@@ -166,11 +162,10 @@ class SettingsPage(ttk.Frame):
     def _create_merchants_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for regional merchants.
+        Sets up dropdown menus for selecting the controlling nation for each region.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up dropdown menus for selecting the controlling nation for each region.
         """
         self._merchants_settings = frame
         merchants = [
@@ -202,11 +197,10 @@ class SettingsPage(ttk.Frame):
     def _create_conquest_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for conquest rankings.
+        Sets up dropdown menus for selecting the conquest ranking of each nation.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up dropdown menus for selecting the conquest ranking of each nation.
         """
         self._conquest_settings = frame
         nations = ["San d'Oria", "Bastok", "Windurst"]
@@ -227,11 +221,10 @@ class SettingsPage(ttk.Frame):
     def _create_guilds_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for guild merchants.
+        Sets up checkboxes for each crafting guild and the Tenshodo.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up checkboxes for each crafting guild and the Tenshodo.
         """
         self._guilds_settings = frame
         guilds = [
@@ -247,11 +240,10 @@ class SettingsPage(ttk.Frame):
     def _create_database_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for database connection.
+        Sets up input fields for database host, user, password, and database name.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Sets up input fields for database host, user, password, and database name.
         """
         self._database_settings = frame
         settings = [
@@ -441,13 +433,12 @@ class SettingsPage(ttk.Frame):
                                 saved_settings: dict) -> None:
         """
         Create number input fields for settings.
+        Creates labeled entry fields for numeric settings.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
             settings (list[tuple[str, Union[int, float]]]): List of setting names and default values.
             saved_settings (dict): Dictionary of previously saved settings.
-
-        Creates labeled entry fields for numeric settings.
         """
         for setting, default in settings:
             label = ttk.Label(frame, text=setting)
@@ -461,13 +452,12 @@ class SettingsPage(ttk.Frame):
                                          saved_settings: dict) -> None:
         """
         Create vertically aligned number input fields for settings.
+        Creates vertically aligned labeled entry fields for numeric settings.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
             settings (list[tuple[str, Union[int, float]]]): List of setting names and default values.
             saved_settings (dict): Dictionary of previously saved settings.
-
-        Creates vertically aligned labeled entry fields for numeric settings.
         """
         for setting, default in settings:
             row_frame = ttk.Frame(frame)
@@ -482,11 +472,10 @@ class SettingsPage(ttk.Frame):
     def _create_merchants_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for regional merchants in a two-column layout.
+        Creates a two-column layout of option menus for selecting the controlling nation for each region.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
-
-        Creates a two-column layout of option menus for selecting the controlling nation for each region.
         """
         self._merchants_settings = frame
         merchants = [
@@ -519,13 +508,12 @@ class SettingsPage(ttk.Frame):
                                             saved_settings: dict) -> None:
         """
         Create a two-column layout of boolean settings using checkbuttons.
+        Creates a two-column layout of checkbuttons for boolean settings.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
             settings (list[str]): List of setting names.
             saved_settings (dict): Dictionary of previously saved settings.
-
-        Creates a two-column layout of checkbuttons for boolean settings.
         """
         left_frame = ttk.Frame(frame)
         left_frame.pack(side="left", fill="y", padx=5, pady=5)
@@ -543,13 +531,12 @@ class SettingsPage(ttk.Frame):
                                 saved_settings: dict) -> None:
         """
         Create string settings using labeled entry widgets.
+        Creates labeled entry widgets for string settings.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
             settings (list[tuple[str, str]]): List of tuples containing setting names and default values.
             saved_settings (dict): Dictionary of previously saved settings.
-
-        Creates labeled entry widgets for string settings.
         """
         for setting, default in settings:
             row_frame = ttk.Frame(frame)

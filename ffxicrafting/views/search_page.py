@@ -15,11 +15,10 @@ class SearchPage(RecipeListPage):
     def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the search page.
+        Initializes search-specific attributes and calls the parent constructor.
 
         Args:
             parent (tk.Tk): The parent Tkinter application.
-
-        Initializes search-specific attributes and calls the parent constructor.
         """
         self.action_button_text = "Search"
         self._search_var: tk.StringVar = None
@@ -61,11 +60,10 @@ class SearchPage(RecipeListPage):
     def configure_treeview(self, treeview: ttk.Treeview) -> None:
         """
         Configure the treeview settings.
+        Sets up column headings, text, and alignment for the search results treeview.
 
         Args:
             treeview (ttk.Treeview): The treeview to configure.
-
-        Sets up column headings, text, and alignment for the search results treeview.
         """
         treeview.heading("nq", text="NQ")
         treeview.heading("hq", text="HQ")

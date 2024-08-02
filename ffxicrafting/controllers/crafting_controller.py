@@ -24,9 +24,7 @@ class CraftingController:
 
     def simulate_craft(self, recipe: Recipe) -> dict:
         """
-        Simulate the crafting process for a given recipe.
-
-        This method performs a crafting simulation based on the provided recipe and the
+        Performs a crafting simulation based on the provided recipe and the
         current crafting skill settings. It calculates profits and formats the results.
 
         Args:
@@ -39,10 +37,7 @@ class CraftingController:
                 - profit_per_storage (float): The calculated profit per storage unit.
                 - sell_freq (float): The highest sell frequency among the crafting results.
 
-        Returns None if the crafting simulation produces no results.
-
-        Note:
-            This method uses the SettingsManager to fetch current craft skills for the simulation.
+            None if the crafting simulation produces no results.
         """
         skills = SettingsManager.get_craft_skills()
         crafter = Crafter(*skills, recipe)
