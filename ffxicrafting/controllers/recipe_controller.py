@@ -1,5 +1,7 @@
 import logging
-from entities import Recipe
+from database import Database
+from entities import Recipe, Ingredient, Result
+from models import RecipeModel
 from repositories import RecipeRepository
 from controllers import ItemController
 
@@ -7,19 +9,52 @@ logger = logging.getLogger(__name__)
 
 
 class RecipeController:
+    """
+    Controller class for managing recipe-related operations.
+    """
+
     _recipe_cache = {}
 
-    def __init__(self, db) -> None:
+    def __init__(self, db: Database) -> None:
+        """
+        Initialize the RecipeController with database connection and required controllers.
+
+        Args:
+            db (Database): The database connection object.
+        """
         self._item_controller: ItemController = ItemController(db)
         self._recipe_repository: RecipeRepository = RecipeRepository(db)
 
-    def get_recipe(self, recipe_id):
+    def get_recipe(self, recipe_id: int) -> Recipe:
+        """
+        Retrieve a recipe from the cache by its ID.
+
+        Args:
+            recipe_id (int): The ID of the recipe to retrieve.
+
+        Returns:
+            Recipe: The requested recipe object.
+
+        Raises:
+            ValueError: If the recipe with the given ID is not found in the cache.
+        """
         if recipe_id in self._recipe_cache:
             return self._recipe_cache[recipe_id]
         else:
             raise ValueError(f"Recipe with id {recipe_id} not found in cache.")
 
-    def get_recipes_by_level(self, *craft_levels, batch_size, offset):
+    def get_recipes_by_level(self, *craft_levels: int, batch_size: int, offset: int) -> list[Recipe]:
+        """
+        Retrieve recipes based on craft levels, with pagination support.
+
+        Args:
+            *craft_levels (int): Variable number of craft levels to filter recipes by.
+            batch_size (int): The number of recipes to retrieve in this batch.
+            offset (int): The offset from which to start retrieving recipes.
+
+        Returns:
+            list[Recipe]: A list of Recipe objects matching the specified criteria.
+        """
         recipe_models = self._recipe_repository.get_recipes_by_level(
             *craft_levels, batch_size=batch_size, offset=offset)
         if recipe_models:
@@ -29,7 +64,18 @@ class RecipeController:
         else:
             return []
 
-    def search_recipe(self, search_term, batch_size, offset):
+    def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list[Recipe]:
+        """
+        Search for recipes based on a search term, with pagination support.
+
+        Args:
+            search_term (str): The term to search for in recipe names or ingredients.
+            batch_size (int): The number of recipes to retrieve in this batch.
+            offset (int): The offset from which to start retrieving recipes.
+
+        Returns:
+            list[Recipe]: A list of Recipe objects matching the search term.
+        """
         recipe_models = self._recipe_repository.search_recipe(search_term, batch_size, offset)
         if recipe_models:
             recipes = self._process_and_cache_recipes(recipe_models)
@@ -38,7 +84,16 @@ class RecipeController:
         else:
             return []
 
-    def _process_and_cache_recipes(self, recipe_models):
+    def _process_and_cache_recipes(self, recipe_models: list[RecipeModel]) -> list[Recipe]:
+        """
+        Process a list of RecipeModel objects into Recipe objects and cache them.
+
+        Args:
+            recipe_models (list[RecipeModel]): A list of RecipeModel objects to process.
+
+        Returns:
+            list[Recipe]: A list of processed Recipe objects.
+        """
         ingredient_item_ids = set()
         result_item_ids = set()
 
@@ -70,7 +125,18 @@ class RecipeController:
                 recipes.append(recipe)
         return recipes
 
-    def _create_recipe_object(self, recipe_model, ingredients, results):
+    def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Ingredient], results: list[Result]) -> Recipe:
+        """
+        Create a Recipe object from a RecipeModel and lists of ingredients and results.
+
+        Args:
+            recipe_model (RecipeModel): The RecipeModel to convert into a Recipe object.
+            ingredients (list[Ingredient]): A list of all unique ingredients for the recipe.
+            results (list[Result]): A list of all unique results for the recipe.
+
+        Returns:
+            Recipe: A fully populated Recipe object.
+        """
         recipe = Recipe(
             recipe_model.id, recipe_model.desynth, recipe_model.key_item, recipe_model.wood, recipe_model.smith,
             recipe_model.gold, recipe_model.cloth, recipe_model.leather, recipe_model.bone, recipe_model.alchemy,
