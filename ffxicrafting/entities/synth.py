@@ -26,34 +26,24 @@ class Synth:
         return self.difficulty <= skill_look_ahead
 
     def get_difficulty(self):
-        recipe_skills = [self.recipe.wood, self.recipe.smith, self.recipe.gold,
-                         self.recipe.cloth, self.recipe.leather,
-                         self.recipe.bone, self.recipe.alchemy,
-                         self.recipe.cook]
+        recipe_skills = [
+            (self.recipe.wood, self.crafter.wood),
+            (self.recipe.smith, self.crafter.smith),
+            (self.recipe.gold, self.crafter.gold),
+            (self.recipe.cloth, self.crafter.cloth),
+            (self.recipe.leather, self.crafter.leather),
+            (self.recipe.bone, self.crafter.bone),
+            (self.recipe.alchemy, self.crafter.alchemy),
+            (self.recipe.cook, self.crafter.cook)
+        ]
 
-        crafter_skills = [self.crafter.wood,
-                          self.crafter.smith,
-                          self.crafter.gold,
-                          self.crafter.cloth,
-                          self.crafter.leather,
-                          self.crafter.bone,
-                          self.crafter.alchemy,
-                          self.crafter.cook]
-
-        skill_differences = [recipe - crafter for recipe, crafter in zip(recipe_skills, crafter_skills)]
-        return min(skill_differences, default=0)
-
-    def get_tier(self):
-        if self.difficulty < -50:
-            return 3
-        elif self.difficulty < -30:
-            return 2
-        elif self.difficulty < -10:
-            return 1
-        elif self.difficulty <= 0:
+        max_required_skill = max((recipe for recipe, _ in recipe_skills if recipe > 0), default=0)
+        if max_required_skill == 0:
             return 0
-        else:
-            return -1
+
+        corresponding_crafter_skill = next(crafter for recipe, crafter in recipe_skills if recipe == max_required_skill)
+
+        return max_required_skill - corresponding_crafter_skill
 
     def get_tier(self):
         if self.difficulty < -50:
