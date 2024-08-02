@@ -241,7 +241,7 @@ class SettingsManager:
             int: The conquest rank for San d'Oria (1-3). Returns 1 if not set or invalid.
         """
         settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("sandoria", "1st")
+        rank_str = settings.get("conquest", {}).get("san doria", "1st")
         return cls._rank_str_to_int(rank_str)
 
     @classmethod
