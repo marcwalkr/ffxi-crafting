@@ -1251,18 +1251,18 @@ INSERT INTO vendor_items VALUES (17391,17719350,66,0,0,0,0,0,0);	-- Willow Fishi
 INSERT INTO vendor_items VALUES (5703,17772598,100,0,0,0,0,0,0);	-- Uleguerand Milk
 INSERT INTO vendor_items VALUES (5684,17772598,250,0,0,0,0,0,0);	-- Chalaimbille
 INSERT INTO vendor_items VALUES (17905,17772598,100,0,0,0,0,0,0);	-- Wormy Broth
-INSERT INTO vendor_items VALUES (5686,17772598,800,0,0,0,0,0,0);	-- Cheese Sandwich
-INSERT INTO vendor_items VALUES (5729,17772598,3360,0,0,0,0,0,0);	-- Bavarois
-INSERT INTO vendor_items VALUES (5718,17772598,1300,0,0,0,0,0,0);	-- Cream Puff
-INSERT INTO vendor_items VALUES (461,17772598,5000,0,0,0,0,0,0);	-- Buffalo Milk Case
-INSERT INTO vendor_items VALUES (5152,17772598,1280,0,0,0,0,0,0);	-- Buffalo Meat
-INSERT INTO vendor_items VALUES (4722,17772598,31878,0,0,0,0,0,0);	-- Enfire II
-INSERT INTO vendor_items VALUES (4723,17772598,30492,0,0,0,0,0,0);	-- Enblizzard II
-INSERT INTO vendor_items VALUES (4724,17772598,27968,0,0,0,0,0,0);	-- Enaero II
-INSERT INTO vendor_items VALUES (4725,17772598,26112,0,0,0,0,0,0);	-- Enstone II
-INSERT INTO vendor_items VALUES (4726,17772598,25600,0,0,0,0,0,0);	-- Enthunder II
-INSERT INTO vendor_items VALUES (4727,17772598,33000,0,0,0,0,0,0);	-- Enwater II
-INSERT INTO vendor_items VALUES (4850,17772598,150000,0,0,0,0,0,0);	-- Refresh II
+-- INSERT INTO vendor_items VALUES (5686,17772598,800,0,0,0,0,0,0);	-- Cheese Sandwich
+-- INSERT INTO vendor_items VALUES (5729,17772598,3360,0,0,0,0,0,0);	-- Bavarois
+-- INSERT INTO vendor_items VALUES (5718,17772598,1300,0,0,0,0,0,0);	-- Cream Puff
+-- INSERT INTO vendor_items VALUES (461,17772598,5000,0,0,0,0,0,0);	-- Buffalo Milk Case
+-- INSERT INTO vendor_items VALUES (5152,17772598,1280,0,0,0,0,0,0);	-- Buffalo Meat
+-- INSERT INTO vendor_items VALUES (4722,17772598,31878,0,0,0,0,0,0);	-- Enfire II
+-- INSERT INTO vendor_items VALUES (4723,17772598,30492,0,0,0,0,0,0);	-- Enblizzard II
+-- INSERT INTO vendor_items VALUES (4724,17772598,27968,0,0,0,0,0,0);	-- Enaero II
+-- INSERT INTO vendor_items VALUES (4725,17772598,26112,0,0,0,0,0,0);	-- Enstone II
+-- INSERT INTO vendor_items VALUES (4726,17772598,25600,0,0,0,0,0,0);	-- Enthunder II
+-- INSERT INTO vendor_items VALUES (4727,17772598,33000,0,0,0,0,0,0);	-- Enwater II
+-- INSERT INTO vendor_items VALUES (4850,17772598,150000,0,0,0,0,0,0);	-- Refresh II
 
 -- Machielle
 INSERT INTO vendor_items VALUES (688,17719303,18,0,0,0,0,0,0);	-- Arrowwood Log
