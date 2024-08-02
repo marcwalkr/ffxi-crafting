@@ -4,6 +4,13 @@ from views import RecipeListPage
 
 
 class SearchPage(RecipeListPage):
+    """
+    A page for searching for FFXI crafting recipes.
+
+    This class extends RecipeListPage to provide functionality specific to searching for crafting recipes,
+    including custom treeview columns and formatted display of search results.
+    """
+
     def __init__(self, parent: tk.Tk) -> None:
         """
         Initialize the search page.
