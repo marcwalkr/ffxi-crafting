@@ -21,13 +21,11 @@ class ItemController:
 
     def __init__(self, db: Database) -> None:
         """
-        Initialize the ItemController.
+        Initializes repositories for items, recipes, vendors, and guilds,
+        as well as the auction controller.
 
         Args:
             db (Database): The database connection object.
-
-        Initializes repositories for items, recipes, vendors, and guilds,
-        as well as the auction controller.
         """
         self._item_repository: ItemRepository = ItemRepository(db)
         self._recipe_repository: RecipeRepository = RecipeRepository(db)
@@ -37,7 +35,8 @@ class ItemController:
 
     def get_recipe_items(self, ingredient_ids: list[int], result_ids: list[int]) -> tuple[list[Ingredient], list[Result]]:
         """
-        Fetch and convert items for a recipe's ingredients and results.
+        Fetches item data from the database, converts it to the appropriate
+        entity types (Ingredient or Result), and caches ingredients for future use.
 
         Args:
             ingredient_ids (list[int]): List of item IDs for the recipe's ingredients.
@@ -47,9 +46,6 @@ class ItemController:
             tuple[list[Ingredient], list[Result]]: A tuple containing two lists:
                 - A list of Ingredient objects for the recipe's ingredients.
                 - A list of Result objects for the recipe's results.
-
-        This method fetches item data from the database, converts it to the appropriate
-        entity types (Ingredient or Result), and caches ingredients for future use.
         """
         all_item_ids = ingredient_ids + result_ids
         all_item_models = self._item_repository.get_items(all_item_ids)
@@ -73,16 +69,14 @@ class ItemController:
 
     def _convert_to_ingredient(self, item_model: ItemModel) -> Ingredient:
         """
-        Convert an ItemModel to an Ingredient or CraftableIngredient entity.
+        Checks if the item is craftable and returns the appropriate
+        ingredient type based on that information.
 
         Args:
             item_model (ItemModel): The ItemModel to convert.
 
         Returns:
             Ingredient or CraftableIngredient: The converted ingredient entity.
-
-        This method checks if the item is craftable and returns the appropriate
-        ingredient type based on that information.
         """
         if self._recipe_repository.is_craftable(item_model.item_id):
             return CraftableIngredient(item_model.item_id, item_model.sub_id, item_model.name,
@@ -110,17 +104,15 @@ class ItemController:
 
     def update_auction_data(self, item_id: int) -> None:
         """
-        Update auction data for a specific item.
+        Fetches the latest auction data for the item and updates the
+        corresponding Ingredient or Result entity with this information. All Result
+        instances are synced with the new auction data.
 
         Args:
             item_id (int): The ID of the item to update auction data for.
 
         Raises:
             ValueError: If the item is not found in the ingredient cache or Result instances.
-
-        This method fetches the latest auction data for the item and updates the
-        corresponding Ingredient or Result entity with this information. All Result
-        instances are synced with the new auction data.
         """
         item = self._ingredient_cache.get(item_id)
         if not item:
@@ -142,16 +134,14 @@ class ItemController:
 
     def update_vendor_cost(self, item_id: int) -> None:
         """
-        Update vendor cost for a specific item.
+        Fetches the latest vendor cost for the item and updates the
+        corresponding Ingredient entity with this information.
 
         Args:
             item_id (int): The ID of the item to update vendor cost for.
 
         Raises:
             ValueError: If the ingredient is not found in the cache.
-
-        This method fetches the latest vendor cost for the item and updates the
-        corresponding Ingredient entity with this information.
         """
         ingredient = self._ingredient_cache.get(item_id)
         if ingredient:
@@ -161,16 +151,14 @@ class ItemController:
 
     def update_guild_cost(self, item_id: int) -> None:
         """
-        Update guild cost for a specific item.
+        Fetches the latest guild cost for the item and updates the
+        corresponding Ingredient entity with this information.
 
         Args:
             item_id (int): The ID of the item to update guild cost for.
 
         Raises:
             ValueError: If the ingredient is not found in the cache.
-
-        This method fetches the latest guild cost for the item and updates the
-        corresponding Ingredient entity with this information.
         """
         ingredient = self._ingredient_cache.get(item_id)
         if ingredient:
@@ -180,7 +168,8 @@ class ItemController:
 
     def _get_auction_data(self, item_id: int) -> tuple[float | None, float | None, float | None, float | None]:
         """
-        Fetch auction data for a specific item.
+        Retrieves the latest auction data from the AuctionController
+        and formats it for use in updating item entities.
 
         Args:
             item_id (int): The ID of the item to fetch auction data for.
@@ -191,9 +180,6 @@ class ItemController:
                 - Stack price (float or None)
                 - Single item sell frequency (float or None)
                 - Stack sell frequency (float or None)
-
-        This method retrieves the latest auction data from the AuctionController
-        and formats it for use in updating item entities.
         """
         auction_items = self._auction_controller.get_auction_items_with_updates(item_id)
         single_price = None
@@ -213,39 +199,86 @@ class ItemController:
 
     def _get_vendor_cost(self, item_id: int) -> int | None:
         """
-        Fetch the vendor cost for a specific item.
+        Retrieves vendor costs for the item, filters out vendors based on
+        beastmen-controlled regions and conquest rankings, and returns the lowest available price.
 
         Args:
             item_id (int): The ID of the item to fetch vendor cost for.
 
         Returns:
             int | None: The lowest vendor cost for the item, or None if not available.
-
-        This method retrieves vendor costs for the item, filters out vendors in
-        Beastmen-controlled regions, and returns the lowest available price.
         """
         vendor_items = self._vendor_repository.get_vendor_items(item_id)
-        beastmen_regions = SettingsManager.get_beastmen_regions()
 
-        # Filter out regional vendors that are controlled by Beastmen
-        filtered_vendor_items = []
-        for vendor_item in vendor_items:
-            regional_vendor = self._vendor_repository.get_regional_vendor(vendor_item.npc_id)
-            if not regional_vendor:
-                # Standard vendor
-                filtered_vendor_items.append(vendor_item)
-            else:
-                vendor_region = regional_vendor.region.lower()
-                if vendor_region not in beastmen_regions:
-                    filtered_vendor_items.append(vendor_item)
+        filtered_vendor_items = self._filter_beastmen_controlled_vendors(vendor_items)
+        filtered_vendor_items = self._filter_by_conquest_rank(filtered_vendor_items)
 
         prices = [vendor_item.price for vendor_item in filtered_vendor_items]
 
         return min(prices, default=None)
 
+    def _filter_beastmen_controlled_vendors(self, vendor_items: list) -> list:
+        """
+        Checks each vendor item against the list of beastmen-controlled regions
+        and removes those that are in such regions. Non-regional vendors are always included.
+
+        Args:
+            vendor_items (list): List of vendor items to filter.
+
+        Returns:
+            list: Filtered list of vendor items, excluding those in beastmen-controlled regions.
+        """
+        beastmen_regions = SettingsManager.get_beastmen_regions()
+        filtered_items = []
+
+        for vendor_item in vendor_items:
+            regional_vendor = self._vendor_repository.get_regional_vendor(vendor_item.npc_id)
+            if not regional_vendor:
+                # Standard vendor, always include
+                filtered_items.append(vendor_item)
+            else:
+                vendor_region = regional_vendor.region.lower()
+                if vendor_region not in beastmen_regions:
+                    filtered_items.append(vendor_item)
+
+        return filtered_items
+
+    def _filter_by_conquest_rank(self, vendor_items: list) -> list:
+        """
+        Checks each vendor item against the current conquest rankings
+        and includes only those that are available based on the current ranks.
+        Vendors with no rank requirement (rank 0) are always included.
+        The ranking system is as follows:
+        - 1: 1st rank (best)
+        - 2: 2nd rank
+        - 3: 3rd rank
+        A lower number indicates a better rank.
+
+        Args:
+            vendor_items (list): List of vendor items to filter.
+
+        Returns:
+            list: Filtered list of vendor items, including only those that are available
+                  given the current conquest rankings.
+        """
+        sandoria_rank = SettingsManager.get_sandoria_rank()
+        bastok_rank = SettingsManager.get_bastok_rank()
+        windurst_rank = SettingsManager.get_windurst_rank()
+
+        filtered_items = []
+
+        for vendor_item in vendor_items:
+            if (vendor_item.sandoria_rank == 0 or vendor_item.sandoria_rank >= sandoria_rank) and \
+               (vendor_item.bastok_rank == 0 or vendor_item.bastok_rank >= bastok_rank) and \
+               (vendor_item.windurst_rank == 0 or vendor_item.windurst_rank >= windurst_rank):
+                filtered_items.append(vendor_item)
+
+        return filtered_items
+
     def _get_guild_cost(self, item_id: int) -> int | None:
         """
-        Fetch the guild cost for a specific item.
+        Retrieves guild costs for the item from enabled guilds and
+        returns the lowest available price.
 
         Args:
             item_id (int): The ID of the item to fetch guild cost for.
@@ -253,8 +286,7 @@ class ItemController:
         Returns:
             int | None: The lowest guild cost for the item, or None if not available.
 
-        This method retrieves guild costs for the item from enabled guilds and
-        returns the lowest available price.
+
         """
         enabled_guilds = SettingsManager.get_enabled_guilds()
         guild_shops = self._guild_repository.get_guild_shops(item_id)
