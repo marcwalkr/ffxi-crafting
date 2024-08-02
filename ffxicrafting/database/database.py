@@ -2,6 +2,7 @@ import threading
 import logging
 import time
 from mysql.connector import pooling, errors
+from mysql.connector.cursor import MySQLCursor
 from config.settings_manager import SettingsManager
 
 logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class Database:
                             raise
 
     @classmethod
-    def _get_connection(cls) -> tuple[pooling.MySQLConnection, pooling.MySQLCursor]:
+    def _get_connection(cls) -> tuple[pooling.MySQLConnection, MySQLCursor]:
         """
         Get a database connection and cursor from the pool.
 
