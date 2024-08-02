@@ -36,11 +36,11 @@ class AuctionController:
         for item in auction_items:
             if item.new_data:
                 new_sales_history = self._auction_repository.get_latest_sales_history(item.item_id, item.is_stack)
-                updated_item = self.process_new_data(item, new_sales_history)
+                updated_item = self._process_new_data(item, new_sales_history)
                 self._auction_repository.update_auction_item(updated_item)
         return auction_items
 
-    def process_new_data(self, item: AuctionItem, new_sales_history: list[SalesHistory]) -> AuctionItem:
+    def _process_new_data(self, item: AuctionItem, new_sales_history: list[SalesHistory]) -> AuctionItem:
         """
         Process new sales history data for an auction item.
 
