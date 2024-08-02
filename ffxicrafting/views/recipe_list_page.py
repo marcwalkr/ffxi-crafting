@@ -87,7 +87,7 @@ class RecipeListPage(ttk.Frame, ABC):
         self.configure_treeview(self._treeview)
         self._treeview.pack(padx=10, pady=10, expand=True, fill="both")
         self._treeview.bind("<Double-1>", self._show_recipe_details)
-        self._treeview.bind("<Button-1>", self._on_treeview_click)
+        self._treeview.bind("<Button-1>", self._treeview.on_click)
 
     @abstractmethod
     def get_tab_text(self) -> str:
@@ -183,18 +183,6 @@ class RecipeListPage(ttk.Frame, ABC):
         self._parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
         self._parent.notebook.select(detail_page)
 
-    def _on_treeview_click(self, event: tk.Event) -> None:
-        """
-        Handle clicks on the treeview to clear selection if clicking on empty space or heading.
-
-        Args:
-            event (tk.Event): The click event on the treeview.
-        """
-        tree = event.widget
-        region = tree.identify("region", event.x, event.y)
-        if region in ("nothing", "heading"):
-            tree.selection_remove(tree.selection())
-
     def start_process(self) -> None:
         """
         Start the process of fetching and processing recipes.
@@ -205,7 +193,7 @@ class RecipeListPage(ttk.Frame, ABC):
         self.action_button["text"] = "Cancel"
         self._progress_bar.pack(pady=10, before=self._treeview)
         self._progress_bar.start()
-        self._clear_treeview(self._treeview)
+        self._treeview.clear()
 
         self._init_executor()
         self._clear_insert_queue()
@@ -356,16 +344,6 @@ class RecipeListPage(ttk.Frame, ABC):
         Default implementation always returns True. Override in subclasses for custom filtering.
         """
         return True
-
-    def _clear_treeview(self, treeview: ttk.Treeview) -> None:
-        """
-        Clear all items from the treeview.
-
-        Args:
-            treeview (ttk.Treeview): The treeview to clear.
-        """
-        for item in treeview.get_children():
-            treeview.delete(item)
 
     def _insert_single_into_treeview(self, recipe_id: int, row: list[any]) -> None:
         """

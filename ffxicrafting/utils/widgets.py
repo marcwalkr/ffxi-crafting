@@ -1,4 +1,5 @@
 import re
+import tkinter as tk
 from tkinter import ttk
 
 
@@ -37,3 +38,19 @@ class TreeviewWithSort(ttk.Treeview):
 
         # Update the heading so it sorts in the opposite order next time
         self.heading(col, command=lambda: self.sort_by(col, not descending))
+
+    def on_click(self, event: tk.Event) -> None:
+        """
+        Handle clicks on the treeview to clear selection if clicking on empty space or heading.
+
+        Args:
+            event (tk.Event): The click event on the treeview.
+        """
+        region = self.identify("region", event.x, event.y)
+        if region in ("nothing", "heading"):
+            self.selection_remove(self.selection())
+
+    def clear(self) -> None:
+        """Clear all items from the treeview."""
+        for item in self.get_children():
+            self.delete(item)

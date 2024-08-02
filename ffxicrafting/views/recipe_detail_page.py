@@ -71,7 +71,7 @@ class RecipeDetailPage(ttk.Frame):
         self._populate_ingredients_tree()
         self._ingredients_tree.pack(padx=10, pady=5, expand=True, fill="both")
 
-        self._ingredients_tree.bind("<Button-1>", self._on_treeview_click)
+        self._ingredients_tree.bind("<Button-1>", self._ingredients_tree.on_click)
 
     def _add_cost_per_synth_frame(self) -> None:
         """
@@ -108,7 +108,7 @@ class RecipeDetailPage(ttk.Frame):
         self._populate_results_tree()
         self._results_tree.pack(padx=10, pady=10, expand=True, fill="both")
 
-        self._results_tree.bind("<Button-1>", self._on_treeview_click)
+        self._results_tree.bind("<Button-1>", self._results_tree.on_click)
 
     def _add_close_button(self) -> None:
         """
@@ -185,17 +185,3 @@ class RecipeDetailPage(ttk.Frame):
         tab_id = self._parent.notebook.index(self)
         self._parent.notebook.forget(tab_id)
         self._parent.notebook.select(self._previous_tab_index)
-
-    def _on_treeview_click(self, event: tk.Event) -> None:
-        """
-        Handle clicks on the treeview.
-
-        Args:
-            event (tk.Event): The click event.
-
-        Clears the selection if the click is on an empty area or column heading.
-        """
-        tree = event.widget
-        region = tree.identify("region", event.x, event.y)
-        if region in ("nothing", "heading"):
-            tree.selection_remove(tree.selection())
