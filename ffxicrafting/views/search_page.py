@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from entities import Recipe
 from views import RecipeListPage
 
 
@@ -72,7 +73,7 @@ class SearchPage(RecipeListPage):
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
 
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[any]:
+    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's search query.
 

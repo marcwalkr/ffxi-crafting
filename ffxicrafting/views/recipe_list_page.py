@@ -3,12 +3,14 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
-from abc import ABC, abstractmethod
 from queue import Queue, Empty
-from utils import TreeviewWithSort
-from views import RecipeDetailPage
+from abc import ABC, abstractmethod
 from controllers import RecipeController, CraftingController, ItemController
 from database import Database
+from entities import Recipe
+from utils import TreeviewWithSort
+from views import RecipeDetailPage
+
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +124,7 @@ class RecipeListPage(ttk.Frame, ABC):
         pass
 
     @abstractmethod
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[any]:
+    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes.
 
@@ -293,7 +295,7 @@ class RecipeListPage(ttk.Frame, ABC):
             # Signal that processing is complete
             self._insert_queue.put(("DONE", None))
 
-    def _process_batch(self, recipes: list[any]) -> None:
+    def _process_batch(self, recipes: list[Recipe]) -> None:
         """
         Process a batch of recipes.
 
@@ -309,7 +311,7 @@ class RecipeListPage(ttk.Frame, ABC):
                     break
                 self._process_single_recipe(recipe, crafting_controller)
 
-    def _process_single_recipe(self, recipe: any, crafting_controller: CraftingController) -> None:
+    def _process_single_recipe(self, recipe: Recipe, crafting_controller: CraftingController) -> None:
         """
         Process a single recipe.
 

@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from views import RecipeListPage
 from config import SettingsManager
+from entities import Recipe
+from views import RecipeListPage
 
 
 class ProfitPage(RecipeListPage):
@@ -67,7 +68,7 @@ class ProfitPage(RecipeListPage):
         treeview.column("profit_per_storage", anchor=tk.CENTER)
         treeview.column("sell_freq", anchor=tk.CENTER)
 
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[any]:
+    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's crafting skills and skill look-ahead.
 

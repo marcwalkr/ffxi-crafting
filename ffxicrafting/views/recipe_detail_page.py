@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from entities import Recipe
 from utils import TreeviewWithSort
 
 
@@ -11,7 +12,7 @@ class RecipeDetailPage(ttk.Frame):
     ingredients, costs, and results for a selected recipe.
     """
 
-    def __init__(self, parent: tk.Tk, recipe: any) -> None:
+    def __init__(self, parent: tk.Tk, recipe: Recipe) -> None:
         """
         Initialize the RecipeDetailPage.
 
@@ -26,7 +27,7 @@ class RecipeDetailPage(ttk.Frame):
         self._previous_tab_index: int = self._parent.notebook.index("current")
         self._ingredients_tree: TreeviewWithSort = None
         self._results_tree: TreeviewWithSort = None
-        self._recipe = recipe
+        self._recipe: Recipe = recipe
         self._cost_per_synth_value_label: ttk.Label = None
 
         self._create_detail_page()
