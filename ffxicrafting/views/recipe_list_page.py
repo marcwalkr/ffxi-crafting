@@ -19,10 +19,11 @@ class RecipeListPage(ttk.Frame, ABC):
         self.recipe_db = Database()
         self.recipe_controller = RecipeController(self.recipe_db)
 
-        self.query_thread = None
         self.max_threads = 15
+        self.query_thread = None
         self.executor = None
         self.insert_queue = Queue()
+        self.futures = []
         self.cancel_event = threading.Event()
 
         self.create_widgets()
@@ -113,12 +114,18 @@ class RecipeListPage(ttk.Frame, ABC):
         self.action_button["state"] = "disabled"
 
     def finish_process(self):
-        threading.Thread(target=self.shutdown_executor, daemon=True).start()
+        self.shutdown_executor()
 
     def shutdown_executor(self):
         if self.executor:
-            self.executor.shutdown(wait=True)
-        self.after(0, self.finish_ui_update)
+            self.executor.shutdown(wait=False)
+            self.check_executor_shutdown()
+
+    def check_executor_shutdown(self):
+        if all(f.done() for f in self.futures):
+            self.finish_ui_update()
+        else:
+            self.after(100, self.check_executor_shutdown)
 
     def finish_ui_update(self):
         self.progress_bar.stop()
@@ -130,7 +137,7 @@ class RecipeListPage(ttk.Frame, ABC):
     def fetch_and_process_batches(self):
         batch_size = 25
         offset = 0
-        futures = []
+        self.futures = []
 
         try:
             while not self.cancel_event.is_set():
@@ -141,7 +148,7 @@ class RecipeListPage(ttk.Frame, ABC):
 
                 try:
                     future = self.executor.submit(self.process_batch, recipes)
-                    futures.append(future)
+                    self.futures.append(future)
                 except RuntimeError:
                     # Executor is shutting down, break the loop
                     break
@@ -149,7 +156,7 @@ class RecipeListPage(ttk.Frame, ABC):
                 offset += batch_size
 
             # Wait for all processing to complete
-            for future in as_completed(futures):
+            for future in as_completed(self.futures):
                 if self.cancel_event.is_set():
                     break
 
