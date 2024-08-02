@@ -102,7 +102,15 @@ class RecipeListPage(ttk.Frame, ABC):
 
     @abstractmethod
     def format_row(self, craft_result: dict) -> list[any]:
-        """Format a row for the treeview based on the craft result."""
+        """
+        Format a row for the treeview based on the craft result.
+
+        Args:
+            craft_result (dict): The craft result to format.
+
+        Returns:
+            list: A list of values to display in the treeview.
+        """
         pass
 
     def _toggle_process(self) -> None:
@@ -214,7 +222,12 @@ class RecipeListPage(ttk.Frame, ABC):
             self._insert_queue.put(("DONE", None))
 
     def _process_batch(self, recipes: list[any]) -> None:
-        """Process a batch of recipes."""
+        """
+        Process a batch of recipes.
+
+        Args:
+            recipes (list[Recipe]): The list of Recipe objects to process.
+        """
         with Database() as db:
             item_controller = ItemController(db)
             crafting_controller = CraftingController(item_controller)
@@ -225,7 +238,13 @@ class RecipeListPage(ttk.Frame, ABC):
                 self._process_single_recipe(recipe, crafting_controller)
 
     def _process_single_recipe(self, recipe: any, crafting_controller: CraftingController) -> None:
-        """Process a single recipe."""
+        """
+        Process a single recipe.
+
+        Args:
+            recipe (Recipe): The Recipe object to process.
+            crafting_controller (CraftingController): The CraftingController object to use.
+        """
         if self._cancel_event.is_set():
             return
 
@@ -239,7 +258,16 @@ class RecipeListPage(ttk.Frame, ABC):
             self._insert_queue.put((recipe.id, row))
 
     def should_display_recipe(self, craft_result: dict) -> bool:
-        """Determine if a recipe should be displayed. Default is True."""
+        """
+        Determine if a recipe should be displayed in the treeview.
+        Default is True and subclasses can override.
+
+        Args:
+            craft_result (dict): The craft result to check.
+
+        Returns:
+            bool: True if the recipe should be displayed, False otherwise.
+        """
         return True
 
     def _clear_treeview(self, treeview: ttk.Treeview) -> None:
@@ -248,7 +276,13 @@ class RecipeListPage(ttk.Frame, ABC):
             treeview.delete(item)
 
     def _insert_single_into_treeview(self, recipe_id: int, row: list[any]) -> None:
-        """Insert a single row into the treeview."""
+        """
+        Insert a single row into the treeview.
+
+        Args:
+            recipe_id (int): The ID of the recipe to insert.
+            row (list[any]): The row of values to insert.
+        """
         self._treeview.insert("", "end", iid=recipe_id, values=row)
 
     def _init_executor(self) -> None:
