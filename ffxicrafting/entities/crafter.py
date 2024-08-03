@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from entities import Synth, Recipe
+from entities import Synth, Recipe, Ingredient
 from config import SettingsManager
 
 if TYPE_CHECKING:
@@ -41,8 +41,22 @@ class Crafter:
         self.synth: Synth = Synth(recipe, self)
 
     def craft(self, item_controller: ItemController) -> tuple[list[Result], float, float]:
+        """
+        Perform the crafting operation and calculate profits.
+
+        Args:
+            item_controller (ItemController): Controller for managing item-related operations.
+
+        Returns:
+            tuple[list[Result], float, float]: A tuple containing:
+                - A list of Result objects representing the crafting outcomes.
+                - The calculated profit per synthesis.
+                - The calculated profit per storage slot.
+
+        Returns (None, None, None) if the crafting cannot be performed due to missing ingredients.
+        """
         num_trials = SettingsManager.get_simulation_trials()
-        self.set_ingredient_costs(item_controller)
+        self._set_ingredient_costs(item_controller)
         cost = self.recipe.calculate_cost()
 
         if not cost:
@@ -50,61 +64,128 @@ class Crafter:
             return None, None, None
 
         results, retained_ingredients = self.synth.simulate(num_trials)
-        simulation_cost = self.calculate_simulation_cost(cost, num_trials, retained_ingredients)
-        cost_per_item = self.calculate_cost_per_item(simulation_cost, results)
-        total_profit, total_storage_slots = self.process_results(results, cost_per_item, item_controller)
+        simulation_cost = self._calculate_simulation_cost(cost, num_trials, retained_ingredients)
+        cost_per_item = self._calculate_cost_per_item(simulation_cost, results)
+        total_profit, total_storage_slots = self._process_results(results, cost_per_item, item_controller)
 
         profit_per_synth = total_profit / num_trials
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
 
         return results.keys(), profit_per_synth, profit_per_storage
 
-    def set_ingredient_costs(self, item_controller):
+    def _set_ingredient_costs(self, item_controller: ItemController) -> None:
+        """
+        Update the costs of ingredients used in the recipe.
+
+        Args:
+            item_controller (ItemController): Controller for managing item-related operations.
+        """
         for ingredient in self.recipe.get_unique_ingredients():
             item_controller.update_vendor_cost(ingredient.item_id)
             item_controller.update_guild_cost(ingredient.item_id)
             item_controller.update_auction_data(ingredient.item_id)
 
-    def calculate_simulation_cost(self, cost, num_trials, retained_ingredients):
+    def _calculate_simulation_cost(self, cost: int, num_trials: int, retained_ingredients: dict[Ingredient, int]) -> float:
+        """
+        Calculate the total cost of the crafting simulation, accounting for retained ingredients on failure.
+
+        Args:
+            cost (int): The base cost of a single crafting attempt.
+            num_trials (int): The number of crafting attempts in the simulation.
+            retained_ingredients (dict[Ingredient, int]): A dictionary of ingredients and their retained quantities.
+
+        Returns:
+            float: The total cost of the simulation after accounting for retained ingredients.
+        """
         simulation_cost = cost * num_trials
-        saved_cost = self.get_saved_cost(retained_ingredients)
+        saved_cost = self._get_saved_cost(retained_ingredients)
         return simulation_cost - saved_cost
 
-    def get_saved_cost(self, retained_ingredients):
+    def _get_saved_cost(self, retained_ingredients: dict[Ingredient, int]) -> float:
+        """
+        Calculate the cost saved from retained ingredients on failure.
+
+        Args:
+            retained_ingredients (dict[Ingredient, int]): A dictionary of ingredients and their retained quantities.
+
+        Returns:
+            float: The total cost saved from retained ingredients.
+        """
         total_saved_cost = 0
-        for ingredient, amount in retained_ingredients.items():
+        for ingredient, quantity in retained_ingredients.items():
             min_cost = ingredient.get_min_cost()
-            saved_cost = min_cost * amount
+            saved_cost = min_cost * quantity
             total_saved_cost += saved_cost
 
         return total_saved_cost
 
-    def calculate_cost_per_item(self, simulation_cost, results):
+    def _calculate_cost_per_item(self, simulation_cost: float, results: dict[Result, int]) -> float:
+        """
+        Calculate the average cost per crafted item.
+
+        Args:
+            simulation_cost (float): The total cost of the crafting simulation.
+            results (dict[Result, int]): A dictionary of crafting results and their quantities.
+
+        Returns:
+            float: The average cost per crafted item. Returns 0 if no items were crafted.
+        """
         total_items = sum(results.values())
         return simulation_cost / total_items if total_items > 0 else 0
 
-    def process_results(self, results, cost_per_item, item_controller):
+    def _process_results(self, results: dict[Result, int], cost_per_item: float, item_controller: ItemController) -> tuple[float, float]:
+        """
+        Process the crafting results to calculate total profit and storage requirements.
+
+        Args:
+            results (dict[Result, int]): A dictionary of crafting results and their quantities.
+            cost_per_item (float): The average cost per crafted item.
+            item_controller (ItemController): Controller for managing item-related operations.
+
+        Returns:
+            tuple[float, float]: A tuple containing:
+                - The total profit from all crafted items.
+                - The total number of storage slots required for the crafted items.
+        """
         total_profit = 0
         total_storage_slots = 0
 
         for result, quantity in results.items():
             item_controller.update_auction_data(result.item_id)
 
-            self.calculate_result_profits(result, cost_per_item)
+            self._calculate_result_profits(result, cost_per_item)
 
-            total_profit += self.calculate_result_total_profit(result, quantity, cost_per_item)
-            total_storage_slots += self.calculate_storage_slots(result, quantity)
+            total_profit += self._calculate_result_total_profit(result, quantity, cost_per_item)
+            total_storage_slots += self._calculate_storage_slots(result, quantity)
 
         return total_profit, total_storage_slots
 
-    def calculate_result_profits(self, result, cost_per_item):
+    def _calculate_result_profits(self, result: Result, cost_per_item: float) -> None:
+        """
+        Calculate and set the profit values for a single crafting result.
+
+        Args:
+            result (Result): The Result object to calculate profits for.
+            cost_per_item (float): The average cost per crafted item.
+        """
         result.single_profit = result.single_price - cost_per_item if result.single_price is not None else None
         if result.stack_price is not None and result.stack_size > 1:
             result.stack_profit = result.stack_price - (cost_per_item * result.stack_size)
         else:
             result.stack_profit = None
 
-    def calculate_result_total_profit(self, result, quantity, cost_per_item):
+    def _calculate_result_total_profit(self, result: Result, quantity: int, cost_per_item: float) -> float:
+        """
+        Calculate the total profit for a specific crafting result.
+
+        Args:
+            result (Result): The Result object to calculate total profit for.
+            quantity (int): The quantity of this result produced.
+            cost_per_item (float): The average cost per crafted item.
+
+        Returns:
+            float: The total profit for this specific crafting result.
+        """
         # If a stack price exists, use it in the calculation
         # because stacks are more commonly sold and it works as a low estimate
         if result.stack_price is not None:
@@ -115,5 +196,15 @@ class Crafter:
         else:
             return (0 - cost_per_item) * quantity
 
-    def calculate_storage_slots(self, result, quantity):
+    def _calculate_storage_slots(self, result: Result, quantity: int) -> int:
+        """
+        Calculate the number of storage slots required for a specific crafting result.
+
+        Args:
+            result (Result): The Result object to calculate storage for.
+            quantity (int): The quantity of this result produced.
+
+        Returns:
+            int: The number of storage slots required for this crafting result.
+        """
         return (quantity + result.stack_size - 1) // result.stack_size
