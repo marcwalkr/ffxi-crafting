@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from entities import Synth, Recipe, Ingredient
+from entities import Synth, Recipe
 from config import SettingsManager
 
 if TYPE_CHECKING:
     from controllers import ItemController
-    from entities import Result
+    from entities import Result, Ingredient
 
 
 class Crafter:
