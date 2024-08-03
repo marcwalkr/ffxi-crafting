@@ -41,188 +41,79 @@ class Crafter:
         self.synth: Synth = Synth(recipe, self)
 
     def craft(self, item_controller: ItemController) -> tuple[list[Result], float, float]:
-        """
-        Perform the crafting operation and calculate profits.
-
-        Simulates the crafting process, calculates profits, and updates result information.
-
-        Args:
-            item_controller (ItemController): Controller for managing item-related operations.
-
-        Returns:
-            tuple[list[Result], float, float]: A tuple containing:
-                - A list of Result objects representing the crafting outcomes.
-                - The calculated profit per synthesis.
-                - The calculated profit per character storage unit.
-
-        Returns ([], None, None) if the simulation produces no results or cost.
-        """
         num_trials = SettingsManager.get_simulation_trials()
-        simulation_cost, results = self.synth.simulate(num_trials, item_controller)
+        self.set_ingredient_costs(item_controller)
+        cost = self.recipe.calculate_cost()
 
-        if not simulation_cost or not results:
-            return [], None, None
+        if not cost:
+            # The synth cannot be crafted because of missing ingredients
+            return None, None, None
 
-        # Calculate and set the expected profit for each result, selling them as singles and stacks
-        self._set_results_profit(results, simulation_cost, item_controller)
+        results, retained_ingredients = self.synth.simulate(num_trials)
+        simulation_cost = self.calculate_simulation_cost(cost, num_trials, retained_ingredients)
+        cost_per_item = self.calculate_cost_per_item(simulation_cost, results)
+        total_profit, total_storage_slots = self.process_results(results, cost_per_item, item_controller)
 
-        # Calculate the overall expected profit per synth and per character storage unit
-        profit_per_synth = self._get_profit_per_synth(results, simulation_cost, num_trials)
-        profit_per_storage = self._get_profit_per_storage(results, simulation_cost)
+        profit_per_synth = total_profit / num_trials
+        profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
 
         return results.keys(), profit_per_synth, profit_per_storage
 
-    def _set_results_profit(self, results: dict[Result, int], simulation_cost: float, item_controller: ItemController) -> None:
-        """
-        Calculate and set the profit for each crafting result.
+    def set_ingredient_costs(self, item_controller):
+        for ingredient in self.recipe.get_unique_ingredients():
+            item_controller.update_vendor_cost(ingredient.item_id)
+            item_controller.update_guild_cost(ingredient.item_id)
+            item_controller.update_auction_data(ingredient.item_id)
 
-        Args:
-            results (dict[Result, int]): Dictionary of Results and their quantities.
-            simulation_cost (float): The total cost of the crafting simulation.
-            item_controller (ItemController): Controller for managing item-related operations.
-        """
+    def calculate_simulation_cost(self, cost, num_trials, retained_ingredients):
+        simulation_cost = cost * num_trials
+        saved_cost = self.get_saved_cost(retained_ingredients)
+        return simulation_cost - saved_cost
+
+    def get_saved_cost(self, retained_ingredients):
+        total_saved_cost = 0
+        for ingredient, amount in retained_ingredients.items():
+            min_cost = ingredient.get_min_cost()
+            saved_cost = min_cost * amount
+            total_saved_cost += saved_cost
+
+        return total_saved_cost
+
+    def calculate_cost_per_item(self, simulation_cost, results):
+        total_items = sum(results.values())
+        return simulation_cost / total_items if total_items > 0 else 0
+
+    def process_results(self, results, cost_per_item, item_controller):
+        total_profit = 0
+        total_storage_slots = 0
+
         for result, quantity in results.items():
             item_controller.update_auction_data(result.item_id)
-            result.crafted_cost = simulation_cost / quantity
-            result.single_profit = self._get_single_profit(result, result.crafted_cost)
-            result.stack_profit = self._get_stack_profit(result, result.crafted_cost)
 
-    def _get_single_profit(self, result: Result, crafted_cost: float) -> float:
-        """
-        Calculate the profit for selling a single item.
+            self.calculate_result_profits(result, cost_per_item)
 
-        Args:
-            result (Result): The Result object representing the crafted item.
-            crafted_cost (float): The cost to craft a single item.
+            total_profit += self.calculate_result_total_profit(result, quantity, cost_per_item)
+            total_storage_slots += self.calculate_storage_slots(result, quantity)
 
-        Returns:
-            float: The calculated profit for selling a single item.
-        """
-        return self._calculate_profit(result, crafted_cost, single=True)
+        return total_profit, total_storage_slots
 
-    def _get_stack_profit(self, result: Result, crafted_cost: float) -> float:
-        """
-        Calculate the profit for selling a stack of items.
-
-        Args:
-            result (Result): The Result object representing the crafted item.
-            crafted_cost (float): The cost to craft a single item.
-
-        Returns:
-            float: The calculated profit for selling a stack of items.
-        """
-        return self._calculate_profit(result, crafted_cost, single=False)
-
-    def _calculate_profit(self, result: Result, crafted_cost: float, single: bool = True) -> float:
-        """
-        Calculate the profit for selling an item, either as a single item or as a stack.
-
-        Args:
-            result (Result): The Result object representing the crafted item.
-            crafted_cost (float): The cost to craft a single item.
-            single (bool, optional): If True, calculate for a single item. If False, calculate for a stack. Defaults to True.
-
-        Returns:
-            float: The calculated profit. Returns None if the selling price is not available.
-        """
-        price = result.single_price if single else result.stack_price
-        stack_size = result.stack_size
-
-        if price is None:
-            return None
-
-        if single:
-            profit = price - crafted_cost
+    def calculate_result_profits(self, result, cost_per_item):
+        result.single_profit = result.single_price - cost_per_item if result.single_price is not None else None
+        if result.stack_price is not None and result.stack_size > 1:
+            result.stack_profit = result.stack_price - (cost_per_item * result.stack_size)
         else:
-            cost_per_stack = crafted_cost * stack_size
-            profit = price - cost_per_stack
+            result.stack_profit = None
 
-        return profit
+    def calculate_result_total_profit(self, result, quantity, cost_per_item):
+        # If a stack price exists, use it in the calculation
+        # because stacks are more commonly sold and it works as a low estimate
+        if result.stack_price is not None:
+            single_price_from_stack = result.stack_price / result.stack_size
+            return (single_price_from_stack - cost_per_item) * quantity
+        elif result.single_price is not None:
+            return (result.single_price - cost_per_item) * quantity
+        else:
+            return (0 - cost_per_item) * quantity
 
-    def _get_profit_per_synth(self, results: dict[Result, int], simulation_cost: float, num_trials: int) -> float:
-        """
-        Calculate the average profit per synthesis operation.
-
-        Args:
-            results (dict[Result, int]): Dictionary of Results and their quantities.
-            simulation_cost (float): The total cost of the crafting simulation.
-            num_trials (int): The number of synthesis trials performed in the simulation.
-
-        Returns:
-            float: The calculated average profit per synthesis.
-        """
-        total_profit = self._calculate_total_profit(results, simulation_cost)
-        profit_per_synth = total_profit / num_trials
-        return profit_per_synth
-
-    def _get_profit_per_storage(self, results: dict[Result, int], simulation_cost: float) -> float:
-        """
-        Calculate the profit per character storage unit.
-
-        Args:
-            results (dict[Result, int]): Dictionary of Results and their quantities.
-            simulation_cost (float): The total cost of the crafting simulation.
-
-        Returns:
-            float: The calculated profit per character storage unit. Returns 0 if total storage is 0.
-        """
-        total_profit = self._calculate_total_profit(results, simulation_cost)
-        total_storage = self._calculate_total_storage(results)
-        profit_per_storage = total_profit / total_storage if total_storage > 0 else 0
-        return profit_per_storage
-
-    def _calculate_total_profit(self, results: dict[Result, int], simulation_cost: float) -> float:
-        """
-        Calculate the total profit from all crafting results.
-
-        Args:
-            results (dict[Result, int]): Dictionary of Results and their quantities.
-            simulation_cost (float): The total cost of the crafting simulation.
-
-        Returns:
-            float: The calculated total profit.
-        """
-        total_gil = 0
-        for result, quantity in results.items():
-            # If a stack price exists, use it in the calculation because stacks are more commonly sold
-            # and it works as a low estimate
-            single_price = (result.stack_price / result.stack_size
-                            if result.stack_price is not None
-                            else result.single_price)
-
-            if single_price is None:
-                continue
-
-            total_gil += single_price * quantity
-
-        total_profit = total_gil - simulation_cost
-        return total_profit
-
-    def _calculate_total_storage(self, results: dict[Result, int]) -> float:
-        """
-        Calculate the total character storage units required for all crafting results.
-
-        Args:
-            results (dict[Result, int]): Dictionary of Results and their quantities.
-
-        Returns:
-            float: The calculated total storage units required.
-        """
-        total_storage = 0
-        store_item_threshold = SettingsManager.get_min_auction_list_price()
-
-        for result, quantity in results.items():
-            # If a stack price exists, use it in the calculation because stacks are more commonly sold
-            # and it works as a low estimate
-            single_price = (result.stack_price / result.stack_size
-                            if result.stack_price is not None
-                            else result.single_price)
-
-            if single_price is None:
-                continue
-
-            # Add crafted items to storage if they are above the sell threshold
-            if single_price * result.stack_size > store_item_threshold:
-                total_storage += quantity / result.stack_size
-
-        return total_storage
+    def calculate_storage_slots(self, result, quantity):
+        return (quantity + result.stack_size - 1) // result.stack_size

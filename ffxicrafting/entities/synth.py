@@ -106,18 +106,7 @@ class Synth:
 
         return retained_ingredients
 
-    def set_ingredients_cost(self, item_controller):
-        for ingredient in self.recipe.get_unique_ingredients():
-            item_controller.update_vendor_cost(ingredient.item_id)
-            item_controller.update_guild_cost(ingredient.item_id)
-            item_controller.update_auction_data(ingredient.item_id)
-
-    def simulate(self, num_trials, item_controller):
-        self.set_ingredients_cost(item_controller)
-        cost = self.recipe.calculate_cost()
-
-        if not cost:
-            return None, None
+    def simulate(self, num_trials):
 
         results = defaultdict(lambda: 0)
         retained_ingredients = defaultdict(lambda: 0)
@@ -131,18 +120,4 @@ class Synth:
                 for result_retained, quantity_retained in retained.items():
                     retained_ingredients[result_retained] += quantity_retained
 
-        simulation_cost = cost * num_trials
-
-        # Subtract the total cost saved from retained ingredients after failures
-        simulation_cost -= self.get_saved_cost(retained_ingredients)
-
-        return simulation_cost, results
-
-    def get_saved_cost(self, retained_ingredients):
-        total_saved_cost = 0
-        for ingredient, amount in retained_ingredients.items():
-            min_cost = ingredient.get_min_cost()
-            saved_cost = min_cost * amount
-            total_saved_cost += saved_cost
-
-        return total_saved_cost
+        return results, retained_ingredients
