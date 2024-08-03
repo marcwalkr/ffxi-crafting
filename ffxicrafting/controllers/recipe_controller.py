@@ -94,10 +94,15 @@ class RecipeController:
         Returns:
             list[Recipe]: A list of processed Recipe objects.
         """
-        ingredient_item_ids = set()
-        result_item_ids = set()
-
+        recipes = []
         for recipe_model in recipe_models:
+            if recipe_model.id in self._recipe_cache:
+                recipes.append(self._recipe_cache[recipe_model.id])
+                continue
+
+            ingredient_item_ids = set()
+            result_item_ids = set()
+
             # Treat the crystal as an ingredient
             ingredient_item_ids.add(recipe_model.crystal)
 
@@ -113,16 +118,13 @@ class RecipeController:
             result_item_ids.update([recipe_model.result, recipe_model.result_hq1, recipe_model.result_hq2,
                                    recipe_model.result_hq3])
 
-        ingredients, results = self._item_controller.get_recipe_items(list(ingredient_item_ids), list(result_item_ids))
+            ingredients, results = self._item_controller.get_recipe_items(
+                list(ingredient_item_ids), list(result_item_ids))
 
-        recipes = []
-        for recipe_model in recipe_models:
-            if recipe_model.id in self._recipe_cache:
-                recipes.append(self._recipe_cache[recipe_model.id])
-            else:
-                recipe = self._create_recipe_object(recipe_model, ingredients, results)
-                self._recipe_cache[recipe_model.id] = recipe
-                recipes.append(recipe)
+            recipe = self._create_recipe_object(recipe_model, ingredients, results)
+            self._recipe_cache[recipe_model.id] = recipe
+            recipes.append(recipe)
+
         return recipes
 
     def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Ingredient], results: list[Result]) -> Recipe:
@@ -160,4 +162,5 @@ class RecipeController:
             next((result for result in results if result.item_id == recipe_model.result_hq2), None),
             next((result for result in results if result.item_id == recipe_model.result_hq3), None)
         )
+
         return recipe
