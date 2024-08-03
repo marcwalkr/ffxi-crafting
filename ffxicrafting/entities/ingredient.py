@@ -7,23 +7,9 @@ class Ingredient(Item):
     properties specific to ingredients used in crafting.
     """
 
-    def __init__(self, item_id: int, sub_id: int, name: str, sort_name: str, stack_size: int, flags: int, ah: int,
-                 no_sale: bool, base_sell: int) -> None:
-        """
-        Initialize an Ingredient instance.
-
-        Args:
-            item_id (int): Unique identifier for the item.
-            sub_id (int): Sub-identifier for the item.
-            name (str): Name of the item.
-            sort_name (str): Name used for sorting purposes.
-            stack_size (int): Maximum quantity of the item that can be stacked.
-            flags (int): Bitfield representing various item properties.
-            ah (int): Auction house category.
-            no_sale (bool): Whether the item can be sold to NPCs.
-            base_sell (int): Base selling price to NPCs.
-        """
-        super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
+    def __init__(self, *args) -> None:
+        """Initialize an Ingredient instance."""
+        super().__init__(*args)
         self.vendor_cost: int | None = None
         self.guild_cost: int | None = None
 
@@ -52,23 +38,9 @@ class CraftableIngredient(Ingredient, CraftableItem):
     Ingredient and CraftableItem classes.
     """
 
-    def __init__(self, item_id: int, sub_id: int, name: str, sort_name: str, stack_size: int, flags: int, ah: int,
-                 no_sale: bool, base_sell: int) -> None:
-        """
-        Initialize a CraftableIngredient instance.
-
-        Args:
-            item_id (int): Unique identifier for the item.
-            sub_id (int): Sub-identifier for the item.
-            name (str): Name of the item.
-            sort_name (str): Name used for sorting purposes.
-            stack_size (int): Maximum quantity of the item that can be stacked.
-            flags (int): Bitfield representing various item properties.
-            ah (int): Auction house category.
-            no_sale (bool): Whether the item can be sold to NPCs.
-            base_sell (int): Base selling price to NPCs.
-        """
-        super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
+    def __init__(self, *args) -> None:
+        """Initialize a CraftableIngredient instance."""
+        super().__init__(*args)
         self.crafted_cost: float | None = None
 
     def get_min_cost(self) -> int | float | None:
