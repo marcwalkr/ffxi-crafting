@@ -2,12 +2,39 @@ from entities import Item, CraftableItem
 
 
 class Ingredient(Item):
-    def __init__(self, item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell):
-        super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
-        self.vendor_cost = None
-        self.guild_cost = None
+    """
+    Represents an ingredient item in the game, extending the base Item class with additional
+    properties specific to ingredients used in crafting.
+    """
 
-    def get_min_cost(self):
+    def __init__(self, item_id: int, sub_id: int, name: str, sort_name: str, stack_size: int, flags: int, ah: int,
+                 no_sale: bool, base_sell: int) -> None:
+        """
+        Initialize an Ingredient instance.
+
+        Args:
+            item_id (int): Unique identifier for the item.
+            sub_id (int): Sub-identifier for the item.
+            name (str): Name of the item.
+            sort_name (str): Name used for sorting purposes.
+            stack_size (int): Maximum quantity of the item that can be stacked.
+            flags (int): Bitfield representing various item properties.
+            ah (int): Auction house category.
+            no_sale (bool): Whether the item can be sold to NPCs.
+            base_sell (int): Base selling price to NPCs.
+        """
+        super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
+        self.vendor_cost: int | None = None
+        self.guild_cost: int | None = None
+
+    def get_min_cost(self) -> int | float | None:
+        """
+        Calculate the minimum cost of the ingredient from various sources.
+
+        Returns:
+            int | float | None: The lowest cost among vendor cost, guild cost, single price,
+            and stack price (divided by stack size). Returns None if no valid costs are available.
+        """
         if self.stack_price is not None:
             cost_from_stack = self.stack_price / self.stack_size
         else:
@@ -20,10 +47,40 @@ class Ingredient(Item):
 
 
 class CraftableIngredient(Ingredient, CraftableItem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """
+    Represents an ingredient that can also be crafted, combining properties of both
+    Ingredient and CraftableItem classes.
+    """
 
-    def get_min_cost(self):
+    def __init__(self, item_id: int, sub_id: int, name: str, sort_name: str, stack_size: int, flags: int, ah: int,
+                 no_sale: bool, base_sell: int) -> None:
+        """
+        Initialize a CraftableIngredient instance.
+
+        Args:
+            item_id (int): Unique identifier for the item.
+            sub_id (int): Sub-identifier for the item.
+            name (str): Name of the item.
+            sort_name (str): Name used for sorting purposes.
+            stack_size (int): Maximum quantity of the item that can be stacked.
+            flags (int): Bitfield representing various item properties.
+            ah (int): Auction house category.
+            no_sale (bool): Whether the item can be sold to NPCs.
+            base_sell (int): Base selling price to NPCs.
+        """
+        super().__init__(item_id, sub_id, name, sort_name, stack_size, flags, ah, no_sale, base_sell)
+        self.crafted_cost: float | None = None
+
+    def get_min_cost(self) -> int | float | None:
+        """
+        Calculate the minimum cost of the craftable ingredient from various sources,
+        including its crafted cost.
+
+        Returns:
+            int | float | None: The lowest cost among vendor cost, guild cost, single price,
+            stack price (divided by stack size), and crafted cost. Returns None if no valid
+            costs are available.
+        """
         costs = [super().get_min_cost(), self.crafted_cost]
         valid_costs = [cost for cost in costs if cost is not None]
         return min(valid_costs, default=None)
