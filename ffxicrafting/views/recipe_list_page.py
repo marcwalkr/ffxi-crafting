@@ -1,6 +1,7 @@
 import threading
 import logging
 import tkinter as tk
+import traceback
 from tkinter import ttk
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from queue import Queue, Empty
@@ -297,14 +298,17 @@ class RecipeListPage(ttk.Frame, ABC):
         Args:
             recipes (list[Recipe]): The list of Recipe objects to process.
         """
-        with Database() as db:
-            item_controller = ItemController(db)
-            crafting_controller = CraftingController(item_controller)
+        try:
+            with Database() as db:
+                item_controller = ItemController(db)
+                crafting_controller = CraftingController(item_controller)
 
-            for recipe in recipes:
-                if self._cancel_event.is_set():
-                    break
-                self._process_single_recipe(recipe, crafting_controller)
+                for recipe in recipes:
+                    if self._cancel_event.is_set():
+                        break
+                    self._process_single_recipe(recipe, crafting_controller)
+        except Exception:
+            traceback.print_exc()
 
     def _process_single_recipe(self, recipe: Recipe, crafting_controller: CraftingController) -> None:
         """

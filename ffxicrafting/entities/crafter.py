@@ -85,12 +85,12 @@ class Crafter:
             item_controller.update_guild_cost(ingredient.item_id)
             item_controller.update_auction_data(ingredient.item_id)
 
-    def _calculate_simulation_cost(self, cost: int, num_trials: int, retained_ingredients: dict[Ingredient, int]) -> float:
+    def _calculate_simulation_cost(self, cost: float, num_trials: int, retained_ingredients: dict[Ingredient, int]) -> float:
         """
         Calculate the total cost of the crafting simulation, accounting for retained ingredients on failure.
 
         Args:
-            cost (int): The base cost of a single crafting attempt.
+            cost (float): The base cost of a single crafting attempt.
             num_trials (int): The number of crafting attempts in the simulation.
             retained_ingredients (dict[Ingredient, int]): A dictionary of ingredients and their retained quantities.
 

@@ -148,19 +148,7 @@ class RecipeController:
             recipe_model.result_hq1, recipe_model.result_hq2, recipe_model.result_hq3, recipe_model.result_qty,
             recipe_model.result_hq1_qty, recipe_model.result_hq2_qty, recipe_model.result_hq3_qty,
             recipe_model.result_name,
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.crystal), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient1), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient2), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient3), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient4), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient5), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient6), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient7), None),
-            next((ingredient for ingredient in ingredients if ingredient.item_id == recipe_model.ingredient8), None),
-            next((result for result in results if result.item_id == recipe_model.result), None),
-            next((result for result in results if result.item_id == recipe_model.result_hq1), None),
-            next((result for result in results if result.item_id == recipe_model.result_hq2), None),
-            next((result for result in results if result.item_id == recipe_model.result_hq3), None)
+            ingredients,
+            results
         )
-
         return recipe

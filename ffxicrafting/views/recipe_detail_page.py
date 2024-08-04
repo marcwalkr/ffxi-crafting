@@ -139,9 +139,8 @@ class RecipeDetailPage(ttk.Frame):
 
         Retrieves ingredient data from the recipe and inserts it into the ingredients treeview.
         """
-        ingredient_counts = self._recipe.get_ingredient_counts()
 
-        for ingredient, quantity in ingredient_counts.items():
+        for ingredient, quantity in self._recipe.ingredients.items():
             ingredient_name = ingredient.get_formatted_name()
 
             single_cost = int(ingredient.single_price * quantity) if ingredient.single_price else ""

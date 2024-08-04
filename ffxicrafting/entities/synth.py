@@ -81,16 +81,16 @@ class Synth:
             if self.attempt_hq():
                 hq_tier = self.get_hq_tier()
                 return self.get_hq_result(hq_tier)
-            return self.recipe.result, self.recipe.result_qty
+            return self.recipe.get_nq_result()
         return None, None
 
     def get_hq_result(self, hq_tier):
         if hq_tier == 1:
-            return self.recipe.result_hq1, self.recipe.result_hq1_qty
+            return self.recipe.get_hq_result(1)
         elif hq_tier == 2:
-            return self.recipe.result_hq2, self.recipe.result_hq2_qty
+            return self.recipe.get_hq_result(2)
         else:
-            return self.recipe.result_hq3, self.recipe.result_hq3_qty
+            return self.recipe.get_hq_result(3)
 
     def do_synth_fail(self):
         loss_probability = clamp(0.15 - (self.difficulty / 20), 0, 1) if self.difficulty > 0 else 0.15
