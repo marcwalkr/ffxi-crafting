@@ -148,7 +148,7 @@ class RecipeController:
             recipe_model.result_hq1, recipe_model.result_hq2, recipe_model.result_hq3, recipe_model.result_qty,
             recipe_model.result_hq1_qty, recipe_model.result_hq2_qty, recipe_model.result_hq3_qty,
             recipe_model.result_name,
-            ingredients,
-            results
+            ingredient_objects=ingredients,
+            result_objects=results
         )
         return recipe
