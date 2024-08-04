@@ -46,10 +46,7 @@ class CraftingController:
         if not results:
             return None
 
-        sell_freq = max(
-            max(result.single_sell_freq or 0, result.stack_sell_freq or 0)
-            for result in results
-        )
+        sell_freq = max(result.get_best_sell_freq() for result in results)
 
         return {
             "crafter": crafter,
