@@ -1,68 +1,190 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from models import RecipeModel
-from utils import unique_preserve_order
+
+if TYPE_CHECKING:
+    from entities import Ingredient, Result
 
 
 class Recipe(RecipeModel):
-    def __init__(self, id, desynth, key_item, wood, smith, gold, cloth, leather, bone, alchemy, cook, crystal_id,
-                 hq_crystal, ingredient1_id, ingredient2_id, ingredient3_id, ingredient4_id, ingredient5_id,
-                 ingredient6_id, ingredient7_id, ingredient8_id, result_id, result_hq1_id, result_hq2_id,
-                 result_hq3_id, result_qty, result_hq1_qty, result_hq2_qty, result_hq3_qty, result_name, crystal,
-                 ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6, ingredient7,
-                 ingredient8, result, result_hq1, result_hq2, result_hq3) -> None:
-        super().__init__(id, desynth, key_item, wood, smith, gold, cloth, leather, bone, alchemy, cook, crystal_id,
-                         hq_crystal, ingredient1_id, ingredient2_id, ingredient3_id, ingredient4_id, ingredient5_id,
-                         ingredient6_id, ingredient7_id, ingredient8_id, result_id, result_hq1_id, result_hq2_id,
-                         result_hq3_id, result_qty, result_hq1_qty, result_hq2_qty, result_hq3_qty, result_name)
+    """
+    Represents a crafting recipe in the game, extending the RecipeModel with additional
+    functionality for managing ingredients and results.
+    """
 
-        self.crystal = crystal
-        self.ingredient1 = ingredient1
-        self.ingredient2 = ingredient2
-        self.ingredient3 = ingredient3
-        self.ingredient4 = ingredient4
-        self.ingredient5 = ingredient5
-        self.ingredient6 = ingredient6
-        self.ingredient7 = ingredient7
-        self.ingredient8 = ingredient8
-        self.result = result
-        self.result_hq1 = result_hq1
-        self.result_hq2 = result_hq2
-        self.result_hq3 = result_hq3
-        self.cost = None
+    def __init__(self, *args, **kwargs) -> None:
+        """
+        Initialize a Recipe instance.
 
-    def get_formatted_ingredient_names(self):
-        counts = self.get_ingredient_counts()
+        Inherits all attributes from RecipeModel and initializes additional properties
+        for managing ingredients and results.
+
+        Args:
+            *args: Variable length argument list for RecipeModel attributes.
+            **kwargs: Arbitrary keyword arguments for RecipeModel attributes.
+                Expects "ingredient_objects" and "result_objects" in kwargs.
+
+        Attributes:
+            ingredients (dict[Ingredient, int]): A dictionary mapping ingredients to their quantities.
+            results (list[tuple[Result, int, str]]): A list of tuples containing Result objects,
+                their quantities, and quality tiers.
+            cost (float | None): The calculated cost of the recipe, if available.
+        """
+        super().__init__(*args)
+
+        ingredient_objects = kwargs.get("ingredient_objects", [])
+        result_objects = kwargs.get("result_objects", [])
+
+        self.ingredients: dict[Ingredient, int] = {}
+        self._populate_ingredients(ingredient_objects)
+
+        self.results: list[tuple[Result, int, str]] = []
+        self._populate_results(result_objects)
+
+        self.cost: float | None = None
+
+    def _populate_ingredients(self, ingredient_objects: list[Ingredient]) -> None:
+        """
+        Populate the ingredients dictionary from the provided ingredient objects.
+
+        Args:
+            ingredient_objects (list[Ingredient]): List of Ingredient objects to populate from.
+        """
+        ingredient_ids = [self.crystal, self.ingredient1, self.ingredient2, self.ingredient3,
+                          self.ingredient4, self.ingredient5, self.ingredient6,
+                          self.ingredient7, self.ingredient8]
+        for item_id in ingredient_ids:
+            if item_id > 0:
+                ingredient = next((i for i in ingredient_objects if i.item_id == item_id), None)
+                if ingredient:
+                    self.ingredients[ingredient] = self.ingredients.get(ingredient, 0) + 1
+
+    def _populate_results(self, result_objects: list[Result]) -> None:
+        """
+        Populate the results list from the provided result objects.
+
+        Args:
+            result_objects (list[Result]): List of Result objects to populate from.
+        """
+        result_ids = [self.result, self.result_hq1, self.result_hq2, self.result_hq3]
+        result_qtys = [self.result_qty, self.result_hq1_qty, self.result_hq2_qty, self.result_hq3_qty]
+        quality_tiers = ["NQ", "HQ1", "HQ2", "HQ3"]
+        for item_id, qty, tier in zip(result_ids, result_qtys, quality_tiers):
+            result = next((r for r in result_objects if r.item_id == item_id), None)
+            if result:
+                self.results.append((result, qty, tier))
+
+    def get_ingredients(self) -> list[Ingredient]:
+        """
+        Get a list of all ingredients, including duplicates.
+
+        Returns:
+            list[Ingredient]: A list of all ingredients, with each ingredient repeated
+                              according to its quantity in the recipe.
+        """
+        return [ingredient for ingredient, count in self.ingredients.items() for _ in range(count)]
+
+    def get_unique_ingredients(self) -> list[Ingredient]:
+        """
+        Get a list of unique ingredients used in the recipe.
+
+        Returns:
+            list[Ingredient]: A list of unique ingredients.
+        """
+        return list(self.ingredients.keys())
+
+    def get_unique_results(self) -> list[Result]:
+        """
+        Get a list of unique results (excluding duplicates across quality tiers).
+
+        Returns:
+            list[Result]: A list of unique Result objects.
+        """
+        seen = set()
+        return [result for result, _, _ in self.results
+                if not (result.item_id in seen or seen.add(result.item_id))]
+
+    def get_nq_result(self) -> tuple[Result | None, int | None]:
+        """
+        Get the normal quality (NQ) result and its quantity.
+
+        Returns:
+            tuple[Result | None, int | None]: A tuple containing the NQ Result object and its quantity,
+                                              or (None, None) if no NQ result exists.
+        """
+        nq_result = next((r for r, q, t in self.results if t == "NQ"), None)
+        if nq_result:
+            qty = next(q for r, q, t in self.results if t == "NQ")
+            return nq_result, qty
+        return None, None
+
+    def get_hq_result(self, hq_tier: int) -> tuple[Result | None, int | None]:
+        """
+        Get the high quality (HQ) result of a specific tier and its quantity.
+
+        Args:
+            hq_tier (int): The HQ tier to retrieve (1, 2, or 3).
+
+        Returns:
+            tuple[Result | None, int | None]: A tuple containing the HQ Result object and its quantity,
+                                              or (None, None) if no result exists for the specified tier.
+        """
+        hq_result = next((r for r, q, t in self.results if t == f"HQ{hq_tier}"), None)
+        if hq_result:
+            qty = next(q for r, q, t in self.results if t == f"HQ{hq_tier}")
+            return hq_result, qty
+        return None, None
+
+    def get_formatted_ingredient_names(self) -> str:
+        """
+        Get a formatted string of ingredient names with their quantities.
+
+        Returns:
+            str: A comma-separated string of ingredient names with quantities.
+        """
         ingredient_strings = []
-        for ingredient, count in counts.items():
+        for ingredient, count in self.ingredients.items():
             if count > 1:
                 ingredient_strings.append(f"{ingredient.get_formatted_name()} x{count}")
             else:
                 ingredient_strings.append(ingredient.get_formatted_name())
-        return ", ".join(unique_preserve_order(ingredient_strings))
+        return ", ".join(ingredient_strings)
 
-    def get_formatted_nq_result(self):
-        if self.result_qty > 1:
-            return self.result.get_formatted_name() + " x" + str(self.result_qty)
-        else:
-            return self.result.get_formatted_name()
+    def get_formatted_nq_result(self) -> str:
+        """
+        Get a formatted string representation of the normal quality (NQ) result.
 
-    def get_formatted_hq_results(self):
+        Returns:
+            str: A string representing the NQ result with its quantity, or an empty string if no NQ result exists.
+        """
+        nq_result, qty = self.get_nq_result()
+        if nq_result:
+            if qty > 1:
+                return f"{nq_result.get_formatted_name()} x{qty}"
+            else:
+                return nq_result.get_formatted_name()
+        return ""
+
+    def get_formatted_hq_results(self) -> str:
+        """
+        Get a formatted string representation of all high quality (HQ) results.
+
+        Returns:
+            str: A comma-separated string of HQ results with their quantities.
+        """
         hq_strings = []
-        if self.result_hq1_qty > 1:
-            hq_strings.append(self.result_hq1.get_formatted_name() + " x" + str(self.result_hq1_qty))
-        else:
-            hq_strings.append(self.result_hq1.get_formatted_name())
-        if self.result_hq2_qty > 1:
-            hq_strings.append(self.result_hq2.get_formatted_name() + " x" + str(self.result_hq2_qty))
-        else:
-            hq_strings.append(self.result_hq2.get_formatted_name())
-        if self.result_hq3_qty > 1:
-            hq_strings.append(self.result_hq3.get_formatted_name() + " x" + str(self.result_hq3_qty))
-        else:
-            hq_strings.append(self.result_hq3.get_formatted_name())
+        for result, qty, tier in self.results:
+            if tier.startswith("HQ"):
+                hq_strings.append(f"{result.get_formatted_name()} x{qty}")
+        return ", ".join(hq_strings)
 
-        return ", ".join(unique_preserve_order(hq_strings))
+    def get_formatted_levels_string(self) -> str:
+        """
+        Get a formatted string representation of the required crafting levels.
 
-    def get_formatted_levels_string(self):
+        Returns:
+            str: A comma-separated string of crafting skills and their required levels.
+        """
         skills = {
             "Wood": self.wood,
             "Smith": self.smith,
@@ -76,38 +198,18 @@ class Recipe(RecipeModel):
         levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
         return ", ".join(levels)
 
-    def get_results(self):
-        return [self.result, self.result_hq1, self.result_hq2, self.result_hq3]
+    def calculate_cost(self) -> float | None:
+        """
+        Calculate the total cost of the recipe based on the minimum costs of its ingredients.
 
-    def get_unique_results(self):
-        return unique_preserve_order(self.get_results())
-
-    def get_ingredients(self):
-        ingredients = [
-            self.crystal, self.ingredient1, self.ingredient2, self.ingredient3,
-            self.ingredient4, self.ingredient5, self.ingredient6, self.ingredient7, self.ingredient8
-        ]
-        return [ingredient for ingredient in ingredients if ingredient is not None]
-
-    def get_unique_ingredients(self):
-        return unique_preserve_order(self.get_ingredients())
-
-    def get_ingredient_counts(self):
-        ingredients = self.get_ingredients()
-        ingredient_counts = {}
-        for ingredient in ingredients:
-            if ingredient in ingredient_counts:
-                ingredient_counts[ingredient] += 1
-            else:
-                ingredient_counts[ingredient] = 1
-        return ingredient_counts
-
-    def calculate_cost(self):
+        Returns:
+            float | None: The total cost of the recipe, or None if any ingredient cost is unavailable.
+        """
         cost = 0
-        for ingredient in self.get_ingredients():
+        for ingredient, count in self.ingredients.items():
             min_cost = ingredient.get_min_cost()
             if min_cost is None:
                 return None
-            cost += min_cost
+            cost += min_cost * count
         self.cost = cost
         return cost
