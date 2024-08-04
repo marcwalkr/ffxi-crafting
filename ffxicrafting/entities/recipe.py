@@ -149,7 +149,7 @@ class Recipe(RecipeModel):
                 ingredient_strings.append(f"{ingredient.get_formatted_name()} x{count}")
             else:
                 ingredient_strings.append(ingredient.get_formatted_name())
-        return ", ".join(unique_preserve_order(ingredient_strings))
+        return ", ".join(ingredient_strings)
 
     def get_formatted_nq_result(self) -> str:
         """
