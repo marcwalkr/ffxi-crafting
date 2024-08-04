@@ -22,6 +22,11 @@ class ItemModel:
             ah (int): The auction house category for this item.
             no_sale (bool): True if the item cannot be sold to NPCs, False otherwise.
             base_sell (int): The base selling price of the item to NPCs.
+
+        Note:
+            The exact purposes of sub_id and flags are not fully known. They are included
+            for completeness as they exist in the original database schema.
+            Flags likely represent various item categories or properties used by the game code.
         """
         self.item_id: int = item_id
         self.sub_id: int = sub_id
