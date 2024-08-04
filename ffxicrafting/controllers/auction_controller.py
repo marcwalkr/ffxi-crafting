@@ -1,3 +1,4 @@
+from database import Database
 from repositories import AuctionRepository
 from models import AuctionItem, SalesHistory
 
@@ -10,7 +11,7 @@ class AuctionController:
     AuctionRepository, handling operations related to auction items and sales history.
     """
 
-    def __init__(self, db) -> None:
+    def __init__(self, db: Database) -> None:
         """
         Initialize the AuctionController.
 
