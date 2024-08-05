@@ -101,7 +101,7 @@ class RecipeDetailPage(ttk.Frame):
         results_frame = ttk.Frame(self)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        result_columns = ("Result", "Avg Single Price", "Avg Stack Price", "Single Profit", "Stack Profit")
+        result_columns = ("Result", "Single Price", "Stack Price", "Single Profit", "Stack Profit")
         self._results_tree = TreeviewWithSort(results_frame, columns=result_columns,
                                               show="headings", selectmode="browse")
         self._configure_treeview_columns(self._results_tree, result_columns)
