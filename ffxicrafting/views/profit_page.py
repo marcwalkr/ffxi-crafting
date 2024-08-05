@@ -80,10 +80,7 @@ class ProfitPage(RecipeListPage):
             list: A list of Recipe objects fetched from the RecipeController.
         """
         skills = SettingsManager.get_craft_skills()
-        skill_look_ahead = SettingsManager.get_skill_look_ahead()
-        return self.recipe_controller.get_recipes_by_level(
-            *(skill - skill_look_ahead for skill in skills), batch_size=batch_size, offset=offset
-        )
+        return self.recipe_controller.get_recipes_by_level(*skills, batch_size=batch_size, offset=offset)
 
     def should_display_recipe(self, craft_result: dict) -> bool:
         """

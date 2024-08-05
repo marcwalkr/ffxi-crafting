@@ -13,14 +13,11 @@ class SettingsManager:
 
     SETTINGS_FILE = "settings.json"
     DEFAULT_SETTINGS = {
-        "profit_table": {
+        "thresholds_and_settings": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
             "min_auction_list_price": 0,
-            "sell_frequency": 0.0
-        },
-        "synth": {
-            "skill_look_ahead": 0,
+            "sell_frequency": 0.0,
             "craft_ingredients": False
         },
         "skill_levels": {
@@ -112,7 +109,7 @@ class SettingsManager:
             int: The profit per synthesis value. Returns 0 if not set.
         """
         settings = cls.load_settings()
-        return settings["profit_table"].get("profit_/_synth", 0)
+        return settings["thresholds_and_settings"].get("profit_/_synth", 0)
 
     @classmethod
     def get_profit_per_storage(cls) -> int:
@@ -123,7 +120,7 @@ class SettingsManager:
             int: The profit per storage value. Returns 0 if not set.
         """
         settings = cls.load_settings()
-        return settings["profit_table"].get("profit_/_storage", 0)
+        return settings["thresholds_and_settings"].get("profit_/_storage", 0)
 
     @classmethod
     def get_min_auction_list_price(cls) -> int:
@@ -134,7 +131,7 @@ class SettingsManager:
             int: The minimum auction list price value. Returns 0 if not set.
         """
         settings = cls.load_settings()
-        return settings["profit_table"].get("min_auction_list_price", 0)
+        return settings["thresholds_and_settings"].get("min_auction_list_price", 0)
 
     @classmethod
     def get_sell_freq(cls) -> float:
@@ -145,18 +142,7 @@ class SettingsManager:
             float: The sell frequency value. Returns 0.0 if not set.
         """
         settings = cls.load_settings()
-        return settings["profit_table"].get("sell_frequency", 0.0)
-
-    @classmethod
-    def get_skill_look_ahead(cls) -> int:
-        """
-        Get the skill look ahead setting.
-
-        Returns:
-            int: The skill look ahead value. Returns 0 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["synth"].get("skill_look_ahead", 0)
+        return settings["thresholds_and_settings"].get("sell_frequency", 0.0)
 
     @classmethod
     def get_craft_ingredients(cls) -> bool:
@@ -167,7 +153,7 @@ class SettingsManager:
             bool: True if craft ingredients is enabled, False otherwise.
         """
         settings = cls.load_settings()
-        return settings["synth"].get("craft_ingredients", False)
+        return settings["thresholds_and_settings"].get("craft_ingredients", False)
 
     @classmethod
     def get_craft_skills(cls) -> list[int]:

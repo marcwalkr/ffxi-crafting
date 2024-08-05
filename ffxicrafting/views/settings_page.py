@@ -49,12 +49,11 @@ class SettingsPage(ttk.Frame):
         """
         Create and layout all categories of settings.
 
-        Sets up frames for different setting categories including profit table, synthesis,
+        Sets up frames for different setting categories including thresholds and settings,
         skill levels, merchants, conquest, guilds, and database settings.
         """
         categories = [
-            ("Profit Table", self._create_profit_table_settings),
-            ("Synth", self._create_synth_settings),
+            ("Thresholds and Settings", self._create_thresholds_and_settings),
         ]
 
         for category_name, create_method in categories:
@@ -98,43 +97,35 @@ class SettingsPage(ttk.Frame):
         save_button = ttk.Button(self, text="Save", command=self._save_settings)
         save_button.pack(pady=(10, 40))
 
-    def _create_profit_table_settings(self, frame: ttk.LabelFrame) -> None:
+    def _create_thresholds_and_settings(self, frame: ttk.LabelFrame) -> None:
         """
-        Create settings for the profit table.
+        Create settings for thresholds and other settings.
         Sets up input fields for profit per synthesis, profit per storage,
-        minimum auction list price, and sell frequency.
+        minimum auction list price, sell frequency, and a checkbox for crafting ingredients.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
         """
-        self._profit_table_settings = frame
+        self._thresholds_and_settings = frame
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
             ("Min Auction List Price", 0),
             ("Sell Frequency", 0)
         ]
-        self._create_number_settings(frame, settings, self._settings.get("profit_table", {}))
 
-    def _create_synth_settings(self, frame: ttk.LabelFrame) -> None:
-        """
-        Create settings for synthesis.
-        Sets up input fields for skill look ahead and a checkbox for crafting ingredients.
+        # Create a horizontal frame for the number settings
+        number_settings_frame = ttk.Frame(frame)
+        number_settings_frame.pack(fill="x", padx=20, pady=5)
 
-        Args:
-            frame (ttk.LabelFrame): The frame to contain these settings.
-        """
-        self._synth_settings = frame
-        settings = [
-            ("Skill Look Ahead", 0),
-        ]
-        self._create_number_settings(frame, settings, self._settings.get("synth", {}))
+        self._create_number_settings(number_settings_frame, settings, self._settings.get("thresholds_and_settings", {}))
 
+        # Add the craft ingredients checkbox
         craft_ingredients_var = tk.BooleanVar(value=self._settings.get(
-            "profit_table", {}).get("craft_ingredients", False))
+            "thresholds_and_settings", {}).get("craft_ingredients", False))
         craft_ingredients_cb = ttk.Checkbutton(frame, text="Craft Ingredients", variable=craft_ingredients_var,
                                                style="Custom.TCheckbutton")
-        craft_ingredients_cb.pack(side="left", padx=20, pady=5)
+        craft_ingredients_cb.pack(anchor="w", padx=30, pady=5)
         craft_ingredients_cb.var = craft_ingredients_var
 
     def _create_skill_levels_settings(self, frame: ttk.LabelFrame) -> None:
@@ -267,8 +258,7 @@ class SettingsPage(ttk.Frame):
         Collects all settings from various categories and saves them using the SettingsManager.
         """
         settings = {
-            "profit_table": self._get_number_settings(self._profit_table_settings),
-            "synth": self._get_synth_settings(),
+            "thresholds_and_settings": self._get_thresholds_and_settings(),
             "skill_levels": self._get_vertical_number_settings(self._skill_levels_settings),
             "regional_merchants": self._get_regional_merchants_settings(),
             "conquest": self._get_option_menu_settings(self._conquest_settings),
@@ -277,16 +267,16 @@ class SettingsPage(ttk.Frame):
         }
         SettingsManager.save_settings(settings)
 
-    def _get_synth_settings(self) -> dict:
+    def _get_thresholds_and_settings(self) -> dict:
         """
-        Retrieve synthesis settings including number settings and checkbox values.
+        Retrieve thresholds and settings including number inputs and the checkbox value.
 
         Returns:
-            dict: A dictionary containing synthesis settings, including 'craft_ingredients' boolean.
+            dict: A dictionary containing thresholds and settings, including numeric values 
+            and "craft_ingredients" boolean.
         """
-        settings = self._get_number_settings(self._synth_settings)
-        # Add the checkbox value
-        for child in self._synth_settings.winfo_children():
+        settings = self._get_number_settings(self._thresholds_and_settings)
+        for child in self._thresholds_and_settings.winfo_children():
             if isinstance(child, ttk.Checkbutton) and child.cget("text") == "Craft Ingredients":
                 settings["craft_ingredients"] = child.var.get()
         return settings
@@ -427,24 +417,28 @@ class SettingsPage(ttk.Frame):
         except ValueError:
             return 0  # Return 0 if conversion fails
 
-    def _create_number_settings(self, frame: ttk.LabelFrame, settings: list[tuple[str, Union[int, float]]],
+    def _create_number_settings(self, frame: ttk.Frame, settings: list[tuple[str, Union[int, float]]],
                                 saved_settings: dict) -> None:
         """
-        Create number input fields for settings.
+        Create number input fields for settings in a horizontal layout.
         Creates labeled entry fields for numeric settings.
 
         Args:
-            frame (ttk.LabelFrame): The frame to contain these settings.
+            frame (ttk.Frame): The frame to contain these settings.
             settings (list[tuple[str, Union[int, float]]]): List of setting names and default values.
             saved_settings (dict): Dictionary of previously saved settings.
         """
         for setting, default in settings:
-            label = ttk.Label(frame, text=setting)
-            label.pack(side="left", padx=5, pady=5)
+            setting_frame = ttk.Frame(frame)
+            setting_frame.pack(side="left", padx=5, pady=5)
+
+            label = ttk.Label(setting_frame, text=setting)
+            label.pack(side="left")
+
             entry_name = setting.lower().replace(" ", "_")
-            entry = ttk.Entry(frame, width=10, name=entry_name)
+            entry = ttk.Entry(setting_frame, width=10, name=entry_name)
             entry.insert(0, saved_settings.get(entry_name, default))
-            entry.pack(side="left", padx=5, pady=5)
+            entry.pack(side="left", padx=(5, 0))
 
     def _create_vertical_number_settings(self, frame: ttk.LabelFrame, settings: list[tuple[str, Union[int, float]]],
                                          saved_settings: dict) -> None:
