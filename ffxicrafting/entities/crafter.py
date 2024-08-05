@@ -172,6 +172,8 @@ class Crafter:
     def _calculate_result_total_profit(self, result: Result, quantity: int) -> float:
         """
         Calculate the total profit for a specific crafting result.
+        The form of the item (stack or single) with the higher sell frequency is used to calculate the profit.
+        If sell frequency data is missing for one form, the other form is used.
 
         Args:
             result (Result): The Result object to calculate total profit for.
@@ -180,15 +182,21 @@ class Crafter:
         Returns:
             float: The total profit for this specific crafting result.
         """
-        # If a stack price exists, use it in the calculation
-        # because stacks are more commonly sold and it works as a low estimate
-        if result.stack_price is not None:
-            single_price_from_stack = result.stack_price / result.stack_size
-            return (single_price_from_stack - result.crafted_cost) * quantity
+        if result.stack_price is not None and result.single_price is not None:
+            if (result.single_sell_freq is None or
+                (result.stack_sell_freq is not None and
+                 result.stack_sell_freq > result.single_sell_freq)):
+                single_price = result.stack_price / result.stack_size
+            else:
+                single_price = result.single_price
+        elif result.stack_price is not None:
+            single_price = result.stack_price / result.stack_size
         elif result.single_price is not None:
-            return (result.single_price - result.crafted_cost) * quantity
+            single_price = result.single_price
         else:
             return 0
+
+        return (single_price - result.crafted_cost) * quantity
 
     def _calculate_storage_slots(self, result: Result, quantity: int) -> int:
         """
