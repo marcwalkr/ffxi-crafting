@@ -165,6 +165,7 @@ class RecipeDetailPage(ttk.Frame):
         Retrieves result data from the recipe and inserts it into the results treeview.
         """
         unique_results = self._recipe.get_unique_results()
+        show_stack_columns = False
         for result in unique_results:
             result_name = result.get_formatted_name()
             single_price = result.single_price if result.single_price is not None else ""
@@ -172,9 +173,30 @@ class RecipeDetailPage(ttk.Frame):
             crafted_cost = int(result.crafted_cost) if result.crafted_cost is not None else ""
             single_profit = int(result.single_profit) if result.single_profit is not None else ""
             stack_profit = int(result.stack_profit) if result.stack_profit is not None else ""
+
+            if stack_price or stack_profit:
+                # Only show stack columns if there is a stack price or stack profit
+                show_stack_columns = True
+
             self._results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
                                                                              crafted_cost, single_profit, stack_profit,
                                                                              self._recipe.id))
+
+        self._update_results_tree_columns(show_stack_columns)
+
+    def _update_results_tree_columns(self, show_stack_columns: bool) -> None:
+        """
+        Update the visibility of stack-related columns in the results tree.
+
+        Args:
+            show_stack_columns (bool): Whether to show or hide stack-related columns.
+        """
+        if show_stack_columns:
+            self._results_tree.show_column("Stack Price")
+            self._results_tree.show_column("Stack Profit")
+        else:
+            self._results_tree.hide_column("Stack Price")
+            self._results_tree.hide_column("Stack Profit")
 
     def _close_detail_page(self) -> None:
         """
