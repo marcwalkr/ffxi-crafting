@@ -68,9 +68,9 @@ class Crafter:
         simulation_cost = self._calculate_simulation_cost(cost, num_trials, retained_ingredients)
         self._set_crafted_costs(simulation_cost, results)
         total_revenue, total_storage_slots = self._process_results(results, item_controller)
-        self._set_profit_contributions(results, total_revenue)
 
         total_profit = total_revenue - simulation_cost
+        self._set_profit_contributions(results, simulation_cost, total_profit)
 
         profit_per_synth = total_profit / num_trials
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
@@ -215,7 +215,7 @@ class Crafter:
         """
         return (quantity + result.stack_size - 1) // result.stack_size
 
-    def _set_profit_contributions(self, results: dict[Result, int], total_profit: float) -> None:
+    def _set_profit_contributions(self, results: dict[Result, int], simulation_cost: float, total_profit: float) -> None:
         """
         Set the profit contribution for each result.
 
@@ -223,10 +223,11 @@ class Crafter:
             results (dict[Result, int]): A dictionary of crafting results and their quantities.
             total_profit (float): The total profit from all crafted items.
         """
+        cost_per_item = simulation_cost / sum(results.values())
         for result, quantity in results.items():
             fastest_selling_price = result.get_fastest_selling_price_per_unit()
             if fastest_selling_price is not None:
-                result_profit = (fastest_selling_price - result.crafted_cost) * quantity
+                result_profit = (fastest_selling_price - cost_per_item) * quantity
                 result.profit_contribution = result_profit / total_profit
             else:
                 result.profit_contribution = 0
