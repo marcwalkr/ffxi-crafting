@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from entities import Synth, Recipe
-from config import SettingsManager
 
 if TYPE_CHECKING:
     from controllers import ItemController
@@ -55,7 +54,6 @@ class Crafter:
 
         Returns (None, None, None) if the crafting cannot be performed due to missing ingredients.
         """
-        num_trials = SettingsManager.get_simulation_trials()
         self._set_ingredient_costs(item_controller)
         cost = self.recipe.calculate_cost()
 
@@ -63,16 +61,16 @@ class Crafter:
             # The synth cannot be crafted because of missing ingredients
             return None, None, None
 
-        results, retained_ingredients = self.synth.simulate(num_trials)
+        results, retained_ingredients = self.synth.simulate()
         self._set_proportions(results)
-        simulation_cost = self._calculate_simulation_cost(cost, num_trials, retained_ingredients)
+        simulation_cost = self._calculate_simulation_cost(cost, retained_ingredients)
         self._set_crafted_costs(simulation_cost, results)
         total_revenue, total_storage_slots = self._process_results(results, item_controller)
 
         total_profit = total_revenue - simulation_cost
         self._set_profit_contributions(results, simulation_cost, total_profit)
 
-        profit_per_synth = total_profit / num_trials
+        profit_per_synth = total_profit / self.synth.SIMULATION_TRIALS
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
 
         return results.keys(), profit_per_synth, profit_per_storage
@@ -89,19 +87,18 @@ class Crafter:
             item_controller.update_guild_cost(ingredient.item_id)
             item_controller.update_auction_data(ingredient.item_id)
 
-    def _calculate_simulation_cost(self, cost: float, num_trials: int, retained_ingredients: dict[Ingredient, int]) -> float:
+    def _calculate_simulation_cost(self, cost: float, retained_ingredients: dict[Ingredient, int]) -> float:
         """
         Calculate the total cost of the crafting simulation, accounting for retained ingredients on failure.
 
         Args:
             cost (float): The base cost of a single crafting attempt.
-            num_trials (int): The number of crafting attempts in the simulation.
             retained_ingredients (dict[Ingredient, int]): A dictionary of ingredients and their retained quantities.
 
         Returns:
             float: The total cost of the simulation after accounting for retained ingredients.
         """
-        simulation_cost = cost * num_trials
+        simulation_cost = cost * self.synth.SIMULATION_TRIALS
         saved_cost = self._get_saved_cost(retained_ingredients)
         return simulation_cost - saved_cost
 

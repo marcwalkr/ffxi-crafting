@@ -119,8 +119,7 @@ class SettingsPage(ttk.Frame):
     def _create_synth_settings(self, frame: ttk.LabelFrame) -> None:
         """
         Create settings for synthesis.
-        Sets up input fields for skill look ahead and simulation trials,
-        as well as a checkbox for crafting ingredients.
+        Sets up input fields for skill look ahead and a checkbox for crafting ingredients.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
@@ -128,7 +127,6 @@ class SettingsPage(ttk.Frame):
         self._synth_settings = frame
         settings = [
             ("Skill Look Ahead", 0),
-            ("Simulation Trials", 1000)
         ]
         self._create_number_settings(frame, settings, self._settings.get("synth", {}))
 

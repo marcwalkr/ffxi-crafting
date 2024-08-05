@@ -21,6 +21,7 @@ class Synth:
     _DESYNTH_HQ_PROBABILITIES: list[float] = [0.37, 0.4, 0.43, 0.46, 0.49]
     _HQ_TIER_WEIGHTS: list[float] = [75, 18.75, 6.25]
     _DESYNTH_HQ_TIER_WEIGHTS: list[float] = [37.5, 37.5, 25]
+    SIMULATION_TRIALS: int = 10000
 
     def __init__(self, recipe: Recipe, crafter: Crafter) -> None:
         """
@@ -168,15 +169,12 @@ class Synth:
 
         return retained_ingredients
 
-    def simulate(self, num_trials: int) -> tuple[dict[Result, int], dict[Ingredient, int]]:
+    def simulate(self) -> tuple[dict[Result, int], dict[Ingredient, int]]:
         """
         Simulate multiple synthesis attempts and calculate the results.
 
         This method performs a specified number of synthesis attempts and tracks
         the results produced and ingredients retained from failed attempts.
-
-        Args:
-            num_trials (int): The number of synthesis attempts to simulate.
 
         Returns:
             tuple[dict[Result, int], dict[Ingredient, int]]: A tuple containing:
@@ -186,7 +184,7 @@ class Synth:
         results = defaultdict(lambda: 0)
         retained_ingredients = defaultdict(lambda: 0)
 
-        for _ in range(num_trials):
+        for _ in range(self.SIMULATION_TRIALS):
             result, quantity = self._synth()
             if result is not None:
                 results[result] += quantity

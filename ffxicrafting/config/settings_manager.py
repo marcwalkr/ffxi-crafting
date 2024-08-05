@@ -21,7 +21,6 @@ class SettingsManager:
         },
         "synth": {
             "skill_look_ahead": 0,
-            "simulation_trials": 1000,
             "craft_ingredients": False
         },
         "skill_levels": {
@@ -158,17 +157,6 @@ class SettingsManager:
         """
         settings = cls.load_settings()
         return settings["synth"].get("skill_look_ahead", 0)
-
-    @classmethod
-    def get_simulation_trials(cls) -> int:
-        """
-        Get the number of simulation trials setting.
-
-        Returns:
-            int: The number of simulation trials. Returns 1000 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["synth"].get("simulation_trials", 1000)
 
     @classmethod
     def get_craft_ingredients(cls) -> bool:
