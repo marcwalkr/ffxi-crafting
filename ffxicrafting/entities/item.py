@@ -77,6 +77,26 @@ class Item(ItemModel):
         self.single_sell_freq = item.single_sell_freq
         self.stack_sell_freq = item.stack_sell_freq
 
+    def get_fastest_selling_price_per_unit(self) -> float | None:
+        """
+        Get the price per unit of the fastest selling method (single or stack).
+
+        Returns:
+            float | None: The price per unit of the fastest selling method, or None if no price data is available.
+        """
+        if self.single_price is not None and self.stack_price is not None:
+            if self.single_sell_freq is None or (self.stack_sell_freq is not None and
+                                                 self.stack_sell_freq > self.single_sell_freq):
+                return self.stack_price / self.stack_size
+            else:
+                return self.single_price
+        elif self.stack_price is not None:
+            return self.stack_price / self.stack_size
+        elif self.single_price is not None:
+            return self.single_price
+        else:
+            return None
+
 
 class CraftableItem(Item):
     """
@@ -95,7 +115,9 @@ class CraftableItem(Item):
             *args: Variable length argument list for Item attributes.
 
         Attributes:
-            crafted_cost (float | None): The cost to craft this item, if applicable.
+            crafted_cost (float | None): The cost of crafting a single unit of the item.
+            proportion (float | None): The proportion of the item produced compared to other results in the recipe.
         """
         super().__init__(*args)
         self.crafted_cost: float | None = None
+        self.proportion: float | None = None

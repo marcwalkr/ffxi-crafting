@@ -28,14 +28,14 @@ class Result(CraftableItem):
             *args: Variable length argument list for CraftableItem attributes.
 
         Attributes:
-            crafted_cost (float | None): The cost of crafting a single unit of the item.
             single_profit (float | None): The profit when selling as a single item.
             stack_profit (float | None): The profit when selling as a stack.
+            profit_contribution (float | None): The profit contribution of this result to the total profit.
         """
         super().__init__(*args)
-        self.crafted_cost: float | None = None
         self.single_profit: float | None = None
         self.stack_profit: float | None = None
+        self.profit_contribution: float | None = None
         Result.instances.append(self)
 
     @classmethod

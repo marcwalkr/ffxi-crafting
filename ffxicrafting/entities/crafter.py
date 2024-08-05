@@ -64,9 +64,11 @@ class Crafter:
             return None, None, None
 
         results, retained_ingredients = self.synth.simulate(num_trials)
+        self._set_proportions(results)
         simulation_cost = self._calculate_simulation_cost(cost, num_trials, retained_ingredients)
         self._set_crafted_costs(simulation_cost, results)
         total_profit, total_storage_slots = self._process_results(results, item_controller)
+        self._set_profit_contributions(results, total_profit)
 
         profit_per_synth = total_profit / num_trials
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
@@ -118,6 +120,17 @@ class Crafter:
             total_saved_cost += saved_cost
 
         return total_saved_cost
+
+    def _set_proportions(self, results: dict[Result, int]) -> None:
+        """
+        Set the craft rates for each result.
+
+        Args:
+            results (dict[Result, int]): A dictionary of crafting results and their quantities.
+        """
+        total_items_produced = sum(results.values())
+        for result, quantity in results.items():
+            result.proportion = quantity / total_items_produced
 
     def _set_crafted_costs(self, simulation_cost: float, results: dict[Result, int]) -> None:
         """
@@ -172,8 +185,7 @@ class Crafter:
     def _calculate_result_total_profit(self, result: Result, quantity: int) -> float:
         """
         Calculate the total profit for a specific crafting result.
-        The form of the item (stack or single) with the higher sell frequency is used to calculate the profit.
-        If sell frequency data is missing for one form, the other form is used.
+        Uses the fastest selling form of the item to calculate the profit.
 
         Args:
             result (Result): The Result object to calculate total profit for.
@@ -182,21 +194,11 @@ class Crafter:
         Returns:
             float: The total profit for this specific crafting result.
         """
-        if result.stack_price is not None and result.single_price is not None:
-            if (result.single_sell_freq is None or
-                (result.stack_sell_freq is not None and
-                 result.stack_sell_freq > result.single_sell_freq)):
-                single_price = result.stack_price / result.stack_size
-            else:
-                single_price = result.single_price
-        elif result.stack_price is not None:
-            single_price = result.stack_price / result.stack_size
-        elif result.single_price is not None:
-            single_price = result.single_price
+        fastest_selling_price = result.get_fastest_selling_price_per_unit()
+        if fastest_selling_price is not None:
+            return (fastest_selling_price - result.crafted_cost) * quantity
         else:
-            return 0
-
-        return (single_price - result.crafted_cost) * quantity
+            return (0 - result.crafted_cost) * quantity
 
     def _calculate_storage_slots(self, result: Result, quantity: int) -> int:
         """
@@ -210,3 +212,19 @@ class Crafter:
             int: The number of storage slots required for this crafting result.
         """
         return (quantity + result.stack_size - 1) // result.stack_size
+
+    def _set_profit_contributions(self, results: dict[Result, int], total_profit: float) -> None:
+        """
+        Set the profit contribution for each result.
+
+        Args:
+            results (dict[Result, int]): A dictionary of crafting results and their quantities.
+            total_profit (float): The total profit from all crafted items.
+        """
+        for result, quantity in results.items():
+            fastest_selling_price = result.get_fastest_selling_price_per_unit()
+            if fastest_selling_price is not None:
+                result_profit = (fastest_selling_price - result.crafted_cost) * quantity
+                result.profit_contribution = result_profit / total_profit
+            else:
+                result.profit_contribution = 0
