@@ -67,8 +67,10 @@ class Crafter:
         self._set_proportions(results)
         simulation_cost = self._calculate_simulation_cost(cost, num_trials, retained_ingredients)
         self._set_crafted_costs(simulation_cost, results)
-        total_profit, total_storage_slots = self._process_results(results, item_controller)
-        self._set_profit_contributions(results, total_profit)
+        total_revenue, total_storage_slots = self._process_results(results, item_controller)
+        self._set_profit_contributions(results, total_revenue)
+
+        total_profit = total_revenue - simulation_cost
 
         profit_per_synth = total_profit / num_trials
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
@@ -145,7 +147,7 @@ class Crafter:
 
     def _process_results(self, results: dict[Result, int], item_controller: ItemController) -> tuple[float, float]:
         """
-        Process the crafting results to calculate total profit and storage requirements.
+        Process the crafting results to calculate total revenue and storage requirements.
 
         Args:
             results (dict[Result, int]): A dictionary of crafting results and their quantities.
@@ -153,10 +155,10 @@ class Crafter:
 
         Returns:
             tuple[float, float]: A tuple containing:
-                - The total profit from all crafted items.
+                - The total revenue from all crafted items.
                 - The total number of storage slots required for the crafted items.
         """
-        total_profit = 0
+        total_revenue = 0
         total_storage_slots = 0
 
         for result, quantity in results.items():
@@ -164,10 +166,10 @@ class Crafter:
 
             self._calculate_result_profits(result)
 
-            total_profit += self._calculate_result_total_profit(result, quantity)
+            total_revenue += self._calculate_result_total_revenue(result, quantity)
             total_storage_slots += self._calculate_storage_slots(result, quantity)
 
-        return total_profit, total_storage_slots
+        return total_revenue, total_storage_slots
 
     def _calculate_result_profits(self, result: Result) -> None:
         """
@@ -182,23 +184,23 @@ class Crafter:
         else:
             result.stack_profit = None
 
-    def _calculate_result_total_profit(self, result: Result, quantity: int) -> float:
+    def _calculate_result_total_revenue(self, result: Result, quantity: int) -> float:
         """
-        Calculate the total profit for a specific crafting result.
-        Uses the fastest selling form of the item to calculate the profit.
+        Calculate the total revenue for a specific crafting result.
+        Uses the fastest selling form of the item to calculate the revenue.
 
         Args:
-            result (Result): The Result object to calculate total profit for.
+            result (Result): The Result object to calculate total revenue for.
             quantity (int): The quantity of this result produced.
 
         Returns:
-            float: The total profit for this specific crafting result.
+            float: The total revenue for this specific crafting result.
         """
         fastest_selling_price = result.get_fastest_selling_price_per_unit()
         if fastest_selling_price is not None:
-            return (fastest_selling_price - result.crafted_cost) * quantity
+            return fastest_selling_price * quantity
         else:
-            return (0 - result.crafted_cost) * quantity
+            return 0
 
     def _calculate_storage_slots(self, result: Result, quantity: int) -> int:
         """
