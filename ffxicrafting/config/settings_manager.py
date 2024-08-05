@@ -123,17 +123,6 @@ class SettingsManager:
         return settings["thresholds_and_settings"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_min_auction_list_price(cls) -> int:
-        """
-        Get the minimum auction list price setting.
-
-        Returns:
-            int: The minimum auction list price value. Returns 0 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["thresholds_and_settings"].get("min_auction_list_price", 0)
-
-    @classmethod
     def get_sell_freq(cls) -> float:
         """
         Get the sell frequency setting.

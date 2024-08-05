@@ -110,7 +110,6 @@ class SettingsPage(ttk.Frame):
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
-            ("Min Auction List Price", 0),
             ("Sell Frequency", 0)
         ]
 
