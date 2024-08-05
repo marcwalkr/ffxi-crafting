@@ -82,7 +82,7 @@ class RecipeDetailPage(ttk.Frame):
         cost_per_synth_frame = ttk.Frame(self)
         cost_per_synth_frame.pack()
 
-        cost_per_synth_label = ttk.Label(cost_per_synth_frame, text="Cost Per Synth:")
+        cost_per_synth_label = ttk.Label(cost_per_synth_frame, text="Cost / Synth:")
         cost_per_synth_label.pack(side=tk.LEFT)
 
         self._cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
@@ -101,7 +101,8 @@ class RecipeDetailPage(ttk.Frame):
         results_frame = ttk.Frame(self)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        result_columns = ("Result", "Avg Single Price", "Avg Stack Price", "Single Profit", "Stack Profit")
+        result_columns = ("Result", "Single Price", "Stack Price", "Cost / Item", "Single Profit", "Stack Profit",
+                          "Proportion", "Profit Contribution")
         self._results_tree = TreeviewWithSort(results_frame, columns=result_columns,
                                               show="headings", selectmode="browse")
         self._configure_treeview_columns(self._results_tree, result_columns)
@@ -165,14 +166,40 @@ class RecipeDetailPage(ttk.Frame):
         Retrieves result data from the recipe and inserts it into the results treeview.
         """
         unique_results = self._recipe.get_unique_results()
+        show_stack_columns = False
         for result in unique_results:
             result_name = result.get_formatted_name()
             single_price = result.single_price if result.single_price is not None else ""
             stack_price = result.stack_price if result.stack_price is not None else ""
+            cost_per_item = int(result.crafted_cost) if result.crafted_cost is not None else ""
             single_profit = int(result.single_profit) if result.single_profit is not None else ""
             stack_profit = int(result.stack_profit) if result.stack_profit is not None else ""
+            proportion = f"{result.proportion:.2%}" if result.proportion is not None else ""
+            profit_contribution = f"{result.profit_contribution:.2%}" if result.profit_contribution is not None else ""
+
+            if stack_price or stack_profit:
+                # Only show stack columns if there is a stack price or stack profit
+                show_stack_columns = True
+
             self._results_tree.insert("", "end", iid=result.item_id, values=(result_name, single_price, stack_price,
-                                                                             single_profit, stack_profit, self._recipe.id))
+                                                                             cost_per_item, single_profit, stack_profit,
+                                                                             proportion, profit_contribution, self._recipe.id))
+
+        self._update_results_tree_columns(show_stack_columns)
+
+    def _update_results_tree_columns(self, show_stack_columns: bool) -> None:
+        """
+        Update the visibility of stack-related columns in the results tree.
+
+        Args:
+            show_stack_columns (bool): Whether to show or hide stack-related columns.
+        """
+        if show_stack_columns:
+            self._results_tree.show_column("Stack Price")
+            self._results_tree.show_column("Stack Profit")
+        else:
+            self._results_tree.hide_column("Stack Price")
+            self._results_tree.hide_column("Stack Profit")
 
     def _close_detail_page(self) -> None:
         """

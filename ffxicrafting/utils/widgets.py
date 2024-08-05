@@ -101,3 +101,11 @@ class TreeviewWithSort(ttk.Treeview):
         """Clear all items from the treeview."""
         for item in self.get_children():
             self.delete(item)
+
+    def hide_column(self, column: str) -> None:
+        """Hide a column in the treeview."""
+        self.column(column, width=0, stretch=False)
+
+    def show_column(self, column: str) -> None:
+        """Show a column in the treeview."""
+        self.column(column, width=100, stretch=True)
