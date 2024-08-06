@@ -196,16 +196,24 @@ class SettingsManager:
         return regions
 
     @classmethod
+    def get_conquest_ranking(cls) -> dict[str, str]:
+        """
+        Get the conquest ranking.
+
+        Returns:
+            dict[str, str]: A dictionary of the nations and their conquest rankings.
+        """
+        return cls.load_settings().get("conquest", cls.DEFAULT_SETTINGS["conquest"])
+
+    @classmethod
     def get_sandoria_rank(cls) -> int:
         """
         Get the conquest rank for San d'Oria.
 
         Returns:
-            int: The conquest rank for San d'Oria (1-3). Returns 1 if not set or invalid.
+            int: The conquest rank for San d'Oria (1-3). Returns 3 if not set or invalid.
         """
-        settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("san doria", "1st")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(cls.get_conquest_ranking().get("san doria", "3rd"))
 
     @classmethod
     def get_bastok_rank(cls) -> int:
@@ -213,11 +221,9 @@ class SettingsManager:
         Get the conquest rank for Bastok.
 
         Returns:
-            int: The conquest rank for Bastok (1-3). Returns 2 if not set or invalid.
+            int: The conquest rank for Bastok (1-3). Returns 3 if not set or invalid.
         """
-        settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("bastok", "2nd")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(cls.get_conquest_ranking().get("bastok", "3rd"))
 
     @classmethod
     def get_windurst_rank(cls) -> int:
@@ -227,9 +233,7 @@ class SettingsManager:
         Returns:
             int: The conquest rank for Windurst (1-3). Returns 3 if not set or invalid.
         """
-        settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("windurst", "3rd")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(cls.get_conquest_ranking().get("windurst", "3rd"))
 
     @staticmethod
     def _rank_str_to_int(rank_str: str) -> int:
