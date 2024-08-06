@@ -6,10 +6,10 @@ CREATE TABLE simulation_results (
     beastmen_regions JSON,
     conquest_ranking JSON, 
     enabled_guilds JSON,
+    from_scratch tinyint UNSIGNED NOT NULL,
     synth_cost int UNSIGNED NOT NULL,
     simulation_cost int UNSIGNED NOT NULL,
     quantity int UNSIGNED NOT NULL,
-    from_scratch tinyint UNSIGNED NOT NULL,
     last_updated timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (item_id, recipe_id, crafter_tier, beastmen_regions(255), conquest_ranking(255), enabled_guilds(255))
+    PRIMARY KEY (item_id, recipe_id, crafter_tier, beastmen_regions(255), conquest_ranking(255), enabled_guilds(255), from_scratch)
 );
