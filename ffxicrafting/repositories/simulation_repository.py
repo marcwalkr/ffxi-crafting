@@ -82,19 +82,18 @@ class SimulationRepository:
                                                   self._conquest_ranking, self._enabled_guilds, from_scratch,
                                                   synth_cost, simulation_cost, quantity)
 
-    def update_simulation_result(self, simulation_result: SimulationResult) -> None:
+    def delete_simulation_result(self, simulation_result: SimulationResult) -> None:
         """
-        Update an existing simulation result in the database and cache.
+        Delete an existing simulation result from the database and cache.
 
         Args:
             simulation_result (SimulationResult): The SimulationResult object with updated information.
         """
-        self._db.update_simulation_result(simulation_result.item_id, simulation_result.recipe_id,
+        self._db.delete_simulation_result(simulation_result.item_id, simulation_result.recipe_id,
                                           simulation_result.crafter_tier, simulation_result.beastmen_regions,
                                           simulation_result.conquest_ranking, simulation_result.enabled_guilds,
-                                          simulation_result.from_scratch, simulation_result.synth_cost,
-                                          simulation_result.simulation_cost, simulation_result.quantity)
+                                          simulation_result.from_scratch)
         cache_key = (simulation_result.item_id, simulation_result.recipe_id, simulation_result.crafter_tier,
                      simulation_result.beastmen_regions, simulation_result.conquest_ranking,
                      simulation_result.enabled_guilds, simulation_result.from_scratch)
-        self._cache[cache_key] = simulation_result
+        del self._cache[cache_key]
