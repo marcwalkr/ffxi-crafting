@@ -58,62 +58,62 @@ INSERT INTO vendor_items VALUES (12850,16974278,24500,0,0,0,0,0,0);	-- Hose
 INSERT INTO vendor_items VALUES (12978,16974278,16000,0,0,0,0,0,0);	-- Socks
 
 -- Amalasanda
-INSERT INTO vendor_items VALUES (704,17780858,144,0,0,0,0,0,0);	-- Bamboo Stick
-INSERT INTO vendor_items VALUES (829,17780858,21000,0,0,0,0,0,0);	-- Silk Cloth
-INSERT INTO vendor_items VALUES (1240,17780858,220,0,0,0,0,0,0);	-- Koma
-INSERT INTO vendor_items VALUES (657,17780858,7000,0,0,0,0,0,0);	-- Tama-Hagane
-INSERT INTO vendor_items VALUES (1415,17780858,73530,0,0,0,0,0,0);	-- Urushi
-INSERT INTO vendor_items VALUES (1161,17780858,40,0,0,0,0,0,0);	-- Uchitake
-INSERT INTO vendor_items VALUES (1164,17780858,40,0,0,0,0,0,0);	-- Tsurara
-INSERT INTO vendor_items VALUES (1167,17780858,40,0,0,0,0,0,0);	-- Kawahori-Ogi
-INSERT INTO vendor_items VALUES (1170,17780858,40,0,0,0,0,0,0);	-- Makibishi
-INSERT INTO vendor_items VALUES (1173,17780858,40,0,0,0,0,0,0);	-- Hiraishin
-INSERT INTO vendor_items VALUES (1176,17780858,40,0,0,0,0,0,0);	-- Mizu-Deppo
-INSERT INTO vendor_items VALUES (1179,17780858,125,0,0,0,0,0,0);	-- Shihei
-INSERT INTO vendor_items VALUES (1182,17780858,125,0,0,0,0,0,0);	-- Jusatsu
-INSERT INTO vendor_items VALUES (1185,17780858,125,0,0,0,0,0,0);	-- Kaginawa
-INSERT INTO vendor_items VALUES (1188,17780858,125,0,0,0,0,0,0);	-- Sairui-Ran
-INSERT INTO vendor_items VALUES (1191,17780858,125,0,0,0,0,0,0);	-- Kodoku
-INSERT INTO vendor_items VALUES (1194,17780858,125,0,0,0,0,0,0);	-- Shinobi-Tabi
-INSERT INTO vendor_items VALUES (1471,17780858,316,0,0,0,0,0,0);	-- Sticky Rice
-INSERT INTO vendor_items VALUES (1554,17780858,645,0,0,0,0,0,0);	-- Turmeric
-INSERT INTO vendor_items VALUES (1555,17780858,1585,0,0,0,0,0,0);	-- Coriander
-INSERT INTO vendor_items VALUES (1590,17780858,800,0,0,0,0,0,0);	-- Holy Basil
-INSERT INTO vendor_items VALUES (1475,17780858,990,0,0,0,0,0,0);	-- Curry Powder
-INSERT INTO vendor_items VALUES (5164,17780858,2595,0,0,0,0,0,0);	-- Ground Wasabi
-INSERT INTO vendor_items VALUES (1652,17780858,200,0,0,0,0,0,0);	-- Rice Vinegar
-INSERT INTO vendor_items VALUES (5237,17780858,492,0,0,0,0,0,0);	-- Shirataki
-INSERT INTO vendor_items VALUES (2702,17780858,5000,0,0,0,0,0,0);	-- Buckwheat Flour
-INSERT INTO vendor_items VALUES (4928,17780858,2331,0,0,0,0,0,0);	-- Katon: Ichi
-INSERT INTO vendor_items VALUES (4931,17780858,2331,0,0,0,0,0,0);	-- Hyoton: Ichi
-INSERT INTO vendor_items VALUES (4934,17780858,2331,0,0,0,0,0,0);	-- Huton: Ichi
-INSERT INTO vendor_items VALUES (4937,17780858,2331,0,0,0,0,0,0);	-- Doton: Ichi
-INSERT INTO vendor_items VALUES (4940,17780858,2331,0,0,0,0,0,0);	-- Raiton: Ichi
-INSERT INTO vendor_items VALUES (4943,17780858,2331,0,0,0,0,0,0);	-- Suiton: Ichi
-INSERT INTO vendor_items VALUES (4949,17780858,2849,0,0,0,0,0,0);	-- Jubaku: Ichi
-INSERT INTO vendor_items VALUES (4952,17780858,2849,0,0,0,0,0,0);	-- Hojo: Ichi
-INSERT INTO vendor_items VALUES (4955,17780858,2849,0,0,0,0,0,0);	-- Kurayami: Ichi
-INSERT INTO vendor_items VALUES (4958,17780858,2849,0,0,0,0,0,0);	-- Dokumori: Ichi
-INSERT INTO vendor_items VALUES (4961,17780858,2849,0,0,0,0,0,0);	-- Tonko: Ichi
-INSERT INTO vendor_items VALUES (4964,17780858,9590,0,0,0,0,0,0);	-- Monomi: Ichi
-INSERT INTO vendor_items VALUES (4687,17780858,60750,0,0,0,0,0,0);	-- Recall-Jugner
-INSERT INTO vendor_items VALUES (4688,17780858,60750,0,0,0,0,0,0);	-- Recall-Pashh
-INSERT INTO vendor_items VALUES (4689,17780858,60750,0,0,0,0,0,0);	-- Recall-Meriph
-INSERT INTO vendor_items VALUES (4747,17780858,34656,0,0,0,0,0,0);	-- Teleport-Vahzl
-INSERT INTO vendor_items VALUES (4728,17780858,34656,0,0,0,0,0,0);	-- Teleport-Yhoat
-INSERT INTO vendor_items VALUES (4729,17780858,34656,0,0,0,0,0,0);	-- Teleport-Altep
-INSERT INTO vendor_items VALUES (4730,17780858,34656,0,0,0,0,0,0);	-- Teleport-Holla
-INSERT INTO vendor_items VALUES (4731,17780858,34656,0,0,0,0,0,0);	-- Teleport-Dem
-INSERT INTO vendor_items VALUES (4732,17780858,34656,0,0,0,0,0,0);	-- Teleport-Mea
-INSERT INTO vendor_items VALUES (4853,17780858,10428,0,0,0,0,0,0);	-- Drain
-INSERT INTO vendor_items VALUES (4855,17780858,12850,0,0,0,0,0,0);	-- Aspir
-INSERT INTO vendor_items VALUES (4857,17780858,10428,0,0,0,0,0,0);	-- Blaze Spikes
-INSERT INTO vendor_items VALUES (4869,17780858,11953,0,0,0,0,0,0);	-- Warp
-INSERT INTO vendor_items VALUES (4870,17780858,37200,0,0,0,0,0,0);	-- Warp II
-INSERT INTO vendor_items VALUES (4873,17780858,32320,0,0,0,0,0,0);	-- Retrace
-INSERT INTO vendor_items VALUES (4882,17780858,67818,0,0,0,0,0,0);	-- Sleepga II
-INSERT INTO vendor_items VALUES (4946,17780858,13133,0,0,0,0,0,0);	-- Utsusemi: Ichi
-INSERT INTO vendor_items VALUES (4994,17780858,11830,0,0,0,0,0,0);	-- Mage's Ballad
+-- INSERT INTO vendor_items VALUES (704,17780858,144,0,0,0,0,0,0);	-- Bamboo Stick
+-- INSERT INTO vendor_items VALUES (829,17780858,21000,0,0,0,0,0,0);	-- Silk Cloth
+-- INSERT INTO vendor_items VALUES (1240,17780858,220,0,0,0,0,0,0);	-- Koma
+-- INSERT INTO vendor_items VALUES (657,17780858,7000,0,0,0,0,0,0);	-- Tama-Hagane
+-- INSERT INTO vendor_items VALUES (1415,17780858,73530,0,0,0,0,0,0);	-- Urushi
+-- INSERT INTO vendor_items VALUES (1161,17780858,40,0,0,0,0,0,0);	-- Uchitake
+-- INSERT INTO vendor_items VALUES (1164,17780858,40,0,0,0,0,0,0);	-- Tsurara
+-- INSERT INTO vendor_items VALUES (1167,17780858,40,0,0,0,0,0,0);	-- Kawahori-Ogi
+-- INSERT INTO vendor_items VALUES (1170,17780858,40,0,0,0,0,0,0);	-- Makibishi
+-- INSERT INTO vendor_items VALUES (1173,17780858,40,0,0,0,0,0,0);	-- Hiraishin
+-- INSERT INTO vendor_items VALUES (1176,17780858,40,0,0,0,0,0,0);	-- Mizu-Deppo
+-- INSERT INTO vendor_items VALUES (1179,17780858,125,0,0,0,0,0,0);	-- Shihei
+-- INSERT INTO vendor_items VALUES (1182,17780858,125,0,0,0,0,0,0);	-- Jusatsu
+-- INSERT INTO vendor_items VALUES (1185,17780858,125,0,0,0,0,0,0);	-- Kaginawa
+-- INSERT INTO vendor_items VALUES (1188,17780858,125,0,0,0,0,0,0);	-- Sairui-Ran
+-- INSERT INTO vendor_items VALUES (1191,17780858,125,0,0,0,0,0,0);	-- Kodoku
+-- INSERT INTO vendor_items VALUES (1194,17780858,125,0,0,0,0,0,0);	-- Shinobi-Tabi
+-- INSERT INTO vendor_items VALUES (1471,17780858,316,0,0,0,0,0,0);	-- Sticky Rice
+-- INSERT INTO vendor_items VALUES (1554,17780858,645,0,0,0,0,0,0);	-- Turmeric
+-- INSERT INTO vendor_items VALUES (1555,17780858,1585,0,0,0,0,0,0);	-- Coriander
+-- INSERT INTO vendor_items VALUES (1590,17780858,800,0,0,0,0,0,0);	-- Holy Basil
+-- INSERT INTO vendor_items VALUES (1475,17780858,990,0,0,0,0,0,0);	-- Curry Powder
+-- INSERT INTO vendor_items VALUES (5164,17780858,2595,0,0,0,0,0,0);	-- Ground Wasabi
+-- INSERT INTO vendor_items VALUES (1652,17780858,200,0,0,0,0,0,0);	-- Rice Vinegar
+-- INSERT INTO vendor_items VALUES (5237,17780858,492,0,0,0,0,0,0);	-- Shirataki
+-- INSERT INTO vendor_items VALUES (2702,17780858,5000,0,0,0,0,0,0);	-- Buckwheat Flour
+-- INSERT INTO vendor_items VALUES (4928,17780858,2331,0,0,0,0,0,0);	-- Katon: Ichi
+-- INSERT INTO vendor_items VALUES (4931,17780858,2331,0,0,0,0,0,0);	-- Hyoton: Ichi
+-- INSERT INTO vendor_items VALUES (4934,17780858,2331,0,0,0,0,0,0);	-- Huton: Ichi
+-- INSERT INTO vendor_items VALUES (4937,17780858,2331,0,0,0,0,0,0);	-- Doton: Ichi
+-- INSERT INTO vendor_items VALUES (4940,17780858,2331,0,0,0,0,0,0);	-- Raiton: Ichi
+-- INSERT INTO vendor_items VALUES (4943,17780858,2331,0,0,0,0,0,0);	-- Suiton: Ichi
+-- INSERT INTO vendor_items VALUES (4949,17780858,2849,0,0,0,0,0,0);	-- Jubaku: Ichi
+-- INSERT INTO vendor_items VALUES (4952,17780858,2849,0,0,0,0,0,0);	-- Hojo: Ichi
+-- INSERT INTO vendor_items VALUES (4955,17780858,2849,0,0,0,0,0,0);	-- Kurayami: Ichi
+-- INSERT INTO vendor_items VALUES (4958,17780858,2849,0,0,0,0,0,0);	-- Dokumori: Ichi
+-- INSERT INTO vendor_items VALUES (4961,17780858,2849,0,0,0,0,0,0);	-- Tonko: Ichi
+-- INSERT INTO vendor_items VALUES (4964,17780858,9590,0,0,0,0,0,0);	-- Monomi: Ichi
+-- INSERT INTO vendor_items VALUES (4687,17780858,60750,0,0,0,0,0,0);	-- Recall-Jugner
+-- INSERT INTO vendor_items VALUES (4688,17780858,60750,0,0,0,0,0,0);	-- Recall-Pashh
+-- INSERT INTO vendor_items VALUES (4689,17780858,60750,0,0,0,0,0,0);	-- Recall-Meriph
+-- INSERT INTO vendor_items VALUES (4747,17780858,34656,0,0,0,0,0,0);	-- Teleport-Vahzl
+-- INSERT INTO vendor_items VALUES (4728,17780858,34656,0,0,0,0,0,0);	-- Teleport-Yhoat
+-- INSERT INTO vendor_items VALUES (4729,17780858,34656,0,0,0,0,0,0);	-- Teleport-Altep
+-- INSERT INTO vendor_items VALUES (4730,17780858,34656,0,0,0,0,0,0);	-- Teleport-Holla
+-- INSERT INTO vendor_items VALUES (4731,17780858,34656,0,0,0,0,0,0);	-- Teleport-Dem
+-- INSERT INTO vendor_items VALUES (4732,17780858,34656,0,0,0,0,0,0);	-- Teleport-Mea
+-- INSERT INTO vendor_items VALUES (4853,17780858,10428,0,0,0,0,0,0);	-- Drain
+-- INSERT INTO vendor_items VALUES (4855,17780858,12850,0,0,0,0,0,0);	-- Aspir
+-- INSERT INTO vendor_items VALUES (4857,17780858,10428,0,0,0,0,0,0);	-- Blaze Spikes
+-- INSERT INTO vendor_items VALUES (4869,17780858,11953,0,0,0,0,0,0);	-- Warp
+-- INSERT INTO vendor_items VALUES (4870,17780858,37200,0,0,0,0,0,0);	-- Warp II
+-- INSERT INTO vendor_items VALUES (4873,17780858,32320,0,0,0,0,0,0);	-- Retrace
+-- INSERT INTO vendor_items VALUES (4882,17780858,67818,0,0,0,0,0,0);	-- Sleepga II
+-- INSERT INTO vendor_items VALUES (4946,17780858,13133,0,0,0,0,0,0);	-- Utsusemi: Ichi
+-- INSERT INTO vendor_items VALUES (4994,17780858,11830,0,0,0,0,0,0);	-- Mage's Ballad
 
 -- Antonia
 INSERT INTO vendor_items VALUES (17061,17776715,6256,0,0,0,0,0,0);	-- Mythril Rod
