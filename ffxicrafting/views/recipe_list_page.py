@@ -33,6 +33,7 @@ class RecipeListPage(ttk.Frame, ABC):
         super().__init__(parent.notebook)
         self._parent = parent
 
+        self.action_frame: ttk.Frame = None
         self.action_button: ttk.Button = None
         self._progress_bar: ttk.Progressbar = None
         self._treeview: TreeviewWithSort = None
@@ -54,12 +55,22 @@ class RecipeListPage(ttk.Frame, ABC):
         """
         Create and layout the widgets for the page.
 
-        Adds the page to the notebook, creates the action button, progress bar, and treeview.
+        Adds the page to the notebook, creates the action frame, progress bar, and treeview.
         """
         self._parent.notebook.add(self, text=self.get_tab_text())
-        self._create_action_button()
+        self.create_action_frame()
         self._create_progress_bar()
         self._create_treeview()
+
+    def create_action_frame(self) -> None:
+        """
+        Create a frame for action-related widgets (e.g., buttons, entry fields).
+
+        This method can be overridden in subclasses to customize the action area.
+        """
+        self.action_frame = ttk.Frame(self)
+        self.action_frame.pack(pady=10)
+        self._create_action_button()
 
     def _create_action_button(self) -> None:
         """
@@ -67,8 +78,8 @@ class RecipeListPage(ttk.Frame, ABC):
 
         The button text is set from self.action_button_text and toggles the process on click.
         """
-        self.action_button = ttk.Button(self, text=self.action_button_text, command=self._toggle_process)
-        self.action_button.pack(pady=10)
+        self.action_button = ttk.Button(self.action_frame, text=self.action_button_text, command=self._toggle_process)
+        self.action_button.pack()
 
     def _create_progress_bar(self) -> None:
         """
@@ -76,7 +87,7 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Initializes an indeterminate progress bar, initially hidden from view.
         """
-        self._progress_bar = ttk.Progressbar(self, mode="indeterminate", length=300)
+        self._progress_bar = ttk.Progressbar(self, mode="indeterminate", length=500)
         self._progress_bar.pack_forget()
 
     def _create_treeview(self) -> None:

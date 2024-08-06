@@ -34,18 +34,23 @@ class SearchPage(RecipeListPage):
         """
         return "Search Recipes"
 
-    def create_widgets(self) -> None:
+    def create_action_frame(self) -> None:
         """
-        Create the widgets for the search page.
+        Create the search input and button within the action frame.
+        """
+        super().create_action_frame()
 
-        Calls the parent method to create common widgets, then adds a search entry
-        field and binds the Return key to trigger the search process.
-        """
-        super().create_widgets()
         self._search_var = tk.StringVar()
-        self._search_entry = ttk.Entry(self, textvariable=self._search_var, font=("Helvetica", 14))
-        self._search_entry.pack(pady=10, before=self.action_button)
+
+        self._search_entry = ttk.Entry(self.action_frame, textvariable=self._search_var,
+                                       font=("Helvetica", 14), width=30)
+        self._search_entry.pack(side=tk.LEFT, padx=(0, 10))
         self._search_entry.bind("<Return>", lambda event: self.start_process())
+
+        # Move the action button to the right of the entry
+        if hasattr(self, 'action_button'):
+            self.action_button.pack_forget()  # Unpack from its current position
+            self.action_button.pack(side=tk.RIGHT)  # Pack to the right
 
     def get_treeview_columns(self) -> list[str]:
         """
