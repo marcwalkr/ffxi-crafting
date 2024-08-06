@@ -87,7 +87,7 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Initializes an indeterminate progress bar, initially hidden from view.
         """
-        self._progress_bar = ttk.Progressbar(self, mode="indeterminate", length=500)
+        self._progress_bar = ttk.Progressbar(self, mode="indeterminate", length=400)
         self._progress_bar.pack_forget()
 
     def _create_treeview(self) -> None:

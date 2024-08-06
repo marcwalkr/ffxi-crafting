@@ -43,7 +43,7 @@ class SearchPage(RecipeListPage):
         self._search_var = tk.StringVar()
 
         self._search_entry = ttk.Entry(self.action_frame, textvariable=self._search_var,
-                                       font=("Helvetica", 14), width=30)
+                                       font=("Helvetica", 14), width=20)
         self._search_entry.pack(side=tk.LEFT, padx=(0, 10))
         self._search_entry.bind("<Return>", lambda event: self.start_process())
 
