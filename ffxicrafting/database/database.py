@@ -247,7 +247,7 @@ class Database:
         Returns:
             tuple: A tuple containing the NPC information.
         """
-        query = "SELECT * FROM npc_list WHERE npcid=%s"
+        query = "SELECT polutils_name FROM npc_list WHERE npcid=%s"
         return self._execute_query(query, (npc_id,), fetch_one=True)
 
     def get_recipes_by_level(self, wood: int, smith: int, gold: int, cloth: int, leather: int, bone: int,
