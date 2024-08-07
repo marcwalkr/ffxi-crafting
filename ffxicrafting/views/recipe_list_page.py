@@ -42,16 +42,18 @@ class RecipeListPage(ttk.Frame, ABC):
         # Initialize a recipe controller instance for quickly fetching the recipe on treeview item click
         self._recipe_controller: RecipeController = RecipeController(Database())
 
-        self._num_fetch_threads: int = 5
+        self._num_fetch_threads: int = 10
         self._batch_size: int = 10
         self._offset: int = 0
 
         self._executor: ThreadPoolExecutor = None
-        self._recipe_queue: Queue = Queue()
+        self._recipe_queue: Queue = Queue(maxsize=10)
         self._futures: list[Future] = []
+        self._fetch_threads_done: int = 0
 
         self._offset_lock: threading.Lock = threading.Lock()
         self._cancel_event: threading.Event = threading.Event()
+        self._all_fetches_complete: threading.Event = threading.Event()
 
         self.create_widgets()
 
@@ -203,21 +205,29 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Initializes the UI for processing, sets up threading, and begins fetching recipes.
         """
+        # 1. Reset state
         self._cancel_event.clear()
+        self._all_fetches_complete.clear()
+        self._offset = 0
+        self._fetch_threads_done = 0
+
+        # 2. Clear and prepare data structures
+        self._clear_recipe_queue()
+        self._futures = []
+
+        # 3. Update UI
         self.action_button["text"] = "Cancel"
         self._progress_bar.pack(pady=10, before=self._treeview)
         self._progress_bar.start()
         self._treeview.clear()
 
-        self._offset = 0
+        # 4. Set up and start thread pool
         self._executor = ThreadPoolExecutor(max_workers=self._num_fetch_threads)
-        self._futures = []
-        self._clear_recipe_queue()
-
         for _ in range(self._num_fetch_threads):
             future = self._executor.submit(self._fetch_recipes)
             self._futures.append(future)
 
+        # 5. Start the recipe queue checking process
         self.after(100, self._check_recipe_queue)
 
     def _cancel_process(self) -> None:
@@ -226,7 +236,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Sets the cancel event and updates the UI to reflect the cancellation.
         """
-        logger.debug("Canceling process")
         self._cancel_event.set()
         self.action_button["text"] = "Canceling..."
         self.action_button["state"] = "disabled"
@@ -237,7 +246,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Shuts down the executor and updates the UI to reflect process completion.
         """
-        logger.debug("Shutting down executor")
         if self._executor:
             self._executor.shutdown(wait=False)
             self._check_executor_shutdown()
@@ -249,7 +257,6 @@ class RecipeListPage(ttk.Frame, ABC):
         Recursively checks until all futures are complete, then calls _finish_ui_update.
         """
         if all(f.done() for f in self._futures):
-            logger.debug("All futures are done")
             self._finish_ui_update()
         else:
             self.after(100, self._check_executor_shutdown)
@@ -260,7 +267,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Resets the progress bar and action button to their initial states.
         """
-        logger.debug("Finishing UI update")
         self._progress_bar.stop()
         self._progress_bar.pack_forget()
 
@@ -274,28 +280,29 @@ class RecipeListPage(ttk.Frame, ABC):
         Args:
             offset (int): The offset for pagination.
         """
-        while not self._cancel_event.is_set():
-            with self._offset_lock:
-                offset = self._offset
-                self._offset += self._batch_size
+        try:
+            while not self._cancel_event.is_set():
+                with self._offset_lock:
+                    offset = self._offset
+                    self._offset += self._batch_size
 
-            try:
                 with Database() as db:
                     recipe_controller = RecipeController(db)
-                    logger.debug(f"Fetching recipes from {offset} to {offset + self._batch_size}")
                     recipes = self.get_recipe_batch(recipe_controller, self._batch_size, offset)
-                    logger.debug(f"Fetched {len(recipes)} recipes")
 
                     if not recipes or self._cancel_event.is_set():
                         break
 
                     for recipe in recipes:
                         self._recipe_queue.put(recipe)
-            except Exception:
-                traceback.print_exc()
-
-        # Signal that the thread is done
-        self._recipe_queue.put(None)
+        except Exception:
+            traceback.print_exc()
+        finally:
+            with self._offset_lock:
+                self._fetch_threads_done += 1
+                if self._fetch_threads_done == self._num_fetch_threads:
+                    self._all_fetches_complete.set()
+                    self._recipe_queue.put(None)
 
     def _process_single_recipe(self, recipe: Recipe) -> None:
         """
@@ -309,8 +316,6 @@ class RecipeListPage(ttk.Frame, ABC):
         if self._cancel_event.is_set():
             return
 
-        logger.debug(f"Processing recipe {recipe.result_name}")
-
         crafting_controller = CraftingController(recipe)
         craft_result = crafting_controller.simulate_craft()
 
@@ -320,8 +325,6 @@ class RecipeListPage(ttk.Frame, ABC):
         if self.should_display_recipe(craft_result):
             row = self.format_row(craft_result)
             self._insert_single_into_treeview(recipe.id, row)
-
-        logger.debug(f"Processed recipe {recipe.result_name}")
 
     def should_display_recipe(self, craft_result: dict) -> bool:
         """
@@ -368,10 +371,15 @@ class RecipeListPage(ttk.Frame, ABC):
         try:
             recipe = self._recipe_queue.get_nowait()
             if recipe is None:
-                logger.debug("Received None from queue, finishing process")
-                self._finish_process()
-                return
-            self._process_single_recipe(recipe)
+                if self._all_fetches_complete.is_set():
+                    logger.debug("Received None from queue, finishing process")
+                    self._finish_process()
+                    return
+                else:
+                    # Put None back in the queue for later
+                    self._recipe_queue.put(None)
+            else:
+                self._process_single_recipe(recipe)
         except Empty:
             pass
 
