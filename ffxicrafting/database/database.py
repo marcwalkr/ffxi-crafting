@@ -205,9 +205,9 @@ class Database:
             item_id (int): The ID of the item to retrieve guild shop data for.
 
         Returns:
-            list: A list of guild shop entries for the specified item.
+            list: A list of guild shop entries for the specified item, containing guildid, itemid, and min_price.
         """
-        query = "SELECT * FROM guild_shops WHERE itemid=%s"
+        query = "SELECT guildid, itemid, min_price, initial_quantity FROM guild_shops WHERE itemid=%s"
         return self._execute_query(query, (item_id,), fetch_one=False)
 
     def get_guild_vendor(self, guild_id: int) -> tuple:
