@@ -7,11 +7,10 @@ class RecipeModel:
     """
 
     def __init__(self, id: int, desynth: bool, key_item: int, wood: int, smith: int, gold: int, cloth: int,
-                 leather: int, bone: int, alchemy: int, cook: int, crystal: int, hq_crystal: int,
-                 ingredient1: int, ingredient2: int, ingredient3: int, ingredient4: int, ingredient5: int,
-                 ingredient6: int, ingredient7: int, ingredient8: int, result: int, result_hq1: int, result_hq2: int,
-                 result_hq3: int, result_qty: int, result_hq1_qty: int, result_hq2_qty: int, result_hq3_qty: int,
-                 result_name: str) -> None:
+                 leather: int, bone: int, alchemy: int, cook: int, crystal: int, ingredient1: int, ingredient2: int,
+                 ingredient3: int, ingredient4: int, ingredient5: int, ingredient6: int, ingredient7: int,
+                 ingredient8: int, result: int, result_hq1: int, result_hq2: int, result_hq3: int, result_qty: int,
+                 result_hq1_qty: int, result_hq2_qty: int, result_hq3_qty: int, result_name: str) -> None:
         """
         Initialize a RecipeModel instance.
 
@@ -28,7 +27,6 @@ class RecipeModel:
             alchemy (int): The Alchemy skill level required for this recipe.
             cook (int): The Cooking skill level required for this recipe.
             crystal (int): The item ID of the crystal required for this recipe.
-            hq_crystal (int): The item ID of the HQ crystal for signing items.
             ingredient1 (int): The item ID of the first ingredient.
             ingredient2 (int): The item ID of the second ingredient.
             ingredient3 (int): The item ID of the third ingredient.
@@ -63,7 +61,6 @@ class RecipeModel:
         self.alchemy: int = alchemy
         self.cook: int = cook
         self.crystal: int = crystal
-        self.hq_crystal: int = hq_crystal
         self.ingredient1: int = ingredient1
         self.ingredient2: int = ingredient2
         self.ingredient3: int = ingredient3

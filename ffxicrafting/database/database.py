@@ -270,8 +270,11 @@ class Database:
         Returns:
             list: A list of recipes matching the specified crafting skill levels.
         """
-        query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
-                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
+        query = ("SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal, "
+                 "Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7, "
+                 "Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty, "
+                 "ResultHQ3Qty, ResultName FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND "
+                 "cloth <= %s AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
         return self._execute_query(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset), fetch_one=False)
 
     def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list:
@@ -287,7 +290,10 @@ class Database:
             list: A list of recipes matching the search term.
         """
         query = """
-        SELECT * FROM synth_recipes
+        SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal,
+        Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7,
+        Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty,
+        ResultHQ3Qty, ResultName FROM synth_recipes
         WHERE MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE)
         ORDER BY MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) DESC, ID ASC
         LIMIT %s OFFSET %s;

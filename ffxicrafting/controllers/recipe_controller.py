@@ -142,12 +142,11 @@ class RecipeController:
         recipe = Recipe(
             recipe_model.id, recipe_model.desynth, recipe_model.key_item, recipe_model.wood, recipe_model.smith,
             recipe_model.gold, recipe_model.cloth, recipe_model.leather, recipe_model.bone, recipe_model.alchemy,
-            recipe_model.cook, recipe_model.crystal, recipe_model.hq_crystal, recipe_model.ingredient1,
-            recipe_model.ingredient2, recipe_model.ingredient3, recipe_model.ingredient4, recipe_model.ingredient5,
-            recipe_model.ingredient6, recipe_model.ingredient7, recipe_model.ingredient8, recipe_model.result,
-            recipe_model.result_hq1, recipe_model.result_hq2, recipe_model.result_hq3, recipe_model.result_qty,
-            recipe_model.result_hq1_qty, recipe_model.result_hq2_qty, recipe_model.result_hq3_qty,
-            recipe_model.result_name,
+            recipe_model.cook, recipe_model.crystal, recipe_model.ingredient1, recipe_model.ingredient2,
+            recipe_model.ingredient3, recipe_model.ingredient4, recipe_model.ingredient5, recipe_model.ingredient6,
+            recipe_model.ingredient7, recipe_model.ingredient8, recipe_model.result, recipe_model.result_hq1,
+            recipe_model.result_hq2, recipe_model.result_hq3, recipe_model.result_qty, recipe_model.result_hq1_qty,
+            recipe_model.result_hq2_qty, recipe_model.result_hq3_qty, recipe_model.result_name,
             ingredient_objects=ingredients,
             result_objects=results
         )
