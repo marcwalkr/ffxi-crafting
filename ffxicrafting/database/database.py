@@ -194,7 +194,7 @@ class Database:
         Returns:
             list: A list of the latest sales history entries for the specified item.
         """
-        query = "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
+        query = "SELECT itemid, price, is_stack FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
         query += "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)"
         return self._execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_one=False)
 
