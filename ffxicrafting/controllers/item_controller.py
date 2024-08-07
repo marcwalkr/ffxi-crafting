@@ -79,13 +79,10 @@ class ItemController:
             Ingredient or CraftableIngredient: The converted ingredient entity.
         """
         if self._recipe_repository.is_craftable(item_model.item_id):
-            return CraftableIngredient(item_model.item_id, item_model.sub_id, item_model.name,
-                                       item_model.sort_name, item_model.stack_size, item_model.flags,
-                                       item_model.ah, item_model.no_sale, item_model.base_sell)
+            return CraftableIngredient(item_model.item_id, item_model.name, item_model.sort_name,
+                                       item_model.stack_size)
         else:
-            return Ingredient(item_model.item_id, item_model.sub_id, item_model.name,
-                              item_model.sort_name, item_model.stack_size, item_model.flags,
-                              item_model.ah, item_model.no_sale, item_model.base_sell)
+            return Ingredient(item_model.item_id, item_model.name, item_model.sort_name, item_model.stack_size)
 
     def _convert_to_result(self, item_model: ItemModel) -> Result:
         """
@@ -97,9 +94,7 @@ class ItemController:
         Returns:
             Result: The converted result entity.
         """
-        result = Result(item_model.item_id, item_model.sub_id, item_model.name, item_model.sort_name,
-                        item_model.stack_size, item_model.flags, item_model.ah, item_model.no_sale,
-                        item_model.base_sell)
+        result = Result(item_model.item_id, item_model.name, item_model.sort_name, item_model.stack_size)
         return result
 
     def update_auction_data(self, item_id: int) -> None:

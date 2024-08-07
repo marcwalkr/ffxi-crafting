@@ -234,7 +234,7 @@ class Database:
             list: A list of item data for the specified item IDs.
         """
         format_strings = ",".join(["%s"] * len(item_ids))
-        query = f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})"
+        query = f"SELECT itemid, name, sortname, stackSize FROM item_basic WHERE itemid IN ({format_strings})"
         return self._execute_query(query, tuple(item_ids), fetch_one=False)
 
     def get_npc(self, npc_id: int) -> tuple:
