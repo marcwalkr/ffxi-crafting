@@ -360,21 +360,18 @@ class RecipeListPage(ttk.Frame, ABC):
 
     def _check_recipe_queue(self) -> None:
         """
-        Check the recipe queue and process recipes.
+        Check the recipe queue and process a single recipe.
 
-        Processes items in the recipe queue, adding them to the treeview.
-        Schedules itself to run again after a short delay if processing is not complete.
+        Processes one item from the recipe queue, adding it to the treeview.
+        Schedules itself to run again after a short delay.
         """
         try:
-            while True:
-                recipe = self._recipe_queue.get_nowait()
-
-                if recipe is None:
-                    logger.debug("Recieved None from queue, finishing process")
-                    self._finish_process()
-                    return
-
-                self._process_single_recipe(recipe)
+            recipe = self._recipe_queue.get_nowait()
+            if recipe is None:
+                logger.debug("Received None from queue, finishing process")
+                self._finish_process()
+                return
+            self._process_single_recipe(recipe)
         except Empty:
             pass
 
