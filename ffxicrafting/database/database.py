@@ -165,7 +165,8 @@ class Database:
         Returns:
             list: A list of auction items for the specified item ID.
         """
-        query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
+        query = "SELECT itemid, avg_price, num_sales, sell_freq, is_stack, new_data FROM auction_items "
+        query += "WHERE itemid=%s AND no_sale=0"
         return self._execute_query(query, (item_id,), fetch_one=False)
 
     def update_auction_item(self, item_id: int, avg_price: int, sell_freq: float, is_stack: int) -> None:
