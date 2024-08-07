@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from config import SettingsManager
+from controllers import RecipeController
 from entities import Recipe
 from views import RecipeListPage
 
@@ -66,13 +67,14 @@ class ProfitPage(RecipeListPage):
         treeview.column("profit_per_storage", anchor=tk.CENTER)
         treeview.column("sell_freq", anchor=tk.CENTER)
 
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
+    def get_recipe_batch(self, recipe_controller: RecipeController, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's crafting skills and skill look-ahead.
         Uses the user's craft skills and skill look-ahead settings to determine
         which recipes to fetch.
 
         Args:
+            recipe_controller (RecipeController): The recipe controller to use.
             batch_size (int): The number of recipes to fetch.
             offset (int): The offset for pagination.
 
@@ -80,7 +82,7 @@ class ProfitPage(RecipeListPage):
             list: A list of Recipe objects fetched from the RecipeController.
         """
         skills = SettingsManager.get_craft_skills()
-        return self.recipe_controller.get_recipes_by_level(*skills, batch_size=batch_size, offset=offset)
+        return recipe_controller.get_recipes_by_level(*skills, batch_size=batch_size, offset=offset)
 
     def should_display_recipe(self, craft_result: dict) -> bool:
         """

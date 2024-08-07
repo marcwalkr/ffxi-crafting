@@ -1,10 +1,9 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from entities import Synth, Recipe
+from entities import Synth
 
 if TYPE_CHECKING:
-    from controllers import ItemController
-    from entities import Result, Ingredient
+    from entities import Result, Ingredient, Recipe
 
 
 class Crafter:
@@ -39,12 +38,9 @@ class Crafter:
         self.recipe: Recipe = recipe
         self.synth: Synth = Synth(recipe, self)
 
-    def craft(self, item_controller: ItemController) -> tuple[list[Result], float, float]:
+    def craft(self) -> tuple[list[Result], float, float]:
         """
         Perform the crafting operation and calculate profits.
-
-        Args:
-            item_controller (ItemController): Controller for managing item-related operations.
 
         Returns:
             tuple[list[Result], float, float]: A tuple containing:
@@ -54,7 +50,6 @@ class Crafter:
 
         Returns (None, None, None) if the crafting cannot be performed due to missing ingredients.
         """
-        self._set_ingredient_costs(item_controller)
         cost = self.recipe.calculate_cost()
 
         if not cost:
@@ -65,7 +60,7 @@ class Crafter:
         self._set_proportions(results)
         simulation_cost = self._calculate_simulation_cost(cost, retained_ingredients)
         self._set_crafted_costs(simulation_cost, results)
-        total_revenue, total_storage_slots = self._process_results(results, item_controller)
+        total_revenue, total_storage_slots = self._process_results(results)
 
         total_profit = total_revenue - simulation_cost
         self._set_profit_contributions(results, simulation_cost, total_profit)
@@ -74,18 +69,6 @@ class Crafter:
         profit_per_storage = total_profit / total_storage_slots if total_storage_slots > 0 else 0
 
         return results.keys(), profit_per_synth, profit_per_storage
-
-    def _set_ingredient_costs(self, item_controller: ItemController) -> None:
-        """
-        Update the costs of ingredients used in the recipe.
-
-        Args:
-            item_controller (ItemController): Controller for managing item-related operations.
-        """
-        for ingredient in self.recipe.get_unique_ingredients():
-            item_controller.update_vendor_cost(ingredient.item_id)
-            item_controller.update_guild_cost(ingredient.item_id)
-            item_controller.update_auction_data(ingredient.item_id)
 
     def _calculate_simulation_cost(self, cost: float, retained_ingredients: dict[Ingredient, int]) -> float:
         """
@@ -142,13 +125,12 @@ class Crafter:
         for result, quantity in results.items():
             result.crafted_cost = simulation_cost / quantity
 
-    def _process_results(self, results: dict[Result, int], item_controller: ItemController) -> tuple[float, float]:
+    def _process_results(self, results: dict[Result, int]) -> tuple[float, float]:
         """
         Process the crafting results to calculate total revenue and storage requirements.
 
         Args:
             results (dict[Result, int]): A dictionary of crafting results and their quantities.
-            item_controller (ItemController): Controller for managing item-related operations.
 
         Returns:
             tuple[float, float]: A tuple containing:
@@ -159,8 +141,6 @@ class Crafter:
         total_storage_slots = 0
 
         for result, quantity in results.items():
-            item_controller.update_auction_data(result.item_id)
-
             self._calculate_result_profits(result)
 
             total_revenue += self._calculate_result_total_revenue(result, quantity)

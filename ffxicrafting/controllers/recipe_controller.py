@@ -121,11 +121,36 @@ class RecipeController:
             ingredients, results = self._item_controller.get_recipe_items(
                 list(ingredient_item_ids), list(result_item_ids))
 
+            self._set_ingredient_costs(ingredients)
+            self._set_result_sell_prices(results)
+
             recipe = self._create_recipe_object(recipe_model, ingredients, results)
             self._recipe_cache[recipe_model.id] = recipe
             recipes.append(recipe)
 
         return recipes
+
+    def _set_ingredient_costs(self, ingredients: list[Ingredient]) -> None:
+        """
+        Update the costs of ingredients used in the recipe.
+
+        Args:
+            ingredients (list[Ingredient]): A list of ingredients to update the costs for.
+        """
+        for ingredient in ingredients:
+            self._item_controller.update_vendor_cost(ingredient.item_id)
+            self._item_controller.update_guild_cost(ingredient.item_id)
+            self._item_controller.update_auction_data(ingredient.item_id)
+
+    def _set_result_sell_prices(self, results: list[Result]) -> None:
+        """
+        Set the auction sell prices on results.
+
+        Args:
+            results (list[Result]): A list of results to set the sell prices for.
+        """
+        for result in results:
+            self._item_controller.update_auction_data(result.item_id)
 
     def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Ingredient], results: list[Result]) -> Recipe:
         """

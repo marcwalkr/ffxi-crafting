@@ -119,7 +119,7 @@ class RecipeDetailPage(ttk.Frame):
         return to the previous tab.
         """
         close_button = ttk.Button(self, text="Close", command=self._close_detail_page)
-        close_button.pack(pady=(5, 10))
+        close_button.pack(pady=(20, 30))
 
     def _configure_treeview_columns(self, treeview: TreeviewWithSort, columns: list[str]) -> None:
         """

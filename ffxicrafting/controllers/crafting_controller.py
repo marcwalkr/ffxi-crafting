@@ -1,4 +1,3 @@
-from controllers import ItemController
 from entities import Crafter, Recipe
 from config import SettingsManager
 
@@ -12,23 +11,19 @@ class CraftingController:
     the crafting entities.
     """
 
-    def __init__(self, item_controller: ItemController) -> None:
+    def __init__(self, recipe: Recipe) -> None:
         """
-        Initialize the CraftingController.
+        Initializes the CraftingController with a given recipe.
 
         Args:
-            item_controller: The controller responsible for item-related operations.
-                             This is used to fetch additional item information during crafting simulations.
+            recipe (Recipe): The recipe to be simulated.
         """
-        self._item_controller: ItemController = item_controller
+        self._recipe: Recipe = recipe
 
-    def simulate_craft(self, recipe: Recipe) -> dict:
+    def simulate_craft(self) -> dict:
         """
         Performs a crafting simulation based on the provided recipe and the
         current crafting skill settings. It calculates profits and formats the results.
-
-        Args:
-            recipe (Recipe): The recipe to simulate crafting for.
 
         Returns:
             dict: A dictionary containing the simulation results, including:
@@ -40,8 +35,8 @@ class CraftingController:
             None if the crafting simulation produces no results.
         """
         skills = SettingsManager.get_craft_skills()
-        crafter = Crafter(*skills, recipe)
-        results, profit_per_synth, profit_per_storage = crafter.craft(self._item_controller)
+        crafter = Crafter(*skills, self._recipe)
+        results, profit_per_synth, profit_per_storage = crafter.craft()
 
         if not results:
             return None

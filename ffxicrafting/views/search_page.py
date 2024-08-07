@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from controllers import RecipeController
 from entities import Recipe
 from views import RecipeListPage
 
@@ -76,11 +77,12 @@ class SearchPage(RecipeListPage):
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
 
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
+    def get_recipe_batch(self, recipe_controller: RecipeController, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's search query.
 
         Args:
+            recipe_controller (RecipeController): The recipe controller to use.
             batch_size (int): The number of recipes to fetch.
             offset (int): The offset for pagination.
 
@@ -88,7 +90,7 @@ class SearchPage(RecipeListPage):
             list: A list of Recipe objects matching the search query,
                   fetched from RecipeController.
         """
-        return self.recipe_controller.search_recipe(self._search_var.get(), batch_size, offset)
+        return recipe_controller.search_recipe(self._search_var.get(), batch_size, offset)
 
     def format_row(self, craft_result: dict[str, any]) -> list[str]:
         """
