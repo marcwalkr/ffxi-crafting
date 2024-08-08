@@ -1507,7 +1507,7 @@ INSERT INTO vendor_items VALUES (4915,16883789,217000,0,0,0,0,0,0);	-- Scroll of
 INSERT INTO vendor_items VALUES (4638,16883789,66000,0,0,0,0,0,0);	-- Banish III
 
 -- Nimia
-INSERT INTO vendor_items VALUES (612,17727528,55,0,0,0,0,0,0);	-- Kazham Peppers
+-- INSERT INTO vendor_items VALUES (612,17727528,55,0,0,0,0,0,0);	-- Kazham Peppers
 INSERT INTO vendor_items VALUES (4432,17727528,55,0,0,0,0,0,0);	-- Kazham Pineapple
 INSERT INTO vendor_items VALUES (4390,17727528,36,0,0,0,0,0,0);	-- Mithran Tomato
 INSERT INTO vendor_items VALUES (626,17727528,234,0,0,0,0,0,0);	-- Black Pepper
@@ -2447,7 +2447,7 @@ INSERT INTO vendor_items VALUES (16551,17739798,713,0,0,0,0,0,0);	-- Sapara
 
 -- Zoby Quhyo
 INSERT INTO vendor_items VALUES (626,17744005,234,0,0,0,0,0,0);	-- Black Pepper
-INSERT INTO vendor_items VALUES (612,17744005,55,0,0,0,0,0,0);	-- Kazham Peppers
+-- INSERT INTO vendor_items VALUES (612,17744005,55,0,0,0,0,0,0);	-- Kazham Peppers
 INSERT INTO vendor_items VALUES (4432,17744005,55,0,0,0,0,0,0);	-- Kazham Pineapple
 INSERT INTO vendor_items VALUES (632,17744005,110,0,0,0,0,0,0);	-- Kukuru Bean
 INSERT INTO vendor_items VALUES (4390,17744005,36,0,0,0,0,0,0);	-- Mithran Tomato
