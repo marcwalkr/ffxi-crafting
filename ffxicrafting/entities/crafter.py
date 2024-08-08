@@ -198,13 +198,39 @@ class Crafter:
 
         Args:
             results (dict[Result, int]): A dictionary of crafting results and their quantities.
+            simulation_cost (float): The total cost of the crafting simulation.
             total_profit (float): The total profit from all crafted items.
         """
         cost_per_item = simulation_cost / sum(results.values())
+
+        # Calculate the total profit from each result
+        result_profits = {}
         for result, quantity in results.items():
             fastest_selling_price = result.get_fastest_selling_price_per_unit()
             if fastest_selling_price is not None:
                 result_profit = (fastest_selling_price - cost_per_item) * quantity
-                result.profit_contribution = result_profit / total_profit
+                result_profits[result] = result_profit
             else:
+                result_profits[result] = 0
+
+        # Handle cases where total profit is zero or negative
+        if total_profit <= 0:
+            # If total profit is zero or negative, contributions cannot be calculated meaningfully
+            for result in results.keys():
                 result.profit_contribution = 0
+        else:
+            # Calculate profit contributions
+            for result, profit in result_profits.items():
+                if profit > 0:
+                    result.profit_contribution = profit / total_profit
+                else:
+                    result.profit_contribution = 0
+
+        # Adjustments for contributions that add up to more or less than 1 due to rounding errors
+        if total_profit > 0:
+            total_contribution = sum(result.profit_contribution for result in results.keys())
+            if total_contribution != 1:
+                # Adjust contributions proportionally if necessary
+                adjustment_factor = 1 / total_contribution
+                for result in results.keys():
+                    result.profit_contribution *= adjustment_factor
