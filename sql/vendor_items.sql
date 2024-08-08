@@ -770,7 +770,7 @@ INSERT INTO vendor_items VALUES (614,17727524,72,0,0,0,0,0,0);	-- Mhaura Garlic
 INSERT INTO vendor_items VALUES (4445,17727524,40,0,0,0,0,0,0);	-- Yagudo Cherry
 
 -- Fomina
-INSERT INTO vendor_items VALUES (612,17752105,55,0,0,0,0,0,0);	-- Kazham Peppers
+-- INSERT INTO vendor_items VALUES (612,17752105,55,0,0,0,0,0,0);	-- Kazham Peppers
 INSERT INTO vendor_items VALUES (4432,17752105,55,0,0,0,0,0,0);	-- Kazham Pineapple
 INSERT INTO vendor_items VALUES (4390,17752105,36,0,0,0,0,0,0);	-- Mithran Tomato
 INSERT INTO vendor_items VALUES (626,17752105,234,0,0,0,0,0,0);	-- Black Pepper
