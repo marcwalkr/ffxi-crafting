@@ -1,6 +1,7 @@
 import threading
 import logging
 import tkinter as tk
+import traceback
 from tkinter import ttk
 from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 from queue import Queue, Empty
@@ -265,20 +266,23 @@ class RecipeListPage(ttk.Frame, ABC):
         Continues fetching until there are no more recipes or the process is canceled.
         Adds a None value to the queue to signal completion.
         """
-        while not self._cancel_event.is_set():
-            with self._offset_lock:
-                offset = self._offset
-                self._offset += self._batch_size
+        try:
+            while not self._cancel_event.is_set():
+                with self._offset_lock:
+                    offset = self._offset
+                    self._offset += self._batch_size
 
-            with Database() as db:
-                recipe_controller = RecipeController(db)
-                recipes = self.get_recipe_batch(recipe_controller, self._batch_size, offset)
+                with Database() as db:
+                    recipe_controller = RecipeController(db)
+                    recipes = self.get_recipe_batch(recipe_controller, self._batch_size, offset)
 
-                if not recipes:
-                    break
+                    if not recipes:
+                        break
 
-                for recipe in recipes:
-                    self._recipe_queue.put(recipe)
+                    for recipe in recipes:
+                        self._recipe_queue.put(recipe)
+        except Exception as e:
+            traceback.print_exc()
 
         self._recipe_queue.put(None)  # Signal this fetch thread is done
 
@@ -289,15 +293,18 @@ class RecipeListPage(ttk.Frame, ABC):
         Continuously retrieves recipes from the queue and processes them
         until receiving a None value or the process is canceled.
         """
-        while True:
-            try:
-                recipe = self._recipe_queue.get(timeout=1)
-                if recipe is None:
-                    break
-                self._process_single_recipe(recipe)
-            except Empty:
-                if self._cancel_event.is_set():
-                    break
+        try:
+            while True:
+                try:
+                    recipe = self._recipe_queue.get(timeout=1)
+                    if recipe is None:
+                        break
+                    self._process_single_recipe(recipe)
+                except Empty:
+                    if self._cancel_event.is_set():
+                        break
+        except Exception as e:
+            traceback.print_exc()
 
     def _process_single_recipe(self, recipe: Recipe) -> None:
         """
