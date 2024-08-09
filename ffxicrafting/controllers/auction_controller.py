@@ -31,13 +31,17 @@ class AuctionController:
         Returns:
             list[AuctionItem]: A list of updated AuctionItem objects.
         """
+        updated_auction_items = []
         auction_items = self._auction_repository.get_auction_items(item_id)
         for item in auction_items:
             if item.new_data:
                 new_sales_history = self._auction_repository.get_latest_sales_history(item.item_id, item.is_stack)
                 updated_item = self._process_new_data(item, new_sales_history)
                 self._auction_repository.update_auction_item(updated_item)
-        return auction_items
+                updated_auction_items.append(updated_item)
+            else:
+                updated_auction_items.append(item)
+        return updated_auction_items
 
     def _process_new_data(self, item: AuctionItem, new_sales_history: list[SalesHistory]) -> AuctionItem:
         """

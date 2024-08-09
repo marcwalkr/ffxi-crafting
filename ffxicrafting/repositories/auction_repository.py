@@ -1,3 +1,4 @@
+from threading import Lock
 from models import AuctionItem, SalesHistory
 from database import Database
 
@@ -12,6 +13,7 @@ class AuctionRepository:
     """
 
     _cache: dict[int, list[AuctionItem]] = {}
+    _cache_lock: Lock = Lock()
 
     def __init__(self, db: Database) -> None:
         """
@@ -52,14 +54,14 @@ class AuctionRepository:
         """
         Update an auction item in the database and cache.
 
-        This method updates the auction item data in the database and refreshes
-        the cache with the new information.
+        This method updates the auction item data in the database and invalidates
+        the cache with the item id.
 
         Args:
             new_item (AuctionItem): The AuctionItem object with updated information.
         """
         self._db.update_auction_item(new_item.item_id, new_item.avg_price, new_item.sell_freq, new_item.is_stack)
-        self._cache[new_item.item_id] = new_item
+        self._invalidate_cache(new_item.item_id)
 
     def get_latest_sales_history(self, item_id: int, is_stack: bool) -> list[SalesHistory]:
         """
@@ -82,3 +84,10 @@ class AuctionRepository:
             return sales_history_list
         else:
             return []
+
+    def _invalidate_cache(self, item_id: int) -> None:
+        """
+        Invalidate the cache for a given item ID.
+        """
+        with self._cache_lock:
+            self._cache.pop(item_id, None)
