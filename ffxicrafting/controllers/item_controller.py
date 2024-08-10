@@ -272,8 +272,7 @@ class ItemController:
 
     def _get_guild_cost(self, item_id: int) -> int | None:
         """
-        Retrieves guild costs for the item from enabled guilds and
-        returns the lowest available price.
+        Retrieves guild costs for the item and returns the lowest available price.
 
         Args:
             item_id (int): The ID of the item to fetch guild cost for.
@@ -283,14 +282,12 @@ class ItemController:
 
 
         """
-        enabled_guilds = SettingsManager.get_enabled_guilds()
         guild_shops = self._guild_repository.get_guild_shops(item_id)
         prices = []
 
         for shop in guild_shops:
-            if shop.initial_quantity > 0:
-                guild_vendor = self._guild_repository.get_guild_vendor(shop.guild_id)
-                if guild_vendor and guild_vendor.category in enabled_guilds:
-                    prices.append(shop.min_price)
+            # Check if the item is regularly restocked
+            if shop.initial_quantity > 0 and shop.daily_increase > 0:
+                prices.append(shop.min_price)
 
         return min(prices, default=None)

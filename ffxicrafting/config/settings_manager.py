@@ -55,18 +55,6 @@ class SettingsManager:
             "bastok": "2nd",
             "windurst": "3rd"
         },
-        "guilds": {
-            "alchemy": True,
-            "bonecraft": True,
-            "clothcraft": True,
-            "cooking": True,
-            "fishing": True,
-            "goldsmithing": True,
-            "leathercraft": True,
-            "smithing": True,
-            "woodworking": True,
-            "tenshodo": True
-        },
         "database": {
             "host": "",
             "user": "",
@@ -229,19 +217,6 @@ class SettingsManager:
         """
         rank_map = {"1st": 1, "2nd": 2, "3rd": 3}
         return rank_map.get(rank_str, 1)
-
-    @classmethod
-    def get_enabled_guilds(cls) -> list[str]:
-        """
-        Get the list of enabled guilds.
-
-        Returns:
-            list[str]: A list of enabled guild names, capitalized.
-        """
-        settings = cls.load_settings()
-        guilds = settings["guilds"].items()
-        enabled_guilds = [guild for guild, enabled in guilds if enabled]
-        return [guild.capitalize() for guild in enabled_guilds]
 
     @classmethod
     def get_database_host(cls) -> str:
