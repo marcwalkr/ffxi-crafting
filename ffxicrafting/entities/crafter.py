@@ -141,25 +141,10 @@ class Crafter:
         total_storage_slots = 0
 
         for result, quantity in results.items():
-            self._calculate_result_profits(result)
-
             total_revenue += self._calculate_result_total_revenue(result, quantity)
             total_storage_slots += self._calculate_storage_slots(result, quantity)
 
         return total_revenue, total_storage_slots
-
-    def _calculate_result_profits(self, result: Result) -> None:
-        """
-        Calculate and set the profit values for a single crafting result.
-
-        Args:
-            result (Result): The Result object to calculate profits for.
-        """
-        result.single_profit = result.single_price - result.crafted_cost if result.single_price is not None else None
-        if result.stack_price is not None and result.stack_size > 1:
-            result.stack_profit = result.stack_price - (result.crafted_cost * result.stack_size)
-        else:
-            result.stack_profit = None
 
     def _calculate_result_total_revenue(self, result: Result, quantity: int) -> float:
         """
