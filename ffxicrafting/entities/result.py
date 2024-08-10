@@ -69,14 +69,14 @@ class Result(CraftableItem):
             if result.item_id == item.item_id:
                 result.update_from_item(item)
 
-    def get_best_sell_freq(self) -> float:
+    def get_best_sell_frequency(self) -> float:
         """
         Get the best sell frequency between single and stack sales.
 
         Returns:
-            float: The higher sell frequency between single_sell_freq and stack_sell_freq.
+            float: The higher sell frequency between single_sell_frequency and stack_sell_frequency.
                    Returns 0 if both frequencies are None.
         """
-        single_freq = self.single_sell_freq or 0
-        stack_freq = self.stack_sell_freq or 0
-        return max(single_freq, stack_freq)
+        single_frequency = self.single_sell_frequency or 0
+        stack_frequency = self.stack_sell_frequency or 0
+        return max(single_frequency, stack_frequency)

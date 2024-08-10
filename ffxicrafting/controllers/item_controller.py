@@ -115,13 +115,13 @@ class ItemController:
 
         if item:
             if (item.single_price is None or item.stack_price is None or
-                    item.single_sell_freq is None or item.stack_sell_freq is None):
+                    item.single_sell_frequency is None or item.stack_sell_frequency is None):
                 auction_data = self._get_auction_data(item_id)
 
                 item.single_price = auction_data[0]
                 item.stack_price = auction_data[1]
-                item.single_sell_freq = auction_data[2]
-                item.stack_sell_freq = auction_data[3]
+                item.single_sell_frequency = auction_data[2]
+                item.stack_sell_frequency = auction_data[3]
         else:
             raise ValueError(f"Item with id {item_id} not found in Ingredient cache or Result instances.")
 
@@ -179,18 +179,18 @@ class ItemController:
         auction_items = self._auction_controller.get_auction_items_with_updates(item_id)
         single_price = None
         stack_price = None
-        single_sell_freq = None
-        stack_sell_freq = None
+        single_sell_frequency = None
+        stack_sell_frequency = None
 
         for auction_item in auction_items:
             if not auction_item.is_stack:
                 single_price = auction_item.avg_price if auction_item.avg_price > 0 else None
-                single_sell_freq = auction_item.sell_freq if auction_item.sell_freq > 0 else None
+                single_sell_frequency = auction_item.sell_frequency if auction_item.sell_frequency > 0 else None
             else:
                 stack_price = auction_item.avg_price if auction_item.avg_price > 0 else None
-                stack_sell_freq = auction_item.sell_freq if auction_item.sell_freq > 0 else None
+                stack_sell_frequency = auction_item.sell_frequency if auction_item.sell_frequency > 0 else None
 
-        return single_price, stack_price, single_sell_freq, stack_sell_freq
+        return single_price, stack_price, single_sell_frequency, stack_sell_frequency
 
     def _get_vendor_cost(self, item_id: int) -> int | None:
         """

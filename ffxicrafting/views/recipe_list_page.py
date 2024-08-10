@@ -281,7 +281,7 @@ class RecipeListPage(ttk.Frame, ABC):
 
                     for recipe in recipes:
                         self._recipe_queue.put(recipe)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
         self._recipe_queue.put(None)  # Signal this fetch thread is done
@@ -303,7 +303,7 @@ class RecipeListPage(ttk.Frame, ABC):
                 except Empty:
                     if self._cancel_event.is_set():
                         break
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
     def _process_single_recipe(self, recipe: Recipe) -> None:

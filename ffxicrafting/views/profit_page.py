@@ -41,9 +41,9 @@ class ProfitPage(RecipeListPage):
 
         Returns:
             list[str]: A list of column identifiers for the treeview:
-            ["nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage", "sell_freq"]
+            ["nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage", "sell_frequency"]
         """
-        return ["nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage", "sell_freq"]
+        return ["nq", "hq", "tier", "cost_per_synth", "profit_per_synth", "profit_per_storage", "sell_frequency"]
 
     def configure_treeview(self, treeview: ttk.Treeview) -> None:
         """
@@ -59,13 +59,13 @@ class ProfitPage(RecipeListPage):
         treeview.heading("cost_per_synth", text="Cost / Synth")
         treeview.heading("profit_per_synth", text="Profit / Synth")
         treeview.heading("profit_per_storage", text="Profit / Storage")
-        treeview.heading("sell_freq", text="Sell Freq")
+        treeview.heading("sell_frequency", text="Sell Frequency")
 
         treeview.column("tier", anchor=tk.CENTER)
         treeview.column("cost_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_synth", anchor=tk.CENTER)
         treeview.column("profit_per_storage", anchor=tk.CENTER)
-        treeview.column("sell_freq", anchor=tk.CENTER)
+        treeview.column("sell_frequency", anchor=tk.CENTER)
 
     def get_recipe_batch(self, recipe_controller: RecipeController, batch_size: int, offset: int) -> list[Recipe]:
         """
@@ -96,27 +96,27 @@ class ProfitPage(RecipeListPage):
         """
         return self._passes_thresholds(craft_result["profit_per_synth"],
                                        craft_result["profit_per_storage"],
-                                       craft_result["sell_freq"])
+                                       craft_result["sell_frequency"])
 
-    def _passes_thresholds(self, profit_per_synth: int, profit_per_storage: int, sell_freq: float) -> bool:
+    def _passes_thresholds(self, profit_per_synth: int, profit_per_storage: int, sell_frequency: float) -> bool:
         """
         Check if a recipe passes all profit thresholds.
 
         Args:
             profit_per_synth (int): The profit per synthesis.
             profit_per_storage (int): The profit per character storage unit.
-            sell_freq (float): The sell frequency.
+            sell_frequency (float): The sell frequency.
 
         Returns:
             bool: True if the recipe meets or exceeds all thresholds, False otherwise.
         """
         per_synth_threshold = SettingsManager.get_profit_per_synth()
         per_storage_threshold = SettingsManager.get_profit_per_storage()
-        sell_freq_threshold = SettingsManager.get_sell_freq()
+        sell_frequency_threshold = SettingsManager.get_sell_frequency()
 
         return (profit_per_synth >= per_synth_threshold and
                 profit_per_storage >= per_storage_threshold and
-                sell_freq >= sell_freq_threshold)
+                sell_frequency >= sell_frequency_threshold)
 
     def format_row(self, craft_result: dict) -> list[any]:
         """
@@ -144,5 +144,5 @@ class ProfitPage(RecipeListPage):
             int(crafter.recipe.cost),
             int(craft_result["profit_per_synth"]),
             int(craft_result["profit_per_storage"]),
-            float(f"{craft_result['sell_freq']:.4f}")
+            float(f"{craft_result['sell_frequency']:.4f}")
         ]

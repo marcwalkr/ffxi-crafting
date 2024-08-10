@@ -20,14 +20,14 @@ class Item(ItemModel):
         Attributes:
             single_price (float | None): The price for a single item in the auction house.
             stack_price (float | None): The price for a stack of items in the auction house.
-            single_sell_freq (float | None): The sell frequency for single items.
-            stack_sell_freq (float | None): The sell frequency for stacks of items.
+            single_sell_frequency (float | None): The sell frequency for single items.
+            stack_sell_frequency (float | None): The sell frequency for stacks of items.
         """
         super().__init__(*args)
         self.single_price: float | None = None
         self.stack_price: float | None = None
-        self.single_sell_freq: float | None = None
-        self.stack_sell_freq: float | None = None
+        self.single_sell_frequency: float | None = None
+        self.stack_sell_frequency: float | None = None
 
     def __eq__(self, __value: object) -> bool:
         """
@@ -74,8 +74,8 @@ class Item(ItemModel):
         """
         self.single_price = item.single_price
         self.stack_price = item.stack_price
-        self.single_sell_freq = item.single_sell_freq
-        self.stack_sell_freq = item.stack_sell_freq
+        self.single_sell_frequency = item.single_sell_frequency
+        self.stack_sell_frequency = item.stack_sell_frequency
 
     def get_fastest_selling_price_per_unit(self) -> float | None:
         """
@@ -85,8 +85,8 @@ class Item(ItemModel):
             float | None: The price per unit of the fastest selling method, or None if no price data is available.
         """
         if self.single_price is not None and self.stack_price is not None:
-            if self.single_sell_freq is None or (self.stack_sell_freq is not None and
-                                                 self.stack_sell_freq > self.single_sell_freq):
+            if self.single_sell_frequency is None or (self.stack_sell_frequency is not None and
+                                                      self.stack_sell_frequency > self.single_sell_frequency):
                 return self.stack_price / self.stack_size
             else:
                 return self.single_price

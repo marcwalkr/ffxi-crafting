@@ -108,7 +108,7 @@ class SettingsManager:
         return cls.load_settings()["thresholds_and_settings"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_sell_freq(cls) -> float:
+    def get_sell_frequency(cls) -> float:
         """
         Get the sell frequency setting.
 

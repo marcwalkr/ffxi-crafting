@@ -61,5 +61,5 @@ class AuctionController:
         prices = [sale.price for sale in new_sales_history]
         avg_price = sum(prices) / len(prices)
         item.avg_price = avg_price
-        item.sell_freq = item.num_sales / 15
+        item.sell_frequency = item.num_sales / 15
         return item

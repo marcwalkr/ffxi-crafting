@@ -30,7 +30,7 @@ class CraftingController:
                 - crafter (Crafter): The Crafter object used in the simulation.
                 - profit_per_synth (float): The calculated profit per synthesis.
                 - profit_per_storage (float): The calculated profit per storage unit.
-                - sell_freq (float): The highest sell frequency among the crafting results.
+                - sell_frequency (float): The highest sell frequency among the crafting results.
 
             None if the crafting simulation produces no results.
         """
@@ -41,11 +41,11 @@ class CraftingController:
         if not results:
             return None
 
-        sell_freq = max(result.get_best_sell_freq() for result in results)
+        sell_frequency = max(result.get_best_sell_frequency() for result in results)
 
         return {
             "crafter": crafter,
             "profit_per_synth": profit_per_synth,
             "profit_per_storage": profit_per_storage,
-            "sell_freq": sell_freq
+            "sell_frequency": sell_frequency
         }
