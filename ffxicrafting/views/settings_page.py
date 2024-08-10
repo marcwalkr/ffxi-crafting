@@ -63,12 +63,12 @@ class SettingsPage(ttk.Frame):
 
         # Left column: Skill Levels
         skill_levels_frame = ttk.LabelFrame(bottom_frame, text="Skill Levels")
-        skill_levels_frame.pack(side="left", fill="y", padx=(40, 0), pady=5)
+        skill_levels_frame.pack(side="left", fill="y", padx=(20, 0), pady=5)
         self._create_skill_levels_settings(skill_levels_frame)
 
         # Middle column: Regional Merchants
         merchants_frame = ttk.LabelFrame(bottom_frame, text="Regional Merchants")
-        merchants_frame.pack(side="left", fill="both", expand=True, padx=60, pady=5)
+        merchants_frame.pack(side="left", fill="both", padx=20, pady=5)
         self._create_merchants_settings(merchants_frame)
 
         # Right column: Conquest and Database
@@ -93,7 +93,7 @@ class SettingsPage(ttk.Frame):
         """
         Create settings for thresholds and other settings.
         Sets up input fields for profit per synthesis, profit per storage,
-        minimum auction list price, sell frequency, and a checkbox for crafting ingredients.
+        minimum auction list price, and sell frequency.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
@@ -110,14 +110,6 @@ class SettingsPage(ttk.Frame):
         number_settings_frame.pack(fill="x", padx=20, pady=5)
 
         self._create_number_settings(number_settings_frame, settings, self._settings.get("thresholds_and_settings", {}))
-
-        # Add the craft ingredients checkbox
-        craft_ingredients_var = tk.BooleanVar(value=self._settings.get(
-            "thresholds_and_settings", {}).get("craft_ingredients", False))
-        craft_ingredients_cb = ttk.Checkbutton(frame, text="Craft Ingredients", variable=craft_ingredients_var,
-                                               style="Custom.TCheckbutton")
-        craft_ingredients_cb.pack(anchor="w", padx=30, pady=5)
-        craft_ingredients_cb.var = craft_ingredients_var
 
     def _create_skill_levels_settings(self, frame: ttk.LabelFrame) -> None:
         """
@@ -240,16 +232,12 @@ class SettingsPage(ttk.Frame):
 
     def _get_thresholds_and_settings(self) -> dict:
         """
-        Retrieve thresholds and settings including number inputs and the checkbox value.
+        Retrieve thresholds and settings including number inputs.
 
         Returns:
-            dict: A dictionary containing thresholds and settings, including numeric values 
-            and "craft_ingredients" boolean.
+            dict: A dictionary containing thresholds and settings, including numeric values.
         """
         settings = self._get_number_settings(self._thresholds_and_settings)
-        for child in self._thresholds_and_settings.winfo_children():
-            if isinstance(child, ttk.Checkbutton) and child.cget("text") == "Craft Ingredients":
-                settings["craft_ingredients"] = child.var.get()
         return settings
 
     def _get_number_settings(self, frame: ttk.LabelFrame) -> dict:

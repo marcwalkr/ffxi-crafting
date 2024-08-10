@@ -18,7 +18,6 @@ class SettingsManager:
             "profit_/_storage": 0,
             "min_auction_list_price": 0,
             "sell_frequency": 0.0,
-            "craft_ingredients": False
         },
         "skill_levels": {
             "wood": 0,
@@ -96,8 +95,7 @@ class SettingsManager:
         Returns:
             int: The profit per synthesis value. Returns 0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["thresholds_and_settings"].get("profit_/_synth", 0)
+        return cls.load_settings()["thresholds_and_settings"].get("profit_/_synth", 0)
 
     @classmethod
     def get_profit_per_storage(cls) -> int:
@@ -107,8 +105,7 @@ class SettingsManager:
         Returns:
             int: The profit per storage value. Returns 0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["thresholds_and_settings"].get("profit_/_storage", 0)
+        return cls.load_settings()["thresholds_and_settings"].get("profit_/_storage", 0)
 
     @classmethod
     def get_sell_freq(cls) -> float:
@@ -118,19 +115,7 @@ class SettingsManager:
         Returns:
             float: The sell frequency value. Returns 0.0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["thresholds_and_settings"].get("sell_frequency", 0.0)
-
-    @classmethod
-    def get_craft_ingredients(cls) -> bool:
-        """
-        Get the craft ingredients setting.
-
-        Returns:
-            bool: True if craft ingredients is enabled, False otherwise.
-        """
-        settings = cls.load_settings()
-        return settings["thresholds_and_settings"].get("craft_ingredients", False)
+        return cls.load_settings()["thresholds_and_settings"].get("sell_frequency", 0.0)
 
     @classmethod
     def get_craft_skills(cls) -> list[int]:
@@ -226,8 +211,7 @@ class SettingsManager:
         Returns:
             str: The database host. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("host", "")
+        return cls.load_settings()["database"].get("host", "")
 
     @classmethod
     def get_database_user(cls) -> str:
@@ -237,8 +221,7 @@ class SettingsManager:
         Returns:
             str: The database user. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("user", "")
+        return cls.load_settings()["database"].get("user", "")
 
     @classmethod
     def get_database_password(cls) -> str:
@@ -248,8 +231,7 @@ class SettingsManager:
         Returns:
             str: The database password. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("password", "")
+        return cls.load_settings()["database"].get("password", "")
 
     @classmethod
     def get_database_name(cls) -> str:
@@ -259,5 +241,4 @@ class SettingsManager:
         Returns:
             str: The database name. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("database", "")
+        return cls.load_settings()["database"].get("database", "")
