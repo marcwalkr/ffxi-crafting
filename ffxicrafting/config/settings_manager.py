@@ -167,18 +167,6 @@ class SettingsManager:
         ]
 
     @classmethod
-    def get_regional_merchants(cls) -> dict:
-        """
-        Get the regional merchants settings.
-
-        Returns:
-            dict: A dictionary of regions and their controlling nations.
-            Returns the default settings if not set.
-        """
-        settings = cls.load_settings()
-        return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
-
-    @classmethod
     def get_beastmen_regions(cls) -> list[str]:
         """
         Get the list of regions controlled by beastmen.
@@ -196,16 +184,6 @@ class SettingsManager:
         return regions
 
     @classmethod
-    def get_conquest_ranking(cls) -> dict[str, str]:
-        """
-        Get the conquest ranking.
-
-        Returns:
-            dict[str, str]: A dictionary of the nations and their conquest rankings.
-        """
-        return cls.load_settings().get("conquest", cls.DEFAULT_SETTINGS["conquest"])
-
-    @classmethod
     def get_sandoria_rank(cls) -> int:
         """
         Get the conquest rank for San d'Oria.
@@ -213,7 +191,8 @@ class SettingsManager:
         Returns:
             int: The conquest rank for San d'Oria (1-3). Returns 3 if not set or invalid.
         """
-        return cls._rank_str_to_int(cls.get_conquest_ranking().get("san doria", "3rd"))
+        settings = cls.load_settings()
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("sandoria", "3rd"))
 
     @classmethod
     def get_bastok_rank(cls) -> int:
@@ -223,7 +202,8 @@ class SettingsManager:
         Returns:
             int: The conquest rank for Bastok (1-3). Returns 3 if not set or invalid.
         """
-        return cls._rank_str_to_int(cls.get_conquest_ranking().get("bastok", "3rd"))
+        settings = cls.load_settings()
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("bastok", "3rd"))
 
     @classmethod
     def get_windurst_rank(cls) -> int:
@@ -233,7 +213,8 @@ class SettingsManager:
         Returns:
             int: The conquest rank for Windurst (1-3). Returns 3 if not set or invalid.
         """
-        return cls._rank_str_to_int(cls.get_conquest_ranking().get("windurst", "3rd"))
+        settings = cls.load_settings()
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("windurst", "3rd"))
 
     @staticmethod
     def _rank_str_to_int(rank_str: str) -> int:

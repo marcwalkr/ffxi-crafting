@@ -322,38 +322,35 @@ class Database:
         results = self._execute_query(query, (), fetch_one=False)
         return [result[0] for result in results]
 
-    def get_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, beastmen_regions: str,
-                              conquest_ranking: str, enabled_guilds: str, from_scratch: bool) -> tuple:
+    def get_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool) -> tuple:
         """
-        Retrieve simulation result for a specific item from a specific recipe with settings that affect the crafting outcome.
+        Retrieve simulation result for a specific item from a specific recipe with min cost or max cost used.
         """
         query = "SELECT * FROM simulation_results WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
-        query += "beastmen_regions=%s AND conquest_ranking=%s AND enabled_guilds=%s AND from_scratch=%s"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, beastmen_regions,
-                                           conquest_ranking, enabled_guilds, from_scratch), fetch_one=True)
+        query += "min_cost_used=%s"
+        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used), fetch_one=True)
 
-    def insert_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, beastmen_regions: str,
-                                 conquest_ranking: str, enabled_guilds: str, from_scratch: bool, synth_cost: float,
-                                 simulation_cost: float, quantity: int) -> None:
+    def insert_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool, synth_cost: float,
+                                 simulation_cost: float, leftover_cost: float, quantity: int, cost_per_unit: float) -> None:
         """
-        Insert simulation result for a specific item from a specific recipe with settings that affect the crafting outcome.
+        Insert simulation result for a specific item from a specific recipe with min cost or max cost used.
         """
-        query = "INSERT INTO simulation_results (item_id, recipe_id, crafter_tier, beastmen_regions, "
-        query += "conquest_ranking, enabled_guilds, from_scratch, synth_cost, simulation_cost, quantity) "
-        query += "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, beastmen_regions,
-                                           conquest_ranking, enabled_guilds, from_scratch, synth_cost,
-                                           simulation_cost, quantity), commit=True)
+        query = "INSERT INTO simulation_results (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost, "
+        query += "simulation_cost, leftover_cost, quantity, cost_per_unit) "
+        query += "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost,
+                                           simulation_cost, leftover_cost, quantity, cost_per_unit), commit=True)
 
-    def delete_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, beastmen_regions: str,
-                                 conquest_ranking: str, enabled_guilds: str, from_scratch: bool) -> None:
+    def update_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool, synth_cost: float,
+                                 simulation_cost: float, leftover_cost: float, quantity: int, cost_per_unit: float) -> None:
         """
-        Delete a simulation result for a specific item from a specific recipe with settings that affect the crafting outcome.
+        Update a simulation result for a specific item from a specific recipe with min cost or max cost used.
         """
-        query = "DELETE FROM simulation_results WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
-        query += "beastmen_regions=%s AND conquest_ranking=%s AND enabled_guilds=%s AND from_scratch=%s"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, beastmen_regions,
-                                           conquest_ranking, enabled_guilds, from_scratch), commit=True)
+        query = "UPDATE simulation_results SET synth_cost=%s, simulation_cost=%s, leftover_cost=%s, "
+        query += "quantity=%s, cost_per_unit=%s WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
+        query += "min_cost_used=%s"
+        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost,
+                                           simulation_cost, leftover_cost, quantity, cost_per_unit), commit=True)
 
     def get_regional_vendor(self, npc_id: int) -> tuple:
         """

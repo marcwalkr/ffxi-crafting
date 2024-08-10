@@ -11,7 +11,6 @@ from database import Database
 from entities import Recipe
 from utils import TreeviewWithSort
 from views import RecipeDetailPage
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -205,7 +204,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Initializes the UI for processing, sets up threading, and begins fetching recipes.
         """
-        self._start_time = time.time()
         # Reset state
         self._cancel_event.clear()
         self._offset = 0
@@ -239,8 +237,6 @@ class RecipeListPage(ttk.Frame, ABC):
 
         Shuts down the executor and updates the UI to reflect the completion of the process.
         """
-        self._end_time = time.time()
-        logger.info(f"Process took {self._end_time - self._start_time} seconds")
         if self._executor:
             self._executor.shutdown(wait=False)
 
