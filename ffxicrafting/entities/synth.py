@@ -5,7 +5,7 @@ from collections import defaultdict
 from utils import clamp
 
 if TYPE_CHECKING:
-    from entities import Recipe, Crafter, Result, Ingredient
+    from entities import Recipe, Crafter, Item
 
 
 class Synth:
@@ -117,12 +117,12 @@ class Synth:
         weights = self._DESYNTH_HQ_TIER_WEIGHTS if self._recipe.desynth else self._HQ_TIER_WEIGHTS
         return random.choices([1, 2, 3], weights=weights)[0]
 
-    def _synth(self) -> tuple[Result, int]:
+    def _synth(self) -> tuple[Item, int]:
         """
         Perform a single synthesis attempt.
 
         Returns:
-            tuple[Result, int]: A tuple containing the Result object and its quantity,
+            tuple[Item, int]: A tuple containing the Item object and its quantity,
                                 or (None, None) if the synthesis fails.
         """
         if self._attempt_success():
@@ -132,7 +132,7 @@ class Synth:
             return self._recipe.get_nq_result()
         return None, None
 
-    def _get_hq_result(self, hq_tier: int) -> Result:
+    def _get_hq_result(self, hq_tier: int) -> Item:
         """
         Get the high-quality (HQ) result for a given tier.
 
@@ -140,7 +140,7 @@ class Synth:
             hq_tier (int): The HQ tier (1, 2, or 3).
 
         Returns:
-            tuple[Result, int]: A tuple containing the HQ Result object and its quantity.
+            tuple[Item, int]: A tuple containing the HQ Item object and its quantity.
         """
         if hq_tier == 1:
             return self._recipe.get_hq_result(1)
@@ -149,12 +149,12 @@ class Synth:
         else:
             return self._recipe.get_hq_result(3)
 
-    def _do_synth_fail(self) -> dict[Ingredient, int]:
+    def _do_synth_fail(self) -> dict[Item, int]:
         """
         Handle a failed synthesis attempt and determine retained ingredients.
 
         Returns:
-            dict[Ingredient, int]: A dictionary of retained ingredients and their quantities.
+            dict[Item, int]: A dictionary of retained ingredients and their quantities.
         """
         loss_probability = clamp(0.15 - (self._difficulty / 20), 0, 1) if self._difficulty > 0 else 0.15
         if self._recipe.desynth:
@@ -169,7 +169,7 @@ class Synth:
 
         return retained_ingredients
 
-    def simulate(self) -> tuple[dict[Result, int], dict[Ingredient, int]]:
+    def simulate(self) -> tuple[dict[Item, int], dict[Item, int]]:
         """
         Simulate multiple synthesis attempts and calculate the results.
 
@@ -177,9 +177,9 @@ class Synth:
         the results produced and ingredients retained from failed attempts.
 
         Returns:
-            tuple[dict[Result, int], dict[Ingredient, int]]: A tuple containing:
-                - A dictionary of Results and their quantities produced during the simulation.
-                - A dictionary of Ingredients and their quantities retained from failed attempts.
+            tuple[dict[Item, int], dict[Item, int]]: A tuple containing:
+                - A dictionary of Items and their quantities produced during the simulation.
+                - A dictionary of Items and their quantities retained from failed attempts.
         """
         results = defaultdict(lambda: 0)
         retained_ingredients = defaultdict(lambda: 0)

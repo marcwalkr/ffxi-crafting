@@ -12,22 +12,33 @@ class Item(ItemModel):
         """
         Initialize an Item instance.
 
-        Inherits all attributes from ItemModel and initializes additional auction-related properties.
+        Inherits all attributes from ItemModel and initializes additional price-related properties.
 
         Args:
             *args: Variable length argument list for ItemModel attributes.
 
         Attributes:
-            single_price (float | None): The price for a single item in the auction house.
-            stack_price (float | None): The price for a stack of items in the auction house.
+            min_single_price (float | None): The minimum price for a single item in the auction house.
+            max_single_price (float | None): The maximum price for a single item in the auction house.
+            average_single_price (float | None): The average price for a single item in the auction house.
+            min_stack_price (float | None): The minimum price for a stack of items in the auction house.
+            max_stack_price (float | None): The maximum price for a stack of items in the auction house.
+            average_stack_price (float | None): The average price for a stack of items in the auction house.
             single_sell_frequency (float | None): The sell frequency for single items.
             stack_sell_frequency (float | None): The sell frequency for stacks of items.
         """
         super().__init__(*args)
-        self.single_price: float | None = None
-        self.stack_price: float | None = None
+        self.min_single_price: float | None = None
+        self.max_single_price: float | None = None
+        self.average_single_price: float | None = None
+        self.min_stack_price: float | None = None
+        self.max_stack_price: float | None = None
+        self.average_stack_price: float | None = None
         self.single_sell_frequency: float | None = None
         self.stack_sell_frequency: float | None = None
+
+        self.min_vendor_cost: float | None = None
+        self.min_guild_cost: float | None = None
 
     def __eq__(self, __value: object) -> bool:
         """
@@ -65,59 +76,55 @@ class Item(ItemModel):
         """
         return self.sort_name.replace("_", " ").title()
 
-    def update_from_item(self, item):
+    def get_min_cost(self) -> int | float | None:
         """
-        Update this Item's auction-related properties from another Item.
+        Calculate the minimum cost of the item from various sources.
 
-        Args:
-            item (Item): Another Item instance to copy auction data from.
+        Returns:
+            int | float | None: The lowest cost among vendor cost, guild cost, single price,
+            and stack price (divided by stack size). Returns None if no valid costs are available.
         """
-        self.single_price = item.single_price
-        self.stack_price = item.stack_price
-        self.single_sell_frequency = item.single_sell_frequency
-        self.stack_sell_frequency = item.stack_sell_frequency
+        if self.min_stack_price is not None:
+            cost_from_stack = self.min_stack_price / self.stack_size
+        else:
+            cost_from_stack = None
+
+        costs = [self.min_vendor_cost, self.min_guild_cost, self.min_single_price, cost_from_stack]
+        valid_costs = [cost for cost in costs if cost is not None]
+
+        return min(valid_costs, default=None)
+
+    def get_highest_sell_frequency(self) -> float | None:
+        """
+        Get the highest sell frequency of the item.
+
+        Returns:
+            float | None: The highest sell frequency, or None if both frequencies are None.
+        """
+        frequencies = [self.single_sell_frequency, self.stack_sell_frequency]
+        valid_frequencies = [f for f in frequencies if f is not None]
+        return max(valid_frequencies) if valid_frequencies else None
 
     def get_fastest_selling_price_per_unit(self) -> float | None:
         """
-        Get the price per unit of the fastest selling method (single or stack).
+        Get the fastest selling price per unit of the item.
+        If the stack sells faster, return the stack price divided by the stack size.
+        Otherwise, return the single price. 
 
         Returns:
-            float | None: The price per unit of the fastest selling method, or None if no price data is available.
+            float | None: The fastest selling price per unit of the item.
+
         """
-        if self.single_price is not None and self.stack_price is not None:
-            if self.single_sell_frequency is None or (self.stack_sell_frequency is not None and
-                                                      self.stack_sell_frequency > self.single_sell_frequency):
-                return self.stack_price / self.stack_size
-            else:
-                return self.single_price
-        elif self.stack_price is not None:
-            return self.stack_price / self.stack_size
-        elif self.single_price is not None:
-            return self.single_price
-        else:
+        if self.single_sell_frequency is None and self.stack_sell_frequency is None:
             return None
 
+        if self.single_sell_frequency is None:
+            return self.min_stack_price / self.stack_size if self.min_stack_price is not None else None
 
-class CraftableItem(Item):
-    """
-    Represents a craftable item in the game, extending the base Item class.
+        if self.stack_sell_frequency is None:
+            return self.min_single_price
 
-    This class adds a crafted_cost attribute to track the cost of crafting the item.
-    """
-
-    def __init__(self, *args) -> None:
-        """
-        Initialize a CraftableItem instance.
-
-        Inherits all attributes from Item and initializes an additional crafted_cost property.
-
-        Args:
-            *args: Variable length argument list for Item attributes.
-
-        Attributes:
-            crafted_cost (float | None): The cost of crafting a single unit of the item.
-            proportion (float | None): The proportion of the item produced compared to other results in the recipe.
-        """
-        super().__init__(*args)
-        self.crafted_cost: float | None = None
-        self.proportion: float | None = None
+        if self.single_sell_frequency >= self.stack_sell_frequency:
+            return self.min_single_price
+        else:
+            return self.min_stack_price / self.stack_size if self.min_stack_price is not None else None

@@ -1,6 +1,6 @@
 import logging
 from database import Database
-from entities import Recipe, Ingredient, Result
+from entities import Recipe, Item
 from models import RecipeModel
 from repositories import RecipeRepository
 from controllers import ItemController
@@ -100,29 +100,37 @@ class RecipeController:
                 recipes.append(self._recipe_cache[recipe_model.id])
                 continue
 
-            ingredient_item_ids = set()
-            result_item_ids = set()
+            item_ids = set()
 
-            # Treat the crystal as an ingredient
-            ingredient_item_ids.add(recipe_model.crystal)
-
-            # Gather ingredient ids
-            ingredient_item_ids.update([recipe_model.ingredient1, recipe_model.ingredient2, recipe_model.ingredient3,
-                                       recipe_model.ingredient4, recipe_model.ingredient5, recipe_model.ingredient6,
-                                       recipe_model.ingredient7, recipe_model.ingredient8])
+            item_ids.update([recipe_model.crystal, recipe_model.ingredient1, recipe_model.ingredient2,
+                             recipe_model.ingredient3, recipe_model.ingredient4, recipe_model.ingredient5,
+                             recipe_model.ingredient6, recipe_model.ingredient7, recipe_model.ingredient8,
+                             recipe_model.result, recipe_model.result_hq1, recipe_model.result_hq2,
+                             recipe_model.result_hq3])
 
             # Remove empty ingredients represented by 0
-            ingredient_item_ids.discard(0)
+            item_ids.discard(0)
 
-            # Gather result ids
-            result_item_ids.update([recipe_model.result, recipe_model.result_hq1, recipe_model.result_hq2,
-                                   recipe_model.result_hq3])
+            items = self._item_controller.get_recipe_items(list(item_ids))
+            self._set_costs(items)
 
-            ingredients, results = self._item_controller.get_recipe_items(
-                list(ingredient_item_ids), list(result_item_ids))
+            crystal = next((item for item in items if item.item_id == recipe_model.crystal), None)
+            ingredient1 = next((item for item in items if item.item_id == recipe_model.ingredient1), None)
+            ingredient2 = next((item for item in items if item.item_id == recipe_model.ingredient2), None)
+            ingredient3 = next((item for item in items if item.item_id == recipe_model.ingredient3), None)
+            ingredient4 = next((item for item in items if item.item_id == recipe_model.ingredient4), None)
+            ingredient5 = next((item for item in items if item.item_id == recipe_model.ingredient5), None)
+            ingredient6 = next((item for item in items if item.item_id == recipe_model.ingredient6), None)
+            ingredient7 = next((item for item in items if item.item_id == recipe_model.ingredient7), None)
+            ingredient8 = next((item for item in items if item.item_id == recipe_model.ingredient8), None)
+            ingredients = [crystal, ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6,
+                           ingredient7, ingredient8]
 
-            self._set_ingredient_costs(ingredients)
-            self._set_result_sell_prices(results)
+            result = next((item for item in items if item.item_id == recipe_model.result), None)
+            result_hq1 = next((item for item in items if item.item_id == recipe_model.result_hq1), None)
+            result_hq2 = next((item for item in items if item.item_id == recipe_model.result_hq2), None)
+            result_hq3 = next((item for item in items if item.item_id == recipe_model.result_hq3), None)
+            results = [result, result_hq1, result_hq2, result_hq3]
 
             recipe = self._create_recipe_object(recipe_model, ingredients, results)
             self._recipe_cache[recipe_model.id] = recipe
@@ -130,36 +138,26 @@ class RecipeController:
 
         return recipes
 
-    def _set_ingredient_costs(self, ingredients: list[Ingredient]) -> None:
+    def _set_costs(self, items: list[Item]) -> None:
         """
         Update the costs of ingredients used in the recipe.
 
         Args:
-            ingredients (list[Ingredient]): A list of ingredients to update the costs for.
+            items (list[Item]): A list of items to update the costs for.
         """
-        for ingredient in ingredients:
-            self._item_controller.update_vendor_cost(ingredient.item_id)
-            self._item_controller.update_guild_cost(ingredient.item_id)
-            self._item_controller.update_auction_data(ingredient.item_id)
+        for item in items:
+            self._item_controller.update_vendor_cost(item.item_id)
+            self._item_controller.update_guild_cost(item.item_id)
+            self._item_controller.update_auction_data(item.item_id)
 
-    def _set_result_sell_prices(self, results: list[Result]) -> None:
-        """
-        Set the auction sell prices on results.
-
-        Args:
-            results (list[Result]): A list of results to set the sell prices for.
-        """
-        for result in results:
-            self._item_controller.update_auction_data(result.item_id)
-
-    def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Ingredient], results: list[Result]) -> Recipe:
+    def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Item], results: list[Item]) -> Recipe:
         """
         Create a Recipe object from a RecipeModel and lists of ingredients and results.
 
         Args:
             recipe_model (RecipeModel): The RecipeModel to convert into a Recipe object.
-            ingredients (list[Ingredient]): A list of all unique ingredients for the recipe.
-            results (list[Result]): A list of all unique results for the recipe.
+            ingredients (list[Item]): A list of all unique ingredients for the recipe.
+            results (list[Item]): A list of all unique results for the recipe.
 
         Returns:
             Recipe: A fully populated Recipe object.
