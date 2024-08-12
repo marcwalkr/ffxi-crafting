@@ -39,9 +39,6 @@ class RecipeListPage(ttk.Frame, ABC):
         self._treeview: TreeviewWithSort = None
         self.action_button_text: str
 
-        # Initialize a recipe controller instance for quickly fetching the recipe on treeview item click
-        self._recipe_controller: RecipeController = RecipeController(Database())
-
         self._num_threads: int = 20
         self._batch_size: int = 25
 
@@ -192,10 +189,10 @@ class RecipeListPage(ttk.Frame, ABC):
             return
 
         recipe_id = tree.selection()[0]
-        recipe = self._recipe_controller.get_recipe(int(recipe_id))
+        profit_data = CraftingController.get_profit_data(int(recipe_id))
 
-        detail_page = RecipeDetailPage(self._parent, recipe)
-        self._parent.notebook.add(detail_page, text=f"Recipe {recipe.result_name} Details")
+        detail_page = RecipeDetailPage(self._parent, profit_data)
+        self._parent.notebook.add(detail_page, text=f"Recipe {profit_data.recipe.result_name} Details")
         self._parent.notebook.select(detail_page)
 
     def start_process(self) -> None:
@@ -317,8 +314,7 @@ class RecipeListPage(ttk.Frame, ABC):
         if self._cancel_event.is_set():
             return
 
-        crafting_controller = CraftingController(recipe)
-        craft_result = crafting_controller.simulate_craft()
+        craft_result = CraftingController.simulate_craft(recipe)
 
         if not craft_result:
             return

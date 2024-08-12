@@ -1,5 +1,10 @@
-from entities import Crafter, Recipe
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from entities import Crafter, ProfitData
 from config import SettingsManager
+
+if TYPE_CHECKING:
+    from entities import Recipe
 
 
 class CraftingController:
@@ -10,20 +15,26 @@ class CraftingController:
     and result formatting. It serves as an intermediary between the application logic and
     the crafting entities.
     """
+    _profit_data_cache: dict[int, ProfitData] = {}
 
-    def __init__(self, recipe: Recipe) -> None:
+    @classmethod
+    def get_profit_data(cls, recipe_id: int) -> ProfitData:
         """
-        Initializes the CraftingController with a given recipe.
-
-        Args:
-            recipe (Recipe): The recipe to be simulated.
+        Get the profit data for a recipe from the cache.
         """
-        self._recipe: Recipe = recipe
+        if recipe_id in cls._profit_data_cache:
+            return cls._profit_data_cache[recipe_id]
+        else:
+            raise ValueError(f"Profit data for recipe with ID {recipe_id} not found in cache")
 
-    def simulate_craft(self) -> dict:
+    @classmethod
+    def simulate_craft(cls, recipe: Recipe) -> dict:
         """
         Performs a crafting simulation based on the provided recipe and the
         current crafting skill settings. It calculates profits and formats the results.
+
+        Args:
+            recipe (Recipe): The recipe to be simulated.
 
         Returns:
             dict: A dictionary containing the simulation results, including:
@@ -35,17 +46,22 @@ class CraftingController:
             None if the crafting simulation produces no results.
         """
         skills = SettingsManager.get_craft_skills()
-        crafter = Crafter(*skills, self._recipe)
-        results, profit_per_synth, profit_per_storage = crafter.craft()
+        crafter = Crafter(*skills, recipe)
+        results, retained_ingredients = crafter.craft()
 
         if not results:
             return None
 
-        sell_frequency = max(result.get_best_sell_frequency() for result in results)
+        profit_data = ProfitData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
+        cls._profit_data_cache[recipe.id] = profit_data
+
+        sell_frequencies = [result.get_highest_sell_frequency() for result in profit_data.recipe.get_unique_results()]
+        valid_frequencies = [f for f in sell_frequencies if f is not None]
+        sell_frequency = max(valid_frequencies) if valid_frequencies else None
 
         return {
             "crafter": crafter,
-            "profit_per_synth": profit_per_synth,
-            "profit_per_storage": profit_per_storage,
+            "profit_per_synth": profit_data.profit_per_synth,
+            "profit_per_storage": profit_data.profit_per_storage,
             "sell_frequency": sell_frequency
         }

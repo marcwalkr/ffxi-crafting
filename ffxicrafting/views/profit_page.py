@@ -141,7 +141,7 @@ class ProfitPage(RecipeListPage):
             crafter.recipe.get_formatted_nq_result(),
             crafter.recipe.get_formatted_hq_results(),
             crafter.synth.tier,
-            int(crafter.recipe.cost),
+            int(crafter.recipe.min_cost),
             int(craft_result["profit_per_synth"]),
             int(craft_result["profit_per_storage"]),
             float(f"{craft_result['sell_frequency']:.4f}")
