@@ -281,26 +281,52 @@ class Database:
 
     def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list:
         """
-        Search for recipes based on a search term.
+        Search for recipes based on a search term, matching against result item names.
 
         Args:
-            search_term (str): The term to search for in recipe names.
+            search_term (str): The term to search for in result item names.
             batch_size (int): Number of recipes to retrieve.
             offset (int): Offset for pagination.
 
         Returns:
             list: A list of recipes matching the search term.
         """
+        # Prepare search terms for LIKE clause
+        like_term = f"%{search_term.replace(" ", "%")}%"
+
         query = """
-        SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal,
-        Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7,
-        Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty,
-        ResultHQ3Qty, ResultName FROM synth_recipes
-        WHERE MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE)
-        ORDER BY MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) DESC, ID ASC
+        WITH recipe_results AS (
+            SELECT ID, Result AS item_id FROM synth_recipes WHERE Result IS NOT NULL
+            UNION ALL
+            SELECT ID, ResultHQ1 FROM synth_recipes WHERE ResultHQ1 IS NOT NULL
+            UNION ALL
+            SELECT ID, ResultHQ2 FROM synth_recipes WHERE ResultHQ2 IS NOT NULL
+            UNION ALL
+            SELECT ID, ResultHQ3 FROM synth_recipes WHERE ResultHQ3 IS NOT NULL
+        ),
+        matched_recipes AS (
+            SELECT DISTINCT r.ID,
+                CASE 
+                    WHEN ib.name LIKE %s THEN 2
+                    WHEN MATCH(ib.name) AGAINST(%s IN BOOLEAN MODE) THEN 1
+                    ELSE 0
+                END AS relevance
+            FROM recipe_results r
+            JOIN item_basic ib ON r.item_id = ib.itemid
+            WHERE ib.name LIKE %s OR MATCH(ib.name) AGAINST(%s IN BOOLEAN MODE)
+        )
+        SELECT sr.ID, sr.Desynth, sr.KeyItem, sr.Wood, sr.Smith, sr.Gold, sr.Cloth, 
+               sr.Leather, sr.Bone, sr.Alchemy, sr.Cook, sr.Crystal,
+               sr.Ingredient1, sr.Ingredient2, sr.Ingredient3, sr.Ingredient4, sr.Ingredient5, 
+               sr.Ingredient6, sr.Ingredient7, sr.Ingredient8, sr.Result, sr.ResultHQ1, 
+               sr.ResultHQ2, sr.ResultHQ3, sr.ResultQty, sr.ResultHQ1Qty, sr.ResultHQ2Qty,
+               sr.ResultHQ3Qty, sr.ResultName
+        FROM matched_recipes mr
+        JOIN synth_recipes sr ON mr.ID = sr.ID
+        ORDER BY mr.relevance DESC, sr.ID ASC
         LIMIT %s OFFSET %s;
         """
-        return self._execute_query(query, (search_term, search_term, batch_size, offset), fetch_one=False)
+        return self._execute_query(query, (like_term, search_term, like_term, search_term, batch_size, offset), fetch_one=False)
 
     def get_all_result_item_ids(self) -> list:
         """
