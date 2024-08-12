@@ -9,9 +9,9 @@ from config import SettingsManager
 from controllers import RecipeController, CraftingController
 from database import Database
 from entities import Recipe
-from utils import TreeviewWithSort
+from utils import TreeviewWithSort, get_number_settings, create_number_settings
 from views import RecipeDetailPage
-from typing import Union
+
 
 logger = logging.getLogger(__name__)
 
@@ -93,11 +93,10 @@ class SearchPage(ttk.Frame):
 
     def _create_filters_frame(self) -> None:
         """
-        Create the filters frame containing threshold and skill level settings.
+        Create the filters frame containing threshold settings.
 
         This frame is initially hidden and can be toggled with the Filters button.
-        It contains two sections: Thresholds and Skill Levels, each with their respective
-        number input fields.
+        It contains the Thresholds section with number input fields.
         """
         self._filters_frame = ttk.Frame(self)
         self._filters_frame.pack_forget()  # Initially hidden
@@ -105,114 +104,27 @@ class SearchPage(ttk.Frame):
         # Thresholds settings
         thresholds_frame = ttk.LabelFrame(self._filters_frame, text="Thresholds")
         thresholds_frame.pack(fill="x", padx=10, pady=(0, 5))
-        self._create_number_settings(thresholds_frame, [
+
+        thresholds_inner_frame = ttk.Frame(thresholds_frame)
+        thresholds_inner_frame.pack(padx=5, pady=5)
+
+        create_number_settings(thresholds_inner_frame, [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
             ("Sell Frequency", 0)
-        ], self._settings.get("thresholds", {}))
-
-        # Skill levels settings
-        skill_levels_frame = ttk.LabelFrame(self._filters_frame, text="Skill Levels")
-        skill_levels_frame.pack(fill="x", padx=10, pady=5)
-        self._create_number_settings(skill_levels_frame, [
-            ("Wood", 0),
-            ("Smith", 0),
-            ("Gold", 0),
-            ("Cloth", 0),
-            ("Leather", 0),
-            ("Bone", 0),
-            ("Alchemy", 0),
-            ("Cook", 0)
-        ], self._settings.get("skill_levels", {}))
-
-    def _create_number_settings(self, frame: ttk.Frame, settings: list[tuple[str, Union[int, float]]],
-                                saved_settings: dict) -> None:
-        """
-        Create number input fields for a group of settings.
-
-        This method creates a label and an entry widget for each setting, arranged
-        horizontally within the given frame.
-
-        Args:
-            frame (ttk.Frame): The parent frame to contain these settings.
-            settings (list[tuple[str, Union[int, float]]]): A list of tuples, each containing
-                the setting name and its default value.
-            saved_settings (dict): A dictionary of previously saved settings to populate
-                the input fields.
-        """
-        for setting, default in settings:
-            setting_frame = ttk.Frame(frame)
-            setting_frame.pack(side="left", padx=5, pady=5)
-
-            label = ttk.Label(setting_frame, text=setting)
-            label.pack(side="left")
-
-            entry_name = setting.lower().replace(" ", "_")
-            entry = ttk.Entry(setting_frame, width=10, name=entry_name)
-            entry.insert(0, saved_settings.get(entry_name, default))
-            entry.pack(side="left", padx=(5, 0))
-
-    def _get_number_settings(self, frame: ttk.LabelFrame) -> dict:
-        """
-        Recursively retrieve number settings from a frame and its child frames.
-
-        This method traverses the widget hierarchy within the given frame,
-        collecting values from Entry widgets and converting them to numbers.
-
-        Args:
-            frame (ttk.LabelFrame): The frame containing number settings.
-
-        Returns:
-            dict: A dictionary of setting names and their numeric values.
-                  Returns 0 for blank or invalid inputs.
-        """
-        settings = {}
-        for child in frame.winfo_children():
-            if isinstance(child, ttk.Entry):
-                label = child._name.split(".")[-1]
-                value = child.get()
-                settings[label] = self._convert_to_number(value)
-            elif isinstance(child, ttk.Frame):
-                settings.update(self._get_number_settings(child))  # Recursively check nested frames
-        return settings
-
-    def _convert_to_number(self, value: str) -> Union[int, float]:
-        """
-        Convert a string value to a number (int or float).
-
-        This method attempts to convert the input string to either an integer or
-        a float, depending on whether it contains a decimal point. If conversion
-        fails or the input is blank, it returns 0.
-
-        Args:
-            value (str): The string value to convert.
-
-        Returns:
-            Union[int, float]: The converted number. Returns 0 if the input is blank
-                               or conversion fails.
-        """
-        if not value.strip():  # Check if the value is blank or only whitespace
-            return 0
-        try:
-            if "." in value:
-                return float(value)
-            else:
-                return int(value)
-        except ValueError:
-            return 0  # Return 0 if conversion fails
+        ], self._settings.get("thresholds", {}), orientation="horizontal")
 
     def _save_filter_settings(self) -> None:
         """
         Save the current filter settings to the application's configuration.
 
-        This method retrieves the current values from the threshold and skill level
-        input fields, updates the existing settings with these new values, and then
-        saves the updated settings using the SettingsManager.
+        This method retrieves the current values from the threshold input fields,
+        updates the existing settings with these new values, and then saves the
+        updated settings using the SettingsManager.
         """
         current_settings = SettingsManager.load_settings()
         new_settings = {
-            "thresholds": self._get_number_settings(self._filters_frame.winfo_children()[0]),
-            "skill_levels": self._get_number_settings(self._filters_frame.winfo_children()[1])
+            "thresholds": get_number_settings(self._filters_frame.winfo_children()[0]),
         }
         current_settings.update(new_settings)
         SettingsManager.save_settings(current_settings)

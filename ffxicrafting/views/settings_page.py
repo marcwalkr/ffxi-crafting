@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from config import SettingsManager
-from typing import Union
+from utils import get_number_settings, create_number_settings
 
 
 class SettingsPage(ttk.Frame):
@@ -43,15 +43,27 @@ class SettingsPage(ttk.Frame):
         """
         Create and layout all categories of settings.
 
-        Sets up frames for different setting categories including merchants, conquest, and database settings.
+        Sets up frames for different setting categories including skill levels,
+        merchants, conquest, and database settings in a three-column layout.
         """
         # Create a frame to hold all settings
         main_frame = ttk.Frame(self)
-        main_frame.pack(fill="both", expand=True, padx=200, pady=50)
+        main_frame.pack(fill="both", expand=True, padx=150, pady=(60, 0))
 
-        # Regional Merchants
-        merchants_frame = ttk.LabelFrame(main_frame, text="Regional Merchants")
-        merchants_frame.pack(side="left", fill="both", expand=True, padx=(0, 10), pady=5)
+        # Left column: Skill Levels
+        left_column = ttk.Frame(main_frame)
+        left_column.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        skill_levels_frame = ttk.LabelFrame(left_column, text="Skill Levels")
+        skill_levels_frame.pack(fill="both", expand=True)
+        self._create_skill_levels_settings(skill_levels_frame)
+
+        # Middle column: Regional Merchants
+        middle_column = ttk.Frame(main_frame)
+        middle_column.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        merchants_frame = ttk.LabelFrame(middle_column, text="Regional Merchants")
+        merchants_frame.pack(fill="both", expand=True)
         self._create_merchants_settings(merchants_frame)
 
         # Right column: Conquest and Database
@@ -67,7 +79,22 @@ class SettingsPage(ttk.Frame):
         self._create_database_settings(database_frame)
 
         save_button = ttk.Button(self, text="Save", command=self._save_settings)
-        save_button.pack(pady=(0, 40))
+        save_button.pack(pady=(20, 60))
+
+    def _create_skill_levels_settings(self, frame: ttk.LabelFrame) -> None:
+        inner_frame = ttk.Frame(frame)
+        inner_frame.pack(padx=5, pady=5)
+
+        create_number_settings(inner_frame, [
+            ("Wood", 0),
+            ("Smith", 0),
+            ("Gold", 0),
+            ("Cloth", 0),
+            ("Leather", 0),
+            ("Bone", 0),
+            ("Alchemy", 0),
+            ("Cook", 0)
+        ], self._settings.get("skill_levels", {}), orientation="vertical")
 
     def _create_merchants_settings(self, frame: ttk.LabelFrame) -> None:
         """
@@ -101,6 +128,7 @@ class SettingsPage(ttk.Frame):
             var = tk.StringVar(value=self._settings.get("regional_merchants", {}).get(
                 merchant.lower().replace(" ", "_"), "San d'Oria"))
             option_menu = ttk.OptionMenu(row_frame, var, var.get(), *options)
+            option_menu.config(width=10)
             option_menu.pack(side="left", padx=(2, 5), pady=2)
             option_menu.var = var
 
@@ -162,6 +190,7 @@ class SettingsPage(ttk.Frame):
         current_settings = SettingsManager.load_settings()
 
         new_settings = {
+            "skill_levels": self._get_skill_levels_settings(),
             "regional_merchants": self._get_regional_merchants_settings(),
             "conquest": self._get_option_menu_settings(self._conquest_settings),
             "database": self._get_string_settings(self._database_settings)
@@ -169,6 +198,10 @@ class SettingsPage(ttk.Frame):
 
         current_settings.update(new_settings)
         SettingsManager.save_settings(current_settings)
+
+    def _get_skill_levels_settings(self) -> dict:
+        skill_levels_frame = self.winfo_children()[0].winfo_children()[0].winfo_children()[0]
+        return get_number_settings(skill_levels_frame)
 
     def _get_regional_merchants_settings(self) -> dict:
         """
@@ -226,59 +259,3 @@ class SettingsPage(ttk.Frame):
                         label = subchild.master.winfo_children()[0].cget("text").lower().replace("'", "")
                         settings[label] = subchild.var.get()
         return settings
-
-    def _create_merchants_settings(self, frame: ttk.LabelFrame) -> None:
-        """
-        Create settings for regional merchants in a two-column layout.
-        Creates a two-column layout of option menus for selecting the controlling nation for each region.
-
-        Args:
-            frame (ttk.LabelFrame): The frame to contain these settings.
-        """
-        self._merchants_settings = frame
-        merchants = [
-            "Aragoneu", "Derfland", "Elshimo Lowlands", "Elshimo Uplands", "Fauregandi",
-            "Gustaberg", "Kolshushu", "Kuzotz", "Li'Telor", "Movalpolos", "Norvallen", "Qufim",
-            "Ronfaure", "Sarutabaruta", "Tavnazian Archipelago", "Valdeaunia", "Vollbow", "Zulkheim"
-        ]
-        options = ["San d'Oria", "Bastok", "Windurst", "Beastmen"]
-
-        left_frame = ttk.Frame(frame)
-        left_frame.pack(side="left", fill="y", padx=5, pady=5)
-        right_frame = ttk.Frame(frame)
-        right_frame.pack(side="left", fill="y", padx=5, pady=5)
-
-        for i, merchant in enumerate(merchants):
-            target_frame = left_frame if i % 2 == 0 else right_frame
-            row_frame = ttk.Frame(target_frame)
-            row_frame.pack(fill="x", padx=5, pady=2)
-
-            label = ttk.Label(row_frame, text=merchant, width=20, anchor="w")
-            label.pack(side="left", padx=(5, 2), pady=2)
-
-            var = tk.StringVar(value=self._settings.get("regional_merchants", {}).get(
-                merchant.lower().replace(" ", "_"), "San d'Oria"))
-            option_menu = ttk.OptionMenu(row_frame, var, var.get(), *options)
-            option_menu.pack(side="left", padx=(2, 5), pady=2)
-            option_menu.var = var
-
-    def _create_string_settings(self, frame: ttk.LabelFrame, settings: list[tuple[str, str]],
-                                saved_settings: dict) -> None:
-        """
-        Create string settings using labeled entry widgets.
-        Creates labeled entry widgets for string settings.
-
-        Args:
-            frame (ttk.LabelFrame): The frame to contain these settings.
-            settings (list[tuple[str, str]]): List of tuples containing setting names and default values.
-            saved_settings (dict): Dictionary of previously saved settings.
-        """
-        for setting, default in settings:
-            row_frame = ttk.Frame(frame)
-            row_frame.pack(fill="x", padx=5, pady=2)
-            label = ttk.Label(row_frame, text=setting)
-            label.pack(side="left", padx=5, pady=5)
-            entry_name = setting.lower().replace(" ", "_")
-            entry = ttk.Entry(row_frame, width=20, name=entry_name)
-            entry.insert(0, saved_settings.get(entry_name, default))
-            entry.pack(side="right", padx=5, pady=5)
