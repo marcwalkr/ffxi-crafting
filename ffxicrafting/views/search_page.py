@@ -5,12 +5,13 @@ import traceback
 from tkinter import ttk
 from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 from queue import Queue, Empty
+from config import SettingsManager
 from controllers import RecipeController, CraftingController
 from database import Database
 from entities import Recipe
 from utils import TreeviewWithSort
 from views import RecipeDetailPage
-
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,11 @@ class SearchPage(ttk.Frame):
         self._search_var: tk.StringVar = None
         self._search_entry: ttk.Entry = None
 
+        self._filters_frame: ttk.Frame = None
+        self._filters_button: ttk.Button = None
+        self._filters_visible: bool = False
+        self._settings: dict = SettingsManager.load_settings()
+
         self._num_threads: int = 20
         self._batch_size: int = 25
 
@@ -62,6 +68,7 @@ class SearchPage(ttk.Frame):
         """
         self._parent.notebook.add(self, text="Search Items")
         self._create_action_frame()
+        self._create_filters_frame()
         self._create_progress_bar()
         self._create_treeview()
 
@@ -70,22 +77,159 @@ class SearchPage(ttk.Frame):
         Create the search input and button within the input frame.
         """
         self._action_frame = ttk.Frame(self)
-        self._action_frame.pack(pady=10)
-        self._create_action_button()
+        self._action_frame.pack(pady=(10, 5))
 
         self._search_var = tk.StringVar()
-
         self._search_entry = ttk.Entry(self._action_frame, textvariable=self._search_var,
                                        font=("Helvetica", 14), width=20)
         self._search_entry.pack(side=tk.LEFT, padx=(0, 10))
-        self._search_entry.bind("<Return>", lambda event: self.start_process())
+        self._search_entry.bind("<Return>", lambda event: self._toggle_process())
 
-    def _create_action_button(self) -> None:
-        """
-        Create the action button for starting and stopping the process.
-        """
         self._action_button = ttk.Button(self._action_frame, text="Search", command=self._toggle_process)
-        self._action_button.pack(side=tk.RIGHT)
+        self._action_button.pack(side=tk.LEFT, padx=(0, 10))
+
+        self._filters_button = ttk.Button(self._action_frame, text="Filters", command=self._toggle_filters)
+        self._filters_button.pack(side=tk.LEFT, padx=(0, 10))
+
+    def _create_filters_frame(self) -> None:
+        """
+        Create the filters frame containing threshold and skill level settings.
+
+        This frame is initially hidden and can be toggled with the Filters button.
+        It contains two sections: Thresholds and Skill Levels, each with their respective
+        number input fields.
+        """
+        self._filters_frame = ttk.Frame(self)
+        self._filters_frame.pack_forget()  # Initially hidden
+
+        # Thresholds settings
+        thresholds_frame = ttk.LabelFrame(self._filters_frame, text="Thresholds")
+        thresholds_frame.pack(fill="x", padx=10, pady=(0, 5))
+        self._create_number_settings(thresholds_frame, [
+            ("Profit / Synth", 0),
+            ("Profit / Storage", 0),
+            ("Sell Frequency", 0)
+        ], self._settings.get("thresholds", {}))
+
+        # Skill levels settings
+        skill_levels_frame = ttk.LabelFrame(self._filters_frame, text="Skill Levels")
+        skill_levels_frame.pack(fill="x", padx=10, pady=5)
+        self._create_number_settings(skill_levels_frame, [
+            ("Wood", 0),
+            ("Smith", 0),
+            ("Gold", 0),
+            ("Cloth", 0),
+            ("Leather", 0),
+            ("Bone", 0),
+            ("Alchemy", 0),
+            ("Cook", 0)
+        ], self._settings.get("skill_levels", {}))
+
+    def _create_number_settings(self, frame: ttk.Frame, settings: list[tuple[str, Union[int, float]]],
+                                saved_settings: dict) -> None:
+        """
+        Create number input fields for a group of settings.
+
+        This method creates a label and an entry widget for each setting, arranged
+        horizontally within the given frame.
+
+        Args:
+            frame (ttk.Frame): The parent frame to contain these settings.
+            settings (list[tuple[str, Union[int, float]]]): A list of tuples, each containing
+                the setting name and its default value.
+            saved_settings (dict): A dictionary of previously saved settings to populate
+                the input fields.
+        """
+        for setting, default in settings:
+            setting_frame = ttk.Frame(frame)
+            setting_frame.pack(side="left", padx=5, pady=5)
+
+            label = ttk.Label(setting_frame, text=setting)
+            label.pack(side="left")
+
+            entry_name = setting.lower().replace(" ", "_")
+            entry = ttk.Entry(setting_frame, width=10, name=entry_name)
+            entry.insert(0, saved_settings.get(entry_name, default))
+            entry.pack(side="left", padx=(5, 0))
+
+    def _get_number_settings(self, frame: ttk.LabelFrame) -> dict:
+        """
+        Recursively retrieve number settings from a frame and its child frames.
+
+        This method traverses the widget hierarchy within the given frame,
+        collecting values from Entry widgets and converting them to numbers.
+
+        Args:
+            frame (ttk.LabelFrame): The frame containing number settings.
+
+        Returns:
+            dict: A dictionary of setting names and their numeric values.
+                  Returns 0 for blank or invalid inputs.
+        """
+        settings = {}
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Entry):
+                label = child._name.split(".")[-1]
+                value = child.get()
+                settings[label] = self._convert_to_number(value)
+            elif isinstance(child, ttk.Frame):
+                settings.update(self._get_number_settings(child))  # Recursively check nested frames
+        return settings
+
+    def _convert_to_number(self, value: str) -> Union[int, float]:
+        """
+        Convert a string value to a number (int or float).
+
+        This method attempts to convert the input string to either an integer or
+        a float, depending on whether it contains a decimal point. If conversion
+        fails or the input is blank, it returns 0.
+
+        Args:
+            value (str): The string value to convert.
+
+        Returns:
+            Union[int, float]: The converted number. Returns 0 if the input is blank
+                               or conversion fails.
+        """
+        if not value.strip():  # Check if the value is blank or only whitespace
+            return 0
+        try:
+            if "." in value:
+                return float(value)
+            else:
+                return int(value)
+        except ValueError:
+            return 0  # Return 0 if conversion fails
+
+    def _save_filter_settings(self) -> None:
+        """
+        Save the current filter settings to the application's configuration.
+
+        This method retrieves the current values from the threshold and skill level
+        input fields, updates the existing settings with these new values, and then
+        saves the updated settings using the SettingsManager.
+        """
+        current_settings = SettingsManager.load_settings()
+        new_settings = {
+            "thresholds": self._get_number_settings(self._filters_frame.winfo_children()[0]),
+            "skill_levels": self._get_number_settings(self._filters_frame.winfo_children()[1])
+        }
+        current_settings.update(new_settings)
+        SettingsManager.save_settings(current_settings)
+
+    def _toggle_filters(self) -> None:
+        """
+        Toggle the visibility of the filters frame.
+
+        If the filters are currently visible, this method hides them.
+        If they are hidden, it displays them above the treeview.
+        """
+        if self._filters_visible:
+            self._filters_frame.pack_forget()
+            self._filters_visible = False
+        else:
+            self._filters_frame.pack(before=self._treeview)
+            self._filters_visible = True
 
     def _create_progress_bar(self) -> None:
         """
@@ -94,7 +238,8 @@ class SearchPage(ttk.Frame):
         Initializes an indeterminate progress bar, initially hidden from view.
         """
         self._progress_bar = ttk.Progressbar(self, mode="indeterminate", length=400)
-        self._progress_bar.pack_forget()
+        self._progress_bar.pack(pady=10)
+        self._progress_bar.pack_forget()  # Hide it initially
 
     def _create_treeview(self) -> None:
         """
@@ -172,12 +317,17 @@ class SearchPage(ttk.Frame):
 
     def _toggle_process(self) -> None:
         """
-        Toggle the process between start and cancel.
+        Toggle between starting and canceling the search process.
 
-        Starts the process if it's not running, or cancels it if it is.
+        If the search is not running, this method saves the current filter settings,
+        collapses the filters if they're visible, and starts the search process.
+        If the search is already running, it cancels the process.
         """
-        if self._action_button["text"] == self.action_button_text:
-            self.start_process()
+        if self._action_button["text"] == "Search":
+            self._save_filter_settings()
+            if self._filters_visible:
+                self._toggle_filters()
+            self._start_process()
         else:
             self._cancel_process()
 
@@ -200,7 +350,7 @@ class SearchPage(ttk.Frame):
         self._parent.notebook.add(detail_page, text=f"Recipe {profit_data.recipe.result_name} Details")
         self._parent.notebook.select(detail_page)
 
-    def start_process(self) -> None:
+    def _start_process(self) -> None:
         """
         Start the process of fetching and processing recipes.
 
@@ -324,7 +474,7 @@ class SearchPage(ttk.Frame):
         if not craft_result:
             return
 
-        if self.should_display_recipe(craft_result):
+        if self._should_display_recipe(craft_result):
             row = self._format_row(craft_result)
             self._insert_single_into_treeview(recipe.id, row)
 
@@ -342,10 +492,9 @@ class SearchPage(ttk.Frame):
 
         self.after(0, self._finish_process)
 
-    def should_display_recipe(self, craft_result: dict) -> bool:
+    def _should_display_recipe(self, craft_result: dict) -> bool:
         """
         Determine if a recipe should be displayed in the treeview.
-        Default implementation always returns True. Override in subclasses for custom filtering.
 
         Args:
             craft_result (dict): The craft result to check.

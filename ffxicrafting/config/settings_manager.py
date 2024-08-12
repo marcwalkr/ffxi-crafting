@@ -13,10 +13,9 @@ class SettingsManager:
 
     SETTINGS_FILE = "settings.json"
     DEFAULT_SETTINGS = {
-        "thresholds_and_settings": {
+        "thresholds": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
-            "min_auction_list_price": 0,
             "sell_frequency": 0.0,
         },
         "skill_levels": {
@@ -95,7 +94,7 @@ class SettingsManager:
         Returns:
             int: The profit per synthesis value. Returns 0 if not set.
         """
-        return cls.load_settings()["thresholds_and_settings"].get("profit_/_synth", 0)
+        return cls.load_settings()["thresholds"].get("profit_/_synth", 0)
 
     @classmethod
     def get_profit_per_storage(cls) -> int:
@@ -105,7 +104,7 @@ class SettingsManager:
         Returns:
             int: The profit per storage value. Returns 0 if not set.
         """
-        return cls.load_settings()["thresholds_and_settings"].get("profit_/_storage", 0)
+        return cls.load_settings()["thresholds"].get("profit_/_storage", 0)
 
     @classmethod
     def get_sell_frequency(cls) -> float:
@@ -115,7 +114,7 @@ class SettingsManager:
         Returns:
             float: The sell frequency value. Returns 0.0 if not set.
         """
-        return cls.load_settings()["thresholds_and_settings"].get("sell_frequency", 0.0)
+        return cls.load_settings()["thresholds"].get("sell_frequency", 0.0)
 
     @classmethod
     def get_craft_skills(cls) -> list[int]:
