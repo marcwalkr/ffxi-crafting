@@ -291,6 +291,10 @@ class Database:
         Returns:
             list: A list of recipes matching the search term.
         """
+        # Check if the search term is empty or only whitespace
+        if not search_term or search_term.isspace():
+            return []
+
         # Prepare search terms for LIKE clause
         like_term = f"%{search_term.replace(" ", "%")}%"
 
