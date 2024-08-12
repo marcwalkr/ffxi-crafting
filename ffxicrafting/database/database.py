@@ -155,18 +155,19 @@ class Database:
             logger.error(f"Database query failed: {e}")
             return None if fetch_one else []
 
-    def get_auction_items(self, item_id: int) -> list:
+    def get_auction_item(self, item_id: int, is_stack: bool) -> list:
         """
         Retrieve auction items for a specific item ID.
 
         Args:
             item_id (int): The ID of the item to retrieve auction data for.
-
+            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
         Returns:
             list: A list of auction items for the specified item ID.
         """
-        query = "SELECT * FROM auction_items WHERE itemid=%s AND no_sale=0"
-        return self._execute_query(query, (item_id,), fetch_one=False)
+        query = "SELECT itemid, avg_price, num_sales, sell_freq, is_stack, new_data FROM auction_items "
+        query += "WHERE itemid=%s AND is_stack=%s AND no_sale=0"
+        return self._execute_query(query, (item_id, is_stack), fetch_one=True)
 
     def update_auction_item(self, item_id: int, avg_price: int, sell_freq: float, is_stack: int) -> None:
         """
@@ -193,7 +194,7 @@ class Database:
         Returns:
             list: A list of the latest sales history entries for the specified item.
         """
-        query = "SELECT * FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
+        query = "SELECT itemid, price, is_stack FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
         query += "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)"
         return self._execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_one=False)
 
@@ -205,9 +206,10 @@ class Database:
             item_id (int): The ID of the item to retrieve guild shop data for.
 
         Returns:
-            list: A list of guild shop entries for the specified item.
+            list: A list of guild shop entries for the specified item, containing guildid, itemid, and min_price.
         """
-        query = "SELECT * FROM guild_shops WHERE itemid=%s"
+        query = "SELECT guildid, itemid, min_price, max_price, daily_increase, initial_quantity FROM guild_shops "
+        query += "WHERE itemid=%s"
         return self._execute_query(query, (item_id,), fetch_one=False)
 
     def get_guild_vendor(self, guild_id: int) -> tuple:
@@ -234,7 +236,7 @@ class Database:
             list: A list of item data for the specified item IDs.
         """
         format_strings = ",".join(["%s"] * len(item_ids))
-        query = f"SELECT * FROM item_basic WHERE itemid IN ({format_strings})"
+        query = f"SELECT itemid, name, sortname, stackSize FROM item_basic WHERE itemid IN ({format_strings})"
         return self._execute_query(query, tuple(item_ids), fetch_one=False)
 
     def get_npc(self, npc_id: int) -> tuple:
@@ -247,7 +249,7 @@ class Database:
         Returns:
             tuple: A tuple containing the NPC information.
         """
-        query = "SELECT * FROM npc_list WHERE npcid=%s"
+        query = "SELECT polutils_name FROM npc_list WHERE npcid=%s"
         return self._execute_query(query, (npc_id,), fetch_one=True)
 
     def get_recipes_by_level(self, wood: int, smith: int, gold: int, cloth: int, leather: int, bone: int,
@@ -270,8 +272,11 @@ class Database:
         Returns:
             list: A list of recipes matching the specified crafting skill levels.
         """
-        query = ("SELECT * FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND cloth <= %s "
-                 "AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
+        query = ("SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal, "
+                 "Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7, "
+                 "Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty, "
+                 "ResultHQ3Qty, ResultName FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND "
+                 "cloth <= %s AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
         return self._execute_query(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset), fetch_one=False)
 
     def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list:
@@ -287,7 +292,10 @@ class Database:
             list: A list of recipes matching the search term.
         """
         query = """
-        SELECT * FROM synth_recipes
+        SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal,
+        Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7,
+        Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty,
+        ResultHQ3Qty, ResultName FROM synth_recipes
         WHERE MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE)
         ORDER BY MATCH(ResultName) AGAINST(%s IN BOOLEAN MODE) DESC, ID ASC
         LIMIT %s OFFSET %s;

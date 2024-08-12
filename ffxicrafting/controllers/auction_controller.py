@@ -1,6 +1,7 @@
 from database import Database
 from repositories import AuctionRepository
 from models import AuctionItem, SalesHistory
+from entities import AuctionData
 
 
 class AuctionController:
@@ -20,24 +21,46 @@ class AuctionController:
         """
         self._auction_repository: AuctionRepository = AuctionRepository(db)
 
-    def get_auction_items_with_updates(self, item_id: int) -> list[AuctionItem]:
+    def get_auction_data(self, item_id: int, is_stack: bool) -> AuctionData:
+        """
+        Fetches the auction data for a given item, specifying if the item is a stack or not.
+
+        Args:
+            item_id (int): The ID of the item to retrieve auction data for.
+            is_stack (bool): Whether the item is a stack or not.
+
+        Returns:
+            AuctionData: The auction data for the given item ID and single/stack flag.
+        """
+        auction_item = self._get_auction_item_with_updates(item_id, is_stack)
+        if auction_item:
+            sales_history = self._auction_repository.get_latest_sales_history(item_id, is_stack)
+            auction_data = AuctionData(auction_item.item_id, auction_item.average_price, auction_item.num_sales,
+                                       auction_item.sell_frequency, auction_item.is_stack, auction_item.new_data,
+                                       sales_history=sales_history)
+            return auction_data
+        else:
+            return None
+
+    def _get_auction_item_with_updates(self, item_id: int, is_stack: bool) -> AuctionItem:
         """
         Fetches auction items, checks for new data, and updates the items
         with the latest sales history information.
 
         Args:
             item_id (int): The ID of the item to retrieve auction data for.
-
+            is_stack (bool): Whether the item is a stack or not.
         Returns:
-            list[AuctionItem]: A list of updated AuctionItem objects.
+            AuctionItem: The updated AuctionItem object.
         """
-        auction_items = self._auction_repository.get_auction_items(item_id)
-        for item in auction_items:
-            if item.new_data:
-                new_sales_history = self._auction_repository.get_latest_sales_history(item.item_id, item.is_stack)
-                updated_item = self._process_new_data(item, new_sales_history)
-                self._auction_repository.update_auction_item(updated_item)
-        return auction_items
+        auction_item = self._auction_repository.get_auction_item(item_id, is_stack)
+        if auction_item and auction_item.new_data:
+            new_sales_history = self._auction_repository.get_latest_sales_history(item_id, is_stack)
+            updated_item = self._process_new_data(auction_item, new_sales_history)
+            self._auction_repository.update_auction_item(updated_item)
+            return updated_item
+        else:
+            return auction_item
 
     def _process_new_data(self, item: AuctionItem, new_sales_history: list[SalesHistory]) -> AuctionItem:
         """
@@ -57,5 +80,5 @@ class AuctionController:
         prices = [sale.price for sale in new_sales_history]
         avg_price = sum(prices) / len(prices)
         item.avg_price = avg_price
-        item.sell_freq = item.num_sales / 15
+        item.sell_frequency = item.num_sales / 15
         return item

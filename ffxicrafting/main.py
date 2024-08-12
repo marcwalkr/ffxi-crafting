@@ -46,7 +46,7 @@ class App(tk.Tk):
         checkbuttons, and menubuttons to ensure a consistent look across the application.
         """
         style = ttk.Style(self)
-        style.configure("TButton", font=("Helvetica", 14), padding=10)
+        style.configure("TButton", font=("Helvetica", 14), padding=5)
         style.configure("TLabel", font=("Helvetica", 14), padding=5)
         style.configure("TNotebook.Tab", font=("Helvetica", 10), padding=4)
         style.configure("Treeview", font=("Helvetica", 12))

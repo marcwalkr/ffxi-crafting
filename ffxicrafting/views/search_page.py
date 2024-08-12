@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from controllers import RecipeController
 from entities import Recipe
 from views import RecipeListPage
 
@@ -34,18 +35,23 @@ class SearchPage(RecipeListPage):
         """
         return "Search Recipes"
 
-    def create_widgets(self) -> None:
+    def create_action_frame(self) -> None:
         """
-        Create the widgets for the search page.
+        Create the search input and button within the action frame.
+        """
+        super().create_action_frame()
 
-        Calls the parent method to create common widgets, then adds a search entry
-        field and binds the Return key to trigger the search process.
-        """
-        super().create_widgets()
         self._search_var = tk.StringVar()
-        self._search_entry = ttk.Entry(self, textvariable=self._search_var, font=("Helvetica", 14))
-        self._search_entry.pack(pady=10, before=self.action_button)
+
+        self._search_entry = ttk.Entry(self.action_frame, textvariable=self._search_var,
+                                       font=("Helvetica", 14), width=20)
+        self._search_entry.pack(side=tk.LEFT, padx=(0, 10))
         self._search_entry.bind("<Return>", lambda event: self.start_process())
+
+        # Move the action button to the right of the entry
+        if hasattr(self, 'action_button'):
+            self.action_button.pack_forget()  # Unpack from its current position
+            self.action_button.pack(side=tk.RIGHT)  # Pack to the right
 
     def get_treeview_columns(self) -> list[str]:
         """
@@ -71,11 +77,12 @@ class SearchPage(RecipeListPage):
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
 
-    def get_recipe_batch(self, batch_size: int, offset: int) -> list[Recipe]:
+    def get_recipe_batch(self, recipe_controller: RecipeController, batch_size: int, offset: int) -> list[Recipe]:
         """
         Fetch a batch of recipes based on the user's search query.
 
         Args:
+            recipe_controller (RecipeController): The recipe controller to use.
             batch_size (int): The number of recipes to fetch.
             offset (int): The offset for pagination.
 
@@ -83,7 +90,7 @@ class SearchPage(RecipeListPage):
             list: A list of Recipe objects matching the search query,
                   fetched from RecipeController.
         """
-        return self.recipe_controller.search_recipe(self._search_var.get(), batch_size, offset)
+        return recipe_controller.search_recipe(self._search_var.get(), batch_size, offset)
 
     def format_row(self, craft_result: dict[str, any]) -> list[str]:
         """

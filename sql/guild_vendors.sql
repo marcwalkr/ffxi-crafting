@@ -61,3 +61,4 @@ INSERT INTO guild_vendors VALUES (60422, 17809448, "Tenshodo"); -- Chiyo (Norg) 
 INSERT INTO guild_vendors VALUES (60423, 17809446, "Tenshodo"); -- Jirokichi (Norg) Tenshodo Merchant
 INSERT INTO guild_vendors VALUES (60424, 17809445, "Tenshodo"); -- Vuliaie (Norg) Tenshodo Merchant
 INSERT INTO guild_vendors VALUES (60431, 16994370, "Tenshodo"); -- Tsutsuroon (Tenshodo Merchant) Nashmau
+INSERT INTO guild_vendors VALUES (60432, 17780858, "Tenshodo"); -- Amalasanda (Lower Jeuno) Tenshodo Merchant

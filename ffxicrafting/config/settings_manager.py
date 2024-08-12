@@ -13,16 +13,11 @@ class SettingsManager:
 
     SETTINGS_FILE = "settings.json"
     DEFAULT_SETTINGS = {
-        "profit_table": {
+        "thresholds_and_settings": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
             "min_auction_list_price": 0,
-            "sell_frequency": 0.0
-        },
-        "synth": {
-            "skill_look_ahead": 0,
-            "simulation_trials": 1000,
-            "craft_ingredients": False
+            "sell_frequency": 0.0,
         },
         "skill_levels": {
             "wood": 0,
@@ -58,18 +53,6 @@ class SettingsManager:
             "sandoria": "1st",
             "bastok": "2nd",
             "windurst": "3rd"
-        },
-        "guilds": {
-            "alchemy": True,
-            "bonecraft": True,
-            "clothcraft": True,
-            "cooking": True,
-            "fishing": True,
-            "goldsmithing": True,
-            "leathercraft": True,
-            "smithing": True,
-            "woodworking": True,
-            "tenshodo": True
         },
         "database": {
             "host": "",
@@ -112,8 +95,7 @@ class SettingsManager:
         Returns:
             int: The profit per synthesis value. Returns 0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["profit_table"].get("profit_/_synth", 0)
+        return cls.load_settings()["thresholds_and_settings"].get("profit_/_synth", 0)
 
     @classmethod
     def get_profit_per_storage(cls) -> int:
@@ -123,63 +105,17 @@ class SettingsManager:
         Returns:
             int: The profit per storage value. Returns 0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["profit_table"].get("profit_/_storage", 0)
+        return cls.load_settings()["thresholds_and_settings"].get("profit_/_storage", 0)
 
     @classmethod
-    def get_min_auction_list_price(cls) -> int:
-        """
-        Get the minimum auction list price setting.
-
-        Returns:
-            int: The minimum auction list price value. Returns 0 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["profit_table"].get("min_auction_list_price", 0)
-
-    @classmethod
-    def get_sell_freq(cls) -> float:
+    def get_sell_frequency(cls) -> float:
         """
         Get the sell frequency setting.
 
         Returns:
             float: The sell frequency value. Returns 0.0 if not set.
         """
-        settings = cls.load_settings()
-        return settings["profit_table"].get("sell_frequency", 0.0)
-
-    @classmethod
-    def get_skill_look_ahead(cls) -> int:
-        """
-        Get the skill look ahead setting.
-
-        Returns:
-            int: The skill look ahead value. Returns 0 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["synth"].get("skill_look_ahead", 0)
-
-    @classmethod
-    def get_simulation_trials(cls) -> int:
-        """
-        Get the number of simulation trials setting.
-
-        Returns:
-            int: The number of simulation trials. Returns 1000 if not set.
-        """
-        settings = cls.load_settings()
-        return settings["synth"].get("simulation_trials", 1000)
-
-    @classmethod
-    def get_craft_ingredients(cls) -> bool:
-        """
-        Get the craft ingredients setting.
-
-        Returns:
-            bool: True if craft ingredients is enabled, False otherwise.
-        """
-        settings = cls.load_settings()
-        return settings["synth"].get("craft_ingredients", False)
+        return cls.load_settings()["thresholds_and_settings"].get("sell_frequency", 0.0)
 
     @classmethod
     def get_craft_skills(cls) -> list[int]:
@@ -204,18 +140,6 @@ class SettingsManager:
         ]
 
     @classmethod
-    def get_regional_merchants(cls) -> dict:
-        """
-        Get the regional merchants settings.
-
-        Returns:
-            dict: A dictionary of regions and their controlling nations.
-            Returns the default settings if not set.
-        """
-        settings = cls.load_settings()
-        return settings.get("regional_merchants", cls.DEFAULT_SETTINGS["regional_merchants"])
-
-    @classmethod
     def get_beastmen_regions(cls) -> list[str]:
         """
         Get the list of regions controlled by beastmen.
@@ -238,11 +162,10 @@ class SettingsManager:
         Get the conquest rank for San d'Oria.
 
         Returns:
-            int: The conquest rank for San d'Oria (1-3). Returns 1 if not set or invalid.
+            int: The conquest rank for San d'Oria (1-3). Returns 3 if not set or invalid.
         """
         settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("san doria", "1st")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("sandoria", "3rd"))
 
     @classmethod
     def get_bastok_rank(cls) -> int:
@@ -250,11 +173,10 @@ class SettingsManager:
         Get the conquest rank for Bastok.
 
         Returns:
-            int: The conquest rank for Bastok (1-3). Returns 2 if not set or invalid.
+            int: The conquest rank for Bastok (1-3). Returns 3 if not set or invalid.
         """
         settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("bastok", "2nd")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("bastok", "3rd"))
 
     @classmethod
     def get_windurst_rank(cls) -> int:
@@ -265,8 +187,7 @@ class SettingsManager:
             int: The conquest rank for Windurst (1-3). Returns 3 if not set or invalid.
         """
         settings = cls.load_settings()
-        rank_str = settings.get("conquest", {}).get("windurst", "3rd")
-        return cls._rank_str_to_int(rank_str)
+        return cls._rank_str_to_int(settings.get("conquest", cls.DEFAULT_SETTINGS["conquest"]).get("windurst", "3rd"))
 
     @staticmethod
     def _rank_str_to_int(rank_str: str) -> int:
@@ -283,19 +204,6 @@ class SettingsManager:
         return rank_map.get(rank_str, 1)
 
     @classmethod
-    def get_enabled_guilds(cls) -> list[str]:
-        """
-        Get the list of enabled guilds.
-
-        Returns:
-            list[str]: A list of enabled guild names, capitalized.
-        """
-        settings = cls.load_settings()
-        guilds = settings["guilds"].items()
-        enabled_guilds = [guild for guild, enabled in guilds if enabled]
-        return [guild.capitalize() for guild in enabled_guilds]
-
-    @classmethod
     def get_database_host(cls) -> str:
         """
         Get the database host setting.
@@ -303,8 +211,7 @@ class SettingsManager:
         Returns:
             str: The database host. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("host", "")
+        return cls.load_settings()["database"].get("host", "")
 
     @classmethod
     def get_database_user(cls) -> str:
@@ -314,8 +221,7 @@ class SettingsManager:
         Returns:
             str: The database user. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("user", "")
+        return cls.load_settings()["database"].get("user", "")
 
     @classmethod
     def get_database_password(cls) -> str:
@@ -325,8 +231,7 @@ class SettingsManager:
         Returns:
             str: The database password. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("password", "")
+        return cls.load_settings()["database"].get("password", "")
 
     @classmethod
     def get_database_name(cls) -> str:
@@ -336,5 +241,4 @@ class SettingsManager:
         Returns:
             str: The database name. Returns an empty string if not set.
         """
-        settings = cls.load_settings()
-        return settings["database"].get("database", "")
+        return cls.load_settings()["database"].get("database", "")

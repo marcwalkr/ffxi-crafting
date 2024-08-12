@@ -1,9 +1,6 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from collections import OrderedDict
+from entities import Item
 from models import RecipeModel
-
-if TYPE_CHECKING:
-    from entities import Ingredient, Result
 
 
 class Recipe(RecipeModel):
@@ -25,9 +22,9 @@ class Recipe(RecipeModel):
                 Expects "ingredient_objects" and "result_objects" in kwargs.
 
         Attributes:
-            ingredients (dict[Ingredient, int]): A dictionary mapping ingredients to their quantities.
-            results (list[tuple[Result, int, str]]): A list of tuples containing Result objects,
-                their quantities, and quality tiers.
+            ingredients (dict[Item, int]): A dictionary mapping ingredients to their quantities.
+            results (OrderedDict[Item, list[tuple[int, str]]]): An ordered dictionary mapping Item objects 
+                to a list of tuples containing their quantities and quality tiers.
             cost (float | None): The calculated cost of the recipe, if available.
         """
         super().__init__(*args)
@@ -35,15 +32,15 @@ class Recipe(RecipeModel):
         ingredient_objects = kwargs.get("ingredient_objects", [])
         result_objects = kwargs.get("result_objects", [])
 
-        self.ingredients: dict[Ingredient, int] = {}
+        self.ingredients: dict[Item, int] = {}
         self._populate_ingredients(ingredient_objects)
 
-        self.results: list[tuple[Result, int, str]] = []
+        self._results: OrderedDict[Item, list[tuple[int, str]]] = OrderedDict()
         self._populate_results(result_objects)
 
-        self.cost: float | None = None
+        self.min_cost = self.calculate_cost()
 
-    def _populate_ingredients(self, ingredient_objects: list[Ingredient]) -> None:
+    def _populate_ingredients(self, ingredient_objects: list[Item]) -> None:
         """
         Populate the ingredients dictionary from the provided ingredient objects.
 
@@ -59,7 +56,7 @@ class Recipe(RecipeModel):
                 if ingredient:
                     self.ingredients[ingredient] = self.ingredients.get(ingredient, 0) + 1
 
-    def _populate_results(self, result_objects: list[Result]) -> None:
+    def _populate_results(self, result_objects: list[Item]) -> None:
         """
         Populate the results list from the provided result objects.
 
@@ -69,12 +66,16 @@ class Recipe(RecipeModel):
         result_ids = [self.result, self.result_hq1, self.result_hq2, self.result_hq3]
         result_qtys = [self.result_qty, self.result_hq1_qty, self.result_hq2_qty, self.result_hq3_qty]
         quality_tiers = ["NQ", "HQ1", "HQ2", "HQ3"]
-        for item_id, qty, tier in zip(result_ids, result_qtys, quality_tiers):
-            result = next((r for r in result_objects if r.item_id == item_id), None)
-            if result:
-                self.results.append((result, qty, tier))
 
-    def get_ingredients(self) -> list[Ingredient]:
+        for item_id, qty, tier in zip(result_ids, result_qtys, quality_tiers):
+            if item_id:
+                result = next((r for r in result_objects if r.item_id == item_id), None)
+                if result:
+                    if result not in self._results:
+                        self._results[result] = []
+                    self._results[result].append((qty, tier))
+
+    def get_ingredients(self) -> list[Item]:
         """
         Get a list of all ingredients, including duplicates.
 
@@ -84,7 +85,7 @@ class Recipe(RecipeModel):
         """
         return [ingredient for ingredient, count in self.ingredients.items() for _ in range(count)]
 
-    def get_unique_ingredients(self) -> list[Ingredient]:
+    def get_unique_ingredients(self) -> list[Item]:
         """
         Get a list of unique ingredients used in the recipe.
 
@@ -93,18 +94,16 @@ class Recipe(RecipeModel):
         """
         return list(self.ingredients.keys())
 
-    def get_unique_results(self) -> list[Result]:
+    def get_unique_results(self) -> list[Item]:
         """
-        Get a list of unique results (excluding duplicates across quality tiers).
+        Get a list of result objects representing the recipe's unique result items.
 
         Returns:
-            list[Result]: A list of unique Result objects.
+            list[Result]: A list of Result objects.
         """
-        seen = set()
-        return [result for result, _, _ in self.results
-                if not (result.item_id in seen or seen.add(result.item_id))]
+        return list(self._results.keys())
 
-    def get_nq_result(self) -> tuple[Result | None, int | None]:
+    def get_nq_result(self) -> tuple[Item | None, int | None]:
         """
         Get the normal quality (NQ) result and its quantity.
 
@@ -112,13 +111,13 @@ class Recipe(RecipeModel):
             tuple[Result | None, int | None]: A tuple containing the NQ Result object and its quantity,
                                               or (None, None) if no NQ result exists.
         """
-        nq_result = next((r for r, q, t in self.results if t == "NQ"), None)
-        if nq_result:
-            qty = next(q for r, q, t in self.results if t == "NQ")
-            return nq_result, qty
+        for result, qty_tiers in self._results.items():
+            for qty, tier in qty_tiers:
+                if tier == "NQ":
+                    return result, qty
         return None, None
 
-    def get_hq_result(self, hq_tier: int) -> tuple[Result | None, int | None]:
+    def get_hq_result(self, hq_tier: int) -> tuple[Item | None, int | None]:
         """
         Get the high quality (HQ) result of a specific tier and its quantity.
 
@@ -129,10 +128,10 @@ class Recipe(RecipeModel):
             tuple[Result | None, int | None]: A tuple containing the HQ Result object and its quantity,
                                               or (None, None) if no result exists for the specified tier.
         """
-        hq_result = next((r for r, q, t in self.results if t == f"HQ{hq_tier}"), None)
-        if hq_result:
-            qty = next(q for r, q, t in self.results if t == f"HQ{hq_tier}")
-            return hq_result, qty
+        for result, qty_tiers in self._results.items():
+            for qty, tier in qty_tiers:
+                if tier == f"HQ{hq_tier}":
+                    return result, qty
         return None, None
 
     def get_formatted_ingredient_names(self) -> str:
@@ -173,9 +172,10 @@ class Recipe(RecipeModel):
             str: A comma-separated string of HQ results with their quantities.
         """
         hq_strings = []
-        for result, qty, tier in self.results:
-            if tier.startswith("HQ"):
-                hq_strings.append(f"{result.get_formatted_name()} x{qty}")
+        for result, qty_tiers in self._results.items():
+            for qty, tier in qty_tiers:
+                if tier.startswith("HQ"):
+                    hq_strings.append(f"{result.get_formatted_name()} x{qty}")
         return ", ".join(hq_strings)
 
     def get_formatted_levels_string(self) -> str:
@@ -198,18 +198,17 @@ class Recipe(RecipeModel):
         levels = [f"{skill} {level}" for skill, level in skills.items() if level > 0]
         return ", ".join(levels)
 
-    def calculate_cost(self) -> float | None:
+    def calculate_cost(self) -> float:
         """
-        Calculate the total cost of the recipe based on the minimum costs of its ingredients.
+        Calculate the min cost of the recipe based on the costs of its ingredients.
 
         Returns:
-            float | None: The total cost of the recipe, or None if any ingredient cost is unavailable.
+            float: The minimum cost of the recipe.
         """
-        cost = 0
+        total_cost = 0
         for ingredient, count in self.ingredients.items():
             min_cost = ingredient.get_min_cost()
             if min_cost is None:
                 return None
-            cost += min_cost * count
-        self.cost = cost
-        return cost
+            total_cost += min_cost * count
+        return total_cost
