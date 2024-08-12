@@ -1,7 +1,7 @@
 import tkinter as tk
 import logging
 from tkinter import ttk
-from views import SearchPage, ProfitPage, SettingsPage, RecipeListPage
+from views import SearchPage, SettingsPage
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -26,7 +26,7 @@ class App(tk.Tk):
         self.title("FFXI Crafting Tool")
         self.geometry("1600x900")
 
-        self._recipe_pages: list[RecipeListPage] = []
+        self._search_page: SearchPage = None
 
         self._main_frame: ttk.Frame = None
         self.notebook: ttk.Notebook = None
@@ -76,17 +76,10 @@ class App(tk.Tk):
         """
         Create and initialize the different pages of the application.
 
-        Instantiates SearchPage, ProfitPage, and SettingsPage. Adds RecipeListPages
-        to the _recipe_pages list for later cleanup.
+        Instantiates SearchPage and SettingsPage.
         """
-        pages = [
-            SearchPage(self),
-            ProfitPage(self),
-            SettingsPage(self)
-        ]
-        for page in pages:
-            if isinstance(page, RecipeListPage):
-                self._recipe_pages.append(page)
+        self._search_page = SearchPage(self)
+        SettingsPage(self)
 
     def on_close(self) -> None:
         """
@@ -99,13 +92,11 @@ class App(tk.Tk):
 
     def _cleanup_pages(self) -> None:
         """
-        Clean up resources used by recipe pages before closing.
+        Clean up resources used by the search page before closing.
 
-        Calls the cleanup method on each RecipeListPage and clears the list.
+        Calls the cleanup method on the search page.
         """
-        for page in self._recipe_pages:
-            page.cleanup()
-        self._recipe_pages.clear()
+        self._search_page.cleanup()
 
 
 def main() -> None:
