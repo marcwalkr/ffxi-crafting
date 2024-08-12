@@ -12,7 +12,8 @@ class AuctionRepository:
     to improve performance for frequently accessed auction items.
     """
 
-    _cache: dict[int, list[AuctionItem]] = {}
+    _auction_item_cache: dict[tuple[int, bool], AuctionItem] = {}
+    _sales_history_cache: dict[tuple[int, bool], list[SalesHistory]] = {}
     _cache_lock: Lock = Lock()
 
     def __init__(self, db: Database) -> None:
@@ -24,7 +25,7 @@ class AuctionRepository:
         """
         self._db: Database = db
 
-    def get_auction_items(self, item_id: int) -> list[AuctionItem]:
+    def get_auction_item(self, item_id: int, is_stack: bool) -> AuctionItem | None:
         """
         Retrieve auction items for a given item ID.
 
@@ -33,22 +34,23 @@ class AuctionRepository:
 
         Args:
             item_id (int): The ID of the item to retrieve auction data for.
-
+            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
         Returns:
-            list[AuctionItem]: A list of AuctionItem objects for the given item ID.
-                               Returns an empty list if no auction items are found.
+            AuctionItem | None: An AuctionItem object for the given item ID.
+            Returns None if no auction item was found.
         """
-        if item_id in self._cache:
-            return self._cache[item_id]
+        cache_key = (item_id, is_stack)
+        if cache_key in self._auction_item_cache:
+            return self._auction_item_cache[cache_key]
         else:
-            auction_item_tuples = self._db.get_auction_items(item_id)
-            if auction_item_tuples is not None:
-                auction_items = [AuctionItem(*auction_item_tuple) for auction_item_tuple in auction_item_tuples]
-                self._cache[item_id] = auction_items
-                return auction_items
+            auction_item_tuple = self._db.get_auction_item(item_id, is_stack)
+            if auction_item_tuple is not None:
+                auction_item = AuctionItem(*auction_item_tuple)
+                self._auction_item_cache[cache_key] = auction_item
+                return auction_item
             else:
-                self._cache[item_id] = []
-                return []
+                self._auction_item_cache[cache_key] = None
+                return None
 
     def update_auction_item(self, new_item: AuctionItem) -> None:
         """
@@ -67,8 +69,8 @@ class AuctionRepository:
         """
         Retrieve the latest sales history for a given item.
 
-        This method queries the database for the most recent sales history
-        entries for the specified item.
+        This method first checks the cache for the requested item. If not found,
+        it queries the database and caches the result for future use.
 
         Args:
             item_id (int): The ID of the item to retrieve sales history for.
@@ -78,16 +80,23 @@ class AuctionRepository:
             list[SalesHistory]: A list of SalesHistory objects representing the latest sales.
                                 Returns an empty list if no sales history is found.
         """
-        sales_history_tuples = self._db.get_latest_sales_history(item_id, is_stack)
-        if sales_history_tuples:
-            sales_history_list = [SalesHistory(*sales_history_tuple) for sales_history_tuple in sales_history_tuples]
-            return sales_history_list
+        cache_key = (item_id, is_stack)
+        if cache_key in self._sales_history_cache:
+            return self._sales_history_cache[cache_key]
         else:
-            return []
+            sales_history_tuples = self._db.get_latest_sales_history(item_id, is_stack)
+            if sales_history_tuples:
+                sales_history_list = [SalesHistory(*sales_history_tuple)
+                                      for sales_history_tuple in sales_history_tuples]
+                self._sales_history_cache[cache_key] = sales_history_list
+                return sales_history_list
+            else:
+                self._sales_history_cache[cache_key] = []
+                return []
 
     def _invalidate_cache(self, item_id: int) -> None:
         """
         Invalidate the cache for a given item ID.
         """
         with self._cache_lock:
-            self._cache.pop(item_id, None)
+            self._auction_item_cache.pop(item_id, None)

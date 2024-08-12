@@ -155,19 +155,19 @@ class Database:
             logger.error(f"Database query failed: {e}")
             return None if fetch_one else []
 
-    def get_auction_items(self, item_id: int) -> list:
+    def get_auction_item(self, item_id: int, is_stack: bool) -> list:
         """
         Retrieve auction items for a specific item ID.
 
         Args:
             item_id (int): The ID of the item to retrieve auction data for.
-
+            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
         Returns:
             list: A list of auction items for the specified item ID.
         """
         query = "SELECT itemid, avg_price, num_sales, sell_freq, is_stack, new_data FROM auction_items "
-        query += "WHERE itemid=%s AND no_sale=0"
-        return self._execute_query(query, (item_id,), fetch_one=False)
+        query += "WHERE itemid=%s AND is_stack=%s AND no_sale=0"
+        return self._execute_query(query, (item_id, is_stack), fetch_one=True)
 
     def update_auction_item(self, item_id: int, avg_price: int, sell_freq: float, is_stack: int) -> None:
         """
@@ -322,36 +322,6 @@ class Database:
         """
         results = self._execute_query(query, (), fetch_one=False)
         return [result[0] for result in results]
-
-    def get_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool) -> tuple:
-        """
-        Retrieve simulation result for a specific item from a specific recipe with min cost or max cost used.
-        """
-        query = "SELECT * FROM simulation_results WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
-        query += "min_cost_used=%s"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used), fetch_one=True)
-
-    def insert_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool, synth_cost: float,
-                                 simulation_cost: float, leftover_cost: float, quantity: int, cost_per_unit: float) -> None:
-        """
-        Insert simulation result for a specific item from a specific recipe with min cost or max cost used.
-        """
-        query = "INSERT INTO simulation_results (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost, "
-        query += "simulation_cost, leftover_cost, quantity, cost_per_unit) "
-        query += "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost,
-                                           simulation_cost, leftover_cost, quantity, cost_per_unit), commit=True)
-
-    def update_simulation_result(self, item_id: int, recipe_id: int, crafter_tier: int, min_cost_used: bool, synth_cost: float,
-                                 simulation_cost: float, leftover_cost: float, quantity: int, cost_per_unit: float) -> None:
-        """
-        Update a simulation result for a specific item from a specific recipe with min cost or max cost used.
-        """
-        query = "UPDATE simulation_results SET synth_cost=%s, simulation_cost=%s, leftover_cost=%s, "
-        query += "quantity=%s, cost_per_unit=%s WHERE item_id=%s AND recipe_id=%s AND crafter_tier=%s AND "
-        query += "min_cost_used=%s"
-        return self._execute_query(query, (item_id, recipe_id, crafter_tier, min_cost_used, synth_cost,
-                                           simulation_cost, leftover_cost, quantity, cost_per_unit), commit=True)
 
     def get_regional_vendor(self, npc_id: int) -> tuple:
         """
