@@ -8,7 +8,6 @@ class VendorRepository:
 
     This class provides methods to interact with the database for retrieving
     vendor item information, regional vendor data, and vendor locations.
-    It implements caching to improve performance for frequently accessed data.
     """
 
     _vendor_item_cache: dict[int, list[VendorItem]] = {}
@@ -18,18 +17,55 @@ class VendorRepository:
     def __init__(self, db: Database) -> None:
         """
         Initialize a VendorRepository instance.
+        All vendor data is loaded into the cache on initialization.
 
         Args:
             db (Database): The database connection object used for querying vendor data.
         """
         self._db = db
+        if not VendorRepository._vendor_item_cache:
+            self._load_vendor_items()
+        if not VendorRepository._regional_vendor_cache:
+            self._load_regional_vendors()
+        if not VendorRepository._vendor_location_cache:
+            self._load_vendor_locations()
+
+    def _load_vendor_items(self) -> None:
+        """
+        Load all vendor items into the cache.
+        """
+        vendor_item_tuples = self._db.get_all_vendor_items()
+        vendor_items = [VendorItem(*tuple) for tuple in vendor_item_tuples]
+
+        # Group vendor items by item_id
+        grouped_items = {}
+        for item in vendor_items:
+            if item.item_id not in grouped_items:
+                grouped_items[item.item_id] = []
+            grouped_items[item.item_id].append(item)
+
+        # Update the cache with grouped items
+        VendorRepository._vendor_item_cache = grouped_items
+
+    def _load_regional_vendors(self) -> None:
+        """
+        Load all regional vendors into the cache.
+        """
+        regional_vendor_tuples = self._db.get_all_regional_vendors()
+        regional_vendors = [RegionalVendor(*tuple) for tuple in regional_vendor_tuples]
+        VendorRepository._regional_vendor_cache = {v.npc_id: v for v in regional_vendors}
+
+    def _load_vendor_locations(self) -> None:
+        """
+        Load all vendor locations into the cache.
+        """
+        vendor_location_tuples = self._db.get_all_vendor_locations()
+        vendor_locations = [VendorLocation(*tuple) for tuple in vendor_location_tuples]
+        VendorRepository._vendor_location_cache = {v.npc_id: v for v in vendor_locations}
 
     def get_vendor_items(self, item_id: int) -> list[VendorItem]:
         """
-        Retrieve vendor items for a given item ID.
-
-        This method first checks the cache for the requested item. If not found,
-        it queries the database and caches the result for future use.
+        Retrieve vendor items for a given item ID from the cache.
 
         Args:
             item_id (int): The ID of the item to retrieve vendor information for.
@@ -41,20 +77,11 @@ class VendorRepository:
         if item_id in self._vendor_item_cache:
             return self._vendor_item_cache[item_id]
         else:
-            vendor_item_tuples = self._db.get_vendor_items(item_id)
-            if vendor_item_tuples:
-                self._vendor_item_cache[item_id] = [VendorItem(*v) for v in vendor_item_tuples]
-                return self._vendor_item_cache[item_id]
-
-            self._vendor_item_cache[item_id] = []
             return []
 
     def get_regional_vendor(self, npc_id: int) -> RegionalVendor | None:
         """
-        Retrieve regional vendor information for a given NPC ID.
-
-        This method first checks the cache for the requested regional vendor. If not found,
-        it queries the database and caches the result for future use.
+        Retrieve regional vendor information for a given NPC ID from the cache.
 
         Args:
             npc_id (int): The ID of the NPC to retrieve regional vendor information for.
@@ -66,18 +93,11 @@ class VendorRepository:
         if npc_id in self._regional_vendor_cache:
             return self._regional_vendor_cache[npc_id]
         else:
-            regional_vendor_tuple = self._db.get_regional_vendor(npc_id)
-            if regional_vendor_tuple:
-                self._regional_vendor_cache[npc_id] = RegionalVendor(*regional_vendor_tuple)
-                return self._regional_vendor_cache[npc_id]
             return None
 
     def get_vendor_location(self, npc_id: int) -> VendorLocation | None:
         """
-        Retrieve vendor location information for a given NPC ID.
-
-        This method first checks the cache for the requested vendor location. If not found,
-        it queries the database and caches the result for future use.
+        Retrieve vendor location information for a given NPC ID from the cache.
 
         Args:
             npc_id (int): The ID of the NPC to retrieve location information for.
@@ -89,8 +109,4 @@ class VendorRepository:
         if npc_id in self._vendor_location_cache:
             return self._vendor_location_cache[npc_id]
         else:
-            vendor_location_tuple = self._db.get_vendor_location(npc_id)
-            if vendor_location_tuple:
-                self._vendor_location_cache[npc_id] = VendorLocation(*vendor_location_tuple)
-                return self._vendor_location_cache[npc_id]
             return None

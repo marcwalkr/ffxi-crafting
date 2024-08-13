@@ -144,9 +144,9 @@ class Recipe(RecipeModel):
         ingredient_strings = []
         for ingredient, count in self.ingredients.items():
             if count > 1:
-                ingredient_strings.append(f"{ingredient.get_formatted_name()} x{count}")
+                ingredient_strings.append(f"{ingredient.get_formatted_sort_name()} x{count}")
             else:
-                ingredient_strings.append(ingredient.get_formatted_name())
+                ingredient_strings.append(ingredient.get_formatted_sort_name())
         return ", ".join(ingredient_strings)
 
     def get_formatted_nq_result(self) -> str:
@@ -159,9 +159,9 @@ class Recipe(RecipeModel):
         nq_result, qty = self.get_nq_result()
         if nq_result:
             if qty > 1:
-                return f"{nq_result.get_formatted_name()} x{qty}"
+                return f"{nq_result.get_formatted_sort_name()} x{qty}"
             else:
-                return nq_result.get_formatted_name()
+                return nq_result.get_formatted_sort_name()
         return ""
 
     def get_formatted_hq_results(self) -> str:
@@ -175,7 +175,7 @@ class Recipe(RecipeModel):
         for result, qty_tiers in self._results.items():
             for qty, tier in qty_tiers:
                 if tier.startswith("HQ"):
-                    hq_strings.append(f"{result.get_formatted_name()} x{qty}")
+                    hq_strings.append(f"{result.get_formatted_sort_name()} x{qty}")
         return ", ".join(hq_strings)
 
     def get_formatted_levels_string(self) -> str:

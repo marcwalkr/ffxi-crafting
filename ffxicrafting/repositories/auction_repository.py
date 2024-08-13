@@ -8,70 +8,57 @@ class AuctionRepository:
     Repository class for handling auction-related data operations.
 
     This class provides methods to interact with the database for retrieving
-    and updating auction items and sales history data. It implements caching
-    to improve performance for frequently accessed auction items.
+    and updating auction items and sales history data.
     """
 
-    _auction_item_cache: dict[tuple[int, bool], AuctionItem] = {}
     _sales_history_cache: dict[tuple[int, bool], list[SalesHistory]] = {}
+    _auction_item_cache: dict[tuple[int, bool], AuctionItem] = {}
     _cache_lock: Lock = Lock()
 
     def __init__(self, db: Database) -> None:
         """
         Initialize an AuctionRepository instance.
+        All sales history and auction items are loaded into the cache on initialization.
 
         Args:
             db (Database): The database connection object used for querying auction data.
         """
         self._db: Database = db
+        if not AuctionRepository._sales_history_cache:
+            self._load_sales_history()
+        if not AuctionRepository._auction_item_cache:
+            self._load_auction_items()
 
-    def get_auction_item(self, item_id: int, is_stack: bool) -> AuctionItem | None:
+    def _load_sales_history(self) -> None:
         """
-        Retrieve auction items for a given item ID.
-
-        This method first checks the cache for the requested item. If not found,
-        it queries the database and caches the result for future use.
-
-        Args:
-            item_id (int): The ID of the item to retrieve auction data for.
-            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
-        Returns:
-            AuctionItem | None: An AuctionItem object for the given item ID.
-            Returns None if no auction item was found.
+        Load all sales history into the cache, keeping only the latest batch for each item.
         """
-        cache_key = (item_id, is_stack)
-        if cache_key in self._auction_item_cache:
-            return self._auction_item_cache[cache_key]
-        else:
-            auction_item_tuple = self._db.get_auction_item(item_id, is_stack)
-            if auction_item_tuple is not None:
-                auction_item = AuctionItem(*auction_item_tuple)
-                self._auction_item_cache[cache_key] = auction_item
-                return auction_item
-            else:
-                self._auction_item_cache[cache_key] = None
-                return None
+        sales_history_tuples = self._db.get_all_sales_history()
+        sales_history = [SalesHistory(*tuple) for tuple in sales_history_tuples]
 
-    def update_auction_item(self, new_item: AuctionItem) -> None:
+        # Group sales history by (item_id, is_stack) and keep only the latest batch
+        grouped_history = {}
+        for item in sales_history:
+            key = (item.item_id, item.is_stack)
+            if key not in grouped_history or item.batch_id > grouped_history[key][0].batch_id:
+                grouped_history[key] = [item]
+            elif item.batch_id == grouped_history[key][0].batch_id:
+                grouped_history[key].append(item)
+
+        # Update the cache with grouped history
+        AuctionRepository._sales_history_cache = grouped_history
+
+    def _load_auction_items(self) -> None:
         """
-        Update an auction item in the database and cache.
-
-        This method updates the auction item data in the database and invalidates
-        the cache with the item id.
-
-        Args:
-            new_item (AuctionItem): The AuctionItem object with updated information.
+        Load all auction items into the cache.
         """
-        self._db.update_auction_item(new_item.item_id, new_item.average_price, new_item.sell_frequency,
-                                     new_item.is_stack)
-        self._invalidate_cache(new_item.item_id)
+        auction_item_tuples = self._db.get_all_auction_items()
+        auction_items = [AuctionItem(*tuple) for tuple in auction_item_tuples]
+        AuctionRepository._auction_item_cache.update({(item.item_id, item.is_stack): item for item in auction_items})
 
     def get_latest_sales_history(self, item_id: int, is_stack: bool) -> list[SalesHistory]:
         """
-        Retrieve the latest sales history for a given item.
-
-        This method first checks the cache for the requested item. If not found,
-        it queries the database and caches the result for future use.
+        Retrieve the latest sales history for a given item from the cache.
 
         Args:
             item_id (int): The ID of the item to retrieve sales history for.
@@ -85,19 +72,32 @@ class AuctionRepository:
         if cache_key in self._sales_history_cache:
             return self._sales_history_cache[cache_key]
         else:
-            sales_history_tuples = self._db.get_latest_sales_history(item_id, is_stack)
-            if sales_history_tuples:
-                sales_history_list = [SalesHistory(*sales_history_tuple)
-                                      for sales_history_tuple in sales_history_tuples]
-                self._sales_history_cache[cache_key] = sales_history_list
-                return sales_history_list
-            else:
-                self._sales_history_cache[cache_key] = []
-                return []
+            return []
 
-    def _invalidate_cache(self, item_id: int) -> None:
+    def get_auction_item(self, item_id: int, is_stack: bool) -> AuctionItem | None:
         """
-        Invalidate the cache for a given item ID.
+        Retrieve an AuctionItem object from the cache.
+
+        Args:
+            item_id (int): The ID of the item to retrieve auction data for.
+            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
+        Returns:
+            AuctionItem | None: An AuctionItem object for the given item ID.
+            Returns None if no auction item was found.
+        """
+        cache_key = (item_id, is_stack)
+        if cache_key in self._auction_item_cache:
+            return self._auction_item_cache[cache_key]
+        else:
+            return None
+
+    def update_auction_item(self, new_item: AuctionItem) -> None:
+        """
+        Update an auction item in the cache.
+
+        Args:
+            new_item (AuctionItem): The AuctionItem object with updated information.
         """
         with self._cache_lock:
-            self._auction_item_cache.pop(item_id, None)
+            cache_key = (new_item.item_id, new_item.is_stack)
+            self._auction_item_cache[cache_key] = new_item

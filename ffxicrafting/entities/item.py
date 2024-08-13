@@ -4,18 +4,22 @@ from models import ItemModel
 class Item(ItemModel):
     """
     Represents a game item, extending the ItemModel with additional attributes and methods.
-
-    This class inherits all attributes from ItemModel and adds auction-related properties.
     """
 
-    def __init__(self, *args) -> None:
+    def __init__(self, item_id: int, name: str, sort_name: str, stack_size: int, min_single_price: float | None,
+                 max_single_price: float | None, average_single_price: float | None, min_stack_price: float | None,
+                 max_stack_price: float | None, average_stack_price: float | None, single_sell_frequency: float | None,
+                 stack_sell_frequency: float | None, min_vendor_cost: float | None, min_guild_cost: float | None) -> None:
         """
         Initialize an Item instance.
 
         Inherits all attributes from ItemModel and initializes additional price-related properties.
 
         Args:
-            *args: Variable length argument list for ItemModel attributes.
+            item_id (int): The unique identifier for the item.
+            name (str): The name of the item as it appears in the game.
+            sort_name (str): A version of the name used for sorting purposes.
+            stack_size (int): The maximum quantity of this item that can be stacked in one inventory slot.
 
         Attributes:
             min_single_price (float | None): The minimum price for a single item in the auction house.
@@ -27,18 +31,18 @@ class Item(ItemModel):
             single_sell_frequency (float | None): The sell frequency for single items.
             stack_sell_frequency (float | None): The sell frequency for stacks of items.
         """
-        super().__init__(*args)
-        self.min_single_price: float | None = None
-        self.max_single_price: float | None = None
-        self.average_single_price: float | None = None
-        self.min_stack_price: float | None = None
-        self.max_stack_price: float | None = None
-        self.average_stack_price: float | None = None
-        self.single_sell_frequency: float | None = None
-        self.stack_sell_frequency: float | None = None
+        super().__init__(item_id, name, sort_name, stack_size)
+        self.min_single_price: float | None = min_single_price
+        self.max_single_price: float | None = max_single_price
+        self.average_single_price: float | None = average_single_price
+        self.min_stack_price: float | None = min_stack_price
+        self.max_stack_price: float | None = max_stack_price
+        self.average_stack_price: float | None = average_stack_price
+        self.single_sell_frequency: float | None = single_sell_frequency
+        self.stack_sell_frequency: float | None = stack_sell_frequency
 
-        self.min_vendor_cost: float | None = None
-        self.min_guild_cost: float | None = None
+        self.min_vendor_cost: float | None = min_vendor_cost
+        self.min_guild_cost: float | None = min_guild_cost
 
     def __eq__(self, __value: object) -> bool:
         """
@@ -73,6 +77,15 @@ class Item(ItemModel):
 
         Returns:
             str: The item's name with underscores replaced by spaces and title-cased.
+        """
+        return self.name.replace("_", " ").title()
+
+    def get_formatted_sort_name(self):
+        """
+        Get a formatted version of the item's sort name.
+
+        Returns:
+            str: The item's sort name with underscores replaced by spaces and title-cased.
         """
         return self.sort_name.replace("_", " ").title()
 

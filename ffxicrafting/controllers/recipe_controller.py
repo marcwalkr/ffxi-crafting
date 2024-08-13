@@ -13,80 +13,52 @@ class RecipeController:
     Controller class for managing recipe-related operations.
     """
 
-    _recipe_cache = {}
+    _cache = []
 
     def __init__(self, db: Database) -> None:
         """
         Initialize the RecipeController with database connection and required controllers.
+        All Recipe objects are created and cached on initialization.
 
         Args:
             db (Database): The database connection object.
         """
         self._item_controller: ItemController = ItemController(db)
         self._recipe_repository: RecipeRepository = RecipeRepository(db)
+        if not RecipeController._cache:
+            self._create_recipe_objects()
 
-    def get_recipe(self, recipe_id: int) -> Recipe:
+    def _create_recipe_objects(self) -> None:
         """
-        Retrieve a recipe from the cache by its ID.
+        Load all recipes into the cache.
+        """
+        recipe_models = self._recipe_repository.get_all_recipes()
+        recipes = self._process_recipe_models(recipe_models)
+        RecipeController._cache = recipes
+        self._recipe_repository.delete_cache()
+
+    def search_recipe(self, search_term: str) -> list[Recipe]:
+        """
+        Search for recipes in the cache based on a search term.
+        Searches through the recipe's result items.
 
         Args:
-            recipe_id (int): The ID of the recipe to retrieve.
-
-        Returns:
-            Recipe: The requested recipe object.
-
-        Raises:
-            ValueError: If the recipe with the given ID is not found in the cache.
-        """
-        if recipe_id in self._recipe_cache:
-            return self._recipe_cache[recipe_id]
-        else:
-            raise ValueError(f"Recipe with id {recipe_id} not found in cache.")
-
-    def get_recipes_by_level(self, *craft_levels: int, batch_size: int, offset: int) -> list[Recipe]:
-        """
-        Retrieve recipes based on craft levels, with pagination support.
-
-        Args:
-            *craft_levels (int): Variable number of craft levels to filter recipes by.
-            batch_size (int): The number of recipes to retrieve in this batch.
-            offset (int): The offset from which to start retrieving recipes.
-
-        Returns:
-            list[Recipe]: A list of Recipe objects matching the specified criteria.
-        """
-        recipe_models = self._recipe_repository.get_recipes_by_level(
-            *craft_levels, batch_size=batch_size, offset=offset)
-        if recipe_models:
-            recipes = self._process_and_cache_recipes(recipe_models)
-            self._recipe_cache.update({recipe.id: recipe for recipe in recipes})
-            return recipes
-        else:
-            return []
-
-    def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list[Recipe]:
-        """
-        Search for recipes based on a search term, with pagination support.
-
-        Args:
-            search_term (str): The term to search for in recipe names or ingredients.
-            batch_size (int): The number of recipes to retrieve in this batch.
-            offset (int): The offset from which to start retrieving recipes.
+            search_term (str): The term to search for in recipe result items.
 
         Returns:
             list[Recipe]: A list of Recipe objects matching the search term.
         """
-        recipe_models = self._recipe_repository.search_recipe(search_term, batch_size, offset)
-        if recipe_models:
-            recipes = self._process_and_cache_recipes(recipe_models)
-            self._recipe_cache.update({recipe.id: recipe for recipe in recipes})
-            return recipes
-        else:
-            return []
+        recipes = []
+        for recipe in self._cache:
+            for result in recipe.get_unique_results():
+                if search_term.lower() in result.get_formatted_name().lower():
+                    if recipe not in recipes:
+                        recipes.append(recipe)
+        return recipes
 
-    def _process_and_cache_recipes(self, recipe_models: list[RecipeModel]) -> list[Recipe]:
+    def _process_recipe_models(self, recipe_models: list[RecipeModel]) -> list[Recipe]:
         """
-        Process a list of RecipeModel objects into Recipe objects and cache them.
+        Process a list of RecipeModel objects into Recipe objects.
 
         Args:
             recipe_models (list[RecipeModel]): A list of RecipeModel objects to process.
@@ -96,12 +68,7 @@ class RecipeController:
         """
         recipes = []
         for recipe_model in recipe_models:
-            if recipe_model.id in self._recipe_cache:
-                recipes.append(self._recipe_cache[recipe_model.id])
-                continue
-
             item_ids = set()
-
             item_ids.update([recipe_model.crystal, recipe_model.ingredient1, recipe_model.ingredient2,
                              recipe_model.ingredient3, recipe_model.ingredient4, recipe_model.ingredient5,
                              recipe_model.ingredient6, recipe_model.ingredient7, recipe_model.ingredient8,
@@ -112,7 +79,6 @@ class RecipeController:
             item_ids.discard(0)
 
             items = self._item_controller.get_recipe_items(list(item_ids))
-            self._set_costs(items)
 
             crystal = next((item for item in items if item.item_id == recipe_model.crystal), None)
             ingredient1 = next((item for item in items if item.item_id == recipe_model.ingredient1), None)
@@ -133,22 +99,9 @@ class RecipeController:
             results = [result, result_hq1, result_hq2, result_hq3]
 
             recipe = self._create_recipe_object(recipe_model, ingredients, results)
-            self._recipe_cache[recipe_model.id] = recipe
             recipes.append(recipe)
 
         return recipes
-
-    def _set_costs(self, items: list[Item]) -> None:
-        """
-        Update the costs of ingredients used in the recipe.
-
-        Args:
-            items (list[Item]): A list of items to update the costs for.
-        """
-        for item in items:
-            self._item_controller.update_vendor_cost(item.item_id)
-            self._item_controller.update_guild_cost(item.item_id)
-            self._item_controller.update_auction_data(item.item_id)
 
     def _create_recipe_object(self, recipe_model: RecipeModel, ingredients: list[Item], results: list[Item]) -> Recipe:
         """

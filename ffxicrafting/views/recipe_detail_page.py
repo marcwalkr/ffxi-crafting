@@ -141,7 +141,7 @@ class RecipeDetailPage(ttk.Frame):
         """
 
         for ingredient, quantity in self._profit_data.recipe.ingredients.items():
-            ingredient_name = ingredient.get_formatted_name()
+            ingredient_name = ingredient.get_formatted_sort_name()
 
             single_cost = int(ingredient.min_single_price * quantity) if ingredient.min_single_price else ""
 
@@ -167,7 +167,7 @@ class RecipeDetailPage(ttk.Frame):
         unique_results = self._profit_data.recipe.get_unique_results()
         show_stack_columns = False
         for result in unique_results:
-            result_name = result.get_formatted_name()
+            result_name = result.get_formatted_sort_name()
             single_price = result.min_single_price if result.min_single_price is not None else ""
             stack_price = result.min_stack_price if result.min_stack_price is not None else ""
             proportion = self._profit_data.proportions[result]

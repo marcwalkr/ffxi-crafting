@@ -77,6 +77,11 @@ class ProfitData:
         for result, quantity in results.items():
             proportions[result] = quantity / total_items_produced
 
+        # If any result the recipe can produce wasn't produced in the simulation, set its proportion to 0
+        for result in self.recipe.get_unique_results():
+            if result not in proportions:
+                proportions[result] = 0
+
         return proportions
 
     def _process_results(self, results: dict[Item, int]) -> tuple[float, float]:
@@ -180,5 +185,10 @@ class ProfitData:
                 adjustment_factor = 1 / total_contribution
                 for result in profit_contributions.keys():
                     profit_contributions[result] *= adjustment_factor
+
+        # If any result the recipe can produce wasn't produced in the simulation, set its contribution to 0
+        for result in self.recipe.get_unique_results():
+            if result not in profit_contributions:
+                profit_contributions[result] = 0
 
         return profit_contributions

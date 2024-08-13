@@ -3,7 +3,6 @@ import logging
 import tkinter as tk
 import traceback
 from tkinter import ttk
-from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 from queue import Queue, Empty
 from config import SettingsManager
 from controllers import RecipeController, CraftingController
@@ -19,7 +18,7 @@ logger = logging.getLogger(__name__)
 class SearchPage(ttk.Frame):
     """
     A page for searching for profitable items to craft in FFXI.
-    Handles filtering, simulating recipes, and displaying results in a treeview with multithreading.
+    Handles searching, simulating recipes, filtering, and displaying results in a treeview.
     """
 
     def __init__(self, parent: tk.Tk) -> None:
@@ -46,17 +45,11 @@ class SearchPage(ttk.Frame):
         self._filters_visible: bool = False
         self._settings: dict = SettingsManager.load_settings()
 
-        self._num_threads: int = 20
-        self._batch_size: int = 25
-
-        self._executor: ThreadPoolExecutor = None
-        self._recipe_queue: Queue = Queue()
-        self._fetch_futures: list[Future] = []
-        self._process_futures: list[Future] = []
-        self._offset: int = 0
-
-        self._offset_lock: threading.Lock = threading.Lock()
+        self._recipe_queue: Queue[Recipe] = Queue()
+        self._insert_queue: Queue[tuple[int, list[any]]] = Queue()
         self._cancel_event: threading.Event = threading.Event()
+        self._producer_thread: threading.Thread = None
+        self._consumer_thread: threading.Thread = None
 
         self.create_widgets()
 
@@ -102,7 +95,7 @@ class SearchPage(ttk.Frame):
         self._filters_frame.pack_forget()  # Initially hidden
 
         # Thresholds settings
-        thresholds_frame = ttk.LabelFrame(self._filters_frame, text="Thresholds")
+        thresholds_frame = ttk.LabelFrame(self._filters_frame)
         thresholds_frame.pack(fill="x", padx=10, pady=(0, 5))
 
         thresholds_inner_frame = ttk.Frame(thresholds_frame)
@@ -189,21 +182,6 @@ class SearchPage(ttk.Frame):
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
 
-    def _get_recipe_batch(self, recipe_controller: RecipeController, batch_size: int, offset: int) -> list[Recipe]:
-        """
-        Fetch a batch of recipes based on the user's search query.
-
-        Args:
-            recipe_controller (RecipeController): The recipe controller to use.
-            batch_size (int): The number of recipes to fetch.
-            offset (int): The offset for pagination.
-
-        Returns:
-            list: A list of Recipe objects matching the search query,
-                  fetched from RecipeController.
-        """
-        return recipe_controller.search_recipe(self._search_var.get(), batch_size, offset)
-
     def _format_row(self, craft_result: dict[str, any]) -> list[str]:
         """
         Format a row for the treeview based on the craft result.
@@ -268,24 +246,54 @@ class SearchPage(ttk.Frame):
         """
         Start the process of fetching and processing recipes.
 
-        Initializes the UI for processing, sets up threading, and begins fetching recipes.
+        Initializes the UI for processing, sets up threading, and begins fetching and processing recipes.
         """
-        # Reset state
         self._cancel_event.clear()
-        self._offset = 0
-
-        # Clear and prepare data structures
-        self._recipe_queue = Queue()
-        self._fetch_futures = []
-
-        # Update UI
         self._action_button["text"] = "Cancel"
         self._progress_bar.pack(pady=10, before=self._treeview)
         self._progress_bar.start()
         self._treeview.clear()
 
-        # Start executor in a new thread to avoid blocking the main thread
-        threading.Thread(target=self._start_executor, daemon=True).start()
+        self._producer_thread = threading.Thread(target=self._produce_recipes, daemon=True)
+        self._producer_thread.start()
+
+        self._consumer_thread = threading.Thread(target=self._consume_recipes, daemon=True)
+        self._consumer_thread.start()
+
+        self.after(100, self._check_insert_queue)
+
+    def _produce_recipes(self) -> None:
+        try:
+            with Database() as db:
+                recipe_controller = RecipeController(db)
+                recipes = recipe_controller.search_recipe(self._search_var.get())
+
+                for recipe in recipes:
+                    if self._cancel_event.is_set():
+                        break
+                    self._recipe_queue.put(recipe)
+
+        except Exception:
+            traceback.print_exc()
+        finally:
+            self._recipe_queue.put(None)  # Signal end of recipes
+
+    def _consume_recipes(self) -> None:
+        while not self._cancel_event.is_set():
+            try:
+                recipe = self._recipe_queue.get(timeout=0.1)
+                if recipe is None:
+                    break
+                craft_result = CraftingController.simulate_craft(recipe)
+                if craft_result and self._should_display_recipe(craft_result):
+                    row = self._format_row(craft_result)
+                    self._insert_queue.put((recipe.id, row))
+            except Empty:
+                continue
+            except Exception:
+                traceback.print_exc()
+
+        self._insert_queue.put(None)  # Signal that processing is complete
 
     def _cancel_process(self) -> None:
         """
@@ -298,113 +306,41 @@ class SearchPage(ttk.Frame):
         self._action_button["state"] = "disabled"
 
     def _finish_process(self) -> None:
-        """
-        Finish the process and clean up resources.
+        self._cancel_event.set()
+        if self._consumer_thread:
+            self._consumer_thread.join()
+            self._consumer_thread = None
+        if self._producer_thread:
+            self._producer_thread.join()
+            self._producer_thread = None
 
-        Shuts down the executor and updates the UI to reflect the completion of the process.
-        """
-        if self._executor:
-            self._executor.shutdown(wait=False)
+        # Clear queues
+        while not self._recipe_queue.empty():
+            self._recipe_queue.get()
+        while not self._insert_queue.empty():
+            self._insert_queue.get()
 
-        # Update UI
         self._progress_bar.stop()
         self._progress_bar.pack_forget()
         self._action_button["text"] = "Search"
         self._action_button["state"] = "normal"
 
-    def _start_executor(self) -> None:
+    def _check_insert_queue(self) -> None:
         """
-        Initialize and start the ThreadPoolExecutor.
-
-        Creates separate threads for fetching and processing recipes, and submits a task to wait for completion.
-        """
-        self._executor = ThreadPoolExecutor(max_workers=self._num_threads)
-        fetch_futures = [self._executor.submit(self._fetch_recipes) for _ in range(self._num_threads // 2)]
-        process_futures = [self._executor.submit(self._process_recipes) for _ in range(self._num_threads // 2)]
-
-        all_futures = fetch_futures + process_futures
-        self._executor.submit(self._wait_for_completion, all_futures)
-
-    def _fetch_recipes(self) -> None:
-        """
-        Fetch recipes in batches and add them to the recipe queue.
-
-        Continues fetching until there are no more recipes or the process is canceled.
-        Adds a None value to the queue to signal completion.
-        """
-        try:
-            while not self._cancel_event.is_set():
-                with self._offset_lock:
-                    offset = self._offset
-                    self._offset += self._batch_size
-
-                with Database() as db:
-                    recipe_controller = RecipeController(db)
-                    recipes = self._get_recipe_batch(recipe_controller, self._batch_size, offset)
-
-                    if not recipes:
-                        break
-
-                    for recipe in recipes:
-                        self._recipe_queue.put(recipe)
-        except Exception:
-            traceback.print_exc()
-
-        self._recipe_queue.put(None)  # Signal this fetch thread is done
-
-    def _process_recipes(self) -> None:
-        """
-        Process recipes from the recipe queue.
-
-        Continuously retrieves recipes from the queue and processes them
-        until receiving a None value or the process is canceled.
+        Check the insert queue for new results and insert them into the treeview.
         """
         try:
             while True:
-                try:
-                    recipe = self._recipe_queue.get(timeout=1)
-                    if recipe is None:
-                        break
-                    self._process_single_recipe(recipe)
-                except Empty:
-                    if self._cancel_event.is_set():
-                        break
-        except Exception:
-            traceback.print_exc()
+                item = self._insert_queue.get_nowait()
+                if item is None:
+                    self._finish_process()
+                    return
+                recipe_id, row = item
+                self._insert_single_into_treeview(recipe_id, row)
+        except Empty:
+            pass
 
-    def _process_single_recipe(self, recipe: Recipe) -> None:
-        """
-        Process a single recipe.
-        Simulates the craft and adds the result to the insert queue if it should be displayed.
-
-        Args:
-            recipe (Recipe): The Recipe object to process.
-        """
-        if self._cancel_event.is_set():
-            return
-
-        craft_result = CraftingController.simulate_craft(recipe)
-
-        if not craft_result:
-            return
-
-        if self._should_display_recipe(craft_result):
-            row = self._format_row(craft_result)
-            self._insert_single_into_treeview(recipe.id, row)
-
-    def _wait_for_completion(self, futures):
-        """
-        Wait for all futures to complete and finish the process.
-
-        Args:
-            futures (list): List of Future objects to wait for.
-
-        Calls _finish_process on the main thread after all futures are completed.
-        """
-        for future in as_completed(futures):
-            future.result()  # This will raise any exceptions that occurred
-
-        self.after(0, self._finish_process)
+        self.after(100, self._check_insert_queue)
 
     def _should_display_recipe(self, craft_result: dict) -> bool:
         """
@@ -430,7 +366,7 @@ class SearchPage(ttk.Frame):
 
     def cleanup(self) -> None:
         """
-        Cleanup resources and shutdown threads.
+        Sets the cancel event to let the process finish.
 
         Should be called when the page is being closed or the application is shutting down.
         """

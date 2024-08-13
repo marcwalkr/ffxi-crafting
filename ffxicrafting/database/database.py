@@ -155,75 +155,45 @@ class Database:
             logger.error(f"Database query failed: {e}")
             return None if fetch_one else []
 
-    def get_auction_item(self, item_id: int, is_stack: bool) -> list:
+    def get_all_auction_items(self) -> list:
         """
-        Retrieve auction items for a specific item ID.
-
-        Args:
-            item_id (int): The ID of the item to retrieve auction data for.
-            is_stack (bool): Indicates whether to retrieve data for stacks (True) or singles (False).
-        Returns:
-            list: A list of auction items for the specified item ID.
-        """
-        query = "SELECT itemid, avg_price, num_sales, sell_freq, is_stack, new_data FROM auction_items "
-        query += "WHERE itemid=%s AND is_stack=%s AND no_sale=0"
-        return self._execute_query(query, (item_id, is_stack), fetch_one=True)
-
-    def update_auction_item(self, item_id: int, avg_price: int, sell_freq: float, is_stack: int) -> None:
-        """
-        Update the auction data for a specific item.
-
-        Args:
-            item_id (int): The ID of the item to update.
-            avg_price (int): The new average price for the item.
-            sell_freq (float): The new sell frequency for the item.
-            is_stack (int): Indicates whether the item is a stack (1) or single (0).
-        """
-        query = "UPDATE auction_items SET avg_price = %s, sell_freq = %s, new_data = 0 "
-        query += "WHERE itemid = %s AND is_stack = %s"
-        return self._execute_query(query, (avg_price, sell_freq, item_id, is_stack), commit=True)
-
-    def get_latest_sales_history(self, item_id: int, is_stack: int) -> list:
-        """
-        Retrieve the latest sales history for a specific item.
-
-        Args:
-            item_id (int): The ID of the item to retrieve sales history for.
-            is_stack (int): Indicates whether to retrieve history for stacks (1) or singles (0).
+        Retrieve all auction items.
 
         Returns:
-            list: A list of the latest sales history entries for the specified item.
+            list: A list of all auction items.
         """
-        query = "SELECT itemid, price, is_stack FROM sales_history WHERE itemid=%s AND is_stack=%s AND batch_id = "
-        query += "(SELECT MAX(batch_id) FROM sales_history WHERE itemid=%s AND is_stack=%s)"
-        return self._execute_query(query, (item_id, is_stack, item_id, is_stack), fetch_one=False)
+        query = "SELECT itemid, avg_price, num_sales, sell_freq, is_stack, new_data FROM auction_items"
+        return self._execute_query(query, (), fetch_one=False)
 
-    def get_guild_shops(self, item_id: int) -> list:
+    def get_all_sales_history(self) -> list:
         """
-        Retrieve guild shop data for a specific item.
-
-        Args:
-            item_id (int): The ID of the item to retrieve guild shop data for.
+        Retrieve all the latest sales history.
 
         Returns:
-            list: A list of guild shop entries for the specified item, containing guildid, itemid, and min_price.
+            list: A list of all the latest sales history.
         """
-        query = "SELECT guildid, itemid, min_price, max_price, daily_increase, initial_quantity FROM guild_shops "
-        query += "WHERE itemid=%s"
-        return self._execute_query(query, (item_id,), fetch_one=False)
+        query = "SELECT itemid, is_stack, price, batch_id FROM sales_history"
+        return self._execute_query(query, (), fetch_one=False)
 
-    def get_guild_vendor(self, guild_id: int) -> tuple:
+    def get_all_guild_shops(self) -> list:
         """
-        Retrieve information for a specific guild vendor.
-
-        Args:
-            guild_id (int): The ID of the guild vendor to retrieve information for.
+        Retrieve all guild shop data.
 
         Returns:
-            tuple: A tuple containing the guild vendor information.
+            list: A list of all guild shop data.
         """
-        query = "SELECT * FROM guild_vendors WHERE guildid=%s"
-        return self._execute_query(query, (guild_id,), fetch_one=True)
+        query = "SELECT guildid, itemid, min_price, max_price, daily_increase, initial_quantity FROM guild_shops"
+        return self._execute_query(query, (), fetch_one=False)
+
+    def get_all_guild_vendors(self) -> list:
+        """
+        Retrieve all guild vendor data.
+
+        Returns:
+            list: A list of all guild vendor data.
+        """
+        query = "SELECT * FROM guild_vendors"
+        return self._execute_query(query, (), fetch_one=False)
 
     def get_items(self, item_ids: list[int]) -> list:
         """
@@ -239,138 +209,94 @@ class Database:
         query = f"SELECT itemid, name, sortname, stackSize FROM item_basic WHERE itemid IN ({format_strings})"
         return self._execute_query(query, tuple(item_ids), fetch_one=False)
 
-    def get_npc(self, npc_id: int) -> tuple:
+    def get_all_npcs(self) -> list:
         """
-        Retrieve information for a specific NPC.
-
-        Args:
-            npc_id (int): The ID of the NPC to retrieve information for.
+        Retrieve all NPCs.
 
         Returns:
-            tuple: A tuple containing the NPC information.
+            list: A list of all NPCs.
         """
-        query = "SELECT polutils_name FROM npc_list WHERE npcid=%s"
-        return self._execute_query(query, (npc_id,), fetch_one=True)
+        query = "SELECT polutils_name FROM npc_list"
+        return self._execute_query(query, (), fetch_one=False)
 
-    def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list:
+    def get_all_recipes(self) -> list:
         """
-        Search for recipes based on a search term, matching against result item names.
-
-        Args:
-            search_term (str): The term to search for in result item names.
-            batch_size (int): Number of recipes to retrieve.
-            offset (int): Offset for pagination.
+        Retrieve all recipes.
 
         Returns:
-            list: A list of recipes matching the search term, or all recipes if the search term is empty.
+            list: A list of all recipes.
         """
-        if not search_term or search_term.isspace():
-            query = """
-            SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, 
-                Leather, Bone, Alchemy, Cook, Crystal,
-                Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, 
-                Ingredient6, Ingredient7, Ingredient8, Result, ResultHQ1, 
-                ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty,
-                ResultHQ3Qty, ResultName
-            FROM synth_recipes
-            ORDER BY ID ASC
-            LIMIT %s OFFSET %s;
-            """
-            return self._execute_query(query, (batch_size, offset), fetch_one=False)
+        query = "SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal, "
+        query += "Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7, "
+        query += "Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty, "
+        query += "ResultHQ3Qty, ResultName FROM synth_recipes"
+        return self._execute_query(query, (), fetch_one=False)
 
-        # Prepare search terms for LIKE clause
-        like_term = f"%{search_term.replace(" ", "%")}%"
-
-        query = """
-        WITH recipe_results AS (
-            SELECT ID, Result AS item_id FROM synth_recipes WHERE Result IS NOT NULL
-            UNION ALL
-            SELECT ID, ResultHQ1 FROM synth_recipes WHERE ResultHQ1 IS NOT NULL
-            UNION ALL
-            SELECT ID, ResultHQ2 FROM synth_recipes WHERE ResultHQ2 IS NOT NULL
-            UNION ALL
-            SELECT ID, ResultHQ3 FROM synth_recipes WHERE ResultHQ3 IS NOT NULL
-        ),
-        matched_recipes AS (
-            SELECT DISTINCT r.ID,
-                CASE 
-                    WHEN ib.name LIKE %s THEN 2
-                    WHEN MATCH(ib.name) AGAINST(%s IN BOOLEAN MODE) THEN 1
-                    ELSE 0
-                END AS relevance
-            FROM recipe_results r
-            JOIN item_basic ib ON r.item_id = ib.itemid
-            WHERE ib.name LIKE %s OR MATCH(ib.name) AGAINST(%s IN BOOLEAN MODE)
-        )
-        SELECT sr.ID, sr.Desynth, sr.KeyItem, sr.Wood, sr.Smith, sr.Gold, sr.Cloth, 
-               sr.Leather, sr.Bone, sr.Alchemy, sr.Cook, sr.Crystal,
-               sr.Ingredient1, sr.Ingredient2, sr.Ingredient3, sr.Ingredient4, sr.Ingredient5, 
-               sr.Ingredient6, sr.Ingredient7, sr.Ingredient8, sr.Result, sr.ResultHQ1, 
-               sr.ResultHQ2, sr.ResultHQ3, sr.ResultQty, sr.ResultHQ1Qty, sr.ResultHQ2Qty,
-               sr.ResultHQ3Qty, sr.ResultName
-        FROM matched_recipes mr
-        JOIN synth_recipes sr ON mr.ID = sr.ID
-        ORDER BY mr.relevance DESC, sr.ID ASC
-        LIMIT %s OFFSET %s;
+    def get_all_recipe_item_ids(self) -> list:
         """
-        return self._execute_query(query, (like_term, search_term, like_term, search_term, batch_size, offset), fetch_one=False)
-
-    def get_all_result_item_ids(self) -> list:
-        """
-        Retrieve all unique result item IDs from the recipes.
+        Retrieve all unique non-zero item IDs from the recipes, including crystals, ingredients, results.
 
         Returns:
-            list: A list of all unique result item IDs.
+            list: A list of all unique non-zero item IDs used in recipes.
         """
         query = """
-        SELECT DISTINCT result_id FROM (
-            SELECT result AS result_id FROM synth_recipes WHERE result IS NOT NULL
+        SELECT DISTINCT item_id FROM (
+            SELECT Crystal AS item_id FROM synth_recipes WHERE Crystal != 0
             UNION
-            SELECT resulthq1 AS result_id FROM synth_recipes WHERE resulthq1 IS NOT NULL
+            SELECT Ingredient1 FROM synth_recipes WHERE Ingredient1 != 0
             UNION
-            SELECT resulthq2 AS result_id FROM synth_recipes WHERE resulthq2 IS NOT NULL
+            SELECT Ingredient2 FROM synth_recipes WHERE Ingredient2 != 0
             UNION
-            SELECT resulthq3 AS result_id FROM synth_recipes WHERE resulthq3 IS NOT NULL
-        ) AS all_results
+            SELECT Ingredient3 FROM synth_recipes WHERE Ingredient3 != 0
+            UNION
+            SELECT Ingredient4 FROM synth_recipes WHERE Ingredient4 != 0
+            UNION
+            SELECT Ingredient5 FROM synth_recipes WHERE Ingredient5 != 0
+            UNION
+            SELECT Ingredient6 FROM synth_recipes WHERE Ingredient6 != 0
+            UNION
+            SELECT Ingredient7 FROM synth_recipes WHERE Ingredient7 != 0
+            UNION
+            SELECT Ingredient8 FROM synth_recipes WHERE Ingredient8 != 0
+            UNION
+            SELECT Result FROM synth_recipes WHERE Result != 0
+            UNION
+            SELECT ResultHQ1 FROM synth_recipes WHERE ResultHQ1 != 0
+            UNION
+            SELECT ResultHQ2 FROM synth_recipes WHERE ResultHQ2 != 0
+            UNION
+            SELECT ResultHQ3 FROM synth_recipes WHERE ResultHQ3 != 0
+        ) AS all_items
         """
         results = self._execute_query(query, (), fetch_one=False)
         return [result[0] for result in results]
 
-    def get_regional_vendor(self, npc_id: int) -> tuple:
+    def get_all_regional_vendors(self) -> list:
         """
-        Retrieve information for a specific regional vendor.
-
-        Args:
-            npc_id (int): The ID of the regional vendor to retrieve information for.
+        Retrieve all regional vendors.
 
         Returns:
-            tuple: A tuple containing the regional vendor information.
+            list: A list of all regional vendors.
         """
-        query = "SELECT * FROM regional_vendors WHERE npcid=%s"
-        return self._execute_query(query, (npc_id,), fetch_one=True)
+        query = "SELECT * FROM regional_vendors"
+        return self._execute_query(query, (), fetch_one=False)
 
-    def get_vendor_items(self, item_id: int) -> list:
+    def get_all_vendor_items(self) -> list:
         """
-        Retrieve vendor items for a specific item ID.
-
-        Args:
-            item_id (int): The ID of the item to retrieve vendor data for.
+        Retrieve all vendor items.
 
         Returns:
-            list: A list of vendor items for the specified item ID.
+            list: A list of all vendor items.
         """
-        query = "SELECT * FROM vendor_items WHERE itemid=%s"
-        return self._execute_query(query, (item_id,), fetch_one=False)
+        query = "SELECT * FROM vendor_items"
+        return self._execute_query(query, (), fetch_one=False)
 
-    def get_vendor_location(self, npc_id: int) -> tuple:
+    def get_all_vendor_locations(self) -> list:
         """
-        Retrieve location information for a specific vendor.
-
-        Args:
-            npc_id (int): The ID of the vendor to retrieve location information for.
+        Retrieve all vendor locations.
 
         Returns:
-            tuple: A tuple containing the vendor location information.
+            list: A list of all vendor locations.
         """
-        query = "SELECT * FROM vendor_locations WHERE npcid=%s"
-        return self._execute_query(query, (npc_id,), fetch_one=True)
+        query = "SELECT * FROM vendor_locations"
+        return self._execute_query(query, (), fetch_one=False)
