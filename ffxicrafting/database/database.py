@@ -252,33 +252,6 @@ class Database:
         query = "SELECT polutils_name FROM npc_list WHERE npcid=%s"
         return self._execute_query(query, (npc_id,), fetch_one=True)
 
-    def get_recipes_by_level(self, wood: int, smith: int, gold: int, cloth: int, leather: int, bone: int,
-                             alchemy: int, cook: int, batch_size: int, offset: int) -> list:
-        """
-        Retrieve recipes based on crafting skill levels.
-
-        Args:
-            wood (int): Woodworking crafting skill level.
-            smith (int): Smithing crafting skill level.
-            gold (int): Goldsmithing crafting skill level.
-            cloth (int): Clothcraft crafting skill level.
-            leather (int): Leatherworking crafting skill level.
-            bone (int): Bonecraft crafting skill level.
-            alchemy (int): Alchemy crafting skill level.
-            cook (int): Cooking crafting skill level.
-            batch_size (int): Number of recipes to retrieve.
-            offset (int): Offset for pagination.
-
-        Returns:
-            list: A list of recipes matching the specified crafting skill levels.
-        """
-        query = ("SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, Leather, Bone, Alchemy, Cook, Crystal, "
-                 "Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, Ingredient6, Ingredient7, "
-                 "Ingredient8, Result, ResultHQ1, ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty, "
-                 "ResultHQ3Qty, ResultName FROM synth_recipes WHERE wood <= %s AND smith <= %s AND gold <= %s AND "
-                 "cloth <= %s AND leather <= %s AND bone <= %s AND alchemy <= %s AND cook <= %s LIMIT %s OFFSET %s")
-        return self._execute_query(query, (wood, smith, gold, cloth, leather, bone, alchemy, cook, batch_size, offset), fetch_one=False)
-
     def search_recipe(self, search_term: str, batch_size: int, offset: int) -> list:
         """
         Search for recipes based on a search term, matching against result item names.
@@ -289,9 +262,8 @@ class Database:
             offset (int): Offset for pagination.
 
         Returns:
-            list: A list of recipes matching the search term.
+            list: A list of recipes matching the search term, or all recipes if the search term is empty.
         """
-        # Check if the search term is empty or only whitespace
         if not search_term or search_term.isspace():
             query = """
             SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, 
