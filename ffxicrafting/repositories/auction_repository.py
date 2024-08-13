@@ -62,7 +62,8 @@ class AuctionRepository:
         Args:
             new_item (AuctionItem): The AuctionItem object with updated information.
         """
-        self._db.update_auction_item(new_item.item_id, new_item.avg_price, new_item.sell_freq, new_item.is_stack)
+        self._db.update_auction_item(new_item.item_id, new_item.average_price, new_item.sell_frequency,
+                                     new_item.is_stack)
         self._invalidate_cache(new_item.item_id)
 
     def get_latest_sales_history(self, item_id: int, is_stack: bool) -> list[SalesHistory]:
