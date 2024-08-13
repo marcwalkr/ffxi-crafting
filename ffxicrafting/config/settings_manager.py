@@ -16,7 +16,7 @@ class SettingsManager:
         "thresholds": {
             "profit_/_synth": 0,
             "profit_/_storage": 0,
-            "sell_frequency": 0.0,
+            "sell_frequency": 0.0
         },
         "skill_levels": {
             "wood": 0,

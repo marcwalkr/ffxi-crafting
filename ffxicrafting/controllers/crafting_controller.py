@@ -15,7 +15,7 @@ class CraftingController:
     and result formatting. It serves as an intermediary between the application logic and
     the crafting entities.
     """
-    _profit_data_cache: dict[int, ProfitData] = {}
+    _profit_data_cache: dict[tuple[int, int, int, int, int, int, int, int, int], ProfitData] = {}
 
     @classmethod
     def get_profit_data(cls, recipe_id: int) -> ProfitData:
@@ -25,7 +25,7 @@ class CraftingController:
         if recipe_id in cls._profit_data_cache:
             return cls._profit_data_cache[recipe_id]
         else:
-            raise ValueError(f"Profit data for recipe with ID {recipe_id} not found in cache")
+            return None
 
     @classmethod
     def simulate_craft(cls, recipe: Recipe) -> dict:
@@ -46,14 +46,17 @@ class CraftingController:
             None if the crafting simulation produces no results.
         """
         skills = SettingsManager.get_craft_skills()
+        cache_key = (recipe.id, *skills)
         crafter = Crafter(*skills, recipe)
-        results, retained_ingredients = crafter.craft()
+        profit_data = cls.get_profit_data(cache_key)
+        if not profit_data:
+            results, retained_ingredients = crafter.craft()
 
-        if not results:
-            return None
+            if not results:
+                return None
 
-        profit_data = ProfitData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
-        cls._profit_data_cache[recipe.id] = profit_data
+            profit_data = ProfitData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
+            cls._profit_data_cache[cache_key] = profit_data
 
         sell_frequencies = [result.get_highest_sell_frequency() for result in profit_data.recipe.get_unique_results()]
         valid_frequencies = [f for f in sell_frequencies if f is not None]

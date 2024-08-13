@@ -256,7 +256,9 @@ class SearchPage(ttk.Frame):
             return
 
         recipe_id = tree.selection()[0]
-        profit_data = CraftingController.get_profit_data(int(recipe_id))
+        skills = SettingsManager.get_craft_skills()
+        cache_key = (recipe_id, *skills)
+        profit_data = CraftingController.get_profit_data(cache_key)
 
         detail_page = RecipeDetailPage(self._parent, profit_data)
         self._parent.notebook.add(detail_page, text=f"Recipe {profit_data.recipe.result_name} Details")
