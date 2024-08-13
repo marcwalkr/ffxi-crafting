@@ -107,35 +107,6 @@ class SearchPage(ttk.Frame):
             ("Sell Frequency", 0)
         ], self._settings.get("thresholds", {}), orientation="horizontal")
 
-    def _save_filter_settings(self) -> None:
-        """
-        Save the current filter settings to the application's configuration.
-
-        This method retrieves the current values from the threshold input fields,
-        updates the existing settings with these new values, and then saves the
-        updated settings using the SettingsManager.
-        """
-        current_settings = SettingsManager.load_settings()
-        new_settings = {
-            "thresholds": get_number_settings(self._filters_frame.winfo_children()[0]),
-        }
-        current_settings.update(new_settings)
-        SettingsManager.save_settings(current_settings)
-
-    def _toggle_filters(self) -> None:
-        """
-        Toggle the visibility of the filters frame.
-
-        If the filters are currently visible, this method hides them.
-        If they are hidden, it displays them above the treeview.
-        """
-        if self._filters_visible:
-            self._filters_frame.pack_forget()
-            self._filters_visible = False
-        else:
-            self._filters_frame.pack(before=self._treeview)
-            self._filters_visible = True
-
     def _create_progress_bar(self) -> None:
         """
         Create the progress bar for indicating processing status.
@@ -152,21 +123,12 @@ class SearchPage(ttk.Frame):
 
         Sets up the treeview with sortable columns and binds double-click and single-click events.
         """
-        self._treeview = TreeviewWithSort(self, columns=self._get_treeview_columns(), show="headings")
+        columns = ["nq", "hq", "levels", "ingredients"]
+        self._treeview = TreeviewWithSort(self, columns=columns, show="headings")
         self._configure_treeview(self._treeview)
         self._treeview.pack(padx=10, pady=10, expand=True, fill="both")
         self._treeview.bind("<Double-1>", self._show_recipe_details)
         self._treeview.bind("<Button-1>", self._treeview.on_click)
-
-    def _get_treeview_columns(self) -> list[str]:
-        """
-        Return the columns for the treeview.
-
-        Returns:
-            list[str]: A list of column identifiers for the treeview:
-            ["nq", "hq", "levels", "ingredients"]
-        """
-        return ("nq", "hq", "levels", "ingredients")
 
     def _configure_treeview(self, treeview: ttk.Treeview) -> None:
         """
@@ -181,6 +143,198 @@ class SearchPage(ttk.Frame):
         treeview.heading("levels", text="Craft Levels")
         treeview.heading("ingredients", text="Ingredients")
         treeview.column("levels", anchor=tk.CENTER)
+
+    def _toggle_filters(self) -> None:
+        """
+        Toggle the visibility of the filters frame.
+
+        If the filters are currently visible, this method hides them.
+        If they are hidden, it displays them above the treeview.
+        """
+        if self._filters_visible:
+            self._filters_frame.pack_forget()
+            self._filters_visible = False
+        else:
+            self._filters_frame.pack(before=self._treeview)
+            self._filters_visible = True
+
+    def _save_filter_settings(self) -> None:
+        """
+        Save the current filter settings to the application's configuration.
+
+        This method retrieves the current values from the threshold input fields,
+        updates the existing settings with these new values, and then saves the
+        updated settings using the SettingsManager.
+        """
+        current_settings = SettingsManager.load_settings()
+        new_settings = {
+            "thresholds": get_number_settings(self._filters_frame.winfo_children()[0]),
+        }
+        current_settings.update(new_settings)
+        SettingsManager.save_settings(current_settings)
+
+    def _toggle_process(self) -> None:
+        """
+        Toggle between starting and canceling the search process.
+
+        If the search is not running, this method saves the current filter settings,
+        collapses the filters if they're visible, and starts the search process.
+        If the search is already running, it cancels the process.
+        """
+        if self._action_button["text"] == "Search":
+            self._save_filter_settings()
+            if self._filters_visible:
+                self._toggle_filters()
+            self._start_process()
+        else:
+            self._cancel_process()
+
+    def _start_process(self) -> None:
+        """
+        Start the process of fetching and processing recipes.
+
+        Initializes the UI for processing, sets up threading, and begins fetching and processing recipes.
+        """
+        self._cancel_event.clear()
+        self._action_button["text"] = "Cancel"
+        self._progress_bar.pack(pady=10, before=self._treeview)
+        self._progress_bar.start()
+        self._treeview.clear()
+
+        self._producer_thread = threading.Thread(target=self._produce_recipes, daemon=True)
+        self._producer_thread.start()
+
+        self._consumer_thread = threading.Thread(target=self._consume_recipes, daemon=True)
+        self._consumer_thread.start()
+
+        self.after(100, self._check_insert_queue)
+
+    def _produce_recipes(self) -> None:
+        """
+        Fetch recipes and add them to the recipe queue.
+
+        This method runs in a separate thread. It queries the database for recipes
+        based on the search criteria and puts them into the recipe queue for processing.
+        If cancelled, it will stop fetching recipes and signal the end of the queue.
+        """
+        try:
+            with Database() as db:
+                recipe_controller = RecipeController(db)
+                recipes = recipe_controller.search_recipe(self._search_var.get())
+
+                for recipe in recipes:
+                    if self._cancel_event.is_set():
+                        break
+                    self._recipe_queue.put(recipe)
+
+        except Exception:
+            traceback.print_exc()
+        finally:
+            self._recipe_queue.put(None)  # Signal end of recipes
+
+    def _consume_recipes(self) -> None:
+        """
+        Process recipes from the recipe queue.
+
+        This method runs in a separate thread. It continuously takes recipes from the queue,
+        simulates the craft, and if the recipe should be displayed, formats the result and
+        adds it to the insert queue. It will stop when it receives a None value (end of queue)
+        or when cancelled.
+        """
+        while not self._cancel_event.is_set():
+            try:
+                recipe = self._recipe_queue.get(timeout=0.1)
+                if recipe is None:
+                    break
+                craft_result = CraftingController.simulate_craft(recipe)
+                if craft_result and self._should_display_recipe(craft_result):
+                    row = self._format_row(craft_result)
+                    self._insert_queue.put((recipe.id, row))
+            except Empty:
+                continue
+            except Exception:
+                traceback.print_exc()
+
+        self._insert_queue.put(None)  # Signal that processing is complete
+
+    def _check_insert_queue(self) -> None:
+        """
+        Check the insert queue for new results and insert them into the treeview.
+
+        This method runs on the main thread. It processes items from the insert queue
+        and adds them to the treeview. If it receives a None value, it signals that
+        processing is complete and calls _finish_process.
+        """
+        try:
+            while True:
+                item = self._insert_queue.get_nowait()
+                if item is None:
+                    self._finish_process()
+                    return
+                recipe_id, row = item
+                self._insert_single_into_treeview(recipe_id, row)
+        except Empty:
+            pass
+
+        self.after(100, self._check_insert_queue)
+
+    def _cancel_process(self) -> None:
+        """
+        Cancel the ongoing process.
+
+        Sets the cancel event, disables the button and updates the button text to "Canceling...".
+        """
+        self._cancel_event.set()
+        self._action_button["text"] = "Canceling..."
+        self._action_button["state"] = "disabled"
+
+    def _finish_process(self) -> None:
+        """
+        Clean up after the recipe processing is complete or cancelled.
+
+        This method stops all threads, clears the queues, resets the UI elements,
+        and prepares the page for a new search.
+        """
+        self._cancel_event.set()
+        if self._consumer_thread:
+            self._consumer_thread.join()
+            self._consumer_thread = None
+        if self._producer_thread:
+            self._producer_thread.join()
+            self._producer_thread = None
+
+        # Clear queues
+        while not self._recipe_queue.empty():
+            self._recipe_queue.get()
+        while not self._insert_queue.empty():
+            self._insert_queue.get()
+
+        self._progress_bar.stop()
+        self._progress_bar.pack_forget()
+        self._action_button["text"] = "Search"
+        self._action_button["state"] = "normal"
+
+    def _insert_single_into_treeview(self, recipe_id: int, row: list[any]) -> None:
+        """
+        Insert a single row into the treeview.
+
+        Args:
+            recipe_id (int): The ID of the recipe to insert.
+            row (list[any]): The row of values to insert.
+        """
+        self._treeview.insert("", "end", iid=recipe_id, values=row)
+
+    def _should_display_recipe(self, craft_result: dict) -> bool:
+        """
+        Determine if a recipe should be displayed in the treeview.
+
+        Args:
+            craft_result (dict): The craft result to check.
+
+        Returns:
+            bool: True if the recipe should be displayed, False otherwise.
+        """
+        return True
 
     def _format_row(self, craft_result: dict[str, any]) -> list[str]:
         """
@@ -205,22 +359,6 @@ class SearchPage(ttk.Frame):
             recipe.get_formatted_ingredient_names()
         ]
 
-    def _toggle_process(self) -> None:
-        """
-        Toggle between starting and canceling the search process.
-
-        If the search is not running, this method saves the current filter settings,
-        collapses the filters if they're visible, and starts the search process.
-        If the search is already running, it cancels the process.
-        """
-        if self._action_button["text"] == "Search":
-            self._save_filter_settings()
-            if self._filters_visible:
-                self._toggle_filters()
-            self._start_process()
-        else:
-            self._cancel_process()
-
     def _show_recipe_details(self, event: tk.Event) -> None:
         """
         Show the details of the selected recipe in a new tab.
@@ -241,128 +379,6 @@ class SearchPage(ttk.Frame):
         detail_page = RecipeDetailPage(self._parent, profit_data)
         self._parent.notebook.add(detail_page, text=f"Recipe {profit_data.recipe.result_name} Details")
         self._parent.notebook.select(detail_page)
-
-    def _start_process(self) -> None:
-        """
-        Start the process of fetching and processing recipes.
-
-        Initializes the UI for processing, sets up threading, and begins fetching and processing recipes.
-        """
-        self._cancel_event.clear()
-        self._action_button["text"] = "Cancel"
-        self._progress_bar.pack(pady=10, before=self._treeview)
-        self._progress_bar.start()
-        self._treeview.clear()
-
-        self._producer_thread = threading.Thread(target=self._produce_recipes, daemon=True)
-        self._producer_thread.start()
-
-        self._consumer_thread = threading.Thread(target=self._consume_recipes, daemon=True)
-        self._consumer_thread.start()
-
-        self.after(100, self._check_insert_queue)
-
-    def _produce_recipes(self) -> None:
-        try:
-            with Database() as db:
-                recipe_controller = RecipeController(db)
-                recipes = recipe_controller.search_recipe(self._search_var.get())
-
-                for recipe in recipes:
-                    if self._cancel_event.is_set():
-                        break
-                    self._recipe_queue.put(recipe)
-
-        except Exception:
-            traceback.print_exc()
-        finally:
-            self._recipe_queue.put(None)  # Signal end of recipes
-
-    def _consume_recipes(self) -> None:
-        while not self._cancel_event.is_set():
-            try:
-                recipe = self._recipe_queue.get(timeout=0.1)
-                if recipe is None:
-                    break
-                craft_result = CraftingController.simulate_craft(recipe)
-                if craft_result and self._should_display_recipe(craft_result):
-                    row = self._format_row(craft_result)
-                    self._insert_queue.put((recipe.id, row))
-            except Empty:
-                continue
-            except Exception:
-                traceback.print_exc()
-
-        self._insert_queue.put(None)  # Signal that processing is complete
-
-    def _cancel_process(self) -> None:
-        """
-        Cancel the ongoing process.
-
-        Sets the cancel event, disables the button and updates the button text to "Canceling...".
-        """
-        self._cancel_event.set()
-        self._action_button["text"] = "Canceling..."
-        self._action_button["state"] = "disabled"
-
-    def _finish_process(self) -> None:
-        self._cancel_event.set()
-        if self._consumer_thread:
-            self._consumer_thread.join()
-            self._consumer_thread = None
-        if self._producer_thread:
-            self._producer_thread.join()
-            self._producer_thread = None
-
-        # Clear queues
-        while not self._recipe_queue.empty():
-            self._recipe_queue.get()
-        while not self._insert_queue.empty():
-            self._insert_queue.get()
-
-        self._progress_bar.stop()
-        self._progress_bar.pack_forget()
-        self._action_button["text"] = "Search"
-        self._action_button["state"] = "normal"
-
-    def _check_insert_queue(self) -> None:
-        """
-        Check the insert queue for new results and insert them into the treeview.
-        """
-        try:
-            while True:
-                item = self._insert_queue.get_nowait()
-                if item is None:
-                    self._finish_process()
-                    return
-                recipe_id, row = item
-                self._insert_single_into_treeview(recipe_id, row)
-        except Empty:
-            pass
-
-        self.after(100, self._check_insert_queue)
-
-    def _should_display_recipe(self, craft_result: dict) -> bool:
-        """
-        Determine if a recipe should be displayed in the treeview.
-
-        Args:
-            craft_result (dict): The craft result to check.
-
-        Returns:
-            bool: True if the recipe should be displayed, False otherwise.
-        """
-        return True
-
-    def _insert_single_into_treeview(self, recipe_id: int, row: list[any]) -> None:
-        """
-        Insert a single row into the treeview.
-
-        Args:
-            recipe_id (int): The ID of the recipe to insert.
-            row (list[any]): The row of values to insert.
-        """
-        self._treeview.insert("", "end", iid=recipe_id, values=row)
 
     def cleanup(self) -> None:
         """
