@@ -30,7 +30,7 @@ class AuctionController:
             is_stack (bool): Whether the item is a stack or not.
 
         Returns:
-            AuctionData: The auction data for the given item ID and single/stack flag.
+            AuctionData: The auction data for the given item ID and single/stack category.
         """
         auction_item = self._get_auction_item_with_updates(item_id, is_stack)
         if auction_item:
@@ -79,6 +79,6 @@ class AuctionController:
             return item
         prices = [sale.price for sale in new_sales_history]
         avg_price = sum(prices) / len(prices)
-        item.avg_price = avg_price
+        item.average_price = avg_price
         item.sell_frequency = item.num_sales / 15
         return item
