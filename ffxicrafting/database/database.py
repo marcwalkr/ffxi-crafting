@@ -293,7 +293,18 @@ class Database:
         """
         # Check if the search term is empty or only whitespace
         if not search_term or search_term.isspace():
-            return []
+            query = """
+            SELECT ID, Desynth, KeyItem, Wood, Smith, Gold, Cloth, 
+                Leather, Bone, Alchemy, Cook, Crystal,
+                Ingredient1, Ingredient2, Ingredient3, Ingredient4, Ingredient5, 
+                Ingredient6, Ingredient7, Ingredient8, Result, ResultHQ1, 
+                ResultHQ2, ResultHQ3, ResultQty, ResultHQ1Qty, ResultHQ2Qty,
+                ResultHQ3Qty, ResultName
+            FROM synth_recipes
+            ORDER BY ID ASC
+            LIMIT %s OFFSET %s;
+            """
+            return self._execute_query(query, (batch_size, offset), fetch_one=False)
 
         # Prepare search terms for LIKE clause
         like_term = f"%{search_term.replace(" ", "%")}%"
