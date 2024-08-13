@@ -31,10 +31,16 @@ class AuctionData(AuctionItem):
         """
         Get the minimum price from the sales history.
         """
-        return min(self._sales_history, key=lambda x: x.price).price
+        if self._sales_history:
+            return min(self._sales_history, key=lambda x: x.price).price
+        else:
+            return None
 
     def get_max_price(self) -> float:
         """
         Get the maximum price from the sales history.
         """
-        return max(self._sales_history, key=lambda x: x.price).price
+        if self._sales_history:
+            return max(self._sales_history, key=lambda x: x.price).price
+        else:
+            return None
