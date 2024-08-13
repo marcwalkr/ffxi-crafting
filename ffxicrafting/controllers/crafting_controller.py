@@ -18,12 +18,12 @@ class CraftingController:
     _profit_data_cache: dict[tuple[int, int, int, int, int, int, int, int, int], ProfitData] = {}
 
     @classmethod
-    def get_profit_data(cls, recipe_id: int) -> ProfitData:
+    def get_profit_data(cls, cache_key: tuple[int, int, int, int, int, int, int, int, int]) -> ProfitData:
         """
         Get the profit data for a recipe from the cache.
         """
-        if recipe_id in cls._profit_data_cache:
-            return cls._profit_data_cache[recipe_id]
+        if cache_key in cls._profit_data_cache:
+            return cls._profit_data_cache[cache_key]
         else:
             return None
 
