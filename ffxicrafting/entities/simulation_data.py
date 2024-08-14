@@ -5,15 +5,15 @@ if TYPE_CHECKING:
     from entities import Item, Recipe
 
 
-class ProfitData:
+class SimulationData:
     """
-    Class to store profit data for a crafting simulation.
+    Class to store data for a crafting simulation.
     """
 
     def __init__(self, recipe: Recipe, results: dict[Item, int], retained_ingredients: dict[Item, int],
                  num_trials: int) -> None:
         """
-        Initialize the ProfitData object.
+        Initialize the SimulationData object.
 
         Args:
             recipe (Recipe): The recipe that was used to craft the results.

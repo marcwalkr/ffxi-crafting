@@ -374,10 +374,10 @@ class SearchPage(ttk.Frame):
         recipe_id = tree.selection()[0]
         skills = SettingsManager.get_craft_skills()
         cache_key = (int(recipe_id), *skills)
-        profit_data = CraftingController.get_profit_data(cache_key)
+        simulation_data = CraftingController.get_simulation_data(cache_key)
 
-        detail_page = RecipeDetailPage(self._parent, profit_data)
-        self._parent.notebook.add(detail_page, text=f"Recipe {profit_data.recipe.result_name} Details")
+        detail_page = RecipeDetailPage(self._parent, simulation_data)
+        self._parent.notebook.add(detail_page, text=f"Recipe {simulation_data.recipe.result_name} Details")
         self._parent.notebook.select(detail_page)
 
     def cleanup(self) -> None:

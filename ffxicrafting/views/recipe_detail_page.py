@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from entities import ProfitData
+from entities import SimulationData
 from utils import TreeviewWithSort
 
 
@@ -12,7 +12,7 @@ class RecipeDetailPage(ttk.Frame):
     ingredients, costs, and results for a selected recipe.
     """
 
-    def __init__(self, parent: tk.Tk, profit_data: ProfitData) -> None:
+    def __init__(self, parent: tk.Tk, simulation_data: SimulationData) -> None:
         """
         Initialize the RecipeDetailPage.
         Creates a new tab in the parent's notebook and sets up the detail page.
@@ -26,7 +26,7 @@ class RecipeDetailPage(ttk.Frame):
         self._previous_tab_index: int = self._parent.notebook.index("current")
         self._ingredients_tree: TreeviewWithSort = None
         self._results_tree: TreeviewWithSort = None
-        self._profit_data: ProfitData = profit_data
+        self._simulation_data: SimulationData = simulation_data
         self._cost_per_synth_value_label: ttk.Label = None
 
         self._create_detail_page()
@@ -38,7 +38,7 @@ class RecipeDetailPage(ttk.Frame):
         Sets up the recipe label, ingredients tree, cost per synth frame,
         results tree, and close button.
         """
-        self._add_recipe_label(self._profit_data.recipe.result_name)
+        self._add_recipe_label(self._simulation_data.recipe.result_name)
         self._add_ingredients_tree()
         self._add_cost_per_synth_frame()
         self._add_results_tree()
@@ -88,7 +88,10 @@ class RecipeDetailPage(ttk.Frame):
         self._cost_per_synth_value_label = ttk.Label(cost_per_synth_frame)
         self._cost_per_synth_value_label.pack(side=tk.LEFT)
 
-        value_text = f"{int(self._profit_data.recipe.min_cost)} gil" if self._profit_data.recipe.min_cost else "N/A"
+        if self._simulation_data.recipe.min_cost:
+            value_text = f"{int(self._simulation_data.recipe.min_cost)} gil"
+        else:
+            value_text = "N/A"
         self._cost_per_synth_value_label.config(text=value_text)
 
     def _add_results_tree(self) -> None:
@@ -140,7 +143,7 @@ class RecipeDetailPage(ttk.Frame):
         Retrieves ingredient data from the recipe and inserts it into the ingredients treeview.
         """
 
-        for ingredient, quantity in self._profit_data.recipe.ingredients.items():
+        for ingredient, quantity in self._simulation_data.recipe.ingredients.items():
             ingredient_name = ingredient.get_formatted_sort_name()
 
             single_cost = int(ingredient.min_single_price * quantity) if ingredient.min_single_price else ""
@@ -164,15 +167,15 @@ class RecipeDetailPage(ttk.Frame):
 
         Retrieves result data from the recipe and inserts it into the results treeview.
         """
-        unique_results = self._profit_data.recipe.get_unique_results()
+        unique_results = self._simulation_data.recipe.get_unique_results()
         show_stack_columns = False
         for result in unique_results:
             result_name = result.get_formatted_sort_name()
             single_price = result.min_single_price if result.min_single_price is not None else ""
             stack_price = result.min_stack_price if result.min_stack_price is not None else ""
-            proportion = self._profit_data.proportions[result]
+            proportion = self._simulation_data.proportions[result]
             proportion_string = f"{proportion:.2%}" if proportion is not None else ""
-            profit_contribution = self._profit_data.profit_contributions[result]
+            profit_contribution = self._simulation_data.profit_contributions[result]
             contribution_string = f"{profit_contribution:.2%}" if profit_contribution is not None else ""
 
             if stack_price:

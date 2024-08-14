@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from entities import Crafter, ProfitData
+from entities import Crafter, SimulationData
 from config import SettingsManager
 
 if TYPE_CHECKING:
@@ -15,15 +15,15 @@ class CraftingController:
     and result formatting. It serves as an intermediary between the application logic and
     the crafting entities.
     """
-    _profit_data_cache: dict[tuple[int, int, int, int, int, int, int, int, int], ProfitData] = {}
+    _simulation_data_cache: dict[tuple[int, int, int, int, int, int, int, int, int], SimulationData] = {}
 
     @classmethod
-    def get_profit_data(cls, cache_key: tuple[int, int, int, int, int, int, int, int, int]) -> ProfitData:
+    def get_simulation_data(cls, cache_key: tuple[int, int, int, int, int, int, int, int, int]) -> SimulationData:
         """
-        Get the profit data for a recipe from the cache.
+        Get the simulation data for a recipe from the cache.
         """
-        if cache_key in cls._profit_data_cache:
-            return cls._profit_data_cache[cache_key]
+        if cache_key in cls._simulation_data_cache:
+            return cls._simulation_data_cache[cache_key]
         else:
             return None
 
@@ -48,23 +48,23 @@ class CraftingController:
         skills = SettingsManager.get_craft_skills()
         cache_key = (recipe.id, *skills)
         crafter = Crafter(*skills, recipe)
-        profit_data = cls.get_profit_data(cache_key)
-        if not profit_data:
+        simulation_data = cls.get_simulation_data(cache_key)
+        if not simulation_data:
             results, retained_ingredients = crafter.craft()
 
             if not results:
                 return None
 
-            profit_data = ProfitData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
-            cls._profit_data_cache[cache_key] = profit_data
+            simulation_data = SimulationData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
+            cls._simulation_data_cache[cache_key] = simulation_data
 
-        sell_frequencies = [result.get_highest_sell_frequency() for result in profit_data.recipe.get_unique_results()]
+        sell_frequencies = [result.get_highest_sell_frequency() for result in simulation_data.recipe.get_unique_results()]
         valid_frequencies = [f for f in sell_frequencies if f is not None]
         sell_frequency = max(valid_frequencies) if valid_frequencies else None
 
         return {
             "crafter": crafter,
-            "profit_per_synth": profit_data.profit_per_synth,
-            "profit_per_storage": profit_data.profit_per_storage,
+            "profit_per_synth": simulation_data.profit_per_synth,
+            "profit_per_storage": simulation_data.profit_per_storage,
             "sell_frequency": sell_frequency
         }
