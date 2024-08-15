@@ -9,7 +9,7 @@ from controllers import RecipeController, CraftingController
 from database import Database
 from entities import Recipe
 from utils import TreeviewWithSort, get_number_settings, create_number_settings
-from views import RecipeDetailPage
+from views import ItemDetailPage
 
 
 logger = logging.getLogger(__name__)
@@ -127,7 +127,7 @@ class SearchPage(ttk.Frame):
         self._treeview = TreeviewWithSort(self, columns=columns, show="headings")
         self._configure_treeview(self._treeview)
         self._treeview.pack(padx=10, pady=10, expand=True, fill="both")
-        self._treeview.bind("<Double-1>", self._show_recipe_details)
+        self._treeview.bind("<Double-1>", self._show_item_details)
         self._treeview.bind("<Button-1>", self._treeview.on_click)
 
     def _configure_treeview(self, treeview: ttk.Treeview) -> None:
@@ -359,10 +359,10 @@ class SearchPage(ttk.Frame):
             recipe.get_formatted_ingredient_names()
         ]
 
-    def _show_recipe_details(self, event: tk.Event) -> None:
+    def _show_item_details(self, event: tk.Event) -> None:
         """
-        Show the details of the selected recipe in a new tab.
-        Opens a new RecipeDetailPage for the selected recipe.
+        Show the details of the selected item in a new tab.
+        Opens a new ItemDetailPage for the selected item.
 
         Args:
             event (tk.Event): The event triggered by double-clicking a recipe.
@@ -376,8 +376,8 @@ class SearchPage(ttk.Frame):
         cache_key = (int(recipe_id), *skills)
         simulation_data = CraftingController.get_simulation_data(cache_key)
 
-        detail_page = RecipeDetailPage(self._parent, simulation_data)
-        self._parent.notebook.add(detail_page, text=f"Recipe {simulation_data.recipe.result_name} Details")
+        detail_page = ItemDetailPage(self._parent, 1234)
+        self._parent.notebook.add(detail_page, text=f"Test Item Details")
         self._parent.notebook.select(detail_page)
 
     def cleanup(self) -> None:
