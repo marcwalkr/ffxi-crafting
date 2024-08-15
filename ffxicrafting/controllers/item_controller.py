@@ -39,35 +39,13 @@ class ItemController:
         item_models = self._item_repository.get_all_items()
         for item_model in item_models:
             single_auction_data = self._auction_controller.get_auction_data(item_model.item_id, is_stack=False)
-            if single_auction_data:
-                min_single_price = single_auction_data.min_price
-                max_single_price = single_auction_data.max_price
-                average_single_price = single_auction_data.average_price
-                single_sell_frequency = single_auction_data.sell_frequency
-            else:
-                min_single_price = None
-                max_single_price = None
-                average_single_price = None
-                single_sell_frequency = None
             stack_auction_data = self._auction_controller.get_auction_data(item_model.item_id, is_stack=True)
-            if stack_auction_data:
-                min_stack_price = stack_auction_data.min_price
-                max_stack_price = stack_auction_data.max_price
-                average_stack_price = stack_auction_data.average_price
-                stack_sell_frequency = stack_auction_data.sell_frequency
-            else:
-                min_stack_price = None
-                max_stack_price = None
-                average_stack_price = None
-                stack_sell_frequency = None
 
             min_vendor_cost = self._vendor_controller.get_min_cost(item_model.item_id)
             min_guild_cost = self._guild_controller.get_min_cost(item_model.item_id)
 
             item = Item(item_model.item_id, item_model.name, item_model.sort_name, item_model.stack_size,
-                        min_single_price, max_single_price, average_single_price, min_stack_price, max_stack_price,
-                        average_stack_price, single_sell_frequency, stack_sell_frequency, min_vendor_cost,
-                        min_guild_cost)
+                        single_auction_data, stack_auction_data, min_vendor_cost, min_guild_cost)
             ItemController._cache[item_model.item_id] = item
 
         self._item_repository.delete_cache()

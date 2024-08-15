@@ -1,4 +1,9 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from models import ItemModel
+
+if TYPE_CHECKING:
+    from entities import AuctionData
 
 
 class Item(ItemModel):
@@ -6,10 +11,9 @@ class Item(ItemModel):
     Represents a game item, extending the ItemModel with additional attributes and methods.
     """
 
-    def __init__(self, item_id: int, name: str, sort_name: str, stack_size: int, min_single_price: float | None,
-                 max_single_price: float | None, average_single_price: float | None, min_stack_price: float | None,
-                 max_stack_price: float | None, average_stack_price: float | None, single_sell_frequency: float | None,
-                 stack_sell_frequency: float | None, min_vendor_cost: float | None, min_guild_cost: float | None) -> None:
+    def __init__(self, item_id: int, name: str, sort_name: str, stack_size: int,
+                 single_auction_data: AuctionData | None, stack_auction_data: AuctionData | None,
+                 min_vendor_cost: float | None, min_guild_cost: float | None) -> None:
         """
         Initialize an Item instance.
 
@@ -20,26 +24,45 @@ class Item(ItemModel):
             name (str): The name of the item as it appears in the game.
             sort_name (str): A version of the name used for sorting purposes.
             stack_size (int): The maximum quantity of this item that can be stacked in one inventory slot.
+            single_auction_data (AuctionData | None): The auction data for a single item.
+            stack_auction_data (AuctionData | None): The auction data for a stack of items.
+            min_vendor_cost (float | None): The minimum cost of the item from vendors.
+            min_guild_cost (float | None): The minimum cost of the item from guild shops.
 
         Attributes:
-            min_single_price (float | None): The minimum price for a single item in the auction house.
-            max_single_price (float | None): The maximum price for a single item in the auction house.
-            average_single_price (float | None): The average price for a single item in the auction house.
-            min_stack_price (float | None): The minimum price for a stack of items in the auction house.
-            max_stack_price (float | None): The maximum price for a stack of items in the auction house.
-            average_stack_price (float | None): The average price for a stack of items in the auction house.
-            single_sell_frequency (float | None): The sell frequency for single items.
-            stack_sell_frequency (float | None): The sell frequency for stacks of items.
+            min_single_price (float | None): The minimum price of the item from the auction house.
+            max_single_price (float | None): The maximum price of the item from the auction house.
+            average_single_price (float | None): The average price of the item from the auction house.
+            single_sell_frequency (float | None): The sell frequency of the item from the auction house.
+            min_stack_price (float | None): The minimum price of the item from the auction house.
+            max_stack_price (float | None): The maximum price of the item from the auction house.
+            average_stack_price (float | None): The average price of the item from the auction house.
+            stack_sell_frequency (float | None): The sell frequency of the item from the auction house.
+            min_vendor_cost (float | None): The minimum cost of the item from vendors.
+            min_guild_cost (float | None): The minimum cost of the item from guild shops.
         """
         super().__init__(item_id, name, sort_name, stack_size)
-        self.min_single_price: float | None = min_single_price
-        self.max_single_price: float | None = max_single_price
-        self.average_single_price: float | None = average_single_price
-        self.min_stack_price: float | None = min_stack_price
-        self.max_stack_price: float | None = max_stack_price
-        self.average_stack_price: float | None = average_stack_price
-        self.single_sell_frequency: float | None = single_sell_frequency
-        self.stack_sell_frequency: float | None = stack_sell_frequency
+        self.min_single_price: float | None = None
+        self.max_single_price: float | None = None
+        self.average_single_price: float | None = None
+        self.single_sell_frequency: float | None = None
+
+        if single_auction_data:
+            self.min_single_price = single_auction_data.min_price
+            self.max_single_price = single_auction_data.max_price
+            self.average_single_price = single_auction_data.average_price
+            self.single_sell_frequency = single_auction_data.sell_frequency
+
+        self.min_stack_price: float | None = None
+        self.max_stack_price: float | None = None
+        self.average_stack_price: float | None = None
+        self.stack_sell_frequency: float | None = None
+
+        if stack_auction_data:
+            self.min_stack_price = stack_auction_data.min_price
+            self.max_stack_price = stack_auction_data.max_price
+            self.average_stack_price = stack_auction_data.average_price
+            self.stack_sell_frequency = stack_auction_data.sell_frequency
 
         self.min_vendor_cost: float | None = min_vendor_cost
         self.min_guild_cost: float | None = min_guild_cost
@@ -107,12 +130,12 @@ class Item(ItemModel):
 
         return min(valid_costs, default=None)
 
-    def get_highest_sell_frequency(self) -> float | None:
+    def get_max_sell_frequency(self) -> float | None:
         """
-        Get the highest sell frequency of the item.
+        Get the maximum sell frequency of the item.
 
         Returns:
-            float | None: The highest sell frequency, or None if both frequencies are None.
+            float | None: The maximum sell frequency, or None if both frequencies are None.
         """
         frequencies = [self.single_sell_frequency, self.stack_sell_frequency]
         valid_frequencies = [f for f in frequencies if f is not None]

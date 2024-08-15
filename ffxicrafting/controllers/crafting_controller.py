@@ -58,7 +58,7 @@ class CraftingController:
             simulation_data = SimulationData(recipe, results, retained_ingredients, crafter.synth.SIMULATION_TRIALS)
             cls._simulation_data_cache[cache_key] = simulation_data
 
-        sell_frequencies = [result.get_highest_sell_frequency() for result in simulation_data.recipe.get_unique_results()]
+        sell_frequencies = [result.get_max_sell_frequency() for result in simulation_data.recipe.get_unique_results()]
         valid_frequencies = [f for f in sell_frequencies if f is not None]
         sell_frequency = max(valid_frequencies) if valid_frequencies else None
 
