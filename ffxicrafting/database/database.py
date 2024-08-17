@@ -209,14 +209,14 @@ class Database:
         query = f"SELECT itemid, name, sortname, stackSize FROM item_basic WHERE itemid IN ({format_strings})"
         return self._execute_query(query, tuple(item_ids), fetch_one=False)
 
-    def get_all_npcs(self) -> list:
+    def get_all_vendor_npcs(self) -> list:
         """
-        Retrieve all NPCs.
+        Retrieve all vendor NPCs.
 
         Returns:
-            list: A list of all NPCs.
+            list: A list of all vendor NPCs.
         """
-        query = "SELECT polutils_name FROM npc_list"
+        query = "SELECT polutils_name FROM npc_list WHERE npcid IN (SELECT npcid FROM vendor_locations)"
         return self._execute_query(query, (), fetch_one=False)
 
     def get_all_recipes(self) -> list:
