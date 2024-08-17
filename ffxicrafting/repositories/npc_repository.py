@@ -28,7 +28,7 @@ class NpcRepository:
         """
         Load all NPCs into the cache.
         """
-        npc_tuples = self._db.get_all_npcs()
+        npc_tuples = self._db.get_all_vendor_npcs()
         npcs = [Npc(*tuple) for tuple in npc_tuples]
         NpcRepository._cache.update({n.npc_id: n for n in npcs})
 

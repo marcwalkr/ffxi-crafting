@@ -300,3 +300,13 @@ class Database:
         """
         query = "SELECT * FROM vendor_locations"
         return self._execute_query(query, (), fetch_one=False)
+
+    def get_all_zones(self) -> list:
+        """
+        Retrieve all zones.
+
+        Returns:
+            list: A list of all zones.
+        """
+        query = "SELECT zoneid, name FROM zone_settings"
+        return self._execute_query(query, (), fetch_one=False)
