@@ -1,4 +1,4 @@
-class Npc:
+class NpcModel:
     """
     Represents a Non-Player Character (NPC) in the game.
 

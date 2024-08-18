@@ -24,10 +24,10 @@ class AuctionData(AuctionItem):
         """
         super().__init__(*args)
         self._sales_history: list[SalesHistory] = kwargs.get("sales_history", [])
-        self.min_price: float = self.get_min_price()
-        self.max_price: float = self.get_max_price()
+        self.min_price: float = self._get_min_price()
+        self.max_price: float = self._get_max_price()
 
-    def get_min_price(self) -> float:
+    def _get_min_price(self) -> float:
         """
         Get the minimum price from the sales history.
         """
@@ -36,7 +36,7 @@ class AuctionData(AuctionItem):
         else:
             return None
 
-    def get_max_price(self) -> float:
+    def _get_max_price(self) -> float:
         """
         Get the maximum price from the sales history.
         """

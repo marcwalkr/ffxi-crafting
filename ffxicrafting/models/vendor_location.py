@@ -7,15 +7,15 @@ class VendorLocation:
     zone-based grid coordinate system.
     """
 
-    def __init__(self, npc_id: int, zone_name: str, coordinates: str) -> None:
+    def __init__(self, npc_id: int, zone_id: str, coordinates: str) -> None:
         """
         Initialize a VendorLocation instance.
 
         Args:
             npc_id (int): The unique identifier for the NPC vendor.
-            zone_name (str): The name of the zone where the vendor is located.
+            zone_id (str): The unique identifier for the zone where the vendor is located.
             coordinates (str): The grid coordinates of the vendor within the zone.
         """
         self.npc_id: int = npc_id
-        self.zone_name: str = zone_name
+        self.zone_id: str = zone_id
         self.coordinates: str = coordinates

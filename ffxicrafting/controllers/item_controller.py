@@ -8,17 +8,14 @@ class ItemController:
     """
     Controller class for managing item-related operations.
 
-    This class handles operations related to items, including fetching item data
-    and updating item information from various sources such as auctions, vendors,
-    and guilds.
+    This class handles creating, storing, and retrieving Item objects.
     """
 
     _cache = {}
 
     def __init__(self, db: Database) -> None:
         """
-        Initializes repositories for items, recipes, vendors, and guilds,
-        as well as the auction controller.
+        Initializes repository for item data and controllers for auction, vendor, and guild data.
         All Item objects are created and cached on initialization.
 
         Args:
