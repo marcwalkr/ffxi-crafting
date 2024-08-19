@@ -24,7 +24,7 @@ class SettingsPage(ttk.Frame):
         super().__init__(parent.notebook)
         self._parent: tk.Tk = parent
         self._settings: dict = SettingsManager.load_settings()
-        self._thresholds_and_settings: ttk.LabelFrame = None
+        self._thresholds: ttk.LabelFrame = None
         self._skill_levels_settings: ttk.LabelFrame = None
         self._merchants_settings: ttk.LabelFrame = None
         self._conquest_settings: ttk.LabelFrame = None
@@ -45,11 +45,11 @@ class SettingsPage(ttk.Frame):
         """
         Create and layout all categories of settings.
 
-        Sets up frames for different setting categories including thresholds and settings,
+        Sets up frames for different setting categories including thresholds,
         skill levels, merchants, conquest, and database settings.
         """
         categories = [
-            ("Thresholds and Settings", self._create_thresholds_and_settings),
+            ("Thresholds", self._create_thresholds),
         ]
 
         for category_name, create_method in categories:
@@ -89,16 +89,16 @@ class SettingsPage(ttk.Frame):
         save_button = ttk.Button(self, text="Save", command=self._save_settings)
         save_button.pack(pady=(10, 40))
 
-    def _create_thresholds_and_settings(self, frame: ttk.LabelFrame) -> None:
+    def _create_thresholds(self, frame: ttk.LabelFrame) -> None:
         """
-        Create settings for thresholds and other settings.
+        Create settings for thresholds.
         Sets up input fields for profit per synthesis, profit per storage,
         minimum auction list price, and sell frequency.
 
         Args:
             frame (ttk.LabelFrame): The frame to contain these settings.
         """
-        self._thresholds_and_settings = frame
+        self._thresholds = frame
         settings = [
             ("Profit / Synth", 0),
             ("Profit / Storage", 0),
@@ -109,7 +109,7 @@ class SettingsPage(ttk.Frame):
         number_settings_frame = ttk.Frame(frame)
         number_settings_frame.pack(fill="x", padx=20, pady=5)
 
-        self._create_number_settings(number_settings_frame, settings, self._settings.get("thresholds_and_settings", {}))
+        self._create_number_settings(number_settings_frame, settings, self._settings.get("thresholds", {}))
 
     def _create_skill_levels_settings(self, frame: ttk.LabelFrame) -> None:
         """
@@ -222,7 +222,7 @@ class SettingsPage(ttk.Frame):
         Collects all settings from various categories and saves them using the SettingsManager.
         """
         settings = {
-            "thresholds_and_settings": self._get_thresholds_and_settings(),
+            "thresholds": self._get_thresholds(),
             "skill_levels": self._get_vertical_number_settings(self._skill_levels_settings),
             "regional_merchants": self._get_regional_merchants_settings(),
             "conquest": self._get_option_menu_settings(self._conquest_settings),
@@ -230,14 +230,14 @@ class SettingsPage(ttk.Frame):
         }
         SettingsManager.save_settings(settings)
 
-    def _get_thresholds_and_settings(self) -> dict:
+    def _get_thresholds(self) -> dict:
         """
-        Retrieve thresholds and settings including number inputs.
+        Retrieve thresholds including number inputs.
 
         Returns:
-            dict: A dictionary containing thresholds and settings, including numeric values.
+            dict: A dictionary containing thresholds, including numeric values.
         """
-        settings = self._get_number_settings(self._thresholds_and_settings)
+        settings = self._get_number_settings(self._thresholds)
         return settings
 
     def _get_number_settings(self, frame: ttk.LabelFrame) -> dict:
