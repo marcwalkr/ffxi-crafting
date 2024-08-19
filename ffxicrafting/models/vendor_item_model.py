@@ -1,4 +1,4 @@
-class VendorItem:
+class VendorItemModel:
     """
     Represents an item sold by a vendor in the game.
 
@@ -7,15 +7,15 @@ class VendorItem:
     nation rankings and citizenship.
     """
 
-    def __init__(self, item_id: int, npc_id: int, price: int, sandoria_rank: int, bastok_rank: int, windurst_rank: int,
+    def __init__(self, item_id: int, npc_id: int, min_price: int, sandoria_rank: int, bastok_rank: int, windurst_rank: int,
                  sandoria_citizen: bool, bastok_citizen: bool, windurst_citizen: bool) -> None:
         """
-        Initialize a VendorItem instance.
+        Initialize a VendorItemModel instance.
 
         Args:
             item_id (int): The unique identifier for the item being sold.
             npc_id (int): The unique identifier for the NPC vendor selling this item.
-            price (int): The price of the item when purchased from this vendor.
+            min_price (int): The minimum price of the item when purchased from this vendor.
             sandoria_rank (int): The required conquest rank for San d'Oria to sell this item.
             bastok_rank (int): The required conquest rank for Bastok to sell this item.
             windurst_rank (int): The required conquest rank for Windurst to sell this item.
@@ -33,7 +33,7 @@ class VendorItem:
         """
         self.item_id: int = item_id
         self.npc_id: int = npc_id
-        self.price: int = price
+        self.min_price: int = min_price
         self.sandoria_rank: int = sandoria_rank
         self.bastok_rank: int = bastok_rank
         self.windurst_rank: int = windurst_rank

@@ -1,5 +1,5 @@
 from database import Database
-from models import VendorItem, RegionalVendor, VendorLocation
+from models import VendorItemModel, RegionalVendor, VendorLocation
 
 
 class VendorRepository:
@@ -10,7 +10,7 @@ class VendorRepository:
     vendor item information, regional vendor data, and vendor locations.
     """
 
-    _vendor_item_cache: dict[int, list[VendorItem]] = {}
+    _vendor_item_cache: dict[int, list[VendorItemModel]] = {}
     _regional_vendor_cache: dict[int, RegionalVendor] = {}
     _vendor_location_cache: dict[int, VendorLocation] = {}
 
@@ -35,7 +35,7 @@ class VendorRepository:
         Load all vendor items into the cache.
         """
         vendor_item_tuples = self._db.get_all_vendor_items()
-        vendor_items = [VendorItem(*tuple) for tuple in vendor_item_tuples]
+        vendor_items = [VendorItemModel(*tuple) for tuple in vendor_item_tuples]
 
         # Group vendor items by item_id
         grouped_items = {}
@@ -63,7 +63,7 @@ class VendorRepository:
         vendor_locations = [VendorLocation(*tuple) for tuple in vendor_location_tuples]
         VendorRepository._vendor_location_cache = {v.npc_id: v for v in vendor_locations}
 
-    def get_vendor_items(self, item_id: int) -> list[VendorItem]:
+    def get_vendor_items(self, item_id: int) -> list[VendorItemModel]:
         """
         Retrieve vendor items for a given item ID from the cache.
 
