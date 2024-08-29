@@ -1,6 +1,6 @@
 from models.guild_shop import GuildShop
 from models.guild_vendor import GuildVendor
-from entities.npc import Npc
+from entities import Npc
 
 
 class GuildItem(GuildShop, GuildVendor):
